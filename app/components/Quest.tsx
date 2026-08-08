@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- generated lesson screens are fixed-size local teaching assets */
+
 import { useEffect, useMemo, useState } from "react";
 import { buildQuest } from "../content/quests";
 import type { ProjectDefinition } from "../content/types";

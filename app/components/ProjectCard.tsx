@@ -1,6 +1,6 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import type { ProjectDefinition } from "../content/types";
 import { LEVELS_PER_QUEST, loadProgress } from "../lib/progress";
 
@@ -11,8 +11,13 @@ export function ProjectCard({
   project: ProjectDefinition;
   onOpen?: (slug: string) => void;
 }) {
-  const progress = typeof window === "undefined" ? null : loadProgress(project.slug, window.localStorage);
-  const completed = progress?.completed.length ?? 0;
+  const [completed, setCompleted] = useState(0);
+
+  useEffect(() => {
+    // Keep the first browser render identical to the server, then restore local progress.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCompleted(loadProgress(project.slug, window.localStorage).completed.length);
+  }, [project.slug]);
   const status = completed === LEVELS_PER_QUEST ? "Готово" : completed > 0 ? `${completed} из 17` : "Не начато";
 
   function open(event: MouseEvent<HTMLAnchorElement>) {
@@ -37,4 +42,3 @@ export function ProjectCard({
     </article>
   );
 }
-

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+/* eslint-disable @next/next/no-page-custom-font -- app-router layout owns the course font links */
+
 export const metadata: Metadata = {
   title: "Академия квестов SUBMARINE",
   description: "Все проекты курса «ИИ-агенты и ИИ-сайты» в формате пошаговых квестов.",
