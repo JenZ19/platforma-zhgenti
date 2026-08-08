@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Академия квестов SUBMARINE",
+  description: "Все проекты курса «ИИ-агенты и ИИ-сайты» в формате пошаговых квестов.",
+  openGraph: {
+    title: "52 проекта. Одна новая профессия.",
+    description: "Выбери проект, повтори 17 шагов и добавь готовую работу в портфолио.",
+    images: ["/og.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Академия квестов SUBMARINE",
+    description: "52 проекта курса — шаг за шагом.",
+    images: ["/og.png"],
+  },
+  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="ru"><head><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" /><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" /></head><body>{children}</body></html>;
+}
