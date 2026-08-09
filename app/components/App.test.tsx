@@ -7,6 +7,7 @@ import { getBotPrototypeSpec } from "../content/bot-prototypes";
 import { agentCoverPrototypeSlugs, getAgentCoverPrototypeSpec } from "../content/agent-cover-prototypes";
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
+import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
 import { getProject, projects } from "../content/projects";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
@@ -92,6 +93,19 @@ describe("academy interface", () => {
     for (const project of featuredProjects) {
       const spec = getThirdCoverPrototypeSpec(project.slug);
       const prototype = container.querySelector(`[data-third-cover-marker="${spec.marker}"]`);
+      expect(prototype, project.slug).not.toBeNull();
+      expect(prototype).toHaveTextContent(spec.headline);
+      expect(prototype).toHaveTextContent(spec.metric);
+    }
+  });
+
+  it("renders a unique content-specific cover for every project through the course finale", () => {
+    const featuredProjects = finalCoverPrototypeSlugs.map((slug) => getProject(slug)!);
+    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+
+    for (const project of featuredProjects) {
+      const spec = getFinalCoverPrototypeSpec(project.slug);
+      const prototype = container.querySelector(`[data-final-cover-marker="${spec.marker}"]`);
       expect(prototype, project.slug).not.toBeNull();
       expect(prototype).toHaveTextContent(spec.headline);
       expect(prototype).toHaveTextContent(spec.metric);
