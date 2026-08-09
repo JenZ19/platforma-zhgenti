@@ -2,6 +2,7 @@
 @import "./bot-prototypes.css";
 @import "./first-cover-prototypes.css";
 @import "./agent-cover-prototypes.css";
+@import "./third-cover-prototypes.css";
 
 :root {
   --paper: #faf7f2;

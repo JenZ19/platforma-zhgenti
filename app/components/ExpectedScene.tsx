@@ -3,9 +3,11 @@
 import type { ProjectDefinition } from "../content/types";
 import { hasFirstCoverPrototype } from "../content/first-cover-prototypes";
 import { hasAgentCoverPrototype } from "../content/agent-cover-prototypes";
+import { hasThirdCoverPrototype } from "../content/third-cover-prototypes";
 import { BotPrototypeScene } from "./BotPrototypeScene";
 import { FirstCoverPrototypeScene } from "./FirstCoverPrototypeScene";
 import { AgentCoverPrototypeScene } from "./AgentCoverPrototypeScene";
+import { ThirdCoverPrototypeScene } from "./ThirdCoverPrototypeScene";
 
 function Chrome({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="mock-window"><div className="mock-bar"><span>● ● ●</span><b>{title}</b><i /></div>{children}</div>;
@@ -42,6 +44,7 @@ function Visual({ project, step }: { project: ProjectDefinition; step: number })
   if (step >= 15) return <FinalScene project={project} step={step} />;
   if (hasFirstCoverPrototype(project.slug)) return <FirstCoverPrototypeScene project={project} step={step} />;
   if (hasAgentCoverPrototype(project.slug)) return <AgentCoverPrototypeScene project={project} step={step} />;
+  if (hasThirdCoverPrototype(project.slug)) return <ThirdCoverPrototypeScene project={project} step={step} />;
   if (project.kind === "service") return <ServiceScene project={project} step={step} />;
   if (project.kind === "bot") return <BotPrototypeScene project={project} step={step} />;
   if (project.kind === "agent") return <AgentScene project={project} step={step} />;
