@@ -12,6 +12,7 @@ export function QuestPreparation({
   onToggle,
   onStartReal,
   onBack,
+  mobile = false,
 }: {
   project: ProjectDefinition;
   preparation: PreparationState;
@@ -20,8 +21,13 @@ export function QuestPreparation({
   onToggle: (id: string) => void;
   onStartReal: () => void;
   onBack: () => void;
+  mobile?: boolean;
 }) {
-  const checklist = buildRealDataChecklist(project);
+  const checklist = buildRealDataChecklist(project).map((item) => item.id === "folder" && mobile ? {
+    ...item,
+    text: `Отдельная комната «${project.slug}» в Telegram только для этого проекта`,
+    detail: "Отправляйте сюда только безопасные копии материалов. Оригиналы, пароли и закрытые документы оставьте у себя.",
+  } : item);
   const allChecked = checklist.every((item) => preparation.checked.includes(item.id));
 
   if (preparation.mode === "real") {
@@ -30,7 +36,7 @@ export function QuestPreparation({
         <button type="button" className="preparation-back" onClick={onBack}>← Изменить выбор</button>
         <p className="section-kicker">Шаг 0 · Реальный проект</p>
         <h2>Сначала соберите материалы</h2>
-        <p className="preparation-lead">Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{project.slug}</b> и отмечайте готовое.</p>
+        <p className="preparation-lead">{mobile ? <>Не нужно делать всё идеально. Соберите безопасные копии для комнаты <b>{project.slug}</b> в Telegram и отмечайте готовое.</> : <>Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{project.slug}</b> и отмечайте готовое.</>}</p>
         <div className="checklist-progress"><span>{preparation.checked.length} из {checklist.length}</span><i><b style={{ width: `${Math.round((preparation.checked.length / checklist.length) * 100)}%` }} /></i></div>
         <div className="preparation-list">
           {checklist.map((item, index) => {
@@ -44,7 +50,7 @@ export function QuestPreparation({
             );
           })}
         </div>
-        <aside className="privacy-note"><span>!</span><p><b>Важно</b> Codex получает только то, что лежит в этой папке. Оригиналы, пароли и закрытые документы туда не кладём.</p></aside>
+        <aside className="privacy-note"><span>!</span><p><b>Важно</b>{mobile ? " Codex получает только материалы из личной комнаты проекта. Оригиналы, пароли и закрытые документы в Telegram не отправляем." : " Codex получает только то, что лежит в этой папке. Оригиналы, пароли и закрытые документы туда не кладём."}</p></aside>
         <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>Папка готова — начать квест →</button>
       </section>
     );

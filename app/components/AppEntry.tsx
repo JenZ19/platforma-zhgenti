@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { getProject } from "../content/projects";
 import { Academy } from "./Academy";
 import { ExpectedScene } from "./ExpectedScene";
+import { MobileAcademy } from "./MobileAcademy";
+import { MobileQuest } from "./MobileQuest";
 import { Quest } from "./Quest";
 
 type Route =
-  | { type: "home" }
-  | { type: "quest"; slug: string }
+  | { type: "home"; format: "desktop" | "mobile" }
+  | { type: "quest"; slug: string; format: "desktop" | "mobile" }
   | { type: "capture"; slug: string; step: number };
 
 function readRoute(): Route {
@@ -16,11 +18,12 @@ function readRoute(): Route {
   const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
   if (capture) return { type: "capture", slug: capture[1], step: Number(capture[2]) };
   const quest = query.get("quest");
-  return quest ? { type: "quest", slug: quest } : { type: "home" };
+  const format = query.get("format") === "mobile" ? "mobile" : "desktop";
+  return quest ? { type: "quest", slug: quest, format } : { type: "home", format };
 }
 
 export function AppEntry() {
-  const [route, setRoute] = useState<Route>({ type: "home" });
+  const [route, setRoute] = useState<Route>({ type: "home", format: "desktop" });
 
   useEffect(() => {
     // Query routing is intentionally browser-only for this single-page academy.
@@ -31,15 +34,16 @@ export function AppEntry() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  function openQuest(slug: string) {
-    window.history.pushState({}, "", `?quest=${slug}`);
-    setRoute({ type: "quest", slug });
+  function openQuest(slug: string, format: "desktop" | "mobile" = route.type === "capture" ? "desktop" : route.format) {
+    window.history.pushState({}, "", format === "mobile" ? `?format=mobile&quest=${slug}` : `?quest=${slug}`);
+    setRoute({ type: "quest", slug, format });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function home() {
-    window.history.pushState({}, "", window.location.pathname);
-    setRoute({ type: "home" });
+    const format = route.type === "capture" ? "desktop" : route.format;
+    window.history.pushState({}, "", format === "mobile" ? `${window.location.pathname}?format=mobile` : window.location.pathname);
+    setRoute({ type: "home", format });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -49,8 +53,8 @@ export function AppEntry() {
   }
   if (route.type === "quest") {
     const project = getProject(route.slug);
-    return project ? <Quest project={project} onHome={home} /> : <Academy onOpen={openQuest} />;
+    if (route.format === "mobile") return project ? <MobileQuest project={project} onHome={home} /> : <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} />;
+    return project ? <Quest project={project} onHome={home} /> : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />;
   }
-  return <Academy onOpen={openQuest} />;
+  return route.format === "mobile" ? <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} /> : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />;
 }
-

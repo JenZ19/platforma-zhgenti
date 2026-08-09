@@ -7,6 +7,8 @@ import { getProject } from "../content/projects";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
 import { Academy } from "./Academy";
+import { AppEntry } from "./AppEntry";
+import { MobileQuest } from "./MobileQuest";
 import { ProjectCard } from "./ProjectCard";
 import { Quest } from "./Quest";
 
@@ -19,6 +21,7 @@ describe("academy interface", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
+    window.history.replaceState({}, "", "/");
   });
 
   it("shows all 52 course projects", () => {
@@ -95,5 +98,24 @@ describe("academy interface", () => {
     fireEvent.click(start);
     expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
     expect(localStorage.getItem(preparationKey("psychologist-site"))).toContain('"ready":true');
+  });
+
+  it("opens a separate phone-only academy from the mobile format route", async () => {
+    window.history.replaceState({}, "", "/?format=mobile");
+    render(<AppEntry />);
+    expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(52);
+  });
+
+  it("stores phone progress separately and shows a safe Telegram fallback", () => {
+    const project = getProject("family-expenses")!;
+    render(<MobileQuest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    expect(screen.getByRole("heading", { name: /фея открыта в telegram/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /открыть фею в telegram/i })).toBeDisabled();
+    expect(screen.getByText(/бот подключается куратором/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
+    expect(localStorage.getItem(progressKey("mobile:family-expenses"))).toContain('"completed":[1]');
+    expect(localStorage.getItem(progressKey("family-expenses"))).toBeNull();
   });
 });
