@@ -50,4 +50,16 @@ describe("quest data preparation", () => {
     expect(isPreparationReady({ version: 1, mode: "real", checked: checklist.slice(0, -1).map((item) => item.id), ready: false }, checklist)).toBe(false);
     expect(isPreparationReady({ version: 1, mode: "real", checked: checklist.map((item) => item.id), ready: true }, checklist)).toBe(true);
   });
+
+  it("explains every home-helper preparation item as concrete beginner actions", () => {
+    const checklist = buildRealDataChecklist(getProject("home-helper")!);
+    expect(checklist).toHaveLength(8);
+    expect(checklist[1].text).toBe("Запишите пять домашних дел в файл «мои-дела.txt»");
+    expect(checklist.map((item) => item.text).join(" ")).not.toMatch(/сущност|дело, зона, исполнитель, повтор/i);
+    for (const [index, item] of checklist.entries()) {
+      expect(item.steps?.length, item.id).toBeGreaterThanOrEqual(3);
+      expect(item.doneWhen?.length, item.id).toBeGreaterThan(20);
+      expect(item.screenshot, item.id).toBe(`/guides/home-helper/real/prep-${String(index + 1).padStart(2, "0")}.png`);
+    }
+  });
 });

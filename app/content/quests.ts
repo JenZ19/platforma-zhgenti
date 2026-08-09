@@ -8,6 +8,7 @@ import { getProject } from "./projects";
 import type { ProjectDefinition, QuestStep } from "./types";
 import type { DataMode } from "../lib/preparation";
 import { adaptQuestToDataMode } from "./data-mode";
+import { buildHomeHelperGuide } from "./home-helper-guide";
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo"): QuestStep[] {
   let steps: QuestStep[];
@@ -31,7 +32,8 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo"):
       steps = buildPortfolioQuest(project);
       break;
   }
-  return adaptQuestToDataMode(steps, project, mode);
+  const modeSteps = adaptQuestToDataMode(steps, project, mode);
+  return project.slug === "home-helper" ? buildHomeHelperGuide(project, mode, modeSteps) : modeSteps;
 }
 
 export function getQuest(slug: string): QuestStep[] | undefined {

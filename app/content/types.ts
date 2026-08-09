@@ -35,5 +35,21 @@ export type QuestStep = {
   screenshot: string;
   reward?: string;
   help: { title: string; body: string; prompt: string };
+  guide?: QuestGuideFrame[];
 };
 
+export type QuestGuideScene = "finder" | "codex" | "academy" | "preview" | "publish" | "portfolio";
+
+export type QuestGuideFrame = {
+  id: number;
+  title: string;
+  app: string;
+  action: string;
+  exactText?: string;
+  after: string;
+  doneWhen: string;
+  fallback: string;
+  screenshot: string;
+  scene: QuestGuideScene;
+  target: string;
+};

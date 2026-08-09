@@ -57,6 +57,49 @@ describe("quest builders", () => {
     }
   });
 
+  it("builds a click-by-click guide for every home-helper level", () => {
+    for (const mode of ["demo", "real"] as const) {
+      const steps = buildQuest(projects.find((project) => project.slug === "home-helper")!, mode);
+      expect(steps).toHaveLength(17);
+      for (const step of steps) {
+        expect(step.guide?.length, `${mode}/${step.id}`).toBeGreaterThanOrEqual(3);
+        expect(step.guide?.map((frame) => frame.id), `${mode}/${step.id}`).toEqual(
+          Array.from({ length: step.guide!.length }, (_, index) => index + 1),
+        );
+        for (const frame of step.guide ?? []) {
+          expect(frame.app.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(2);
+          expect(frame.action.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(12);
+          expect(frame.after.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(12);
+          expect(frame.doneWhen.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(12);
+          expect(frame.fallback.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(20);
+          expect(frame.screenshot, `${mode}/${step.id}/${frame.id}`).toBe(
+            `/guides/home-helper/${mode}/step-${String(step.id).padStart(2, "0")}-frame-${String(frame.id).padStart(2, "0")}.png`,
+          );
+        }
+      }
+    }
+  });
+
+  it("shows creation before opening and splits questionnaire copy, paste, send, and result", () => {
+    const steps = buildQuest(projects.find((project) => project.slug === "home-helper")!, "real");
+    const allTitles = steps.flatMap((step) => step.guide ?? []).map((frame) => frame.title);
+    expect(allTitles.indexOf("Создайте папку home-helper")).toBeLessThan(allTitles.indexOf("Откройте home-helper в Codex"));
+    expect(steps[2].guide?.map((frame) => frame.title)).toEqual([
+      "Откройте проект home-helper",
+      "Откройте подготовленные материалы",
+      "Скопируйте анкету на сайте",
+      "Вставьте анкету в Codex",
+      "Отправьте анкету",
+      "Дождитесь паспорта проекта",
+    ]);
+  });
+
+  it("never mixes training wording into the real home-helper guide", () => {
+    const guideText = stepText(buildQuest(projects.find((project) => project.slug === "home-helper")!, "real").flatMap((step) => step.guide ?? []));
+    expect(guideText).not.toMatch(/вымышлен|демонстрацион|учебн/i);
+    expect(guideText).toContain("мои-дела.txt");
+  });
+
   it("keeps health and child projects inside their safety boundary", () => {
     const pressure = stepText(getQuest("pressure-diary"));
     const fitness = stepText(getQuest("fitness-tracker"));
