@@ -95,6 +95,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     saveProgress(project.slug, next, window.localStorage);
     setHelpOpen(false);
     if (!wasDone && step.reward) setReward(step.reward);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function copy(text: string, kind: "main" | "help") {

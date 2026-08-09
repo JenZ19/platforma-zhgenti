@@ -53,6 +53,17 @@ describe("academy interface", () => {
     expect(localStorage.getItem(progressKey("planner"))).toContain('"completed":[1]');
   });
 
+  it("returns a desktop quest to the top after the learner presses next", () => {
+    render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    vi.mocked(window.scrollTo).mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
+  });
+
   it("opens contextual help inside a quest", () => {
     const project = getProject("recipe-book")!;
     render(<Quest project={project} onHome={vi.fn()} />);
