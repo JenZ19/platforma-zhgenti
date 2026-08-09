@@ -3,6 +3,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import type { ProjectDefinition } from "../content/types";
 import { LEVELS_PER_QUEST, loadProgress } from "../lib/progress";
+import { ProjectPreview } from "./ProjectPreview";
 
 export function ProjectCard({
   project,
@@ -28,6 +29,7 @@ export function ProjectCard({
 
   return (
     <article className="project-card">
+      <ProjectPreview project={project} />
       <div className="project-card-top">
         <span className="project-symbol" aria-hidden="true">{project.symbol}</span>
         <span className={`project-status ${completed === 17 ? "complete" : ""}`}>{status}</span>

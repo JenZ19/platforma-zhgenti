@@ -31,6 +31,16 @@ describe("academy interface", () => {
     expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
   });
 
+  it("shows the finished prototype on every desktop project card", () => {
+    render(<Academy />);
+    const previews = screen.getAllByRole("img", { name: /прототип результата проекта/i });
+    expect(previews).toHaveLength(52);
+    expect(screen.getByRole("img", { name: /учёт расходов семьи/i })).toHaveAttribute(
+      "src",
+      "/screens/family-expenses/step-14.png",
+    );
+  });
+
   it("filters the catalogue by week and search", () => {
     render(<Academy />);
     fireEvent.click(screen.getByRole("button", { name: /неделя 2/i }));
@@ -117,6 +127,11 @@ describe("academy interface", () => {
     render(<AppEntry />);
     expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(52);
+    expect(screen.getAllByRole("img", { name: /прототип результата проекта/i })).toHaveLength(52);
+    expect(screen.getByRole("img", { name: /учёт расходов семьи/i })).toHaveAttribute(
+      "src",
+      "/screens/family-expenses/step-14.png",
+    );
   });
 
   it("stores phone progress separately and shows a safe Telegram fallback", () => {

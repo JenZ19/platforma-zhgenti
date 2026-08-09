@@ -159,7 +159,7 @@ Add styles that make the prototype the first visual element, zoom the level scre
 
 Run: `npm run test:unit -- --maxWorkers=1 && npm run build && npm run lint && npm run verify:screens && git diff --check`
 
-Expected: 39 tests pass, production build succeeds, lint reports no errors, and all screenshot assets verify.
+Expected: 38 tests pass, production build succeeds, lint reports no errors, and all screenshot assets verify.
 
 - [ ] **Step 3: Commit the implementation**
 

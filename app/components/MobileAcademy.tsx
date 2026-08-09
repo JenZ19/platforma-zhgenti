@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { getMobileCapability } from "../content/mobile";
 import { projects } from "../content/projects";
 import { getAcademyStats, loadProgress } from "../lib/progress";
+import { ProjectPreview } from "./ProjectPreview";
 
 const weeks = ["Все", "1 неделя", "2 неделя", "3 неделя", "4 неделя", "5 неделя", "6 неделя"];
 
@@ -46,7 +47,7 @@ export function MobileAcademy({ onOpen }: { onOpen: (slug: string) => void }) {
           {visible.map((project) => {
             const capability = getMobileCapability(project);
             const completed = typeof window === "undefined" ? 0 : loadProgress(`mobile:${project.slug}`, window.localStorage).completed.length;
-            return <article className="mobile-project-card" key={project.slug}><header><span>{project.symbol}</span><small>{completed ? `${completed}/17` : `Неделя ${project.week}`}</small></header><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><h3>{project.title}</h3><p>{project.outcome}</p><footer><span>{capability.detail}</span><a href={`?format=mobile&quest=${project.slug}`} onClick={(event) => open(event, project.slug)} aria-label={`Открыть мобильный квест: ${project.title}`}>Открыть мобильный квест →</a></footer></article>;
+            return <article className="mobile-project-card" key={project.slug}><ProjectPreview project={project} /><header><span>{project.symbol}</span><small>{completed ? `${completed}/17` : `Неделя ${project.week}`}</small></header><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><h3>{project.title}</h3><p>{project.outcome}</p><footer><span>{capability.detail}</span><a href={`?format=mobile&quest=${project.slug}`} onClick={(event) => open(event, project.slug)} aria-label={`Открыть мобильный квест: ${project.title}`}>Открыть мобильный квест →</a></footer></article>;
           })}
         </div>
       </section>
