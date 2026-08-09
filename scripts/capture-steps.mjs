@@ -4,8 +4,14 @@ import { chromium } from "playwright";
 import { projectSlugs, screenPath } from "./projects.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
+const force = process.env.FORCE_SCREENS === "1";
+const selectedSlugs = new Set((process.env.CAPTURE_SLUGS || "").split(",").map((value) => value.trim()).filter(Boolean));
+const selectedSteps = new Set((process.env.CAPTURE_STEPS || "").split(",").map(Number).filter(Number.isInteger));
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const tasks = projectSlugs().flatMap((slug) => Array.from({ length: 17 }, (_, index) => ({ slug, step: index + 1 })));
+const tasks = projectSlugs()
+  .filter((slug) => selectedSlugs.size === 0 || selectedSlugs.has(slug))
+  .flatMap((slug) => Array.from({ length: 17 }, (_, index) => ({ slug, step: index + 1 })))
+  .filter(({ step }) => selectedSteps.size === 0 || selectedSteps.has(step));
 let cursor = 0;
 let finished = 0;
 
@@ -19,7 +25,7 @@ async function worker(number) {
     cursor += 1;
     const { slug, step } = tasks[index];
     const file = screenPath(slug, step);
-    if (fs.existsSync(file)) {
+    if (!force && fs.existsSync(file)) {
       finished += 1;
       continue;
     }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getProject } from "../content/projects";
+import { getProject, projects } from "../content/projects";
+import { getPreparationProfileSlugs } from "../content/preparation";
 import {
   buildRealDataChecklist,
   createEmptyPreparation,
@@ -39,9 +40,71 @@ describe("quest data preparation", () => {
     const checklist = buildRealDataChecklist(project);
     expect(checklist.length).toBeGreaterThanOrEqual(7);
     expect(checklist.map((item) => item.text).join(" ")).toMatch(/запрос|формат|контакт/i);
-    expect(checklist.map((item) => item.text).join(" ")).toContain(project.safety);
+    expect(checklist.map((item) => `${item.text} ${item.detail}`).join(" ")).toContain(project.safety);
     expect(checklist.map((item) => item.text).join(" ")).toMatch(/парол|токен/i);
     expect(new Set(checklist.map((item) => item.id)).size).toBe(checklist.length);
+  });
+
+  it("gives every project its own click-by-click preparation path", () => {
+    const fingerprints = new Set<string>();
+
+    for (const project of projects) {
+      const checklist = buildRealDataChecklist(project);
+      expect(checklist, project.slug).toHaveLength(8);
+      expect(checklist.every((item) => (item.steps?.length ?? 0) >= 3), project.slug).toBe(true);
+      expect(checklist.every((item) => (item.doneWhen?.length ?? 0) > 20), project.slug).toBe(true);
+      expect(checklist.every((item) => item.detail.length > 25), project.slug).toBe(true);
+
+      const fingerprint = checklist
+        .slice(1, 6)
+        .map((item) => `${item.text}|${item.example ?? ""}`)
+        .join("||");
+      fingerprints.add(fingerprint);
+    }
+
+    expect(fingerprints.size).toBe(projects.length);
+    expect(getPreparationProfileSlugs().sort()).toEqual(projects.map((project) => project.slug).sort());
+  });
+
+  it("gives every phone checklist Telegram actions instead of computer instructions", () => {
+    for (const project of projects) {
+      const checklist = buildRealDataChecklist(project, "mobile");
+      const text = checklist.map((item) => item.steps?.join(" ") ?? "").join(" ");
+      expect(text, project.slug).toMatch(/Telegram/i);
+      expect(text, project.slug).not.toMatch(/на компьютере|папку «Документы»|правой кнопкой/i);
+    }
+  });
+
+  it("asks for pressure diary records instead of branding and sales data", () => {
+    const text = buildRealDataChecklist(getProject("pressure-diary")!)
+      .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""} ${item.example ?? ""} ${item.doneWhen ?? ""}`)
+      .join(" ");
+
+    expect(text).toMatch(/мои-измерения\.csv/i);
+    expect(text).toMatch(/верхн.+давлен/i);
+    expect(text).toMatch(/нижн.+давлен/i);
+    expect(text).toMatch(/пульс/i);
+    expect(text).toMatch(/самочувств/i);
+    expect(text).toMatch(/выгрузк.+врач/i);
+    expect(text).not.toMatch(/логотип|цен[аы]|контакт/i);
+  });
+
+  it("does not request commercial materials for personal household services", () => {
+    const personalServices = projects.filter((project) => project.kind === "service");
+    for (const project of personalServices) {
+      const text = buildRealDataChecklist(project).map((item) => item.text).join(" ");
+      expect(text, project.slug).not.toMatch(/логотип|подтверждённые цены|публичные контакты/i);
+    }
+  });
+
+  it("never tells a real-data checklist to use fictional examples", () => {
+    for (const project of projects) {
+      const text = buildRealDataChecklist(project)
+        .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""}`)
+        .join(" ");
+      expect(text, project.slug).not.toMatch(/вымышлен|демонстрацион/i);
+      expect(text, project.slug).not.toMatch(/не добавляем.+реальные контакты в сообщения/i);
+    }
   });
 
   it("requires every real-data checklist item but lets demo mode start immediately", () => {

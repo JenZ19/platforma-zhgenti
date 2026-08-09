@@ -1,10 +1,12 @@
 "use client";
 
 import { getMobileCapability } from "../content/mobile";
+import { getPreparationProfile } from "../content/preparation";
 import type { ProjectDefinition } from "../content/types";
 
 function Phone({ project, step }: { project: ProjectDefinition; step: number }) {
   const constructor = ["bot", "agent"].includes(project.kind) ? "Чатиум" : "Lovable";
+  const profile = getPreparationProfile(project.slug);
   return (
     <div className="mobile-scene-phone">
       <div className="mobile-scene-status"><span>9:41</span><b>● ● ◒</b></div>
@@ -13,7 +15,7 @@ function Phone({ project, step }: { project: ProjectDefinition; step: number }) 
         {step === 1 && <><div className="scene-fairy">✦</div><h3>Добро пожаловать!</h3><p>Я проведу проект с телефона — по одному действию.</p><button>Начать проект</button></>}
         {step === 2 && <><div className="scene-fairy dark">C</div><h3>Подключите свой Codex</h3><p>Войдите по безопасной ссылке. Пароль останется только у вас.</p><div className="device-code"><small>КОД ВХОДА</small><b>FEYA–27</b></div><button>Открыть вход</button></>}
         {step === 3 && <><h3>Какие данные используем?</h3><div className="scene-choice"><b>✦ Учебные</b><small>Примеры уже готовы</small></div><div className="scene-choice real"><b>◇ Реальные</b><small>Сначала откроется чек-лист</small></div></>}
-        {step === 4 && <><h3>Комната материалов</h3><p>Отправьте безопасные копии для проекта.</p><div className="scene-files"><span>DOC</span><b>описание-проекта.docx</b><i>✓</i></div><div className="scene-files"><span>IMG</span><b>пример-экрана.png</b><i>✓</i></div><button>Материалы готовы</button></>}
+        {step === 4 && <><h3>Комната материалов</h3><p>Отправьте безопасные копии для проекта.</p><div className="scene-files"><span>01</span><b>{profile.sourceFile}</b><i>✓</i></div><div className="scene-files"><span>02</span><b>{profile.rulesFile}</b><i>✓</i></div><button>Материалы готовы</button></>}
         {step === 5 && <><small className="scene-progress-label">ВОПРОС 2 ИЗ 3</small><h3>Что должно получиться?</h3><p>{project.outcome}</p><div className="voice-note"><b>▶</b><i /><span>0:18</span></div><button>Отправить ответ</button></>}
         {step === 6 && <><h3>Паспорт проекта</h3><div className="scene-pass"><small>ДЛЯ КОГО</small><p>{project.audience}</p></div><div className="scene-pass"><small>ФУНКЦИИ</small><p>{project.features.slice(0,3).join(" · ")}</p></div><button>Всё верно</button></>}
         {step === 7 && <><div className="scene-loader">✦</div><h3>Ваш Codex работает</h3><p>Можно закрыть Telegram. Фея пришлёт сообщение, когда всё будет готово.</p><div className="queue-pill">Задача №12 · выполняется</div><button className="ghost">Остановить</button></>}

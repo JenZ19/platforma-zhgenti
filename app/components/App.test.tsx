@@ -122,6 +122,13 @@ describe("academy interface", () => {
     expect(localStorage.getItem(preparationKey("psychologist-site"))).toContain('"ready":true');
   });
 
+  it("shows the human project folder name instead of the technical slug", () => {
+    render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
+    expect(screen.getByText(/положите безопасные копии в папку/i)).toHaveTextContent("Дневник давления");
+    expect(screen.queryByText(/положите безопасные копии в папку pressure-diary/i)).not.toBeInTheDocument();
+  });
+
   it("opens a separate phone-only academy from the mobile format route", async () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
@@ -175,6 +182,20 @@ describe("academy interface", () => {
     expect(await screen.findAllByRole("heading", { name: /скопируйте анкету на сайте/i })).not.toHaveLength(0);
     expect(screen.getByText(/нажмите сюда/i)).toBeInTheDocument();
     expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
+  });
+
+  it("keeps shared result screenshots neutral for real and training routes", async () => {
+    window.history.replaceState({}, "", "/?capture=planner-bot--step-09");
+    render(<AppEntry />);
+    expect(await screen.findByText(/безопасные проверочные данные/i)).toBeInTheDocument();
+    expect(screen.queryByText(/вымышлен|учебной папке/i)).not.toBeInTheDocument();
+  });
+
+  it("shows the project-specific source in the mobile materials screenshot", async () => {
+    window.history.replaceState({}, "", "/?capture-mobile=pressure-diary--step-04");
+    render(<AppEntry />);
+    expect(await screen.findByText("мои-измерения.csv")).toBeInTheDocument();
+    expect(screen.getByText("поля-дневника.txt")).toBeInTheDocument();
   });
 
   it("renders a dedicated screenshot scene for each preparation action", async () => {

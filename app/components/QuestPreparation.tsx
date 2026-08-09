@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- generated lesson screens are fixed-size local teaching assets */
 
 import type { ProjectDefinition } from "../content/types";
+import { getPreparationProfile } from "../content/preparation";
 import {
   buildRealDataChecklist,
   type QuestPreparation as PreparationState,
@@ -25,11 +26,8 @@ export function QuestPreparation({
   onBack: () => void;
   mobile?: boolean;
 }) {
-  const checklist = buildRealDataChecklist(project).map((item) => item.id === "folder" && mobile ? {
-    ...item,
-    text: `Отдельная комната «${project.slug}» в Telegram только для этого проекта`,
-    detail: "Отправляйте сюда только безопасные копии материалов. Оригиналы, пароли и закрытые документы оставьте у себя.",
-  } : item);
+  const profile = getPreparationProfile(project.slug);
+  const checklist = buildRealDataChecklist(project, mobile ? "mobile" : "desktop");
   const allChecked = checklist.every((item) => preparation.checked.includes(item.id));
 
   if (preparation.mode === "real") {
@@ -38,7 +36,7 @@ export function QuestPreparation({
         <button type="button" className="preparation-back" onClick={onBack}>← Изменить выбор</button>
         <p className="section-kicker">Шаг 0 · Реальный проект</p>
         <h2>Сначала соберите материалы</h2>
-        <p className="preparation-lead">{mobile ? <>Не нужно делать всё идеально. Соберите безопасные копии для комнаты <b>{project.slug}</b> в Telegram и отмечайте готовое.</> : <>Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{project.slug}</b> и отмечайте готовое.</>}</p>
+        <p className="preparation-lead">{mobile ? <>Не нужно делать всё идеально. Соберите безопасные копии для комнаты <b>{profile.folderName}</b> в Telegram и отмечайте готовое.</> : <>Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{profile.folderName}</b> и отмечайте готовое.</>}</p>
         <div className="checklist-progress"><span>{preparation.checked.length} из {checklist.length}</span><i><b style={{ width: `${Math.round((preparation.checked.length / checklist.length) * 100)}%` }} /></i></div>
         <div className={`preparation-list ${checklist.some((item) => item.steps?.length) ? "detailed-preparation-list" : ""}`}>
           {checklist.map((item, index) => {

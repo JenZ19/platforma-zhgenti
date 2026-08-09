@@ -1,22 +1,36 @@
 import type { DataMode } from "../lib/preparation";
+import { getPreparationProfile } from "./preparation";
+import type { ProjectPreparationProfile } from "./preparation";
 import type { ProjectDefinition, QuestStep } from "./types";
 
-function realText(text: string, project: ProjectDefinition): string {
-  let next = text;
-  for (const example of project.demo) {
-    next = next.replaceAll(`вымышленный пример «${example}»`, `подходящий безопасный пример из папки «${project.slug}»`);
-    next = next.replaceAll(`тестовый пример «${example}»`, `подходящий пример из папки «${project.slug}»`);
-    next = next.replaceAll(`пример «${example}»`, `подходящий пример из папки «${project.slug}»`);
-    next = next.replaceAll(`«${example}»`, `материал из папки «${project.slug}»`);
+function sourceReference(profile: ProjectPreparationProfile, index: number): string {
+  const row = ["первую", "вторую", "третью"][index] ?? "подходящую";
+  return `${row} заполненную строку из файла «${profile.sourceFile}»`;
+}
+
+function realText(text: string, project: ProjectDefinition, profile: ProjectPreparationProfile): string {
+  let next = text
+    .replaceAll(project.slug, profile.folderName)
+    .replaceAll(project.demo.join("; "), `заполненные строки из файла «${profile.sourceFile}»`);
+  for (const [index, example] of project.demo.entries()) {
+    const reference = sourceReference(profile, index);
+    next = next.replaceAll(`вымышленный пример «${example}»`, reference);
+    next = next.replaceAll(`тестовый пример «${example}»`, reference);
+    next = next.replaceAll(`пример «${example}»`, reference);
+    next = next.replaceAll(`«${example}»`, reference);
   }
   next = next
-    .replaceAll(`Демонстрационные примеры: ${project.demo.join("; ")}.`, `Рабочие материалы: безопасные копии из подготовленной папки «${project.slug}».`)
-    .replaceAll(`Для проверки используй только эти вымышленные примеры: ${project.demo.join("; ")}.`, `Для проверки используй только подходящие материалы из подготовленной папки «${project.slug}».`)
-    .replaceAll("на вымышленных примерах", `на безопасных материалах из подготовленной папки «${project.slug}»`)
-    .replaceAll("только на вымышленных примерах", `только на безопасных материалах из подготовленной папки «${project.slug}»`)
-    .replaceAll("третий демонстрационный пример", `подходящий материал из подготовленной папки «${project.slug}»`)
-    .replaceAll("демонстрационные данные", "подготовленные рабочие материалы")
-    .replaceAll("вымышленные примеры", "безопасные рабочие примеры")
+    .replaceAll(`Демонстрационные примеры: ${project.demo.join("; ")}.`, `Рабочий источник: файл «${profile.sourceFile}» с вашими заполненными строками.`)
+    .replaceAll(`Для проверки используй только эти вымышленные примеры: ${project.demo.join("; ")}.`, `Для проверки используй заполненные строки из файла «${profile.sourceFile}».`)
+    .replaceAll("на вымышленных примерах", `на заполненных строках из файла «${profile.sourceFile}»`)
+    .replaceAll("только на вымышленных примерах", `только на заполненных строках из файла «${profile.sourceFile}»`)
+    .replaceAll("третий демонстрационный пример", sourceReference(profile, 2))
+    .replaceAll("демонстрационные данные", `записи из файла «${profile.sourceFile}»`)
+    .replaceAll("вымышленные примеры", `записи из файла «${profile.sourceFile}»`)
+    .replaceAll("учебную работу", "рабочую копию")
+    .replaceAll("учебной версии", "подготовленной версии")
+    .replaceAll("учебной папки", "рабочей папки")
+    .replaceAll("учебные данные", "подготовленные данные")
     .replaceAll("без реальных личных данных", "без лишних персональных данных")
     .replaceAll("нет секретов и реальных данных", "нет секретов и закрытых исходников")
     .replaceAll("реальные контакты", "частные контакты")
@@ -43,17 +57,18 @@ export function adaptQuestToDataMode(
   mode: DataMode,
 ): QuestStep[] {
   if (mode === "demo") return steps;
-  const prefix = `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Сначала используй материалы из подготовленной папки «${project.slug}». Не додумывай отсутствующие факты: если важного материала не хватает, задай один простой вопрос. Не показывай и не публикуй закрытые исходники, пароли, токены и частные персональные данные.\n\n`;
+  const profile = getPreparationProfile(project.slug);
+  const prefix = `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Работай только в папке «${profile.folderName}». Сначала открой файл «${profile.sourceFile}». В нём должны быть поля: ${profile.sourceFields.join(", ")}. Не додумывай отсутствующие факты: если нужная строка не заполнена, задай один простой вопрос. Не показывай и не публикуй закрытые исходники, пароли, токены и частные персональные данные.\n\n`;
   return steps.map((step) => ({
     ...step,
-    why: realText(step.why, project),
-    action: `Возьмите подходящий материал из подготовленной папки. ${realText(step.action, project)}`,
-    prompt: step.prompt ? prefix + realText(step.prompt, project) : undefined,
-    expected: step.expected.map((item) => realText(item, project)),
+    why: realText(step.why, project, profile),
+    action: realText(step.action, project, profile),
+    prompt: step.prompt ? prefix + realText(step.prompt, project, profile) : undefined,
+    expected: step.expected.map((item) => realText(item, project, profile)),
     help: {
       ...step.help,
-      body: realText(step.help.body, project),
-      prompt: prefix + realText(step.help.prompt, project),
+      body: realText(step.help.body, project, profile),
+      prompt: prefix + realText(step.help.prompt, project, profile),
     },
   }));
 }

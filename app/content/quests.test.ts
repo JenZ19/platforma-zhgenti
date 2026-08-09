@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { projects } from "./projects";
+import { getPreparationProfile } from "./preparation";
 import { buildQuest, getQuest } from "./quests";
 
 const placeholder = /TODO|TBD|\[[^\]]+\]|<[^>]+>|вставьте название|название проекта сюда/i;
@@ -49,12 +50,46 @@ describe("quest builders", () => {
 
   it("switches every command to the prepared folder in real-data mode", () => {
     for (const project of projects) {
-      const prompts = buildQuest(project, "real").flatMap((step) => step.prompt ?? []);
+      const realSteps = buildQuest(project, "real");
+      const realStepText = stepText(realSteps);
+      const prompts = realSteps.flatMap((step) => step.prompt ?? []);
+      const profile = getPreparationProfile(project.slug);
       expect(prompts.every((prompt) => prompt.includes("РЕЖИМ РЕАЛЬНЫХ ДАННЫХ")), project.slug).toBe(true);
-      expect(prompts.join(" "), project.slug).toMatch(/подготовленн.+папк/i);
+      expect(prompts.join(" "), project.slug).toContain(profile.folderName);
+      expect(prompts.join(" "), project.slug).toContain(profile.sourceFile);
       expect(prompts.join(" "), project.slug).not.toMatch(/используй (только )?(этот |эти )?вымышлен/i);
-      expect(stepText(buildQuest(project, "real")), project.slug).not.toMatch(/вымышлен|демонстрацион/i);
+      expect(prompts.join(" "), project.slug).not.toMatch(/не добавляем.+реальные контакты в сообщения/i);
+      expect(realStepText, project.slug).not.toMatch(/вымышлен|демонстрацион/i);
+      expect(realStepText, project.slug).not.toContain(project.demo.join("; "));
     }
+  });
+
+  it("keeps real-data actions concrete instead of prefixing every step with a folder instruction", () => {
+    for (const project of projects) {
+      const steps = buildQuest(project, "real");
+      const text = stepText(steps);
+      expect(text, project.slug).not.toContain("Возьмите подходящий материал из подготовленной папки");
+      expect(steps[13].action, project.slug).not.toMatch(/папк|подготовленн.+материал/i);
+    }
+  });
+
+  it("explains the previously ambiguous open, paste, and phone actions click by click", () => {
+    for (const project of projects) {
+      const steps = buildQuest(project, "real");
+      if (project.slug === "home-helper") continue;
+      expect(steps[1].action, `${project.slug}/open`).toMatch(/Codex.+Открыть папку.+выберите.+Открыть/is);
+      expect(steps[2].action, `${project.slug}/paste`).toMatch(/Скопировать команду.+вернитесь в Codex.+вставьте.+отправ/is);
+      expect(steps[13].action, `${project.slug}/phone`).toMatch(/Telegram.+телефон.+вертикально/is);
+      expect(steps[13].action, `${project.slug}/phone`).not.toMatch(/узком экране/i);
+    }
+  });
+
+  it("names the exact prepared file in the real pressure diary route", () => {
+    const steps = buildQuest(projects.find((project) => project.slug === "pressure-diary")!, "real");
+    const prompts = steps.flatMap((step) => step.prompt ?? []).join(" ");
+    expect(prompts).toContain("мои-измерения.csv");
+    expect(prompts).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
+    expect(prompts).not.toMatch(/логотип|подтверждённые цены|публичные контакты/i);
   });
 
   it("builds a click-by-click guide for every home-helper level", () => {

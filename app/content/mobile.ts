@@ -1,4 +1,5 @@
 import type { DataMode } from "../lib/preparation";
+import { getPreparationProfile } from "./preparation";
 import type { ProjectDefinition, ProjectKind, QuestStep } from "./types";
 
 export type MobileCapability = "phone-full" | "phone-template" | "curator";
@@ -76,8 +77,9 @@ function mobileAction(project: ProjectDefinition, step: number): MobileAction {
 }
 
 function modeLine(mode: DataMode, project: ProjectDefinition): string {
+  const profile = getPreparationProfile(project.slug);
   return mode === "real"
-    ? `Работай только с подготовленными реальными материалами проекта «${project.title}». Не додумывай отсутствующие факты и не публикуй частные данные.`
+    ? `Работай в личной комнате «${profile.folderName}». Сначала найди сообщение «ФАЙЛ: ${profile.sourceFile}». В нём должны быть поля: ${profile.sourceFields.join(", ")}. Не додумывай отсутствующие факты и не публикуй частные данные.`
     : `Работай с безопасными учебными примерами: ${project.demo.join("; ")}. Не добавляй настоящие контакты, пароли и личные данные.`;
 }
 
@@ -105,13 +107,16 @@ function promptFor(project: ProjectDefinition, step: number, mode: DataMode): st
   return `Ты — Фея мобильного проекта. Ученица работает только с телефона через Telegram, Codex и мобильный конструктор. ${base}\n\n${requests[step - 1]}`;
 }
 
-function actionText(project: ProjectDefinition, step: number): string {
+function actionText(project: ProjectDefinition, step: number, mode: DataMode): string {
   const constructor = constructorByKind[project.kind] === "lovable" ? "Lovable" : "Чатиум";
+  const profile = getPreparationProfile(project.slug);
   const actions = [
     "Нажмите большую кнопку ниже. Фея откроет нужный проект в Telegram.",
     "Один раз подключите собственный аккаунт Codex по ссылке и коду, который пришлёт Фея.",
     "Выберите учебные или реальные данные. Выбор сохранится только для этого проекта.",
-    "Отправьте в чат проекта текст, фотографии или документы из чек-листа. Оригиналы и секреты не отправляйте.",
+    mode === "real"
+      ? `Откройте комнату «${profile.folderName}». Отправьте отдельное сообщение с первой строкой «ФАЙЛ: ${profile.sourceFile}». Ниже заполните: ${profile.sourceFields.join(", ")}. Оригиналы и секреты не отправляйте.`
+      : `Отправьте в чат готовые учебные примеры проекта «${project.title}». Настоящие контакты, оригиналы и секреты не отправляйте.`,
     "Ответьте Фее на три коротких вопроса. Можно голосовыми сообщениями.",
     "Прочитайте готовый паспорт и нажмите «Всё верно» или напишите одно исправление.",
     "Нажмите «Запустить мой Codex». Можно закрыть Telegram — Фея сообщит, когда результат будет готов.",
@@ -144,7 +149,7 @@ export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "d
       why: id === 1
         ? "В мобильной версии Telegram становится вашей рабочей мастерской: здесь лежат задания, материалы, ссылки и ответы Феи."
         : `Этот уровень ведёт к результату «${project.outcome}» без работы с кодом и без компьютера.`,
-      action: actionText(project, id),
+      action: actionText(project, id, mode),
       kind: "prompt",
       prompt: promptFor(project, id, mode),
       expected: [

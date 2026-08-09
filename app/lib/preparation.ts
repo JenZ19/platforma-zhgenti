@@ -1,4 +1,6 @@
-import type { ProjectDefinition, ProjectKind } from "../content/types";
+import { getPreparationProfile } from "../content/preparation";
+import type { ProjectPreparationProfile } from "../content/preparation";
+import type { ProjectDefinition } from "../content/types";
 import type { StorageLike } from "./progress";
 
 export type DataMode = "demo" | "real";
@@ -22,38 +24,7 @@ export type PreparationItem = {
 
 const PREFIX = "feya-academy-preparation-v1";
 
-const kindMaterial: Record<ProjectKind, (project: ProjectDefinition) => PreparationItem> = {
-  service: (project) => ({
-    id: "real-examples",
-    text: `5–10 настоящих примеров для полей: ${project.entities.join(", ")}`,
-    detail: "Соберите их в одной таблице или текстовом файле и оставьте только данные, которые действительно нужны сервису.",
-  }),
-  bot: (project) => ({
-    id: "real-dialogues",
-    text: `5–10 реальных вопросов или сообщений для сценария «${project.features[0]}»`,
-    detail: "Скопируйте примеры без фамилий, телефонов и лишних деталей переписки. Добавьте желаемый ответ рядом.",
-  }),
-  agent: (project) => ({
-    id: "real-knowledge",
-    text: `Документы и примеры, по которым агент выполнит: ${project.features.slice(0, 3).join(", ")}`,
-    detail: "Положите инструкции, правила и 2–3 хороших примера результата. Удалите всё, что агенту не понадобится.",
-  }),
-  "simple-site": (project) => ({
-    id: "real-site-copy",
-    text: `Финальные факты и тексты для разделов: ${project.entities.join(", ")}`,
-    detail: "Соберите в одном документе имя/название, описание, услуги, условия, цены и только публичные контакты.",
-  }),
-  "advanced-site": (project) => ({
-    id: "real-business-data",
-    text: `Рабочие данные для функций: ${project.features.join(", ")}`,
-    detail: "Подготовьте структуру услуг или товаров, правила расчёта, условия заявки и тестовый путь без настоящей оплаты.",
-  }),
-  portfolio: () => ({
-    id: "real-portfolio-work",
-    text: "4–6 своих лучших проектов: ссылки, безопасные скриншоты и короткое описание каждого",
-    detail: "Учебные работы подпишите как учебные. Не придумывайте клиентов, отзывы и результаты.",
-  }),
-};
+export type PreparationSurface = "desktop" | "mobile";
 
 export function preparationKey(slug: string): string {
   return `${PREFIX}:${slug}`;
@@ -89,44 +60,112 @@ export function resetPreparation(slug: string, storage: StorageLike): void {
   storage.removeItem(preparationKey(slug));
 }
 
-export function buildRealDataChecklist(project: ProjectDefinition): PreparationItem[] {
-  if (project.slug === "home-helper") return buildHomeHelperChecklist();
-  return [
-    {
+export function buildRealDataChecklist(project: ProjectDefinition, surface: PreparationSurface = "desktop"): PreparationItem[] {
+  if (project.slug === "home-helper" && surface === "desktop") return buildHomeHelperChecklist();
+  const profile = getPreparationProfile(project.slug);
+  return buildProfileChecklist(project, profile, surface);
+}
+
+function buildProfileChecklist(
+  project: ProjectDefinition,
+  profile: ProjectPreparationProfile,
+  surface: PreparationSurface,
+): PreparationItem[] {
+  const location = surface === "mobile" ? `комнате «${profile.folderName}» в Telegram` : `папке «${profile.folderName}»`;
+  const createMaterial = (
+    id: string,
+    file: string,
+    text: string,
+    detail: string,
+    lines: string[],
+    example: string,
+    recordCount?: number,
+  ): PreparationItem => ({
+    id,
+    text,
+    detail,
+    steps: surface === "mobile"
+      ? [
+        `Откройте в Telegram комнату проекта «${profile.folderName}».`,
+        `Отправьте отдельное сообщение. В первой строке напишите: ФАЙЛ: ${file}.`,
+        `Ниже напишите по одному пункту: ${lines.join("; ")}.`,
+        recordCount ? `Добавьте минимум ${recordCount} своих примеров. Не копируйте пример ниже как свои данные.` : "Проверьте написанное и отправьте сообщение в комнату проекта.",
+      ]
+      : [
+        `Откройте папку «${profile.folderName}».`,
+        `Создайте в ней новый текстовый файл и назовите его «${file}».`,
+        `Откройте файл и напишите по одному пункту: ${lines.join("; ")}.`,
+        recordCount ? `Добавьте минимум ${recordCount} своих примеров. Не копируйте пример ниже как свои данные.` : "Сохраните файл и закройте его.",
+      ],
+    example,
+    doneWhen: `${surface === "mobile" ? "В комнате проекта есть отдельное сообщение" : "В папке есть файл"} «${file}», внутри заполнены: ${lines.join(", ")}.`,
+  });
+
+  const folderItem: PreparationItem = surface === "mobile"
+    ? {
       id: "folder",
-      text: `Отдельная папка «${project.slug}» только для этого проекта`,
-      detail: "Положите в неё копии материалов, а оригиналы оставьте на прежнем месте.",
-    },
-    kindMaterial[project.kind](project),
-    {
-      id: "structure",
-      text: `Ваши названия и правила для: ${project.entities.join(", ")}`,
-      detail: "Напишите простыми словами, как это устроено у вас или у клиента. Если чего-то нет — так и отметьте, не додумывайте.",
-    },
-    {
-      id: "result-examples",
-      text: `2–3 примера желаемого результата для: ${project.features.slice(0, 3).join(", ")}`,
-      detail: "Подойдут текст, таблица, ссылка или скриншот. Чужой пример используйте только как референс, не выдавайте за свою работу.",
-    },
-    {
-      id: "visuals",
-      text: "Логотип, фотографии и визуальные примеры — только если они нужны проекту",
-      detail: "Проверьте разрешение на использование изображений. Если визуалов пока нет, положите файл «визуалы-позже.txt».",
-    },
-    {
-      id: "public-facts",
-      text: "Подтверждённые цены, условия и контакты, которые разрешено показывать",
-      detail: "Отдельно отметьте, что публичное, а что должно остаться только внутри рабочей папки.",
-    },
+      text: `Создайте в Telegram комнату «${profile.folderName}»`,
+      detail: "Это отдельный чат проекта. Фея и Codex будут брать материалы только отсюда, поэтому другие переписки не смешаются с работой.",
+      steps: [
+        "Откройте в Telegram чат с Феей.",
+        "Нажмите «Мои проекты», затем «Новый проект».",
+        `Напишите точное название: ${profile.folderName}.`,
+        "Откройте созданную комнату и пока ничего туда не отправляйте.",
+      ],
+      doneWhen: `В чате с Феей открывается отдельная пустая комната «${profile.folderName}».`,
+    }
+    : {
+      id: "folder",
+      text: `Создайте папку «${profile.folderName}»`,
+      detail: "Это рабочая копия проекта. Codex будет видеть только файлы внутри неё, а ваши оригиналы останутся на прежнем месте.",
+      steps: [
+        "Откройте на компьютере папку «Документы».",
+        "Нажмите правой кнопкой на свободном месте и выберите «Новая папка».",
+        `Напечатайте точное название: ${profile.folderName}.`,
+        "Нажмите Enter и откройте созданную пустую папку.",
+      ],
+      doneWhen: `В «Документах» видна отдельная пустая папка «${profile.folderName}».`,
+    };
+
+  return [
+    folderItem,
+    createMaterial("real-examples", profile.sourceFile, profile.sourceTitle, profile.sourceWhy, profile.sourceFields, profile.sourceExample, 5),
+    createMaterial("structure", profile.rulesFile, profile.rulesTitle, profile.rulesWhy, profile.rules, profile.rules.join("\n")),
+    createMaterial(
+      "result-examples",
+      "что-должно-получиться.txt",
+      `Запишите, что должен уметь проект «${project.title}»`,
+      "Этот список нужен, чтобы Codex не добавлял лишние функции и в конце проверил каждый обещанный результат.",
+      project.features,
+      `${project.features[0]} — ${project.demo[0]}\n${project.features[1]} — ${project.demo[1]}`,
+    ),
+    createMaterial("presentation", profile.presentationFile, profile.presentationTitle, profile.presentationWhy, profile.presentation, profile.presentation.join("\n")),
+    createMaterial("sharing", profile.sharingFile, profile.sharingTitle, profile.sharingWhy, profile.sharing, profile.sharing.join("\n")),
     {
       id: "project-safety",
-      text: project.safety,
-      detail: "Проверьте это правило до загрузки материалов и ещё раз перед публикацией.",
+      text: `Проверьте правило безопасности проекта «${project.title}»`,
+      detail: project.safety,
+      steps: [
+        `Откройте все подготовленные файлы или сообщения в ${location}.`,
+        `По очереди проверьте: ${profile.safetyChecks.join("; ")}.`,
+        "Удалите сведения, которые нарушают хотя бы одно правило, и сохраните исправленную копию.",
+        `Добавьте в конец файла «${profile.rulesFile}» строку: «Правило безопасности проверено».`,
+      ],
+      example: profile.safetyChecks.join("\n"),
+      doneWhen: `В материалах соблюдены все правила: ${profile.safetyChecks.join(", ")}.`,
     },
     {
       id: "no-secrets",
-      text: "В папке нет паролей, токенов, банковских реквизитов, документов личности и лишних персональных данных",
-      detail: "Секретные доступы подключаются только через защищённые настройки сервиса и никогда не вставляются в промпт.",
+      text: "Уберите пароли, коды, банковские данные и документы",
+      detail: "Codex не просит такие сведения в сообщении. Если доступ понадобится позже, его подключают в защищённых настройках вместе с куратором.",
+      steps: [
+        `Ещё раз откройте все файлы или сообщения в ${location}.`,
+        "Найдите и удалите пароли, коды из СМС, токены, номера карт, паспортные данные и закрытые ссылки.",
+        "Проверьте фотографии и скриншоты: на них не должно быть уведомлений, имён аккаунтов и адресной строки с секретной ссылкой.",
+        "Оставьте оригиналы документов вне рабочей папки или комнаты проекта.",
+      ],
+      example: "Можно: тексты, примеры, правила, разрешённые фотографии.\nНельзя: пароль, токен, паспорт, карта, код из СМС.",
+      doneWhen: `${surface === "mobile" ? "В комнате" : "В папке"} остались только материалы, необходимые проекту, без секретов и лишних личных данных.`,
     },
   ];
 }

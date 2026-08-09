@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildMobileQuest, getMobileCapability } from "./mobile";
 import { projects } from "./projects";
+import { getPreparationProfile } from "./preparation";
 
 describe("mobile quest builder", () => {
   it("builds seventeen phone-only steps for every project", () => {
@@ -31,10 +32,19 @@ describe("mobile quest builder", () => {
     for (const project of projects) {
       const steps = buildMobileQuest(project, "real");
       const prompts = steps.flatMap((step) => step.prompt ?? []);
-      expect(prompts.join(" "), project.slug).toMatch(/реальн|подготовленн.+материал/i);
+      expect(prompts.join(" "), project.slug).toContain(getPreparationProfile(project.slug).sourceFile);
       if (project.kind === "advanced-site") {
         expect(steps.map((step) => step.mobileAction.tool), project.slug).toContain("curator");
       }
     }
+  });
+
+  it("names the exact source in the phone route instead of asking for generic materials", () => {
+    const project = projects.find((item) => item.slug === "pressure-diary")!;
+    const steps = buildMobileQuest(project, "real");
+    expect(steps[3].action).toContain("мои-измерения.csv");
+    expect(steps[3].action).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
+    expect(steps[3].action).not.toMatch(/текст, фотографии или документы/i);
+    expect(steps.flatMap((step) => step.prompt ?? []).join(" ")).toContain("мои-измерения.csv");
   });
 });
