@@ -4,7 +4,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { buildQuest } from "../content/quests";
-import type { ProjectDefinition } from "../content/types";
+import { defaultCustomization, getCustomizationProfile } from "../content/customization";
+import type { ProjectDefinition, QuestCustomization } from "../content/types";
+import { loadCustomization, resetCustomization, saveCustomization } from "../lib/customization";
 import {
   buildRealDataChecklist,
   createEmptyPreparation,
@@ -24,6 +26,7 @@ import {
 } from "../lib/progress";
 import { QuestPreparation } from "./QuestPreparation";
 import { QuestGuide } from "./QuestGuide";
+import { QuestCustomizer } from "./QuestCustomizer";
 
 export function Quest({ project, onHome }: { project: ProjectDefinition; onHome: () => void }) {
   const [preparation, setPreparation] = useState<PreparationState | null>(null);
@@ -32,7 +35,9 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   const [copied, setCopied] = useState<"main" | "help" | null>(null);
   const [reward, setReward] = useState<string | null>(null);
   const [imageOpen, setImageOpen] = useState(false);
-  const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo"), [project, preparation?.mode]);
+  const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(project.slug));
+  const profile = useMemo(() => getCustomizationProfile(project.slug), [project.slug]);
+  const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization), [project, preparation?.mode, customization]);
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
 
   useEffect(() => {
@@ -40,6 +45,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProgress(loadProgress(project.slug, window.localStorage));
     setPreparation(loadPreparation(project.slug, window.localStorage));
+    setCustomization(loadCustomization(project.slug, window.localStorage));
   }, [project.slug]);
 
   const step = steps[progress.activeStep - 1] ?? steps[0];
@@ -108,8 +114,10 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     if (!window.confirm(`Начать квест «${project.title}» заново?`)) return;
     resetProgress(project.slug, window.localStorage);
     resetPreparation(project.slug, window.localStorage);
+    resetCustomization(project.slug, window.localStorage);
     setProgress(createEmptyProgress());
     setPreparation(createEmptyPreparation());
+    setCustomization(defaultCustomization(project.slug));
     setHelpOpen(false);
   }
 
@@ -155,6 +163,8 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
         <article className="level-card" aria-live="polite">
           <header className="level-header"><div><p>Уровень {String(step.id).padStart(2, "0")} <i>✦</i></p><h2>{step.title}</h2></div><span>≈ {step.id < 5 ? 5 : step.id < 13 ? 7 : 10} мин</span></header>
           <section className="why-card"><b>Зачем это</b><p>{step.why}</p></section>
+
+          {step.id === 2 && profile && customization && <QuestCustomizer profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(project.slug, next, window.localStorage); setCustomization(next); }} />}
 
           <section className="action-section">
             <p className="section-kicker">Что сделать</p>

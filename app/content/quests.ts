@@ -5,12 +5,12 @@ import { buildPortfolioQuest } from "./builders/portfolio";
 import { buildServiceQuest } from "./builders/service";
 import { buildSimpleSiteQuest } from "./builders/simple-site";
 import { getProject } from "./projects";
-import type { ProjectDefinition, QuestStep } from "./types";
+import type { ProjectDefinition, QuestCustomization, QuestStep } from "./types";
 import type { DataMode } from "../lib/preparation";
 import { adaptQuestToDataMode } from "./data-mode";
 import { buildHomeHelperGuide } from "./home-helper-guide";
 
-export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo"): QuestStep[] {
+export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", _customization?: QuestCustomization): QuestStep[] {
   let steps: QuestStep[];
   switch (project.kind) {
     case "service":

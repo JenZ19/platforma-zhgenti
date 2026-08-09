@@ -11,6 +11,7 @@ import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content
 import { getProject, projects } from "../content/projects";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
+import { customizationKey } from "../lib/customization";
 import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
 import { ExpectedScene } from "./ExpectedScene";
@@ -222,6 +223,46 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
     expect(localStorage.getItem(progressKey("mobile:family-expenses"))).toContain('"completed":[1]');
     expect(localStorage.getItem(progressKey("family-expenses"))).toBeNull();
+  });
+
+  it("lets a learner personalize the first four quests and restores her choice", () => {
+    const project = getProject("family-expenses")!;
+    const { unmount } = render(<Quest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+
+    expect(screen.getByRole("heading", { name: /соберите свой семейный бюджет/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "Семья с детьми" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Дни без покупок" }));
+    fireEvent.click(screen.getByRole("button", { name: /сохранить мою версию/i }));
+
+    expect(screen.getByRole("status")).toHaveTextContent("Семья с детьми");
+    expect(screen.getByRole("status")).toHaveTextContent("Дни без покупок");
+    expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("Семья с детьми");
+    unmount();
+
+    render(<Quest project={project} onHome={vi.fn()} />);
+    expect(screen.getByRole("status")).toHaveTextContent("Семья с детьми");
+    expect(screen.getByRole("radio", { name: "Дни без покупок" })).toBeChecked();
+  });
+
+  it("keeps the phone customization separate from the computer quest", () => {
+    localStorage.setItem(customizationKey("family-expenses"), JSON.stringify({
+      audience: "Мы вдвоём",
+      goal: "Остаток до конца месяца",
+      name: "Бюджет пары",
+      style: "Мятный порядок",
+      tone: "Мягко и заботливо",
+      feature: "Недельные конверты",
+    }));
+
+    render(<MobileQuest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
+
+    expect(screen.getByRole("heading", { name: /соберите свой семейный бюджет/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Я сама" })).toBeChecked();
+    expect(localStorage.getItem(customizationKey("mobile:family-expenses"))).toBeNull();
   });
 
   it("walks a real home-helper learner through every click with pictures", () => {

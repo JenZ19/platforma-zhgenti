@@ -23,6 +23,29 @@ export type ProjectDefinition = {
   portfolioAngle: string;
 };
 
+export type QuestCustomizationAxis =
+  | "audience"
+  | "goal"
+  | "name"
+  | "style"
+  | "tone"
+  | "feature";
+
+export type QuestCustomization = Record<QuestCustomizationAxis, string>;
+
+export type QuestCustomizationAxisProfile = {
+  label: string;
+  hint: string;
+  options: string[];
+};
+
+export type QuestCustomizationProfile = {
+  slug: string;
+  title: string;
+  promise: string;
+  axes: Record<QuestCustomizationAxis, QuestCustomizationAxisProfile>;
+};
+
 export type QuestStep = {
   id: number;
   title: string;

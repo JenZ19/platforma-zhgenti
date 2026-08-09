@@ -4,11 +4,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { buildMobileQuest, getMobileCapability } from "../content/mobile";
-import type { ProjectDefinition } from "../content/types";
+import { defaultCustomization, getCustomizationProfile } from "../content/customization";
+import type { ProjectDefinition, QuestCustomization } from "../content/types";
+import { loadCustomization, resetCustomization, saveCustomization } from "../lib/customization";
 import { buildRealDataChecklist, createEmptyPreparation, isPreparationReady, loadPreparation, resetPreparation, savePreparation, type QuestPreparation as PreparationState } from "../lib/preparation";
 import { completeStep, createEmptyProgress, isStepUnlocked, loadProgress, resetProgress, saveProgress } from "../lib/progress";
 import { MobileActionButton } from "./MobileActionButton";
 import { QuestPreparation } from "./QuestPreparation";
+import { QuestCustomizer } from "./QuestCustomizer";
 
 export function MobileQuest({ project, onHome }: { project: ProjectDefinition; onHome: () => void }) {
   const storageSlug = `mobile:${project.slug}`;
@@ -17,8 +20,10 @@ export function MobileQuest({ project, onHome }: { project: ProjectDefinition; o
   const [copied, setCopied] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
+  const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(storageSlug));
+  const profile = useMemo(() => getCustomizationProfile(project.slug), [project.slug]);
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
-  const steps = useMemo(() => buildMobileQuest(project, preparation?.mode ?? "demo"), [project, preparation?.mode]);
+  const steps = useMemo(() => buildMobileQuest(project, preparation?.mode ?? "demo", customization), [project, preparation?.mode, customization]);
   const capability = getMobileCapability(project);
 
   useEffect(() => {
@@ -26,6 +31,7 @@ export function MobileQuest({ project, onHome }: { project: ProjectDefinition; o
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProgress(loadProgress(storageSlug, window.localStorage));
     setPreparation(loadPreparation(storageSlug, window.localStorage));
+    setCustomization(loadCustomization(storageSlug, window.localStorage));
   }, [storageSlug]);
 
   const step = steps[progress.activeStep - 1] ?? steps[0];
@@ -61,8 +67,10 @@ export function MobileQuest({ project, onHome }: { project: ProjectDefinition; o
     if (!window.confirm(`Начать мобильный квест «${project.title}» заново?`)) return;
     resetProgress(storageSlug, window.localStorage);
     resetPreparation(storageSlug, window.localStorage);
+    resetCustomization(storageSlug, window.localStorage);
     setProgress(createEmptyProgress());
     setPreparation(createEmptyPreparation());
+    setCustomization(defaultCustomization(storageSlug));
   }
 
   return (
@@ -76,6 +84,7 @@ export function MobileQuest({ project, onHome }: { project: ProjectDefinition; o
           <article className="mobile-level-card">
             <header><div><p>{step.eyebrow} · уровень {step.id}</p><h2>{step.title}</h2></div><span>{step.id < 7 ? "3 мин" : "5 мин"}</span></header>
             <section className="mobile-why"><b>Зачем</b><p>{step.why}</p></section>
+            {step.id === 2 && profile && customization && <QuestCustomizer compact profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, next, window.localStorage); setCustomization(next); }} />}
             <section className="mobile-do"><p className="section-kicker">Одно действие</p><h3>{step.action}</h3><MobileActionButton action={step.mobileAction} projectSlug={project.slug} step={step.id} /></section>
             <section className="mobile-prompt"><header><span>Команда уже готова</span><b>Codex</b></header><p>{step.prompt}</p><button type="button" onClick={copyPrompt}>{copied ? "Скопировано ✓" : "Скопировать на всякий случай"}</button></section>
             <section className="mobile-result"><div><p className="section-kicker">Что должно получиться</p><h3>Сверьте экран</h3></div><button type="button" onClick={() => setImageOpen(true)} aria-label="Увеличить мобильный пример"><img src={step.screenshot} alt={`Мобильный пример уровня ${step.id}`} /><span>Увеличить</span></button><ul>{step.expected.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>
