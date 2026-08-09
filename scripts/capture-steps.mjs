@@ -1,12 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
+import { selectedNumbers } from "./capture-selection.mjs";
 import { projectSlugs, screenPath } from "./projects.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
 const force = process.env.FORCE_SCREENS === "1";
 const selectedSlugs = new Set((process.env.CAPTURE_SLUGS || "").split(",").map((value) => value.trim()).filter(Boolean));
-const selectedSteps = new Set((process.env.CAPTURE_STEPS || "").split(",").map(Number).filter(Number.isInteger));
+const selectedSteps = selectedNumbers(process.env.CAPTURE_STEPS);
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const tasks = projectSlugs()
   .filter((slug) => selectedSlugs.size === 0 || selectedSlugs.has(slug))

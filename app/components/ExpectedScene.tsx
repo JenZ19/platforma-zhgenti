@@ -10,6 +10,7 @@ import { FirstCoverPrototypeScene } from "./FirstCoverPrototypeScene";
 import { AgentCoverPrototypeScene } from "./AgentCoverPrototypeScene";
 import { ThirdCoverPrototypeScene } from "./ThirdCoverPrototypeScene";
 import { FinalCoverPrototypeScene } from "./FinalCoverPrototypeScene";
+import { OriginalServiceScene } from "./OriginalServiceScene";
 
 function Chrome({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="mock-window"><div className="mock-bar"><span>● ● ●</span><b>{title}</b><i /></div>{children}</div>;
@@ -42,6 +43,7 @@ function FinalScene({ project, step }: { project: ProjectDefinition; step: numbe
 }
 
 function Visual({ project, step }: { project: ProjectDefinition; step: number }) {
+  if (project.slug === "family-expenses") return <OriginalServiceScene slug={project.slug} step={step} />;
   if (step <= 4) return <SetupScene project={project} step={step} />;
   if (step >= 15) return <FinalScene project={project} step={step} />;
   if (hasFirstCoverPrototype(project.slug)) return <FirstCoverPrototypeScene project={project} step={step} />;
@@ -57,6 +59,6 @@ function Visual({ project, step }: { project: ProjectDefinition; step: number })
 }
 
 export function ExpectedScene({ project, step }: { project: ProjectDefinition; step: number }) {
-  const titles = ["Создано безопасное место", "Проект открыт правильно", "Заполнен паспорт проекта", "Мастер-команда отправлена", "Рабочая основа готова", "Открыт первый экран", `Работает: ${project.features[0]}`, `Добавлено: ${project.features[1]}`, "Ничего не потерялось", "Исправление прошло проверку", "Пройден путь пользователя", "Сохранена безопасная версия", "Проект стал вашим", "Проверено с телефона", "Финальный аудит пройден", "Проект опубликован", "Карточка портфолио готова"];
+  const titles = project.slug === "family-expenses" ? ["Увидела готовый результат","Выбрала свою версию","Проверила данные расходов","Открыла безопасную папку","Передала паспорт проекта","Получила рабочую основу","Добавила первый расход","Настроила свои категории","Применила свой стиль","Добавила одну особенную функцию","Прошла семейный сценарий","Проверила сохранение и копию","Проверила одной рукой","Опубликовала личную версию","Создала клиентскую копию","Адаптировала по брифу","Упаковала две версии"] : ["Создано безопасное место", "Проект открыт правильно", "Заполнен паспорт проекта", "Мастер-команда отправлена", "Рабочая основа готова", "Открыт первый экран", `Работает: ${project.features[0]}`, `Добавлено: ${project.features[1]}`, "Ничего не потерялось", "Исправление прошло проверку", "Пройден путь пользователя", "Сохранена безопасная версия", "Проект стал вашим", "Проверено с телефона", "Финальный аудит пройден", "Проект опубликован", "Карточка портфолио готова"];
   return <main id="capture-scene" className="capture-canvas"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>УРОВЕНЬ {String(step).padStart(2, "0")} · НЕДЕЛЯ {project.week}</div></header><section className="capture-title"><p>Вот что должно получиться</p><h1>{titles[step - 1]}</h1><span>{project.title}</span></section><div className="capture-visual"><Visual project={project} step={step} /></div><aside className="capture-tip"><b>✦</b><p><strong>Сверь свой экран с примером.</strong><br />Мелкие отличия в тексте и цвете — это нормально.</p></aside></main>;
 }

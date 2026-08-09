@@ -16,6 +16,7 @@ import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
 import { ExpectedScene } from "./ExpectedScene";
 import { MobileQuest } from "./MobileQuest";
+import { MobileExpectedScene } from "./MobileExpectedScene";
 import { ProjectCard } from "./ProjectCard";
 import { Quest } from "./Quest";
 
@@ -62,7 +63,7 @@ describe("academy interface", () => {
   });
 
   it("renders a content-specific final-product cover for the first ten projects", () => {
-    const featuredProjects = firstCoverPrototypeSlugs.map((slug) => getProject(slug)!);
+    const featuredProjects = firstCoverPrototypeSlugs.filter((slug) => slug !== "family-expenses").map((slug) => getProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     for (const project of featuredProjects) {
@@ -72,6 +73,25 @@ describe("academy interface", () => {
       expect(prototype).toHaveTextContent(spec.headline);
       expect(prototype).toHaveTextContent(spec.metric);
     }
+  });
+
+  it("renders distinct family-budget stages instead of a generic service mockup", () => {
+    const project = getProject("family-expenses")!;
+    const stages = new Map([[2, "concept"], [7, "expense"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
+    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={step} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={step} />)}</>);
+
+    for (const [step, stage] of stages) {
+      expect(container.querySelectorAll(`[data-original-service="family-expenses"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
+    }
+    expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
+  });
+
+  it("shows both click-by-click pictures and the final project prototype in an original quest", () => {
+    render(<Quest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const guide = screen.getByRole("region", { name: /делайте по картинкам/i });
+    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(3);
+    expect(screen.getByRole("img", { name: /пример уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.png");
   });
 
   it("renders a content-specific cover for the next ten agents", () => {
@@ -217,7 +237,7 @@ describe("academy interface", () => {
     const project = getProject("family-expenses")!;
     render(<MobileQuest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    expect(screen.getByRole("heading", { name: /фея открыта в telegram/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /увидела, каким станет мой бюджет/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /открыть фею в telegram/i })).toBeDisabled();
     expect(screen.getByText(/бот подключается куратором/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
@@ -294,6 +314,15 @@ describe("academy interface", () => {
     expect(await screen.findAllByRole("heading", { name: /скопируйте анкету на сайте/i })).not.toHaveLength(0);
     expect(screen.getByText(/нажмите сюда/i)).toBeInTheDocument();
     expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
+  });
+
+  it("renders a project-specific guide scene for family expenses", async () => {
+    window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-04--frame-02");
+    render(<AppEntry />);
+    expect(await screen.findByRole("heading", { name: /создала и открыла папку family-expenses/i })).toBeInTheDocument();
+    expect(screen.getByText(/открыть папку family-expenses/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/family-expenses/i).length).toBeGreaterThan(1);
+    expect(document.querySelector('[data-original-guide="family-expenses"]')).toBeInTheDocument();
   });
 
   it("keeps shared result screenshots neutral for real and training routes", async () => {

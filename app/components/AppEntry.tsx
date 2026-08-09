@@ -9,6 +9,8 @@ import { MobileExpectedScene } from "./MobileExpectedScene";
 import { MobileQuest } from "./MobileQuest";
 import { Quest } from "./Quest";
 import { HomeHelperGuideScene, HomeHelperPreparationScene } from "./HomeHelperGuideScene";
+import { OriginalQuestGuideScene } from "./OriginalQuestGuideScene";
+import { isOriginalQuestSlug } from "../content/customization";
 import { buildQuest } from "../content/quests";
 import { buildRealDataChecklist } from "../lib/preparation";
 
@@ -67,7 +69,8 @@ export function AppEntry() {
   if (route.type === "capture-guide") {
     const project = getProject(route.slug);
     const frame = project ? buildQuest(project, route.mode)[route.step - 1]?.guide?.[route.frame - 1] : undefined;
-    return frame ? <HomeHelperGuideScene frame={frame} step={route.step} mode={route.mode} /> : <div>Кадр не найден</div>;
+    if (!project || !frame) return <div>Кадр не найден</div>;
+    return isOriginalQuestSlug(project.slug) ? <OriginalQuestGuideScene project={project} frame={frame} step={route.step} mode={route.mode} /> : <HomeHelperGuideScene frame={frame} step={route.step} mode={route.mode} />;
   }
   if (route.type === "capture-prep") {
     const project = getProject(route.slug);

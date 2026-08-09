@@ -174,11 +174,11 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
 
           {step.guide && <QuestGuide frames={step.guide} />}
 
-          {!step.guide && <section className="expected-section">
+          <section className="expected-section">
             <div className="expected-heading"><div><p className="section-kicker">Что должно получиться</p><h3>Сверь свой экран с примером</h3></div><span>пример</span></div>
             <button type="button" className="reference-shot" onClick={() => setImageOpen(true)} aria-label="Увеличить пример результата"><img src={step.screenshot} alt={`Пример уровня ${step.id}: ${step.title}`} /><span>Увеличить</span></button>
             <ul>{step.expected.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul>
-          </section>}
+          </section>
 
           <div className="level-actions"><button type="button" className="secondary-button" onClick={() => setHelpOpen((value) => !value)}>{helpOpen ? "Скрыть помощь" : "Нужна помощь"}</button><button type="button" className="primary-button" disabled={finished && step.id === 17} onClick={finishStep}>{progress.completed.includes(step.id) ? (step.id === 17 ? "Квест пройден ✦" : "Перейти дальше →") : "Я сделала — следующий шаг →"}</button></div>
 

@@ -1,6 +1,8 @@
 import type { DataMode } from "../lib/preparation";
 import { getPreparationProfile } from "./preparation";
 import type { ProjectDefinition, ProjectKind, QuestCustomization, QuestStep } from "./types";
+import { defaultCustomization } from "./customization";
+import { buildOriginalMobileQuest } from "./original-quests/mobile";
 
 export type MobileCapability = "phone-full" | "phone-template" | "curator";
 export type MobileTool = "telegram" | "lovable" | "chatium" | "screenshot" | "curator";
@@ -138,7 +140,9 @@ export function getMobileCapability(project: ProjectDefinition): MobileCapabilit
   return capabilityByKind[project.kind];
 }
 
-export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", _customization?: QuestCustomization): MobileQuestStep[] {
+export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): MobileQuestStep[] {
+  const original = buildOriginalMobileQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  if (original) return original;
   return titles.map((title, index) => {
     const id = index + 1;
     const action = mobileAction(project, id);

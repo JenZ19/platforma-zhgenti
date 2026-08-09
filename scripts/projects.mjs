@@ -28,3 +28,7 @@ export function homeHelperGuideScreenPath(mode, step, frame) {
 export function homeHelperPreparationScreenPath(index) {
   return path.join(root, "public", "guides", "home-helper", "real", `prep-${String(index).padStart(2, "0")}.png`);
 }
+
+export function originalGuideScreenPath(slug, step, frame) {
+  return path.join(root, "public", "guides", slug, `step-${String(step).padStart(2, "0")}-frame-${String(frame).padStart(2, "0")}.png`);
+}
