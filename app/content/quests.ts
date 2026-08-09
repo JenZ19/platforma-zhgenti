@@ -11,10 +11,14 @@ import { adaptQuestToDataMode } from "./data-mode";
 import { buildHomeHelperGuide } from "./home-helper-guide";
 import { defaultCustomization } from "./customization";
 import { buildFamilyExpensesQuest } from "./original-quests/family-expenses";
+import { buildPlannerQuest } from "./original-quests/planner";
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): QuestStep[] {
   if (project.slug === "family-expenses") {
     return buildFamilyExpensesQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  }
+  if (project.slug === "planner") {
+    return buildPlannerQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
   }
   let steps: QuestStep[];
   switch (project.kind) {

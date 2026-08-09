@@ -39,6 +39,13 @@ function dataContext(project: ProjectDefinition, mode: DataMode): string {
   return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Работай только с копиями из папки «${profile.folderName}». Основные записи находятся в файле «${profile.sourceFile}», правила — в файле «${profile.rulesFile}». Ничего не додумывай, не публикуй личные сведения и не меняй оригиналы вне папки проекта.`;
 }
 
+function domainWords(slug: string): { title: string; result: string } {
+  if (slug === "family-expenses") return { title: "Помощь с бюджетом на этом уровне", result: "бюджет или расход работает правильно" };
+  if (slug === "planner") return { title: "Помощь с планером на этом уровне", result: "планер или дело работает правильно" };
+  if (slug === "idea-vault") return { title: "Помощь с копилкой на этом уровне", result: "копилка или идея работает правильно" };
+  return { title: "Помощь с расписанием на этом уровне", result: "расписание или занятие работает правильно" };
+}
+
 function appFor(input: OriginalStepInput): string {
   if (input.app) return input.app;
   if (input.scene === "finder") return "Папки на компьютере";
@@ -74,7 +81,7 @@ function guideFrames(project: ProjectDefinition, mode: DataMode, input: Original
       exactText: prompt,
       after: `Действие выполнено только внутри проекта «${project.title}». Выбранный режим данных — ${mode === "real" ? "реальные данные из подготовленной папки" : "безопасные примеры"}.`,
       doneWhen: input.expected[0],
-      fallback: `Если нужной кнопки или поля нет, не нажимайте случайные пункты. Откройте помощь этого уровня и скопируйте готовую команду для исправления бюджета или расхода.`,
+      fallback: `Если нужной кнопки или поля нет, не нажимайте случайные пункты. Откройте помощь этого уровня и скопируйте готовую команду для исправления проекта «${project.title}».`,
       screenshot: `${path}-frame-02.png`,
       scene,
       target: input.target ?? "Нажмите сюда",
@@ -100,6 +107,7 @@ export function makeOriginalStep(
   customization: QuestCustomization,
   input: OriginalStepInput,
 ): QuestStep {
+  const domain = domainWords(project.slug);
   const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». Работай только внутри папки текущего проекта и не удаляй работающие части. ${dataContext(project, mode)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
   return {
     id: input.id,
@@ -113,9 +121,9 @@ export function makeOriginalStep(
     screenshot: `/screens/${project.slug}/step-${String(input.id).padStart(2, "0")}.png`,
     reward: rewardAt[input.id],
     help: {
-      title: "Помощь с бюджетом на этом уровне",
+      title: domain.title,
       body: input.help,
-      prompt: `В проекте «${project.title}» я застряла на уровне ${input.id} «${input.title}». ${dataContext(project, mode)} Моя версия: ${passport(customization)} Не переделывай весь проект. Проверь только этот уровень, найди одну причину расхождения и исправь её. Затем напиши одно действие для меня и три видимых признака, по которым я пойму, что бюджет или расход работает правильно.`,
+      prompt: `В проекте «${project.title}» я застряла на уровне ${input.id} «${input.title}». ${dataContext(project, mode)} Моя версия: ${passport(customization)} Не переделывай весь проект. Проверь только этот уровень, найди одну причину расхождения и исправь её. Затем напиши одно действие для меня и три видимых признака, по которым я пойму, что ${domain.result}.`,
     },
     guide: guideFrames(project, mode, input, prompt),
   };

@@ -47,4 +47,14 @@ describe("mobile quest builder", () => {
     expect(steps[3].action).not.toMatch(/текст, фотографии или документы/i);
     expect(steps.flatMap((step) => step.prompt ?? []).join(" ")).toContain("мои-измерения.csv");
   });
+
+  it("gives the planner its own server-room and client-copy phone path", () => {
+    const planner = projects.find((item) => item.slug === "planner")!;
+    const steps = buildMobileQuest(planner, "real");
+    expect(steps[3].action).toMatch(/Telegram.+Новый проект.+planner.+серверн/i);
+    expect(steps[3].action).not.toMatch(/откройте локальн.+папк/i);
+    expect(steps[12].action).toMatch(/одной рукой.+добавьте дело.+перенесите/i);
+    expect(steps[14].action).toContain("planner-client");
+    expect(steps[15].action).toMatch(/восемь ответов.+planner-client/i);
+  });
 });

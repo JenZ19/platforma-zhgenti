@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { defaultCustomization } from "../customization";
 import { getProject } from "../projects";
 import { buildFamilyExpensesQuest } from "./family-expenses";
+import { buildPlannerQuest } from "./planner";
 
 function text(value: unknown): string {
   if (typeof value === "string") return value;
@@ -50,6 +51,48 @@ describe("first four original quests", () => {
     const all = text(steps);
     expect(all).toContain("семейные-расходы.csv");
     expect(all).toContain("правила-бюджета.txt");
+    expect(all).not.toMatch(/вымышлен|демонстрацион|учебн/i);
+    expect(all).not.toContain(project.demo.join("; "));
+  });
+
+  it("builds a calm, original planner that can be repeated for a client", () => {
+    const project = getProject("planner")!;
+    const customization = {
+      ...defaultCustomization(project.slug)!,
+      audience: "Мама с малышом",
+      name: "Дела без паники",
+      style: "Цветные стикеры",
+      tone: "Заботливо",
+      feature: "Режим одной руки",
+    };
+    const steps = buildPlannerQuest(project, "demo", customization);
+
+    expect(steps).toHaveLength(17);
+    expect(new Set(steps.map((step) => step.title)).size).toBe(17);
+    expect(steps.every((step) => /план|дел|задач|день|недел/i.test(text(step))), "every level stays in the planner domain").toBe(true);
+    expect(steps.every((step) => step.why.startsWith("Сейчас мы"))).toBe(true);
+    expect(steps.every((step) => (step.prompt?.length ?? 0) > 220)).toBe(true);
+    expect(steps.every((step) => step.expected.length >= 3)).toBe(true);
+    expect(steps.every((step) => step.guide?.length === 3)).toBe(true);
+
+    for (const id of [2, 5, 9, 10, 15, 16, 17]) {
+      expect(text(steps[id - 1]), `step ${id}`).toContain("Дела без паники");
+      expect(text(steps[id - 1]), `step ${id}`).toContain("Режим одной руки");
+    }
+    expect(text(steps[8])).toContain("Цветные стикеры");
+    expect(text(steps[14])).toContain("planner-client");
+    expect(text(steps[15])).toMatch(/1\. Кто будет пользоваться планером[\s\S]+8\. Что нельзя показывать/);
+    expect(text(steps[16])).toMatch(/личн.+верси.+клиентск.+верси/i);
+    expect(text(steps)).toMatch(/перенести на завтра/i);
+    expect(text(steps)).not.toMatch(/бюджет|расход/i);
+    expect(text(steps)).not.toMatch(/автоматически.+назнач.+приоритет|публичн.+личн.+дел/i);
+  });
+
+  it("keeps the real planner route inside its prepared files", () => {
+    const project = getProject("planner")!;
+    const all = text(buildPlannerQuest(project, "real", defaultCustomization(project.slug)!));
+    expect(all).toContain("мои-дела.txt");
+    expect(all).toContain("правила-планера.txt");
     expect(all).not.toMatch(/вымышлен|демонстрацион|учебн/i);
     expect(all).not.toContain(project.demo.join("; "));
   });

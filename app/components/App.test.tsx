@@ -33,8 +33,8 @@ describe("academy interface", () => {
   });
 
   it("shows all 52 course projects", () => {
-    render(<Academy />);
-    expect(screen.getAllByRole("link", { name: /открыть квест/i })).toHaveLength(52);
+    const { container } = render(<Academy />);
+    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(52);
     expect(screen.getByText("52 проекта")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
   });
@@ -63,7 +63,7 @@ describe("academy interface", () => {
   });
 
   it("renders a content-specific final-product cover for the first ten projects", () => {
-    const featuredProjects = firstCoverPrototypeSlugs.filter((slug) => slug !== "family-expenses").map((slug) => getProject(slug)!);
+    const featuredProjects = firstCoverPrototypeSlugs.filter((slug) => !["family-expenses", "planner"].includes(slug)).map((slug) => getProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     for (const project of featuredProjects) {
@@ -82,6 +82,17 @@ describe("academy interface", () => {
 
     for (const [step, stage] of stages) {
       expect(container.querySelectorAll(`[data-original-service="family-expenses"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
+    }
+    expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
+  });
+
+  it("renders distinct planner stages with a personal and client version", () => {
+    const project = getProject("planner")!;
+    const stages = new Map([[2, "concept"], [7, "task"], [8, "focus"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
+    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={step} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={step} />)}</>);
+
+    for (const [step, stage] of stages) {
+      expect(container.querySelectorAll(`[data-original-service="planner"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
     }
     expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
   });
