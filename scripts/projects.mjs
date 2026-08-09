@@ -18,3 +18,13 @@ export function screenPath(slug, step) {
 export function mobileScreenPath(slug, step) {
   return path.join(root, "public", "screens-mobile", slug, `step-${String(step).padStart(2, "0")}.png`);
 }
+
+export const homeHelperGuideFrameCounts = [5, 4, 6, 4, 4, 3, 4, 3, 3, 3, 4, 3, 3, 3, 3, 4, 4];
+
+export function homeHelperGuideScreenPath(mode, step, frame) {
+  return path.join(root, "public", "guides", "home-helper", mode, `step-${String(step).padStart(2, "0")}-frame-${String(frame).padStart(2, "0")}.png`);
+}
+
+export function homeHelperPreparationScreenPath(index) {
+  return path.join(root, "public", "guides", "home-helper", "real", `prep-${String(index).padStart(2, "0")}.png`);
+}

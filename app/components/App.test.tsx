@@ -142,4 +142,19 @@ describe("academy interface", () => {
     expect(within(guide).getAllByText(/готово, если/i)).toHaveLength(6);
     expect(screen.queryByText(/вымышлен|демонстрацион|учебн/i)).not.toBeInTheDocument();
   });
+
+  it("renders a dedicated arrow screenshot scene for each home-helper action", async () => {
+    window.history.replaceState({}, "", "/?capture-guide=home-helper--real--step-03--frame-03");
+    render(<AppEntry />);
+    expect(await screen.findAllByRole("heading", { name: /скопируйте анкету на сайте/i })).not.toHaveLength(0);
+    expect(screen.getByText(/нажмите сюда/i)).toBeInTheDocument();
+    expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
+  });
+
+  it("renders a dedicated screenshot scene for each preparation action", async () => {
+    window.history.replaceState({}, "", "/?capture-prep=home-helper--prep-02");
+    render(<AppEntry />);
+    expect(await screen.findByRole("heading", { name: /запишите пять домашних дел/i })).toBeInTheDocument();
+    expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
+  });
 });

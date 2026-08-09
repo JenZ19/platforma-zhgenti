@@ -46,7 +46,7 @@ function modeCopy(mode: DataMode) {
   };
 }
 
-function guideForStep(step: number, mode: DataMode, project: ProjectDefinition): QuestGuideFrame[] {
+function guideForStep(step: number, mode: DataMode): QuestGuideFrame[] {
   const copy = modeCopy(mode);
   const dataModeLabel = mode === "real" ? "ваших материалах" : "готовых примерах";
   const framesByStep: Record<number, FrameInput[]> = {
@@ -96,7 +96,7 @@ function guideForStep(step: number, mode: DataMode, project: ProjectDefinition):
     ],
     8: [
       frame("Откройте список покупок", "Браузер", "В меню проекта нажмите раздел «Покупки».", "Откроется экран со строкой для нового товара.", "На экране есть поле и кнопка добавления товара.", "Если раздела нет, вернитесь к уровню 5 и передайте Codex название отсутствующего раздела.", "preview", "Раздел «Покупки»"),
-      frame("Введите один товар", "Браузер", `Нажмите поле товара и введите ${copy.listItem}.`, "Название товара появится внутри поля.", "В поле записан один понятный товар без телефона и адреса.", "Если не хотите добавлять настоящий товар, сначала вернитесь и выберите режим готовых примеров для этого квеста.", "preview", "Поле нового товара", copy.listItem),
+      frame("Введите один товар", "Браузер", `Нажмите поле товара и введите ${copy.listItem}.`, "Название товара появится внутри поля.", "В поле записан один понятный товар без телефона и адреса.", mode === "real" ? "Если товар пока не выбран, напишите «не важно» и продолжите без личных данных." : "Если пример не подходит, возьмите другой безопасный товар из учебного файла.", "preview", "Поле нового товара", copy.listItem),
       frame("Добавьте товар", "Браузер", "Нажмите кнопку «Добавить» рядом с полем.", "Товар переместится в список покупок.", "Товар виден отдельной строкой с отметкой выполнения.", "Если ничего не произошло, сделайте скриншот и передайте Codex: «Кнопка „Добавить“ не создаёт строку».", "preview", "Кнопка «Добавить»"),
     ],
     9: [
@@ -153,7 +153,7 @@ function guideForStep(step: number, mode: DataMode, project: ProjectDefinition):
 
 export function buildHomeHelperGuide(project: ProjectDefinition, mode: DataMode, baseSteps: QuestStep[]): QuestStep[] {
   return baseSteps.map((step) => {
-    const guide = guideForStep(step.id, mode, project);
+    const guide = guideForStep(step.id, mode);
     return {
       ...step,
       action: `Пройдите ${guide.length} коротких кадров ниже. На каждом кадре выполните только одно действие и сразу проверьте результат.`,
