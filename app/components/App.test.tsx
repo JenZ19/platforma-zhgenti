@@ -4,6 +4,7 @@ import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getBotPrototypeSpec } from "../content/bot-prototypes";
+import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getProject, projects } from "../content/projects";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
@@ -50,6 +51,19 @@ describe("academy interface", () => {
     for (const project of bots) {
       const spec = getBotPrototypeSpec(project.slug);
       const prototype = container.querySelector(`[data-prototype-marker="${spec.marker}"]`);
+      expect(prototype, project.slug).not.toBeNull();
+      expect(prototype).toHaveTextContent(spec.headline);
+      expect(prototype).toHaveTextContent(spec.metric);
+    }
+  });
+
+  it("renders a content-specific final-product cover for the first ten projects", () => {
+    const featuredProjects = firstCoverPrototypeSlugs.map((slug) => getProject(slug)!);
+    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+
+    for (const project of featuredProjects) {
+      const spec = getFirstCoverPrototypeSpec(project.slug);
+      const prototype = container.querySelector(`[data-cover-marker="${spec.marker}"]`);
       expect(prototype, project.slug).not.toBeNull();
       expect(prototype).toHaveTextContent(spec.headline);
       expect(prototype).toHaveTextContent(spec.metric);

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./bot-prototypes.css";
+@import "./first-cover-prototypes.css";
 
 :root {
   --paper: #faf7f2;

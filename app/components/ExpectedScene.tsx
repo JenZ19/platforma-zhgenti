@@ -1,7 +1,9 @@
 "use client";
 
 import type { ProjectDefinition } from "../content/types";
+import { hasFirstCoverPrototype } from "../content/first-cover-prototypes";
 import { BotPrototypeScene } from "./BotPrototypeScene";
+import { FirstCoverPrototypeScene } from "./FirstCoverPrototypeScene";
 
 function Chrome({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="mock-window"><div className="mock-bar"><span>● ● ●</span><b>{title}</b><i /></div>{children}</div>;
@@ -36,6 +38,7 @@ function FinalScene({ project, step }: { project: ProjectDefinition; step: numbe
 function Visual({ project, step }: { project: ProjectDefinition; step: number }) {
   if (step <= 4) return <SetupScene project={project} step={step} />;
   if (step >= 15) return <FinalScene project={project} step={step} />;
+  if (hasFirstCoverPrototype(project.slug)) return <FirstCoverPrototypeScene project={project} step={step} />;
   if (project.kind === "service") return <ServiceScene project={project} step={step} />;
   if (project.kind === "bot") return <BotPrototypeScene project={project} step={step} />;
   if (project.kind === "agent") return <AgentScene project={project} step={step} />;
