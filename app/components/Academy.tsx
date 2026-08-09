@@ -31,7 +31,10 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
     <main className="academy-shell">
       <header className="site-header">
         <a className="brand" href="https://submarineedu.ru/feya/" target="_blank" rel="noreferrer"><span>S</span><b>SUBMARINE<small>Академия квестов</small></b></a>
-        <div className="header-score"><i>✦</i> {stats.score} искр</div>
+        <div className="header-actions">
+          <a className="phone-version-link" href="?format=mobile"><span>◒</span> Версия только с телефона</a>
+          <div className="header-score"><i>✦</i> {stats.score} искр</div>
+        </div>
       </header>
 
       <section className="academy-hero">

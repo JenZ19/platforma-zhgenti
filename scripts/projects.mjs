@@ -14,3 +14,7 @@ export function projectSlugs() {
 export function screenPath(slug, step) {
   return path.join(root, "public", "screens", slug, `step-${String(step).padStart(2, "0")}.png`);
 }
+
+export function mobileScreenPath(slug, step) {
+  return path.join(root, "public", "screens-mobile", slug, `step-${String(step).padStart(2, "0")}.png`);
+}

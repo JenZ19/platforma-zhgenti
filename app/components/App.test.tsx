@@ -28,6 +28,7 @@ describe("academy interface", () => {
     render(<Academy />);
     expect(screen.getAllByRole("link", { name: /открыть квест/i })).toHaveLength(52);
     expect(screen.getByText("52 проекта")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
   });
 
   it("filters the catalogue by week and search", () => {

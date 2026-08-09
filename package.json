@@ -12,6 +12,7 @@
     "test": "npm run test:unit && npm run build",
     "test:unit": "vitest run --config vitest.config.ts",
     "capture:steps": "node scripts/capture-steps.mjs",
+    "capture:mobile": "node scripts/capture-mobile-steps.mjs",
     "capture:site": "node scripts/capture-site.mjs",
     "verify:screens": "node scripts/verify-screens.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",

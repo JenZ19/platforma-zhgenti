@@ -1,0 +1,41 @@
+"use client";
+
+import { getMobileCapability } from "../content/mobile";
+import type { ProjectDefinition } from "../content/types";
+
+function Phone({ project, step }: { project: ProjectDefinition; step: number }) {
+  const constructor = ["bot", "agent"].includes(project.kind) ? "Чатиум" : "Lovable";
+  return (
+    <div className="mobile-scene-phone">
+      <div className="mobile-scene-status"><span>9:41</span><b>● ● ◒</b></div>
+      <header><span>{step <= 8 || [11,12,14,15,17].includes(step) ? "←" : "×"}</span><div><b>{step <= 8 || [11,12,14,15,17].includes(step) ? "Фея проекта" : constructor}</b><small>{project.title}</small></div><i>{project.symbol}</i></header>
+      <main>
+        {step === 1 && <><div className="scene-fairy">✦</div><h3>Добро пожаловать!</h3><p>Я проведу проект с телефона — по одному действию.</p><button>Начать проект</button></>}
+        {step === 2 && <><div className="scene-fairy dark">C</div><h3>Подключите свой Codex</h3><p>Войдите по безопасной ссылке. Пароль останется только у вас.</p><div className="device-code"><small>КОД ВХОДА</small><b>FEYA–27</b></div><button>Открыть вход</button></>}
+        {step === 3 && <><h3>Какие данные используем?</h3><div className="scene-choice"><b>✦ Учебные</b><small>Примеры уже готовы</small></div><div className="scene-choice real"><b>◇ Реальные</b><small>Сначала откроется чек-лист</small></div></>}
+        {step === 4 && <><h3>Комната материалов</h3><p>Отправьте безопасные копии для проекта.</p><div className="scene-files"><span>DOC</span><b>описание-проекта.docx</b><i>✓</i></div><div className="scene-files"><span>IMG</span><b>пример-экрана.png</b><i>✓</i></div><button>Материалы готовы</button></>}
+        {step === 5 && <><small className="scene-progress-label">ВОПРОС 2 ИЗ 3</small><h3>Что должно получиться?</h3><p>{project.outcome}</p><div className="voice-note"><b>▶</b><i /><span>0:18</span></div><button>Отправить ответ</button></>}
+        {step === 6 && <><h3>Паспорт проекта</h3><div className="scene-pass"><small>ДЛЯ КОГО</small><p>{project.audience}</p></div><div className="scene-pass"><small>ФУНКЦИИ</small><p>{project.features.slice(0,3).join(" · ")}</p></div><button>Всё верно</button></>}
+        {step === 7 && <><div className="scene-loader">✦</div><h3>Ваш Codex работает</h3><p>Можно закрыть Telegram. Фея пришлёт сообщение, когда всё будет готово.</p><div className="queue-pill">Задача №12 · выполняется</div><button className="ghost">Остановить</button></>}
+        {step === 8 && <><div className="scene-ready">✓</div><h3>Первый результат готов</h3><p>{project.outcome}</p><div className="result-link">{project.slug}.preview <b>↗</b></div><button>Открыть результат</button></>}
+        {step === 9 && <><div className={`constructor-mark ${constructor === "Lovable" ? "love" : "chatium"}`}>{constructor === "Lovable" ? "L" : "Ч"}</div><h3>Создать в {constructor}</h3><p>Задание уже внутри. Войдите в свой аккаунт и подтвердите запуск.</p><button>Создать проект</button></>}
+        {step === 10 && <><small className="scene-progress-label">ПРЕДПРОСМОТР</small><h3>{project.title}</h3><div className="mini-hero"><span>{project.symbol}</span><b>{project.demo[0]}</b><small>{project.features[0]}</small></div><button>{project.features[0]}</button></>}
+        {step === 11 && <><h3>Отправьте скриншот</h3><div className="screenshot-drop"><span>▧</span><b>Скриншот добавлен</b><small>390 × 844</small></div><button>Проверить у Феи</button></>}
+        {step === 12 && <><h3>Фея нашла 3 правки</h3>{["Сделать заголовок короче","Увеличить главную кнопку","Убрать мелкий текст"].map((item,index)=><div className="scene-fix" key={item}><span>{index+1}</span><b>{item}</b></div>)}<button>Скопировать исправление</button></>}
+        {step === 13 && <><h3>Главный путь работает</h3>{project.features.slice(0,3).map((item,index)=><div className="scene-path" key={item}><span>✓</span><b>{item}</b><small>шаг {index+1}</small></div>)}<button>Отправить итог Фее</button></>}
+        {step === 14 && <><h3>Безопасность</h3><div className="safety-card"><span>✓</span><b>Секретов нет</b><small>Пароли и токены не опубликованы</small></div><div className="safety-card"><span>✓</span><b>Данные защищены</b><small>{project.safety}</small></div><button>Проверка пройдена</button></>}
+        {step === 15 && <><h3>Мобильный аудит</h3>{["Экран 390 px","Кнопки для большого пальца","Формы без прокрутки вбок","Ошибок нет"].map(item=><div className="audit-line" key={item}><span>✓</span><b>{item}</b></div>)}<button>Всё зелёное</button></>}
+        {step === 16 && project.kind === "advanced-site" && <><div className="curator-mark">♡</div><h3>Нужен куратор</h3><p>Платежи, домен и закрытые настройки проверит специалист.</p><div className="curator-ticket"><small>ЗАЯВКА</small><b>Проект передан куратору</b></div><button>Посмотреть статус</button></>}
+        {step === 16 && project.kind !== "advanced-site" && <><div className="scene-ready">✓</div><h3>Проект опубликован</h3><p>Ссылка готова к показу.</p><div className="result-link">{project.slug}.live <b>↗</b></div><button>Открыть сайт</button></>}
+        {step === 17 && <><small className="scene-progress-label">МОЁ ПОРТФОЛИО</small><div className="portfolio-phone-card"><span>{project.symbol}</span><h3>{project.title}</h3><p>{project.portfolioAngle}</p><div>{project.features.slice(0,3).map(item=><b key={item}>✓ {item}</b>)}</div></div><button>Добавить в портфолио</button></>}
+      </main>
+      <footer><span>Сообщение…</span><b>↑</b></footer>
+    </div>
+  );
+}
+
+export function MobileExpectedScene({ project, step }: { project: ProjectDefinition; step: number }) {
+  const capability = getMobileCapability(project);
+  const titles = ["Фея открыта в Telegram","Свой Codex подключён","Выбран режим данных","Материалы собраны в чате","Анкета проекта заполнена","Паспорт проекта готов","Мастер-задание запущено","Первый результат получен","Проект открыт в конструкторе","Первый экран проверен","Скриншот отправлен Фее","Исправление подготовлено","Главное действие работает","Безопасность проверена","Мобильный аудит пройден","Проект опубликован","Карточка портфолио готова"];
+  return <main id="capture-scene" className="capture-canvas mobile-capture"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>МОБИЛЬНЫЙ КВЕСТ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Вот что должно получиться на телефоне</p><h1>{titles[step-1]}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><Phone project={project} step={step}/><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{titles[step-1]}</h2><p>Один экран — одно понятное действие. Мелкие отличия в цвете и тексте нормальны.</p><div><b>✓</b> Сделано только с телефона</div><div><b>✓</b> Код вручную не нужен</div></aside></div></main>;
+}

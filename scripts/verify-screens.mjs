@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { projectSlugs, screenPath } from "./projects.mjs";
+import { mobileScreenPath, projectSlugs, screenPath } from "./projects.mjs";
 
 const missing = [];
 const wrongSize = [];
@@ -7,24 +7,25 @@ let count = 0;
 
 for (const slug of projectSlugs()) {
   for (let step = 1; step <= 17; step += 1) {
-    const file = screenPath(slug, step);
-    if (!fs.existsSync(file)) {
-      missing.push(file);
-      continue;
+    for (const file of [screenPath(slug, step), mobileScreenPath(slug, step)]) {
+      if (!fs.existsSync(file)) {
+        missing.push(file);
+        continue;
+      }
+      const bytes = fs.readFileSync(file);
+      const isPng = bytes.subarray(1, 4).toString("ascii") === "PNG";
+      const width = isPng && bytes.length >= 24 ? bytes.readUInt32BE(16) : 0;
+      const height = isPng && bytes.length >= 24 ? bytes.readUInt32BE(20) : 0;
+      if (!isPng || width !== 1200 || height !== 800) wrongSize.push(`${file}: ${width}x${height}`);
+      count += 1;
     }
-    const bytes = fs.readFileSync(file);
-    const isPng = bytes.subarray(1, 4).toString("ascii") === "PNG";
-    const width = isPng && bytes.length >= 24 ? bytes.readUInt32BE(16) : 0;
-    const height = isPng && bytes.length >= 24 ? bytes.readUInt32BE(20) : 0;
-    if (!isPng || width !== 1200 || height !== 800) wrongSize.push(`${file}: ${width}x${height}`);
-    count += 1;
   }
 }
 
-if (missing.length || wrongSize.length || count !== 884) {
+if (missing.length || wrongSize.length || count !== 1768) {
   if (missing.length) console.error(`Нет файлов: ${missing.length}\n${missing.slice(0, 8).join("\n")}`);
   if (wrongSize.length) console.error(`Неверный размер: ${wrongSize.length}\n${wrongSize.slice(0, 8).join("\n")}`);
   process.exit(1);
 }
 
-console.log(`Проверено ${count} PNG-экранов: все 1200x800.`);
+console.log(`Проверено ${count} PNG-экранов: 884 обычных и 884 мобильных, все 1200x800.`);

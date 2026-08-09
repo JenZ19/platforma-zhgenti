@@ -5,16 +5,20 @@ import { getProject } from "../content/projects";
 import { Academy } from "./Academy";
 import { ExpectedScene } from "./ExpectedScene";
 import { MobileAcademy } from "./MobileAcademy";
+import { MobileExpectedScene } from "./MobileExpectedScene";
 import { MobileQuest } from "./MobileQuest";
 import { Quest } from "./Quest";
 
 type Route =
   | { type: "home"; format: "desktop" | "mobile" }
   | { type: "quest"; slug: string; format: "desktop" | "mobile" }
-  | { type: "capture"; slug: string; step: number };
+  | { type: "capture"; slug: string; step: number }
+  | { type: "capture-mobile"; slug: string; step: number };
 
 function readRoute(): Route {
   const query = new URLSearchParams(window.location.search);
+  const mobileCapture = query.get("capture-mobile")?.match(/^(.+)--step-(\d{2})$/);
+  if (mobileCapture) return { type: "capture-mobile", slug: mobileCapture[1], step: Number(mobileCapture[2]) };
   const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
   if (capture) return { type: "capture", slug: capture[1], step: Number(capture[2]) };
   const quest = query.get("quest");
@@ -34,14 +38,14 @@ export function AppEntry() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  function openQuest(slug: string, format: "desktop" | "mobile" = route.type === "capture" ? "desktop" : route.format) {
+  function openQuest(slug: string, format: "desktop" | "mobile" = route.type === "capture" || route.type === "capture-mobile" ? "desktop" : route.format) {
     window.history.pushState({}, "", format === "mobile" ? `?format=mobile&quest=${slug}` : `?quest=${slug}`);
     setRoute({ type: "quest", slug, format });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function home() {
-    const format = route.type === "capture" ? "desktop" : route.format;
+    const format = route.type === "capture" || route.type === "capture-mobile" ? "desktop" : route.format;
     window.history.pushState({}, "", format === "mobile" ? `${window.location.pathname}?format=mobile` : window.location.pathname);
     setRoute({ type: "home", format });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -50,6 +54,10 @@ export function AppEntry() {
   if (route.type === "capture") {
     const project = getProject(route.slug);
     return project ? <ExpectedScene project={project} step={route.step} /> : <div>Проект не найден</div>;
+  }
+  if (route.type === "capture-mobile") {
+    const project = getProject(route.slug);
+    return project ? <MobileExpectedScene project={project} step={route.step} /> : <div>Проект не найден</div>;
   }
   if (route.type === "quest") {
     const project = getProject(route.slug);
