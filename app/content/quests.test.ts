@@ -47,6 +47,16 @@ describe("quest builders", () => {
     }
   });
 
+  it("switches every command to the prepared folder in real-data mode", () => {
+    for (const project of projects) {
+      const prompts = buildQuest(project, "real").flatMap((step) => step.prompt ?? []);
+      expect(prompts.every((prompt) => prompt.includes("РЕЖИМ РЕАЛЬНЫХ ДАННЫХ")), project.slug).toBe(true);
+      expect(prompts.join(" "), project.slug).toMatch(/подготовленн.+папк/i);
+      expect(prompts.join(" "), project.slug).not.toMatch(/используй (только )?(этот |эти )?вымышлен/i);
+      expect(stepText(buildQuest(project, "real")), project.slug).not.toMatch(/вымышлен|демонстрацион/i);
+    }
+  });
+
   it("keeps health and child projects inside their safety boundary", () => {
     const pressure = stepText(getQuest("pressure-diary"));
     const fitness = stepText(getQuest("fitness-tracker"));

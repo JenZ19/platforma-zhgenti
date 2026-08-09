@@ -6,6 +6,15 @@ import { useEffect, useMemo, useState } from "react";
 import { buildQuest } from "../content/quests";
 import type { ProjectDefinition } from "../content/types";
 import {
+  buildRealDataChecklist,
+  createEmptyPreparation,
+  isPreparationReady,
+  loadPreparation,
+  resetPreparation,
+  savePreparation,
+  type QuestPreparation as PreparationState,
+} from "../lib/preparation";
+import {
   completeStep,
   createEmptyProgress,
   isStepUnlocked,
@@ -13,24 +22,61 @@ import {
   resetProgress,
   saveProgress,
 } from "../lib/progress";
+import { QuestPreparation } from "./QuestPreparation";
 
 export function Quest({ project, onHome }: { project: ProjectDefinition; onHome: () => void }) {
-  const steps = useMemo(() => buildQuest(project), [project]);
+  const [preparation, setPreparation] = useState<PreparationState | null>(null);
   const [progress, setProgress] = useState(createEmptyProgress);
   const [helpOpen, setHelpOpen] = useState(false);
   const [copied, setCopied] = useState<"main" | "help" | null>(null);
   const [reward, setReward] = useState<string | null>(null);
   const [imageOpen, setImageOpen] = useState(false);
+  const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo"), [project, preparation?.mode]);
+  const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
 
   useEffect(() => {
     // Quest progress is stored in this browser and restored after mount.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProgress(loadProgress(project.slug, window.localStorage));
+    setPreparation(loadPreparation(project.slug, window.localStorage));
   }, [project.slug]);
 
   const step = steps[progress.activeStep - 1] ?? steps[0];
   const percent = Math.round((progress.completed.length / 17) * 100);
   const finished = progress.completed.length === 17;
+  const preparationReady = preparation ? isPreparationReady(preparation, checklist) : false;
+
+  function storePreparation(next: PreparationState) {
+    setPreparation(next);
+    savePreparation(project.slug, next, window.localStorage);
+  }
+
+  function chooseDemo() {
+    storePreparation({ version: 1, mode: "demo", checked: [], ready: true });
+  }
+
+  function chooseReal() {
+    storePreparation({ version: 1, mode: "real", checked: [], ready: false });
+  }
+
+  function togglePreparation(id: string) {
+    if (!preparation || preparation.mode !== "real") return;
+    const checked = preparation.checked.includes(id)
+      ? preparation.checked.filter((item) => item !== id)
+      : [...preparation.checked, id];
+    storePreparation({ ...preparation, checked, ready: false });
+  }
+
+  function startRealQuest() {
+    if (!preparation || preparation.mode !== "real" || !checklist.every((item) => preparation.checked.includes(item.id))) return;
+    storePreparation({ ...preparation, ready: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function changeDataMode() {
+    resetPreparation(project.slug, window.localStorage);
+    setPreparation(createEmptyPreparation());
+  }
 
   function chooseStep(id: number) {
     if (!isStepUnlocked(progress, id)) return;
@@ -59,7 +105,9 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   function reset() {
     if (!window.confirm(`Начать квест «${project.title}» заново?`)) return;
     resetProgress(project.slug, window.localStorage);
+    resetPreparation(project.slug, window.localStorage);
     setProgress(createEmptyProgress());
+    setPreparation(createEmptyPreparation());
     setHelpOpen(false);
   }
 
@@ -76,9 +124,20 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
         <h1>{project.title}</h1>
         <p>{project.outcome}</p>
         <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / 17</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
+        {preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные данные · папка готова" : "вымышленные данные"}</div>}
       </section>
 
-      <div className="quest-layout">
+      {preparation === null ? <section className="preparation-card preparation-loading">Готовим квест…</section> : !preparationReady ? (
+        <QuestPreparation
+          project={project}
+          preparation={preparation}
+          onChooseDemo={chooseDemo}
+          onChooseReal={chooseReal}
+          onToggle={togglePreparation}
+          onStartReal={startRealQuest}
+          onBack={changeDataMode}
+        />
+      ) : <div className="quest-layout">
         <aside className="quest-map" aria-label="Карта квеста">
           <div className="map-heading"><span className="map-symbol">{project.symbol}</span><div><p>Карта превращения</p><small>17 коротких уровней</small></div></div>
           <div className="level-list">
@@ -112,7 +171,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
           {helpOpen && <section className="help-card"><span>?</span><div><p className="section-kicker">{step.help.title}</p><p>{step.help.body}</p><div className="help-copy"><p>{step.help.prompt}</p><button type="button" onClick={() => copy(step.help.prompt, "help")}>{copied === "help" ? "Готово ✓" : "Скопировать"}</button></div></div></section>}
           {finished && step.id === 17 && <section className="finish-card"><i>✦</i><p>Квест завершён</p><h3>Теперь этот проект — часть твоего портфолио</h3><span>Ссылка, описание и безопасные экраны готовы к показу.</span></section>}
         </article>
-      </div>
+      </div>}
 
       <footer className="academy-footer"><span>SUBMARINE</span><p>Один проект за другим.<br />Так появляется новая профессия.</p></footer>
 

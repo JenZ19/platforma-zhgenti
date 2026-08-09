@@ -4,6 +4,7 @@ import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getProject } from "../content/projects";
+import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
 import { Academy } from "./Academy";
 import { ProjectCard } from "./ProjectCard";
@@ -40,6 +41,7 @@ describe("academy interface", () => {
   it("unlocks quest levels sequentially and saves project-specific progress", () => {
     const project = getProject("planner")!;
     render(<Quest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
@@ -50,6 +52,7 @@ describe("academy interface", () => {
   it("opens contextual help inside a quest", () => {
     const project = getProject("recipe-book")!;
     render(<Quest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /нужна помощь/i }));
     expect(screen.getByText(/не получается создать папку/i)).toBeInTheDocument();
   });
@@ -69,5 +72,28 @@ describe("academy interface", () => {
     await act(async () => root!.unmount());
     container.remove();
     error.mockRestore();
+  });
+
+  it("asks for a data mode before opening each quest", () => {
+    render(<Quest project={getProject("planner")!} onHome={vi.fn()} />);
+    expect(screen.getByRole("heading", { name: /на каких данных будем работать/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /уровень 1:/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
+    expect(localStorage.getItem(preparationKey("planner"))).toContain('"mode":"demo"');
+  });
+
+  it("blocks a real-data quest until its personal checklist is complete", () => {
+    render(<Quest project={getProject("psychologist-site")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
+    const checks = screen.getAllByRole("checkbox");
+    expect(checks.length).toBeGreaterThanOrEqual(7);
+    const start = screen.getByRole("button", { name: /папка готова — начать квест/i });
+    expect(start).toBeDisabled();
+    checks.forEach((check) => fireEvent.click(check));
+    expect(start).toBeEnabled();
+    fireEvent.click(start);
+    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
+    expect(localStorage.getItem(preparationKey("psychologist-site"))).toContain('"ready":true');
   });
 });
