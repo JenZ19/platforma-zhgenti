@@ -12,6 +12,7 @@ import { buildHomeHelperGuide } from "./home-helper-guide";
 import { defaultCustomization } from "./customization";
 import { buildFamilyExpensesQuest } from "./original-quests/family-expenses";
 import { buildPlannerQuest } from "./original-quests/planner";
+import { buildIdeaVaultQuest } from "./original-quests/idea-vault";
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): QuestStep[] {
   if (project.slug === "family-expenses") {
@@ -19,6 +20,9 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", 
   }
   if (project.slug === "planner") {
     return buildPlannerQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  }
+  if (project.slug === "idea-vault") {
+    return buildIdeaVaultQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
   }
   let steps: QuestStep[];
   switch (project.kind) {

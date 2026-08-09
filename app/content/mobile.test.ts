@@ -57,4 +57,13 @@ describe("mobile quest builder", () => {
     expect(steps[14].action).toContain("planner-client");
     expect(steps[15].action).toMatch(/восемь ответов.+planner-client/i);
   });
+
+  it("gives the idea vault a fast-capture and client-copy phone path", () => {
+    const vault = projects.find((item) => item.slug === "idea-vault")!;
+    const steps = buildMobileQuest(vault, "real");
+    expect(steps[3].action).toMatch(/Telegram.+Новый проект.+idea-vault.+серверн/i);
+    expect(steps[12].action).toMatch(/одной рукой.+запишите идею.+поиск/i);
+    expect(steps[14].action).toContain("idea-vault-client");
+    expect(steps[15].action).toMatch(/восемь ответов.+idea-vault-client/i);
+  });
 });

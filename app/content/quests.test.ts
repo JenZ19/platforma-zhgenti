@@ -76,7 +76,7 @@ describe("quest builders", () => {
   it("explains the previously ambiguous open, paste, and phone actions click by click", () => {
     for (const project of projects) {
       const steps = buildQuest(project, "real");
-      if (["home-helper", "family-expenses", "planner"].includes(project.slug)) continue;
+      if (["home-helper", "family-expenses", "planner", "idea-vault"].includes(project.slug)) continue;
       expect(steps[1].action, `${project.slug}/open`).toMatch(/Codex.+Открыть папку.+выберите.+Открыть/is);
       expect(steps[2].action, `${project.slug}/paste`).toMatch(/Скопировать команду.+вернитесь в Codex.+вставьте.+отправ/is);
       expect(steps[13].action, `${project.slug}/phone`).toMatch(/Telegram.+телефон.+вертикально/is);
@@ -92,6 +92,11 @@ describe("quest builders", () => {
     expect(planner[3].action).toMatch(/Codex.+Открыть папку.+planner/is);
     expect(planner[4].action).toMatch(/Скопировать команду.+Codex.+вставьте.+отправьте/is);
     expect(planner[12].action).toMatch(/телефоне.+добавьте дело.+перенесите/is);
+
+    const ideas = buildQuest(projects.find((project) => project.slug === "idea-vault")!, "real");
+    expect(ideas[3].action).toMatch(/Codex.+Открыть папку.+idea-vault/is);
+    expect(ideas[4].action).toMatch(/Скопировать команду.+Codex.+вставьте.+отправьте/is);
+    expect(ideas[12].action).toMatch(/телефоне.+запишите идею.+найдите/is);
   });
 
   it("names the exact prepared file in the real pressure diary route", () => {

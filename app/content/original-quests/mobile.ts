@@ -3,11 +3,12 @@ import type { MobileAction, MobileQuestStep } from "../mobile";
 import type { ProjectDefinition, QuestCustomization } from "../types";
 import { buildFamilyExpensesQuest } from "./family-expenses";
 import { buildPlannerQuest } from "./planner";
+import { buildIdeaVaultQuest } from "./idea-vault";
 
 function actionFor(slug: string, step: number): MobileAction {
-  if (step === 13) return { tool: "screenshot", label: "Отправить мобильную проверку Фее", note: slug === "planner" ? "Пришлите экран «Сегодня», добавление дела и результат переноса на завтра." : "Пришлите первый экран, форму расхода и новый остаток." };
+  if (step === 13) return { tool: "screenshot", label: "Отправить мобильную проверку Фее", note: slug === "planner" ? "Пришлите экран «Сегодня», добавление дела и результат переноса на завтра." : slug === "idea-vault" ? "Пришлите быстрый ввод, новую карточку и результат поиска." : "Пришлите первый экран, форму расхода и новый остаток." };
   if (step === 14) return { tool: "lovable", label: "Открыть публикацию", href: "https://lovable.dev/", note: "Откройте уже созданный проект и нажмите публикацию только после проверки." };
-  const clientCopy = slug === "planner" ? "планера" : "бюджета";
+  const clientCopy = slug === "planner" ? "планера" : slug === "idea-vault" ? "копилки" : "бюджета";
   return {
     tool: "telegram",
     label: step === 15 ? `Создать клиентскую копию ${clientCopy}` : step === 16 ? "Отправить бриф заказчика" : step === 17 ? "Получить карточку портфолио" : "Открыть Фею в Telegram",
@@ -55,14 +56,34 @@ const plannerMobileActions = [
   "Нажмите «Получить карточку портфолио». Проверьте, что личный и клиентский планеры показаны отдельно и в карточке нет выдуманного отзыва.",
 ];
 
+const ideaVaultMobileActions = [
+  "Откройте комнату копилки в Telegram. Фея покажет готовый пример: найдите быстрый ввод, карточки, темы, поиск и статус.",
+  "Выберите шесть ответов в конструкторе, прочитайте резюме и нажмите «Сохранить мою версию».",
+  "Откройте сообщение «мои-идеи.txt». Проверьте десять строк: текст идеи, тема, метка и статус; клиентские секреты не отправляйте.",
+  "В Telegram нажмите «Мои проекты» → «Новый проект», напишите idea-vault и дождитесь «Серверная папка создана». Локальная папка телефона не нужна.",
+  "Скопируйте команду, вставьте её одним сообщением в чат Феи и дождитесь паспорта вашей копилки.",
+  "Нажмите «Запустить мой Codex» и дождитесь ссылки предпросмотра. Телефон можно закрыть до сообщения Феи.",
+  "Откройте предпросмотр, введите безопасную идею, выберите тему и нажмите «Сохранить идею».",
+  "Отправьте Фее свой список тем и статусов. После обновления назначьте их двум карточкам и проверьте фильтр.",
+  "Отправьте команду оформления. Проверьте на новой ссылке крупный текст идеи, контраст поиска и выбранный стиль.",
+  "Отправьте команду на одну выбранную функцию. Заполните её в карточке и снова проверьте обычную запись идеи.",
+  "Добавьте карточки разных тем, найдите слово поиском, включите тему и статус, затем сбросьте все фильтры.",
+  "Измените безопасную идею, добавьте в избранное, обновите страницу, удалите пример с подтверждением и скачайте JSON.",
+  "Откройте ссылку на телефоне и одной рукой запишите идею, выберите тему, найдите её поиском и добавьте следующий маленький шаг.",
+  "Оставьте только безопасную подборку, откройте публикацию, нажмите «Опубликовать» и проверьте запись и поиск по ссылке.",
+  "В Telegram откройте idea-vault и нажмите «Создать копию для клиента». Дождитесь отдельной комнаты idea-vault-client.",
+  "Соберите восемь ответов заказчика, отправьте их в idea-vault-client и подтвердите экран «было / станет» до изменений.",
+  "Получите карточку портфолио и проверьте, что личная и клиентская копилки показаны отдельно без чужих закрытых идей.",
+];
+
 export function buildOriginalMobileQuest(
   project: ProjectDefinition,
   mode: DataMode,
   customization: QuestCustomization,
 ): MobileQuestStep[] | undefined {
-  const build = project.slug === "family-expenses" ? buildFamilyExpensesQuest : project.slug === "planner" ? buildPlannerQuest : undefined;
+  const build = project.slug === "family-expenses" ? buildFamilyExpensesQuest : project.slug === "planner" ? buildPlannerQuest : project.slug === "idea-vault" ? buildIdeaVaultQuest : undefined;
   if (!build) return undefined;
-  const actions = project.slug === "planner" ? plannerMobileActions : mobileActions;
+  const actions = project.slug === "planner" ? plannerMobileActions : project.slug === "idea-vault" ? ideaVaultMobileActions : mobileActions;
   return build(project, mode, customization).map((step) => {
     const action = actionFor(project.slug, step.id);
     return {
