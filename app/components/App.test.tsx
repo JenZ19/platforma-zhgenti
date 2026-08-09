@@ -3,11 +3,13 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getProject } from "../content/projects";
+import { getBotPrototypeSpec } from "../content/bot-prototypes";
+import { getProject, projects } from "../content/projects";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
 import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
+import { ExpectedScene } from "./ExpectedScene";
 import { MobileQuest } from "./MobileQuest";
 import { ProjectCard } from "./ProjectCard";
 import { Quest } from "./Quest";
@@ -39,6 +41,19 @@ describe("academy interface", () => {
       "src",
       "/screens/family-expenses/step-14.png",
     );
+  });
+
+  it("renders a dedicated final-product interface for every bot", () => {
+    const bots = projects.filter((project) => project.kind === "bot");
+    const { container } = render(<>{bots.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+
+    for (const project of bots) {
+      const spec = getBotPrototypeSpec(project.slug);
+      const prototype = container.querySelector(`[data-prototype-marker="${spec.marker}"]`);
+      expect(prototype, project.slug).not.toBeNull();
+      expect(prototype).toHaveTextContent(spec.headline);
+      expect(prototype).toHaveTextContent(spec.metric);
+    }
   });
 
   it("filters the catalogue by week and search", () => {

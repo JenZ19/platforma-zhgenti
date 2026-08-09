@@ -1,6 +1,7 @@
 "use client";
 
 import type { ProjectDefinition } from "../content/types";
+import { BotPrototypeScene } from "./BotPrototypeScene";
 
 function Chrome({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="mock-window"><div className="mock-bar"><span>● ● ●</span><b>{title}</b><i /></div>{children}</div>;
@@ -16,10 +17,6 @@ function SetupScene({ project, step }: { project: ProjectDefinition; step: numbe
 function ServiceScene({ project, step }: { project: ProjectDefinition; step: number }) {
   const visible = Math.max(1, Math.min(project.demo.length, step - 5));
   return <Chrome title={project.title}><div className="service-scene"><header><div><small>МОЙ СЕРВИС</small><h3>{project.title}</h3></div><button>Август 2026⌄</button></header><div className="service-stats"><div><span>{project.entities[0]}</span><b>{project.demo[0]}</b></div><div><span>{project.entities[1]}</span><b>{visible} записи</b></div><div className="rose"><span>Сегодня</span><b>Всё сохранено</b></div></div><div className="service-grid"><section><h4>{project.features[0]}</h4><label>{project.entities[0]}<input value={project.demo[Math.min(visible - 1, project.demo.length - 1)]} readOnly /></label><label>{project.entities[1]}<input value={project.entities[1]} readOnly /></label><button>Сохранить</button></section><section><div className="scene-title"><h4>История</h4><span>{step >= 11 ? "Все ▾" : ""}</span></div>{project.demo.slice(0, visible).map((item, index) => <article key={item}><i className={`dot d${index}`} /><div><b>{item}</b><small>{project.entities[index % project.entities.length]}</small></div><span>✓</span></article>)}</section></div></div></Chrome>;
-}
-
-function BotScene({ project, step }: { project: ProjectDefinition; step: number }) {
-  return <div className="phone-stage"><div className="phone-mock"><header><span>{project.symbol}</span><div><b>{project.title}</b><small>бот · онлайн</small></div></header><main><p className="bot-message">Здравствуйте! Я помогу: {project.outcome.toLocaleLowerCase("ru")}.</p><p className="user-message">{project.demo[0]}</p><p className="bot-message">Готово. Что сделать дальше?</p>{step >= 8 && <p className="user-message">{project.demo[1]}</p>}{step >= 9 && <p className="bot-message">Сохранила ответ и подготовила следующий шаг ✓</p>}<div className="bot-buttons">{project.features.slice(0, step >= 11 ? 4 : 2).map((feature) => <button key={feature}>{feature}</button>)}</div></main><footer>Сообщение… <b>↑</b></footer></div><div className="chat-check"><span>Проверочный диалог</span><h3>{step >= 11 ? "Весь путь пройден" : "Сценарий работает"}</h3><p>Ответы и кнопки используют безопасные проверочные данные.</p></div></div>;
 }
 
 function AgentScene({ project, step }: { project: ProjectDefinition; step: number }) {
@@ -40,7 +37,7 @@ function Visual({ project, step }: { project: ProjectDefinition; step: number })
   if (step <= 4) return <SetupScene project={project} step={step} />;
   if (step >= 15) return <FinalScene project={project} step={step} />;
   if (project.kind === "service") return <ServiceScene project={project} step={step} />;
-  if (project.kind === "bot") return <BotScene project={project} step={step} />;
+  if (project.kind === "bot") return <BotPrototypeScene project={project} step={step} />;
   if (project.kind === "agent") return <AgentScene project={project} step={step} />;
   if (project.kind === "simple-site") return <SiteScene project={project} step={step} advanced={false} />;
   if (project.kind === "advanced-site") return <SiteScene project={project} step={step} advanced />;
