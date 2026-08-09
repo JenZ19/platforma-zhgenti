@@ -92,7 +92,7 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     const checks = screen.getAllByRole("checkbox");
     expect(checks.length).toBeGreaterThanOrEqual(7);
-    const start = screen.getByRole("button", { name: /папка готова — начать квест/i });
+    const start = screen.getByRole("button", { name: /материалы готовы — начать квест/i });
     expect(start).toBeDisabled();
     checks.forEach((check) => fireEvent.click(check));
     expect(start).toBeEnabled();
@@ -118,5 +118,28 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
     expect(localStorage.getItem(progressKey("mobile:family-expenses"))).toContain('"completed":[1]');
     expect(localStorage.getItem(progressKey("family-expenses"))).toBeNull();
+  });
+
+  it("walks a real home-helper learner through every click with pictures", () => {
+    render(<Quest project={getProject("home-helper")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
+    expect(screen.getAllByRole("img", { name: /подготовка home-helper/i })).toHaveLength(8);
+    expect(screen.getByText(/запишите пять домашних дел в файл «мои-дела\.txt»/i)).toBeInTheDocument();
+    screen.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
+    fireEvent.click(screen.getByRole("button", { name: /материалы готовы — начать квест/i }));
+
+    let guide = screen.getByRole("region", { name: /делайте по картинкам/i });
+    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(5);
+    expect(within(guide).getByRole("heading", { name: /создайте папку home-helper/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    guide = screen.getByRole("region", { name: /делайте по картинкам/i });
+    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(6);
+    expect(within(guide).getByRole("heading", { name: /скопируйте анкету на сайте/i })).toBeInTheDocument();
+    expect(within(guide).getByRole("heading", { name: /вставьте анкету в codex/i })).toBeInTheDocument();
+    expect(within(guide).getByRole("heading", { name: /отправьте анкету/i })).toBeInTheDocument();
+    expect(within(guide).getAllByText(/готово, если/i)).toHaveLength(6);
+    expect(screen.queryByText(/вымышлен|демонстрацион|учебн/i)).not.toBeInTheDocument();
   });
 });

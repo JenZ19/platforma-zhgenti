@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element -- generated lesson screens are fixed-size local teaching assets */
+
 import type { ProjectDefinition } from "../content/types";
 import {
   buildRealDataChecklist,
@@ -38,9 +40,27 @@ export function QuestPreparation({
         <h2>Сначала соберите материалы</h2>
         <p className="preparation-lead">{mobile ? <>Не нужно делать всё идеально. Соберите безопасные копии для комнаты <b>{project.slug}</b> в Telegram и отмечайте готовое.</> : <>Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{project.slug}</b> и отмечайте готовое.</>}</p>
         <div className="checklist-progress"><span>{preparation.checked.length} из {checklist.length}</span><i><b style={{ width: `${Math.round((preparation.checked.length / checklist.length) * 100)}%` }} /></i></div>
-        <div className="preparation-list">
+        <div className={`preparation-list ${checklist.some((item) => item.steps?.length) ? "detailed-preparation-list" : ""}`}>
           {checklist.map((item, index) => {
             const checked = preparation.checked.includes(item.id);
+            if (item.steps?.length) {
+              return (
+                <article className={`preparation-guide-item ${checked ? "checked" : ""}`} key={item.id}>
+                  <label>
+                    <input type="checkbox" checked={checked} onChange={() => onToggle(item.id)} />
+                    <span>{checked ? "✓" : String(index + 1).padStart(2, "0")}</span>
+                    <div><b>{item.text}</b><small>{item.detail}</small></div>
+                  </label>
+                  {item.screenshot && <img src={item.screenshot} alt={`Подготовка home-helper: шаг ${index + 1}`} />}
+                  <div className="preparation-guide-copy">
+                    <b>Сделайте по порядку</b>
+                    <ol>{item.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+                  </div>
+                  {item.example && <div className="preparation-example"><b>Пример</b><pre>{item.example}</pre></div>}
+                  <p className="preparation-done"><strong>✓ Готово, если:</strong> {item.doneWhen}</p>
+                </article>
+              );
+            }
             return (
               <label key={item.id} className={checked ? "checked" : ""}>
                 <input type="checkbox" checked={checked} onChange={() => onToggle(item.id)} />
@@ -51,7 +71,7 @@ export function QuestPreparation({
           })}
         </div>
         <aside className="privacy-note"><span>!</span><p><b>Важно</b>{mobile ? " Codex получает только материалы из личной комнаты проекта. Оригиналы, пароли и закрытые документы в Telegram не отправляем." : " Codex получает только то, что лежит в этой папке. Оригиналы, пароли и закрытые документы туда не кладём."}</p></aside>
-        <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>Папка готова — начать квест →</button>
+        <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>Материалы готовы — начать квест →</button>
       </section>
     );
   }
