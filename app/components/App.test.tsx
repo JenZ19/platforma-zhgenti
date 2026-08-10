@@ -189,7 +189,18 @@ describe("academy interface", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
 
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+    expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
+  });
+
+  it("returns a mobile quest to the top immediately after next", () => {
+    render(<MobileQuest project={getProject("child-schedule")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    vi.mocked(window.scrollTo).mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — дальше/i }));
+
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
   });
 

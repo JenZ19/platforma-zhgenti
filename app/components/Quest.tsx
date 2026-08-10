@@ -77,7 +77,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   function startRealQuest() {
     if (!preparation || preparation.mode !== "real" || !checklist.every((item) => preparation.checked.includes(item.id))) return;
     storePreparation({ ...preparation, ready: true });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   function changeDataMode() {
@@ -91,7 +91,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     setProgress(next);
     saveProgress(project.slug, next, window.localStorage);
     setHelpOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   function finishStep() {
@@ -101,7 +101,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     saveProgress(project.slug, next, window.localStorage);
     setHelpOpen(false);
     if (!wasDone && step.reward) setReward(step.reward);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   async function copy(text: string, kind: "main" | "help") {
