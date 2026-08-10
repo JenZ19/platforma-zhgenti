@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getProject, projects } from "../content/projects";
+import { getQuestProject, questProjects } from "../content/projects";
 import { getPreparationProfileSlugs } from "../content/preparation";
 import {
   buildRealDataChecklist,
@@ -36,7 +36,7 @@ describe("quest data preparation", () => {
   });
 
   it("builds a detailed checklist from the selected project", () => {
-    const project = getProject("psychologist-site")!;
+    const project = getQuestProject("psychologist-site")!;
     const checklist = buildRealDataChecklist(project);
     expect(checklist).toHaveLength(5);
     const checklistText = checklist.map((item) => `${item.text} ${item.detail}`).join(" ");
@@ -49,7 +49,7 @@ describe("quest data preparation", () => {
   it("gives every project a personal conversation checklist without manual files", () => {
     const fingerprints = new Set<string>();
 
-    for (const project of projects) {
+    for (const project of questProjects) {
       const checklist = buildRealDataChecklist(project);
       if (project.slug === "family-expenses") {
         expect(checklist).toHaveLength(4);
@@ -69,12 +69,12 @@ describe("quest data preparation", () => {
       fingerprints.add(fingerprint);
     }
 
-    expect(fingerprints.size).toBe(projects.length);
-    expect(getPreparationProfileSlugs().sort()).toEqual(projects.map((project) => project.slug).sort());
+    expect(fingerprints.size).toBe(questProjects.length);
+    expect(getPreparationProfileSlugs().sort()).toEqual(questProjects.map((project) => project.slug).sort());
   });
 
   it("gives every phone checklist Telegram actions instead of computer instructions", () => {
-    for (const project of projects) {
+    for (const project of questProjects) {
       const checklist = buildRealDataChecklist(project, "mobile");
       const text = checklist.map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""}`).join(" ");
       expect(text, project.slug).toMatch(/Telegram/i);
@@ -83,7 +83,7 @@ describe("quest data preparation", () => {
   });
 
   it("asks for pressure diary records instead of branding and sales data", () => {
-    const text = buildRealDataChecklist(getProject("pressure-diary")!)
+    const text = buildRealDataChecklist(getQuestProject("pressure-diary")!)
       .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""} ${item.example ?? ""} ${item.doneWhen ?? ""}`)
       .join(" ");
 
@@ -97,7 +97,7 @@ describe("quest data preparation", () => {
   });
 
   it("does not request commercial materials for personal household services", () => {
-    const personalServices = projects.filter((project) => project.kind === "service");
+    const personalServices = questProjects.filter((project) => project.kind === "service");
     for (const project of personalServices) {
       const text = buildRealDataChecklist(project).map((item) => item.text).join(" ");
       expect(text, project.slug).not.toMatch(/логотип|подтверждённые цены|публичные контакты/i);
@@ -105,7 +105,7 @@ describe("quest data preparation", () => {
   });
 
   it("never tells a real-data checklist to use fictional examples", () => {
-    for (const project of projects) {
+    for (const project of questProjects) {
       const text = buildRealDataChecklist(project)
         .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""}`)
         .join(" ");
@@ -115,7 +115,7 @@ describe("quest data preparation", () => {
   });
 
   it("lets a family-expenses learner prepare answers without creating folders or files", () => {
-    const checklist = buildRealDataChecklist(getProject("family-expenses")!);
+    const checklist = buildRealDataChecklist(getQuestProject("family-expenses")!);
     const text = checklist
       .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""} ${item.doneWhen ?? ""}`)
       .join(" ");
@@ -127,14 +127,14 @@ describe("quest data preparation", () => {
   });
 
   it("requires every real-data checklist item but lets demo mode start immediately", () => {
-    const checklist = buildRealDataChecklist(getProject("planner")!);
+    const checklist = buildRealDataChecklist(getQuestProject("planner")!);
     expect(isPreparationReady({ version: 1, mode: "demo", checked: [], ready: true }, checklist)).toBe(true);
     expect(isPreparationReady({ version: 1, mode: "real", checked: checklist.slice(0, -1).map((item) => item.id), ready: false }, checklist)).toBe(false);
     expect(isPreparationReady({ version: 1, mode: "real", checked: checklist.map((item) => item.id), ready: true }, checklist)).toBe(true);
   });
 
   it("prepares home-helper answers without folders, files, or special formatting", () => {
-    const checklist = buildRealDataChecklist(getProject("home-helper")!);
+    const checklist = buildRealDataChecklist(getQuestProject("home-helper")!);
     expect(checklist).toHaveLength(5);
     const text = checklist.map((item) => `${item.text} ${item.detail}`).join(" ");
     expect(text).toMatch(/Что сделать.+Где.+Кто.+Как часто/i);

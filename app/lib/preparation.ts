@@ -1,5 +1,6 @@
 import { getPreparationProfile } from "../content/preparation";
 import type { ProjectPreparationProfile } from "../content/preparation";
+import { getAgentContract } from "../content/agent-contracts";
 import type { ProjectDefinition } from "../content/types";
 import type { StorageLike } from "./progress";
 
@@ -62,8 +63,40 @@ export function resetPreparation(slug: string, storage: StorageLike): void {
 
 export function buildRealDataChecklist(project: ProjectDefinition, surface: PreparationSurface = "desktop"): PreparationItem[] {
   if (project.slug === "family-expenses") return buildFamilyExpensesChecklist(surface);
+  if (project.kind === "agent") return buildAgentChecklist(project, surface);
   const profile = getPreparationProfile(project.slug);
   return buildProfileChecklist(project, profile, surface);
+}
+
+function buildAgentChecklist(project: ProjectDefinition, surface: PreparationSurface): PreparationItem[] {
+  const contract = getAgentContract(project.slug);
+  return [
+    {
+      id: "request-ready",
+      text: `Вспомните один обычный запрос для «${project.title}»`,
+      detail: `Ничего оформлять не нужно. Можно сказать примерно так: «${contract.inputExample}». Codex примет ответ голосом или текстом и сам выделит нужные сведения.`,
+    },
+    {
+      id: "fields-ready",
+      text: `Вспомните ответы про: ${contract.requiredFields.join(", ")}`,
+      detail: `Codex будет спрашивать строго по одному вопросу. Если чего-то пока не знаете, ответьте «нужно уточнить» — агент не станет додумывать факт.`,
+    },
+    {
+      id: "result-ready",
+      text: `Представьте результат «${contract.resultTitle}»`,
+      detail: `Выберите, что важнее увидеть первым из списка: ${contract.resultItems.join(", ")}. Codex сам соберёт из ответов понятный экран результата.`,
+    },
+    {
+      id: "boundary-ready",
+      text: "Вспомните, когда обязательно нужен человек",
+      detail: `${contract.handoff} ${contract.confirmationRule} ${project.safety}`,
+    },
+    {
+      id: "conversation-ready",
+      text: `Приготовьтесь ответить Codex${surface === "mobile" ? " в Telegram" : ""}`,
+      detail: `Codex сам создаст проект ${project.slug}, папки, файлы, поля и инструкцию. Вы отвечаете на один вопрос за раз голосом или текстом — вручную ничего создавать не придётся.`,
+    },
+  ];
 }
 
 function buildFamilyExpensesChecklist(surface: PreparationSurface): PreparationItem[] {
