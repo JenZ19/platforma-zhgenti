@@ -8,26 +8,22 @@ import { MobileAcademy } from "./MobileAcademy";
 import { MobileExpectedScene } from "./MobileExpectedScene";
 import { MobileQuest } from "./MobileQuest";
 import { Quest } from "./Quest";
-import { HomeHelperGuideScene, HomeHelperPreparationScene } from "./HomeHelperGuideScene";
+import { HomeHelperGuideScene } from "./HomeHelperGuideScene";
 import { OriginalQuestGuideScene } from "./OriginalQuestGuideScene";
 import { isOriginalQuestSlug } from "../content/customization";
 import { buildQuest } from "../content/quests";
-import { buildRealDataChecklist } from "../lib/preparation";
 
 type Route =
   | { type: "home"; format: "desktop" | "mobile" }
   | { type: "quest"; slug: string; format: "desktop" | "mobile" }
   | { type: "capture"; slug: string; step: number }
   | { type: "capture-mobile"; slug: string; step: number }
-  | { type: "capture-guide"; slug: string; mode: "real" | "demo"; step: number; frame: number }
-  | { type: "capture-prep"; slug: string; item: number };
+  | { type: "capture-guide"; slug: string; mode: "real" | "demo"; step: number; frame: number };
 
 function readRoute(): Route {
   const query = new URLSearchParams(window.location.search);
   const guideCapture = query.get("capture-guide")?.match(/^(.+)--(real|demo)--step-(\d{2})--frame-(\d{2})$/);
   if (guideCapture) return { type: "capture-guide", slug: guideCapture[1], mode: guideCapture[2] as "real" | "demo", step: Number(guideCapture[3]), frame: Number(guideCapture[4]) };
-  const prepCapture = query.get("capture-prep")?.match(/^(.+)--prep-(\d{2})$/);
-  if (prepCapture) return { type: "capture-prep", slug: prepCapture[1], item: Number(prepCapture[2]) };
   const mobileCapture = query.get("capture-mobile")?.match(/^(.+)--step-(\d{2})$/);
   if (mobileCapture) return { type: "capture-mobile", slug: mobileCapture[1], step: Number(mobileCapture[2]) };
   const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
@@ -71,11 +67,6 @@ export function AppEntry() {
     const frame = project ? buildQuest(project, route.mode)[route.step - 1]?.guide?.[route.frame - 1] : undefined;
     if (!project || !frame) return <div>Кадр не найден</div>;
     return isOriginalQuestSlug(project.slug) ? <OriginalQuestGuideScene project={project} frame={frame} step={route.step} mode={route.mode} /> : <HomeHelperGuideScene frame={frame} step={route.step} mode={route.mode} />;
-  }
-  if (route.type === "capture-prep") {
-    const project = getProject(route.slug);
-    const item = project ? buildRealDataChecklist(project)[route.item - 1] : undefined;
-    return item ? <HomeHelperPreparationScene item={item} index={route.item} /> : <div>Кадр подготовки не найден</div>;
   }
   if (route.type === "capture-mobile") {
     const project = getProject(route.slug);

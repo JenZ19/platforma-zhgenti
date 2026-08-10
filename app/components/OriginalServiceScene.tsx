@@ -226,6 +226,46 @@ function DataCheck() {
   );
 }
 
+function ConversationData({
+  heading,
+  items,
+  question,
+  answer,
+  voice,
+}: {
+  heading: string;
+  items: [string, string][];
+  question: string;
+  answer: string;
+  voice: string;
+}) {
+  return (
+    <div className="os-data">
+      <aside>
+        <small>КОРОТКИЙ РАЗГОВОР</small>
+        <h3>{heading}</h3>
+        {items.map(([label, value], index) => (
+          <div key={label} className={index === 2 ? "active" : ""}>
+            <i>{index + 1}</i>
+            <span><b>{label}</b><small>{value}</small></span>
+            <strong>✓</strong>
+          </div>
+        ))}
+      </aside>
+      <main>
+        <header><b>Codex задаёт по одному вопросу</b><span>Можно ответить голосом</span></header>
+        <div className="os-codex-chat">
+          <div className="codex"><small>CODEX</small><p>{question}</p></div>
+          <div className="learner"><small>ВЫ</small><p>{answer}</p></div>
+          <div className="codex"><small>CODEX</small><p>Хорошо. Задам следующий короткий вопрос.</p></div>
+          <div className="voice-answer"><i>◉</i><span><b>Голосовой ответ</b><small>{voice}</small></span><strong>0:08</strong></div>
+        </div>
+        <footer>Папки и таблицы создаст Codex <b>Вы только отвечаете ✓</b></footer>
+      </main>
+    </div>
+  );
+}
+
 function Workspace({ stage }: { stage: Stage }) {
   return (
     <div className="os-workspace">
@@ -564,56 +604,7 @@ function PlannerConcept() {
 }
 
 function PlannerData() {
-  return (
-    <div className="op-data">
-      <aside>
-        <small>МАТЕРИАЛЫ ПЛАНЕРА</small>
-        <h3>Неделя собрана</h3>
-        {[
-          ["мои-дела.txt", "7 дел · проверено"],
-          ["правила-планера.txt", "1 главное в день"],
-          ["вид-планера.txt", "спокойный экран"],
-        ].map(([file, note], index) => (
-          <div className={index === 0 ? "active" : ""} key={file}>
-            <i>{index === 0 ? "▤" : "≡"}</i>
-            <span>
-              <b>{file}</b>
-              <small>{note}</small>
-            </span>
-            <strong>✓</strong>
-          </div>
-        ))}
-      </aside>
-      <main>
-        <header>
-          <b>мои-дела.txt</b>
-          <span>Без личных подробностей ✓</span>
-        </header>
-        <section>
-          <div>
-            <b>Что сделать</b>
-            <b>День</b>
-            <b>Приоритет</b>
-            <b>Готово</b>
-          </div>
-          {[
-            ["Записать к врачу", "Вт", "Важно", "Нет"],
-            ["Купить продукты", "Ср", "Обычно", "Нет"],
-            ["30 минут на себя", "Пт", "Бережно", "Нет"],
-          ].map((row) => (
-            <div key={row[0]}>
-              {row.map((cell) => (
-                <span key={cell}>{cell}</span>
-              ))}
-            </div>
-          ))}
-        </section>
-        <footer>
-          Адресов и телефонов нет <b>Можно продолжать ✓</b>
-        </footer>
-      </main>
-    </div>
-  );
+  return <ConversationData heading="4 простых ответа" items={[["Дела", "5–10 примеров"], ["Дни", "или без даты"], ["Приоритеты", "важно · обычно"], ["Перенос", "правило вечера"]]} question="Какие дела вы хотите видеть на этой неделе?" answer="Купить продукты и записаться к врачу." voice="Ещё хочу один вечер оставить свободным…" />;
 }
 
 function PlannerWorkspace({ stage }: { stage: Stage }) {
@@ -622,7 +613,6 @@ function PlannerWorkspace({ stage }: { stage: Stage }) {
       <aside>
         <b>⌘ Codex</b>
         <button>＋ Новая задача</button>
-        <button className="active">▱ Открыть папку</button>
         <small>ПРОЕКТЫ</small>
         <span className="selected">◇ planner</span>
         <span>◇ family-expenses</span>
@@ -630,14 +620,14 @@ function PlannerWorkspace({ stage }: { stage: Stage }) {
       <main>
         <header>
           <b>{stage === "workspace" ? "planner" : "Паспорт планера"}</b>
-          <span>рабочая папка ✓</span>
+          <span>{stage === "workspace" ? "создано Codex автоматически ✓" : "сохранено Codex ✓"}</span>
         </header>
         {stage === "workspace" ? (
           <div className="op-folder">
             <i>◇</i>
             <h3>planner</h3>
-            <p>Открыта отдельная рабочая папка</p>
-            <div>Документы / planner</div>
+            <p>Codex сам создал рабочее место</p>
+            <div>✓ Папка&nbsp;&nbsp; ✓ Данные&nbsp;&nbsp; ✓ Настройки&nbsp;&nbsp; · ничего вручную</div>
           </div>
         ) : (
           <div className="op-passport">
@@ -930,56 +920,7 @@ function IdeaConcept() {
 }
 
 function IdeaData() {
-  return (
-    <div className="oi-data">
-      <aside>
-        <small>МАТЕРИАЛЫ КОПИЛКИ</small>
-        <h3>10 идей готовы</h3>
-        {[
-          ["мои-идеи.txt", "10 строк"],
-          ["темы-и-статусы.txt", "3 темы · 3 статуса"],
-          ["вид-копилки.txt", "карточки"],
-        ].map(([f, n], i) => (
-          <div className={i === 0 ? "active" : ""} key={f}>
-            <i>{i === 0 ? "✦" : "≡"}</i>
-            <span>
-              <b>{f}</b>
-              <small>{n}</small>
-            </span>
-            <strong>✓</strong>
-          </div>
-        ))}
-      </aside>
-      <main>
-        <header>
-          <b>мои-идеи.txt</b>
-          <span>Закрытых концепций нет ✓</span>
-        </header>
-        <section>
-          <div>
-            <b>Идея</b>
-            <b>Тема</b>
-            <b>Метка</b>
-            <b>Статус</b>
-          </div>
-          {[
-            ["Рилс про утро", "Контент", "семья", "Новая"],
-            ["Подарок маме", "Подарки", "уют", "В работе"],
-            ["Маршрут на выходные", "Поездки", "рядом", "Новая"],
-          ].map((row) => (
-            <div key={row[0]}>
-              {row.map((cell) => (
-                <span key={cell}>{cell}</span>
-              ))}
-            </div>
-          ))}
-        </section>
-        <footer>
-          Можно продолжать <b>Проверено ✓</b>
-        </footer>
-      </main>
-    </div>
-  );
+  return <ConversationData heading="4 простых ответа" items={[["Идеи", "3–10 мыслей"], ["Темы", "свои названия"], ["Метки", "по желанию"], ["Статусы", "новая · в работе"]]} question="Какие идеи вы хотите сохранить первыми?" answer="Рилс про утро и маршрут на выходные." voice="Тема — контент, статус пока новая…" />;
 }
 
 function IdeaWorkspace({ stage }: { stage: Stage }) {
@@ -988,7 +929,6 @@ function IdeaWorkspace({ stage }: { stage: Stage }) {
       <aside>
         <b>⌘ Codex</b>
         <button>＋ Новая задача</button>
-        <button className="active">▱ Открыть папку</button>
         <small>ПРОЕКТЫ</small>
         <span className="selected">✦ idea-vault</span>
         <span>◇ planner</span>
@@ -996,14 +936,14 @@ function IdeaWorkspace({ stage }: { stage: Stage }) {
       <main>
         <header>
           <b>{stage === "workspace" ? "idea-vault" : "Паспорт копилки"}</b>
-          <span>рабочая папка ✓</span>
+          <span>{stage === "workspace" ? "создано Codex автоматически ✓" : "сохранено Codex ✓"}</span>
         </header>
         {stage === "workspace" ? (
           <div className="oi-folder">
             <i>✦</i>
             <h3>idea-vault</h3>
-            <p>Открыта отдельная рабочая папка</p>
-            <div>Документы / idea-vault</div>
+            <p>Codex сам создал рабочее место</p>
+            <div>✓ Папка&nbsp;&nbsp; ✓ Данные&nbsp;&nbsp; ✓ Настройки&nbsp;&nbsp; · ничего вручную</div>
           </div>
         ) : (
           <div className="oi-passport">
@@ -1250,37 +1190,7 @@ function ChildConcept() {
 }
 
 function ChildData() {
-  return (
-    <div className="oc-data">
-      <aside>
-        <small>МАТЕРИАЛЫ РАСПИСАНИЯ</small>
-        <h3>Неделя готова</h3>
-        {[
-          ["занятия-недели.txt", "8 занятий"],
-          ["правила-расписания.txt", "повторы и дни"],
-          ["вид-недели.txt", "утренний экран"],
-        ].map(([file, note], index) => (
-          <div key={file} className={index === 0 ? "active" : ""}>
-            <i>{index === 0 ? "◷" : "≡"}</i>
-            <span><b>{file}</b><small>{note}</small></span>
-            <strong>✓</strong>
-          </div>
-        ))}
-      </aside>
-      <main>
-        <header><b>занятия-недели.txt</b><span>Без личных данных ✓</span></header>
-        <section>
-          <div><b>Занятие</b><b>Кто</b><b>Когда</b><b>Что взять</b></div>
-          {[
-            ["Плавание", "Ребёнок А", "Вт · 17:30", "Форма, вода"],
-            ["Музыка", "Ребёнок Б", "Чт · 16:00", "Папка"],
-            ["Рисование", "Ребёнок А", "Сб · 11:00", "Фартук"],
-          ].map((row) => <div key={row[0]}>{row.map((cell) => <span key={cell}>{cell}</span>)}</div>)}
-        </section>
-        <footer>Нет школы, адресов и контактов <b>Можно продолжать ✓</b></footer>
-      </main>
-    </div>
-  );
+  return <ConversationData heading="5 простых ответов" items={[["Занятия", "5–10 примеров"], ["Кто", "Ребёнок А или Б"], ["Когда", "день и время"], ["Повтор", "по желанию"], ["Что взять", "короткий список"]]} question="Какое занятие добавим первым?" answer="Плавание, Ребёнок А, вторник." voice="В 17:30, взять форму и воду…" />;
 }
 
 function ChildWorkspace({ stage }: { stage: Stage }) {
@@ -1289,15 +1199,14 @@ function ChildWorkspace({ stage }: { stage: Stage }) {
       <aside>
         <b>⌘ Codex</b>
         <button>＋ Новая задача</button>
-        <button className="active">▱ Открыть папку</button>
         <small>ПРОЕКТЫ</small>
         <span className="selected">◷ child-schedule</span>
         <span>✦ idea-vault</span>
       </aside>
       <main>
-        <header><b>{stage === "workspace" ? "child-schedule" : "Паспорт расписания"}</b><span>закрытая папка ✓</span></header>
+        <header><b>{stage === "workspace" ? "child-schedule" : "Паспорт расписания"}</b><span>{stage === "workspace" ? "создано Codex автоматически ✓" : "сохранено Codex ✓"}</span></header>
         {stage === "workspace" ? (
-          <div className="oc-folder"><i>◷</i><h3>child-schedule</h3><p>Открыта отдельная папка расписания</p><div>Документы / child-schedule</div></div>
+          <div className="oc-folder"><i>◷</i><h3>child-schedule</h3><p>Codex сам создал рабочее место</p><div>✓ Папка&nbsp;&nbsp; ✓ Данные&nbsp;&nbsp; ✓ Настройки&nbsp;&nbsp; · ничего вручную</div></div>
         ) : (
           <div className="oc-passport">
             <small>НАША НЕДЕЛЯ</small>

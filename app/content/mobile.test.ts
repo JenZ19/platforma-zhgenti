@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildMobileQuest, getMobileCapability } from "./mobile";
 import { projects } from "./projects";
-import { getPreparationProfile } from "./preparation";
 
 describe("mobile quest builder", () => {
   it("builds seventeen phone-only steps for every project", () => {
@@ -32,54 +31,53 @@ describe("mobile quest builder", () => {
     for (const project of projects) {
       const steps = buildMobileQuest(project, "real");
       const prompts = steps.flatMap((step) => step.prompt ?? []);
-      if (project.slug === "family-expenses") {
-        expect(prompts.join(" "), project.slug).not.toContain(getPreparationProfile(project.slug).sourceFile);
-        expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
-        expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля создавай сам/i);
-      } else {
-        expect(prompts.join(" "), project.slug).toContain(getPreparationProfile(project.slug).sourceFile);
-      }
+      expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
+      expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля.+создавай (?:их )?сам/i);
+      expect(prompts.join(" "), project.slug).toMatch(/один короткий вопрос за раз|задавай строго по одному вопросу/i);
       if (project.kind === "advanced-site") {
         expect(steps.map((step) => step.mobileAction.tool), project.slug).toContain("curator");
       }
     }
   });
 
-  it("names the exact source in the phone route instead of asking for generic materials", () => {
+  it("collects pressure-diary answers in chat without a prepared source file", () => {
     const project = projects.find((item) => item.slug === "pressure-diary")!;
     const steps = buildMobileQuest(project, "real");
-    expect(steps[3].action).toContain("мои-измерения.csv");
+    expect(steps[3].action).not.toContain("мои-измерения.csv");
     expect(steps[3].action).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
-    expect(steps[3].action).not.toMatch(/текст, фотографии или документы/i);
-    expect(steps.flatMap((step) => step.prompt ?? []).join(" ")).toContain("мои-измерения.csv");
+    expect(steps[3].action).toMatch(/по одному вопросу голосом или текстом/i);
+    expect(steps.flatMap((step) => step.prompt ?? []).join(" ")).not.toContain("мои-измерения.csv");
   });
 
   it("gives the planner its own server-room and client-copy phone path", () => {
     const planner = projects.find((item) => item.slug === "planner")!;
     const steps = buildMobileQuest(planner, "real");
-    expect(steps[3].action).toMatch(/Telegram.+Новый проект.+planner.+серверн/i);
+    expect(steps[2].action).toMatch(/опрос.+по одному голосом или текстом/i);
+    expect(steps[3].action).toMatch(/Codex сам создаст.+серверную комнату planner.+файлы и поля/i);
     expect(steps[3].action).not.toMatch(/откройте локальн.+папк/i);
     expect(steps[12].action).toMatch(/одной рукой.+добавьте дело.+перенесите/i);
     expect(steps[14].action).toContain("planner-client");
-    expect(steps[15].action).toMatch(/восемь ответов.+planner-client/i);
+    expect(steps[15].action).toMatch(/planner-client.+восемь вопросов по одному голосом или текстом/i);
   });
 
   it("gives the idea vault a fast-capture and client-copy phone path", () => {
     const vault = projects.find((item) => item.slug === "idea-vault")!;
     const steps = buildMobileQuest(vault, "real");
-    expect(steps[3].action).toMatch(/Telegram.+Новый проект.+idea-vault.+серверн/i);
+    expect(steps[2].action).toMatch(/опрос.+по одному голосом или текстом/i);
+    expect(steps[3].action).toMatch(/Codex сам создаст.+серверную комнату idea-vault.+файлы и поля/i);
     expect(steps[12].action).toMatch(/одной рукой.+запишите идею.+поиск/i);
     expect(steps[14].action).toContain("idea-vault-client");
-    expect(steps[15].action).toMatch(/восемь ответов.+idea-vault-client/i);
+    expect(steps[15].action).toMatch(/idea-vault-client.+восемь вопросов по одному голосом или текстом/i);
   });
 
   it("gives the child schedule a private server-room and client-copy phone path", () => {
     const child = projects.find((item) => item.slug === "child-schedule")!;
     const steps = buildMobileQuest(child, "real");
-    expect(steps[3].action).toMatch(/Telegram.+Новый проект.+child-schedule.+серверн/i);
+    expect(steps[2].action).toMatch(/опрос.+по одному голосом или текстом/i);
+    expect(steps[3].action).toMatch(/Codex сам создаст.+серверную комнату child-schedule.+файлы и поля/i);
     expect(steps[12].action).toMatch(/телефоне.+Ребёнок А.+Что взять/i);
     expect(steps[14].action).toContain("child-schedule-client");
-    expect(steps[15].action).toMatch(/восемь ответов.+child-schedule-client/i);
-    expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" ")).toMatch(/не сохраняем ФИО ребёнка.+домашний адрес.+геолокацию/i);
+    expect(steps[15].action).toMatch(/child-schedule-client.+восемь вопросов по одному голосом или текстом/i);
+    expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" ")).toMatch(/не спрашивай ФИО.+адрес.+геолокацию/i);
   });
 });

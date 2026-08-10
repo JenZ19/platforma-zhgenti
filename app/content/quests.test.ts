@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { projects } from "./projects";
-import { getPreparationProfile } from "./preparation";
 import { buildQuest, getQuest } from "./quests";
 
 const placeholder = /TODO|TBD|\[[^\]]+\]|<[^>]+>|вставьте название|название проекта сюда/i;
@@ -48,21 +47,15 @@ describe("quest builders", () => {
     }
   });
 
-  it("switches every command to the prepared folder in real-data mode", () => {
+  it("switches every command to a conversational real-data mode", () => {
     for (const project of projects) {
       const realSteps = buildQuest(project, "real");
       const realStepText = stepText(realSteps);
       const prompts = realSteps.flatMap((step) => step.prompt ?? []);
-      const profile = getPreparationProfile(project.slug);
       expect(prompts.every((prompt) => prompt.includes("РЕЖИМ РЕАЛЬНЫХ ДАННЫХ")), project.slug).toBe(true);
-      expect(prompts.join(" "), project.slug).toContain(profile.folderName);
-      if (project.slug === "family-expenses") {
-        expect(prompts.join(" "), project.slug).not.toContain(profile.sourceFile);
-        expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
-        expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля создавай сам/i);
-      } else {
-        expect(prompts.join(" "), project.slug).toContain(profile.sourceFile);
-      }
+      expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
+      expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля.+создавай (?:их )?сам/i);
+      expect(prompts.join(" "), project.slug).toMatch(/один короткий вопрос за раз|задавай строго по одному вопросу/i);
       expect(prompts.join(" "), project.slug).not.toMatch(/используй (только )?(этот |эти )?вымышлен/i);
       expect(prompts.join(" "), project.slug).not.toMatch(/не добавляем.+реальные контакты в сообщения/i);
       expect(realStepText, project.slug).not.toMatch(/вымышлен|демонстрацион/i);
@@ -83,7 +76,9 @@ describe("quest builders", () => {
     for (const project of projects) {
       const steps = buildQuest(project, "real");
       if (["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule"].includes(project.slug)) continue;
-      expect(steps[1].action, `${project.slug}/open`).toMatch(/Codex.+Открыть папку.+выберите.+Открыть/is);
+      expect(steps[0].action, `${project.slug}/create`).toMatch(/Codex.+Новая задача.+команд.+Проект.+создан/is);
+      expect(steps[0].action, `${project.slug}/create`).not.toMatch(/создайте.+папку|создайте.+файл/is);
+      expect(steps[1].action, `${project.slug}/open`).toMatch(/ответ Codex.+Открыть проект.+название/is);
       expect(steps[2].action, `${project.slug}/paste`).toMatch(/Скопировать команду.+вернитесь в Codex.+вставьте.+отправ/is);
       expect(steps[13].action, `${project.slug}/phone`).toMatch(/Telegram.+телефон.+вертикально/is);
       expect(steps[13].action, `${project.slug}/phone`).not.toMatch(/узком экране/i);
@@ -98,25 +93,31 @@ describe("quest builders", () => {
     expect(budget[12].action).toMatch(/Telegram.+телефон/is);
 
     const planner = buildQuest(projects.find((project) => project.slug === "planner")!, "real");
-    expect(planner[3].action).toMatch(/Codex.+Открыть папку.+planner/is);
+    expect(planner[2].action).toMatch(/по одному вопросу.+голосом или текстом/is);
+    expect(planner[3].action).toMatch(/Codex сам создал проект planner|Проект planner создан/is);
+    expect(planner[3].action).not.toMatch(/создайте.+папку|откройте.+папку/is);
     expect(planner[4].action).toMatch(/Скопировать команду.+Codex.+вставьте.+отправьте/is);
     expect(planner[12].action).toMatch(/телефоне.+добавьте дело.+перенесите/is);
 
     const ideas = buildQuest(projects.find((project) => project.slug === "idea-vault")!, "real");
-    expect(ideas[3].action).toMatch(/Codex.+Открыть папку.+idea-vault/is);
+    expect(ideas[2].action).toMatch(/по одному вопросу.+голосом или текстом/is);
+    expect(ideas[3].action).toMatch(/Проект idea-vault создан/is);
+    expect(ideas[3].action).not.toMatch(/создайте.+папку|откройте.+папку/is);
     expect(ideas[4].action).toMatch(/Скопировать команду.+Codex.+вставьте.+отправьте/is);
     expect(ideas[12].action).toMatch(/телефоне.+запишите идею.+найдите/is);
 
     const child = buildQuest(projects.find((project) => project.slug === "child-schedule")!, "real");
-    expect(child[3].action).toMatch(/Codex.+Открыть папку.+child-schedule/is);
+    expect(child[2].action).toMatch(/по одному вопросу.+голосом или текстом/is);
+    expect(child[3].action).toMatch(/Проект child-schedule создан/is);
+    expect(child[3].action).not.toMatch(/создайте.+папку|откройте.+папку/is);
     expect(child[4].action).toMatch(/Скопировать команду.+Codex.+вставьте.+отправьте/is);
     expect(child[12].action).toMatch(/телефоне.+Ребёнок А.+Что взять/is);
   });
 
-  it("names the exact prepared file in the real pressure diary route", () => {
+  it("asks pressure-diary questions without making the learner prepare a file", () => {
     const steps = buildQuest(projects.find((project) => project.slug === "pressure-diary")!, "real");
     const prompts = steps.flatMap((step) => step.prompt ?? []).join(" ");
-    expect(prompts).toContain("мои-измерения.csv");
+    expect(prompts).not.toContain("мои-измерения.csv");
     expect(prompts).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
     expect(prompts).not.toMatch(/логотип|подтверждённые цены|публичные контакты/i);
   });
@@ -151,24 +152,24 @@ describe("quest builders", () => {
     }
   });
 
-  it("shows creation before opening and splits questionnaire copy, paste, send, and result", () => {
+  it("shows automatic creation before the one-question-at-a-time interview", () => {
     const steps = buildQuest(projects.find((project) => project.slug === "home-helper")!, "real");
     const allTitles = steps.flatMap((step) => step.guide ?? []).map((frame) => frame.title);
-    expect(allTitles.indexOf("Создайте папку home-helper")).toBeLessThan(allTitles.indexOf("Откройте home-helper в Codex"));
+    expect(allTitles.indexOf("Откройте Codex")).toBeLessThan(allTitles.indexOf("Проверьте название проекта"));
     expect(steps[2].guide?.map((frame) => frame.title)).toEqual([
-      "Откройте проект home-helper",
-      "Откройте подготовленные материалы",
-      "Скопируйте анкету на сайте",
-      "Вставьте анкету в Codex",
-      "Отправьте анкету",
-      "Дождитесь паспорта проекта",
+      "Скопируйте команду опроса",
+      "Запустите разговор",
+      "Ответьте обычными словами",
+      "Добавьте ещё несколько дел",
+      "Подтвердите сводку",
     ]);
   });
 
   it("never mixes training wording into the real home-helper guide", () => {
     const guideText = stepText(buildQuest(projects.find((project) => project.slug === "home-helper")!, "real").flatMap((step) => step.guide ?? []));
     expect(guideText).not.toMatch(/вымышлен|демонстрацион|учебн/i);
-    expect(guideText).toContain("мои-дела.txt");
+    expect(guideText).toMatch(/голосом или текстом/i);
+    expect(guideText).not.toMatch(/мои-дела\.txt|создайте папку|откройте подготовленные материалы/i);
   });
 
   it("keeps health and child projects inside their safety boundary", () => {
@@ -178,7 +179,7 @@ describe("quest builders", () => {
     expect(pressure).toContain("не ставит диагноз");
     expect(pressure).toContain("не заменяет врача");
     expect(fitness).toContain("не даёт медицинских рекомендаций");
-    expect(child).toMatch(/не сохраняем ФИО ребёнка/i);
+    expect(child).toMatch(/не называйте полные имена и адреса/i);
     expect(child).not.toMatch(/домашний адрес ребёнка|геолокация ребёнка/i);
   });
 

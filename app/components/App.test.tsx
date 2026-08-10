@@ -9,6 +9,7 @@ import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
 import { getProject, projects } from "../content/projects";
+import { getPreparationProfile } from "../content/preparation";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
 import { customizationKey } from "../lib/customization";
@@ -47,6 +48,17 @@ describe("academy interface", () => {
       "src",
       "/screens/family-expenses/step-14.png",
     );
+  });
+
+  it("renders every mobile collection screen without asking for prepared files", () => {
+    const { container, rerender } = render(<MobileExpectedScene project={projects[0]} step={4} />);
+    for (const project of projects) {
+      rerender(<MobileExpectedScene project={project} step={4} />);
+      const profile = getPreparationProfile(project.slug);
+      expect(container, project.slug).not.toHaveTextContent(profile.sourceFile);
+      expect(container, project.slug).not.toHaveTextContent(profile.rulesFile);
+      expect(container, project.slug).toHaveTextContent(/Codex|создан/i);
+    }
   });
 
   it("renders a dedicated final-product interface for every bot", () => {
@@ -210,7 +222,7 @@ describe("academy interface", () => {
     render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /нужна помощь/i }));
-    expect(screen.getByText(/не получается создать папку/i)).toBeInTheDocument();
+    expect(screen.getByText(/не создавайте папку сами/i)).toBeInTheDocument();
   });
 
   it("hydrates project cards without changing saved progress during hydration", async () => {
@@ -243,8 +255,8 @@ describe("academy interface", () => {
     render(<Quest project={getProject("psychologist-site")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     const checks = screen.getAllByRole("checkbox");
-    expect(checks.length).toBeGreaterThanOrEqual(7);
-    const start = screen.getByRole("button", { name: /материалы готовы — начать квест/i });
+    expect(checks).toHaveLength(5);
+    const start = screen.getByRole("button", { name: /готова отвечать Codex — начать квест/i });
     expect(start).toBeDisabled();
     checks.forEach((check) => fireEvent.click(check));
     expect(start).toBeEnabled();
@@ -268,11 +280,12 @@ describe("academy interface", () => {
     expect(start).toBeEnabled();
   });
 
-  it("shows the human project folder name instead of the technical slug", () => {
+  it("does not ask a pressure-diary learner to prepare a folder or data file", () => {
     render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
-    expect(screen.getByText(/положите безопасные копии в папку/i)).toHaveTextContent("Дневник давления");
-    expect(screen.queryByText(/положите безопасные копии в папку pressure-diary/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Codex сам создаст проект pressure-diary, папки, файлы и нужные поля/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/мои-измерения\.csv|поля-дневника\.txt/i)).not.toBeInTheDocument();
   });
 
   it("opens a separate phone-only academy from the mobile format route", async () => {
@@ -364,31 +377,31 @@ describe("academy interface", () => {
   it("walks a real home-helper learner through every click with pictures", () => {
     render(<Quest project={getProject("home-helper")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
-    expect(screen.getAllByRole("img", { name: /подготовка home-helper/i })).toHaveLength(8);
-    expect(screen.getByText(/запишите пять домашних дел в файл «мои-дела\.txt»/i)).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: /подготовка home-helper/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/Codex сам создаст проект home-helper, папки, файлы и нужные поля/i)).toBeInTheDocument();
     screen.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
-    fireEvent.click(screen.getByRole("button", { name: /материалы готовы — начать квест/i }));
+    fireEvent.click(screen.getByRole("button", { name: /готова отвечать Codex — начать квест/i }));
 
     let guide = screen.getByRole("region", { name: /делайте по картинкам/i });
-    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(5);
-    expect(within(guide).getByRole("heading", { name: /создайте папку home-helper/i })).toBeInTheDocument();
+    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(4);
+    expect(within(guide).getByRole("heading", { name: /откройте Codex/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
     guide = screen.getByRole("region", { name: /делайте по картинкам/i });
-    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(6);
-    expect(within(guide).getByRole("heading", { name: /скопируйте анкету на сайте/i })).toBeInTheDocument();
-    expect(within(guide).getByRole("heading", { name: /вставьте анкету в codex/i })).toBeInTheDocument();
-    expect(within(guide).getByRole("heading", { name: /отправьте анкету/i })).toBeInTheDocument();
-    expect(within(guide).getAllByText(/готово, если/i)).toHaveLength(6);
+    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(5);
+    expect(within(guide).getByRole("heading", { name: /скопируйте команду опроса/i })).toBeInTheDocument();
+    expect(within(guide).getByRole("heading", { name: /запустите разговор/i })).toBeInTheDocument();
+    expect(within(guide).getByRole("heading", { name: /ответьте обычными словами/i })).toBeInTheDocument();
+    expect(within(guide).getAllByText(/готово, если/i)).toHaveLength(5);
     expect(screen.queryByText(/вымышлен|демонстрацион|учебн/i)).not.toBeInTheDocument();
   });
 
   it("renders a dedicated arrow screenshot scene for each home-helper action", async () => {
     window.history.replaceState({}, "", "/?capture-guide=home-helper--real--step-03--frame-03");
     render(<AppEntry />);
-    expect(await screen.findAllByRole("heading", { name: /скопируйте анкету на сайте/i })).not.toHaveLength(0);
-    expect(screen.getByText(/нажмите сюда/i)).toBeInTheDocument();
+    expect(await screen.findAllByRole("heading", { name: /ответьте обычными словами/i })).not.toHaveLength(0);
+    expect(screen.getByText(/пишите сюда/i)).toBeInTheDocument();
     expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
   });
 
@@ -431,17 +444,18 @@ describe("academy interface", () => {
     expect(screen.queryByText(/вымышлен|учебной папке/i)).not.toBeInTheDocument();
   });
 
-  it("shows the project-specific source in the mobile materials screenshot", async () => {
+  it("shows a voice-or-text interview instead of source files in the mobile screenshot", async () => {
     window.history.replaceState({}, "", "/?capture-mobile=pressure-diary--step-04");
     render(<AppEntry />);
-    expect(await screen.findByText("мои-измерения.csv")).toBeInTheDocument();
-    expect(screen.getByText("поля-дневника.txt")).toBeInTheDocument();
+    expect(await screen.findByText(/расскажите своими словами/i)).toBeInTheDocument();
+    expect(screen.getByText(/Codex сам создаст комнату, поля и файлы/i)).toBeInTheDocument();
+    expect(screen.queryByText(/мои-измерения\.csv|поля-дневника\.txt/i)).not.toBeInTheDocument();
   });
 
-  it("renders a dedicated screenshot scene for each preparation action", async () => {
+  it("does not expose the obsolete manual preparation capture route", async () => {
     window.history.replaceState({}, "", "/?capture-prep=home-helper--prep-02");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /запишите пять домашних дел/i })).toBeInTheDocument();
-    expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /выбери проект/i })).toBeInTheDocument();
+    expect(document.querySelector("#capture-guide-scene")).not.toBeInTheDocument();
   });
 });

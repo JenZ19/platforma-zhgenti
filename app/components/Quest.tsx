@@ -141,7 +141,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
         <h1>{project.title}</h1>
         <p>{project.outcome}</p>
         <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / 17</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
-        {preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные данные · папка готова" : "вымышленные данные"}</div>}
+        {preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
       </section>
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим квест…</section> : !preparationReady ? (

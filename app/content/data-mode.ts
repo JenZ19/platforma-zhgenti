@@ -3,30 +3,31 @@ import { getPreparationProfile } from "./preparation";
 import type { ProjectPreparationProfile } from "./preparation";
 import type { ProjectDefinition, QuestStep } from "./types";
 
-function sourceReference(profile: ProjectPreparationProfile, index: number): string {
+function sourceReference(index: number): string {
   const row = ["первую", "вторую", "третью"][index] ?? "подходящую";
-  return `${row} заполненную строку из файла «${profile.sourceFile}»`;
+  return `${row} подтверждённую запись из ответов ученицы`;
 }
 
 function realText(text: string, project: ProjectDefinition, profile: ProjectPreparationProfile): string {
   let next = text
-    .replaceAll(project.slug, profile.folderName)
-    .replaceAll(project.demo.join("; "), `заполненные строки из файла «${profile.sourceFile}»`);
+    .replaceAll(project.demo.join("; "), "подтверждённые примеры из ответов ученицы")
+    .replaceAll(profile.sourceFile, "подтверждённые ответы ученицы")
+    .replaceAll(profile.rulesFile, "подтверждённые правила ученицы");
   for (const [index, example] of project.demo.entries()) {
-    const reference = sourceReference(profile, index);
+    const reference = sourceReference(index);
     next = next.replaceAll(`вымышленный пример «${example}»`, reference);
     next = next.replaceAll(`тестовый пример «${example}»`, reference);
     next = next.replaceAll(`пример «${example}»`, reference);
     next = next.replaceAll(`«${example}»`, reference);
   }
   next = next
-    .replaceAll(`Демонстрационные примеры: ${project.demo.join("; ")}.`, `Рабочий источник: файл «${profile.sourceFile}» с вашими заполненными строками.`)
-    .replaceAll(`Для проверки используй только эти вымышленные примеры: ${project.demo.join("; ")}.`, `Для проверки используй заполненные строки из файла «${profile.sourceFile}».`)
-    .replaceAll("на вымышленных примерах", `на заполненных строках из файла «${profile.sourceFile}»`)
-    .replaceAll("только на вымышленных примерах", `только на заполненных строках из файла «${profile.sourceFile}»`)
-    .replaceAll("третий демонстрационный пример", sourceReference(profile, 2))
-    .replaceAll("демонстрационные данные", `записи из файла «${profile.sourceFile}»`)
-    .replaceAll("вымышленные примеры", `записи из файла «${profile.sourceFile}»`)
+    .replaceAll(`Демонстрационные примеры: ${project.demo.join("; ")}.`, "Рабочие примеры: только ответы, которые ученица подтвердила в диалоге.")
+    .replaceAll(`Для проверки используй только эти вымышленные примеры: ${project.demo.join("; ")}.`, "Для проверки используй только подтверждённые ответы ученицы.")
+    .replaceAll("на вымышленных примерах", "на подтверждённых примерах ученицы")
+    .replaceAll("только на вымышленных примерах", "только на подтверждённых примерах ученицы")
+    .replaceAll("третий демонстрационный пример", sourceReference(2))
+    .replaceAll("демонстрационные данные", "подтверждённые ответы ученицы")
+    .replaceAll("вымышленные примеры", "подтверждённые примеры ученицы")
     .replaceAll("учебную работу", "рабочую копию")
     .replaceAll("учебной версии", "подготовленной версии")
     .replaceAll("учебной папки", "рабочей папки")
@@ -58,17 +59,29 @@ export function adaptQuestToDataMode(
 ): QuestStep[] {
   if (mode === "demo") return steps;
   const profile = getPreparationProfile(project.slug);
-  const prefix = `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Работай только в папке «${profile.folderName}». Сначала открой файл «${profile.sourceFile}». В нём должны быть поля: ${profile.sourceFields.join(", ")}. Не додумывай отсутствующие факты: если нужная строка не заполнена, задай один простой вопрос. Не показывай и не публикуй закрытые исходники, пароли, токены и частные персональные данные.\n\n`;
-  return steps.map((step) => ({
-    ...step,
-    why: realText(step.why, project, profile),
-    action: realText(step.action, project, profile),
-    prompt: step.prompt ? prefix + realText(step.prompt, project, profile) : undefined,
-    expected: step.expected.map((item) => realText(item, project, profile)),
-    help: {
-      ...step.help,
-      body: realText(step.help.body, project, profile),
-      prompt: prefix + realText(step.help.prompt, project, profile),
-    },
-  }));
+  const sharedRules = `Не проси ученицу вручную создавать, открывать или заполнять служебные папки, файлы и поля — создавай их сам внутри проекта ${project.slug}. Не додумывай отсутствующие факты и не публикуй пароли, токены, закрытые исходники и частные персональные данные.`;
+  const prefixFor = (step: QuestStep) => {
+    if (step.id <= 2) {
+      return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. На этом уровне не начинай опрос и не запрашивай материалы: выполни только действие текущего уровня. ${sharedRules}\n\n`;
+    }
+    if (step.id === 3) {
+      return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Сейчас один раз собери сведения для проекта. Задавай строго один короткий вопрос за раз и принимай ответы голосом или текстом. Уточни: ${profile.sourceFields.join(", ")}. Если у ученицы уже есть документ или фотография, можно предложить прикрепить безопасную копию, но не проси создавать служебный файл. После ответов покажи короткую сводку и дождись подтверждения. ${sharedRules}\n\n`;
+    }
+    return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Используй уже подтверждённые ответы ученицы из этого диалога и не начинай опрос заново. Только если без одного факта нельзя выполнить текущий уровень, задай один короткий вопрос и прими ответ голосом или текстом. ${sharedRules}\n\n`;
+  };
+  return steps.map((step) => {
+    const prefix = prefixFor(step);
+    return {
+      ...step,
+      why: realText(step.why, project, profile),
+      action: realText(step.action, project, profile),
+      prompt: step.prompt ? prefix + realText(step.prompt, project, profile) : undefined,
+      expected: step.expected.map((item) => realText(item, project, profile)),
+      help: {
+        ...step.help,
+        body: realText(step.help.body, project, profile),
+        prompt: prefix + realText(step.help.prompt, project, profile),
+      },
+    };
+  });
 }

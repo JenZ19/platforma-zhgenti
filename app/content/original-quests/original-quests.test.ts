@@ -98,11 +98,12 @@ describe("first four original quests", () => {
     expect(text(steps)).not.toMatch(/автоматически.+назнач.+приоритет|публичн.+личн.+дел/i);
   });
 
-  it("keeps the real planner route inside its prepared files", () => {
+  it("builds the real planner from a short Codex interview", () => {
     const project = getProject("planner")!;
     const all = text(buildPlannerQuest(project, "real", defaultCustomization(project.slug)!));
-    expect(all).toContain("мои-дела.txt");
-    expect(all).toContain("правила-планера.txt");
+    expect(all).toMatch(/по одному вопросу.+голосом или текстом/i);
+    expect(all).toMatch(/Codex сам создаст|создай новое рабочее место planner/i);
+    expect(all).not.toMatch(/мои-дела\.txt|правила-планера\.txt|создайте.+папку|создайте.+файл/i);
     expect(all).not.toMatch(/вымышлен|демонстрацион|учебн/i);
     expect(all).not.toContain(project.demo.join("; "));
   });
@@ -128,11 +129,12 @@ describe("first four original quests", () => {
     expect(text(steps)).not.toMatch(/бюджет|расход|главное сегодня/i);
   });
 
-  it("keeps the real idea-vault route inside its prepared files", () => {
+  it("builds the real idea vault from a short Codex interview", () => {
     const project = getProject("idea-vault")!;
     const all = text(buildIdeaVaultQuest(project, "real", defaultCustomization(project.slug)!));
-    expect(all).toContain("мои-идеи.txt");
-    expect(all).toContain("темы-и-статусы.txt");
+    expect(all).toMatch(/по одному вопросу.+голосом или текстом/i);
+    expect(all).toMatch(/Codex сам создаст|создай новое рабочее место idea-vault/i);
+    expect(all).not.toMatch(/мои-идеи\.txt|темы-и-статусы\.txt|создайте.{0,60}(?:папку|файл)/i);
     expect(all).not.toMatch(/вымышлен|демонстрацион|учебн/i);
     expect(all).not.toContain(project.demo.join("; "));
   });
@@ -156,15 +158,17 @@ describe("first four original quests", () => {
     expect(text(steps[15])).toMatch(/1\. Кто будет пользоваться расписанием[\s\S]+8\. Что нельзя показывать/);
     expect(text(steps[16])).toMatch(/семейн.+верси.+клиентск.+верси/i);
     expect(text(steps)).toMatch(/Реб[её]нок А.+Реб[её]нок Б|Реб[её]нок Б.+Реб[её]нок А/i);
-    expect(text(steps)).toMatch(/не сохраняем ФИО ребёнка.+домашний адрес.+геолокацию.+контакты преподавателей/i);
+    expect(text(steps)).toMatch(/без школы, адресов, маршрутов, геолокации и контактов/i);
+    expect(text(steps)).toMatch(/не вставляйте реальные полные имена и адреса/i);
     expect(text(steps)).not.toMatch(/ул\.|дом \d|\+7\s?\d{3}/i);
   });
 
-  it("keeps the real child-schedule route inside its prepared files", () => {
+  it("builds the real child schedule from a private Codex interview", () => {
     const project = getProject("child-schedule")!;
     const all = text(buildChildScheduleQuest(project, "real", defaultCustomization(project.slug)!));
-    expect(all).toContain("занятия-недели.txt");
-    expect(all).toContain("правила-расписания.txt");
+    expect(all).toMatch(/по одному вопросу.+голосом или текстом/i);
+    expect(all).toMatch(/Codex сам создаст|создай новое рабочее место child-schedule/i);
+    expect(all).not.toMatch(/занятия-недели\.txt|правила-расписания\.txt|создайте.{0,60}(?:папку|файл)/i);
     expect(all).not.toMatch(/вымышлен|демонстрацион|учебн/i);
     expect(all).not.toContain(project.demo.join("; "));
   });

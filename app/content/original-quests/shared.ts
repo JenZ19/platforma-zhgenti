@@ -1,5 +1,4 @@
 import type { DataMode } from "../../lib/preparation";
-import { getPreparationProfile } from "../preparation";
 import { paletteDescription } from "../customization";
 import type {
   ProjectDefinition,
@@ -34,21 +33,23 @@ function passport(customization: QuestCustomization): string {
   return `Название: «${customization.name}». Для кого: ${customization.audience}. Главная задача: ${customization.goal}. Устройство экрана: ${customization.style}. Цветовая гамма: ${paletteDescription(customization.palette)}. Тон подсказок: ${customization.tone}. Одна особенная функция: ${customization.feature}.`;
 }
 
-function dataContext(project: ProjectDefinition, mode: DataMode): string {
+function dataContext(project: ProjectDefinition, mode: DataMode, step: number): string {
   if (mode === "demo") return `Используй только безопасные примеры без имён, карт, счетов и контактов: ${project.demo.join("; ")}.`;
-  if (project.slug === "family-expenses") {
-    return "РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Получай сведения только из ответов ученицы в этом диалоге. Задавай один короткий вопрос за раз, принимай ответы голосом или текстом и ничего не додумывай. Все нужные папки, файлы и поля создавай сам внутри текущего рабочего проекта. Никогда не проси ученицу вручную создавать, открывать или заполнять служебные файлы. Не запрашивай и не публикуй номера карт и счетов, коды, пароли и личные сведения членов семьи.";
-  }
-  const profile = getPreparationProfile(project.slug);
-  return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Работай только с копиями из папки «${profile.folderName}». Основные записи находятся в файле «${profile.sourceFile}», правила — в файле «${profile.rulesFile}». Ничего не додумывай, не публикуй личные сведения и не меняй оригиналы вне папки проекта.`;
+  const shared = "Все нужные папки, файлы и поля создавай сам. Никогда не проси ученицу вручную создавать, открывать или заполнять служебные файлы. Не запрашивай и не публикуй пароли, коды, реквизиты и лишние персональные сведения.";
+  if (step <= 2) return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. На этом уровне не начинай опрос: помоги только посмотреть результат или выбрать свою версию. ${shared}`;
+  if (step === 3) return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Сейчас один раз собери сведения: задавай строго один короткий вопрос за раз, принимай ответы голосом или текстом и ничего не додумывай. Если уже есть безопасный документ или фотография, можно предложить прикрепить копию, но не проси создавать служебный файл. После ответов покажи сводку и дождись подтверждения. ${shared}`;
+  return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Используй уже подтверждённые ответы из этого диалога и не начинай опрос заново. Если без одного факта нельзя продолжить, задай только один короткий вопрос и прими ответ голосом или текстом. ${shared}`;
 }
 
 function workspaceContext(project: ProjectDefinition, input: OriginalStepInput): string {
-  if (project.slug === "family-expenses" && input.id === 3) {
+  if (input.id <= 2) {
+    return "Проект ещё не нужно создавать или открывать: выполни только действие текущего уровня и не трогай другие проекты или личные документы.";
+  }
+  if (input.id === 3) {
     return "Папки проекта ещё может не быть. На этом уровне только проведи короткий опрос и дождись подтверждения сводки. Ничего не создавай до подтверждения и не трогай другие проекты или личные документы.";
   }
-  if (project.slug === "family-expenses" && input.id === 4) {
-    return "Создай новое рабочее место family-expenses только внутри уже разрешённого пространства. Не меняй соседние проекты и личные документы.";
+  if (input.id === 4) {
+    return `Создай новое рабочее место ${project.slug} только внутри уже разрешённого пространства. Не меняй соседние проекты и личные документы.`;
   }
   return "Работай только внутри папки текущего проекта и не удаляй работающие части.";
 }
@@ -93,7 +94,7 @@ function guideFrames(project: ProjectDefinition, mode: DataMode, input: Original
       app,
       action: input.action,
       exactText: prompt,
-      after: `Действие выполнено только внутри проекта «${project.title}». Выбранный режим данных — ${mode === "real" ? project.slug === "family-expenses" ? "реальные ответы, которые Codex получил в диалоге" : "реальные данные из подготовленной папки" : "безопасные примеры"}.`,
+      after: `Действие выполнено только внутри проекта «${project.title}». Выбранный режим данных — ${mode === "real" ? "реальные ответы, которые Codex получил в диалоге" : "безопасные примеры"}.`,
       doneWhen: input.expected[0],
       fallback: `Если нужной кнопки или поля нет, не нажимайте случайные пункты. Откройте помощь этого уровня и скопируйте готовую команду для исправления проекта «${project.title}».`,
       screenshot: `${path}-frame-02.png`,
@@ -122,7 +123,7 @@ export function makeOriginalStep(
   input: OriginalStepInput,
 ): QuestStep {
   const domain = domainWords(project.slug);
-  const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». ${workspaceContext(project, input)} ${dataContext(project, mode)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
+  const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». ${workspaceContext(project, input)} ${dataContext(project, mode, input.id)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
   return {
     id: input.id,
     title: input.title,
@@ -137,7 +138,7 @@ export function makeOriginalStep(
     help: {
       title: domain.title,
       body: input.help,
-      prompt: `В проекте «${project.title}» я застряла на уровне ${input.id} «${input.title}». ${dataContext(project, mode)} Моя версия: ${passport(customization)} Не переделывай весь проект. Проверь только этот уровень, найди одну причину расхождения и исправь её. Затем напиши одно действие для меня и три видимых признака, по которым я пойму, что ${domain.result}.`,
+      prompt: `В проекте «${project.title}» я застряла на уровне ${input.id} «${input.title}». ${dataContext(project, mode, input.id)} Моя версия: ${passport(customization)} Не переделывай весь проект. Проверь только этот уровень, найди одну причину расхождения и исправь её. Затем напиши одно действие для меня и три видимых признака, по которым я пойму, что ${domain.result}.`,
     },
     guide: guideFrames(project, mode, input, prompt),
   };

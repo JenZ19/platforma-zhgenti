@@ -38,14 +38,15 @@ describe("quest data preparation", () => {
   it("builds a detailed checklist from the selected project", () => {
     const project = getProject("psychologist-site")!;
     const checklist = buildRealDataChecklist(project);
-    expect(checklist.length).toBeGreaterThanOrEqual(7);
-    expect(checklist.map((item) => item.text).join(" ")).toMatch(/запрос|формат|контакт/i);
-    expect(checklist.map((item) => `${item.text} ${item.detail}`).join(" ")).toContain(project.safety);
-    expect(checklist.map((item) => item.text).join(" ")).toMatch(/парол|токен/i);
+    expect(checklist).toHaveLength(5);
+    const checklistText = checklist.map((item) => `${item.text} ${item.detail}`).join(" ");
+    expect(checklistText).toMatch(/запрос|формат|контакт/i);
+    expect(checklistText).toContain(project.safety);
+    expect(checklistText).toMatch(/парол|токен/i);
     expect(new Set(checklist.map((item) => item.id)).size).toBe(checklist.length);
   });
 
-  it("gives every project its own click-by-click preparation path", () => {
+  it("gives every project a personal conversation checklist without manual files", () => {
     const fingerprints = new Set<string>();
 
     for (const project of projects) {
@@ -56,13 +57,13 @@ describe("quest data preparation", () => {
         fingerprints.add(checklist.map((item) => `${item.text}|${item.detail}`).join("||"));
         continue;
       }
-      expect(checklist, project.slug).toHaveLength(8);
-      expect(checklist.every((item) => (item.steps?.length ?? 0) >= 3), project.slug).toBe(true);
-      expect(checklist.every((item) => (item.doneWhen?.length ?? 0) > 20), project.slug).toBe(true);
+      expect(checklist, project.slug).toHaveLength(5);
+      expect(checklist.every((item) => item.steps === undefined), project.slug).toBe(true);
+      expect(checklist.every((item) => item.screenshot === undefined), project.slug).toBe(true);
       expect(checklist.every((item) => item.detail.length > 25), project.slug).toBe(true);
 
       const fingerprint = checklist
-        .slice(1, 6)
+        .slice(0, 4)
         .map((item) => `${item.text}|${item.example ?? ""}`)
         .join("||");
       fingerprints.add(fingerprint);
@@ -86,12 +87,12 @@ describe("quest data preparation", () => {
       .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""} ${item.example ?? ""} ${item.doneWhen ?? ""}`)
       .join(" ");
 
-    expect(text).toMatch(/мои-измерения\.csv/i);
+    expect(text).not.toMatch(/mои-измерения\.csv|мои-измерения\.csv|\.txt/i);
     expect(text).toMatch(/верхн.+давлен/i);
     expect(text).toMatch(/нижн.+давлен/i);
     expect(text).toMatch(/пульс/i);
     expect(text).toMatch(/самочувств/i);
-    expect(text).toMatch(/выгрузк.+врач/i);
+    expect(text).toMatch(/истори.+измерений|фильтр по дате/i);
     expect(text).not.toMatch(/логотип|цен[аы]|контакт/i);
   });
 
@@ -132,15 +133,14 @@ describe("quest data preparation", () => {
     expect(isPreparationReady({ version: 1, mode: "real", checked: checklist.map((item) => item.id), ready: true }, checklist)).toBe(true);
   });
 
-  it("explains every home-helper preparation item as concrete beginner actions", () => {
+  it("prepares home-helper answers without folders, files, or special formatting", () => {
     const checklist = buildRealDataChecklist(getProject("home-helper")!);
-    expect(checklist).toHaveLength(8);
-    expect(checklist[1].text).toBe("Запишите пять домашних дел в файл «мои-дела.txt»");
-    expect(checklist.map((item) => item.text).join(" ")).not.toMatch(/сущност|дело, зона, исполнитель, повтор/i);
-    for (const [index, item] of checklist.entries()) {
-      expect(item.steps?.length, item.id).toBeGreaterThanOrEqual(3);
-      expect(item.doneWhen?.length, item.id).toBeGreaterThan(20);
-      expect(item.screenshot, item.id).toBe(`/guides/home-helper/real/prep-${String(index + 1).padStart(2, "0")}.png`);
-    }
+    expect(checklist).toHaveLength(5);
+    const text = checklist.map((item) => `${item.text} ${item.detail}`).join(" ");
+    expect(text).toMatch(/Что сделать.+Где.+Кто.+Как часто/i);
+    expect(text).toMatch(/голосом или текстом/i);
+    expect(text).toMatch(/Codex сам создаст проект home-helper, папки, файлы и нужные поля/i);
+    expect(text).not.toMatch(/мои-дела\.txt|создайте.+папку|создайте.+файл|откройте.+файл/i);
+    expect(checklist.every((item) => item.steps === undefined && item.screenshot === undefined)).toBe(true);
   });
 });

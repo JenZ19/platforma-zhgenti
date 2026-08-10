@@ -4,7 +4,6 @@ import { chromium } from "playwright";
 import {
   homeHelperGuideFrameCounts,
   homeHelperGuideScreenPath,
-  homeHelperPreparationScreenPath,
 } from "./projects.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
@@ -16,13 +15,8 @@ const guideTasks = ["real", "demo"].flatMap((mode) => homeHelperGuideFrameCounts
   frame: frameIndex + 1,
   file: homeHelperGuideScreenPath(mode, stepIndex + 1, frameIndex + 1),
 }))));
-const prepTasks = Array.from({ length: 8 }, (_, index) => ({
-  type: "prep",
-  index: index + 1,
-  file: homeHelperPreparationScreenPath(index + 1),
-}));
 const force = process.env.FORCE_CAPTURE === "1";
-const tasks = process.env.CAPTURE_PREP_ONLY === "1" ? prepTasks : [...prepTasks, ...guideTasks];
+const tasks = guideTasks;
 let cursor = 0;
 let finished = 0;
 
@@ -35,9 +29,7 @@ async function worker(number) {
     const task = tasks[cursor++];
     if (!force && fs.existsSync(task.file)) { finished += 1; continue; }
     fs.mkdirSync(path.dirname(task.file), { recursive: true });
-    const route = task.type === "guide"
-      ? `?capture-guide=home-helper--${task.mode}--step-${String(task.step).padStart(2, "0")}--frame-${String(task.frame).padStart(2, "0")}`
-      : `?capture-prep=home-helper--prep-${String(task.index).padStart(2, "0")}`;
+    const route = `?capture-guide=home-helper--${task.mode}--step-${String(task.step).padStart(2, "0")}--frame-${String(task.frame).padStart(2, "0")}`;
     let lastError;
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
