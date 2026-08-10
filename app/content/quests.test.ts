@@ -234,4 +234,37 @@ describe("quest builders", () => {
       expect(steps[15].prompt, slug).toMatch(/до подтверждения/i);
     },
   );
+
+  it("teaches every non-agent project as a personal version and a client copy", () => {
+    const nonAgents = questProjects.filter((project) => project.kind !== "agent");
+    expect(nonAgents).toHaveLength(24);
+    const originalSlugs = new Set(["family-expenses", "planner", "idea-vault", "child-schedule"]);
+    const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug));
+    expect(genericNonAgents).toHaveLength(20);
+
+    for (const project of genericNonAgents) {
+      const customization = defaultCustomization(project.slug)!;
+      const steps = buildQuest(project, "demo", customization);
+      const text = stepText(steps);
+
+      expect(text, project.slug).toContain(customization.name);
+      expect(text, project.slug).toContain(customization.audience);
+      expect(text, project.slug).toContain(customization.palette.name);
+      expect(steps[14].title, project.slug).toMatch(/личн.+верси|аудит и публикац/i);
+      expect(steps[15].title, project.slug).toMatch(/клиентск.+копи|заказчик/i);
+      expect(steps[15].prompt, project.slug).toMatch(/восемь вопросов|8 вопросов/i);
+      expect(steps[15].prompt, project.slug).toMatch(/по одному вопросу/i);
+      expect(steps[15].prompt, project.slug).toMatch(/было.+станет/is);
+      expect(steps[16].prompt, project.slug).toMatch(/личн.+верси.+клиентск.+верси/is);
+    }
+
+    for (const slug of originalSlugs) {
+      const project = questProjects.find((item) => item.slug === slug)!;
+      const steps = buildQuest(project, "demo", defaultCustomization(project.slug));
+      expect(steps[13].title, slug).toMatch(/опубликовал/i);
+      expect(steps[14].title, slug).toMatch(/клиентск.+копи/i);
+      expect(steps[15].title, slug).toMatch(/бриф|адаптировал/i);
+      expect(steps[16].title, slug).toMatch(/упаковал|портфолио/i);
+    }
+  });
 });

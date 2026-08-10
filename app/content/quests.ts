@@ -9,10 +9,31 @@ import type { DataMode } from "../lib/preparation";
 import { adaptQuestToDataMode } from "./data-mode";
 import { buildHomeHelperGuide } from "./home-helper-guide";
 import { defaultCustomization } from "./customization";
+import { customizationSummary } from "./customization";
 import { buildFamilyExpensesQuest } from "./original-quests/family-expenses";
 import { buildPlannerQuest } from "./original-quests/planner";
 import { buildIdeaVaultQuest } from "./original-quests/idea-vault";
 import { buildChildScheduleQuest } from "./original-quests/child-schedule";
+
+function applyCustomization(
+  steps: QuestStep[],
+  project: ProjectDefinition,
+  customization?: QuestCustomization,
+): QuestStep[] {
+  if (!customization || project.kind === "agent") return steps;
+  const summary = customizationSummary(project.slug, customization);
+  return steps.map((step) => {
+    if (![2, 4, 13, 15, 16, 17].includes(step.id)) return step;
+    return {
+      ...step,
+      prompt: step.prompt ? `${step.prompt}\n\nМОЯ ВЕРСИЯ ПРОЕКТА: ${summary}` : undefined,
+      help: {
+        ...step.help,
+        prompt: `${step.help.prompt}\n\nСохрани мою версию: ${summary}`,
+      },
+    };
+  });
+}
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): QuestStep[] {
   if (project.slug === "family-expenses") {
@@ -45,7 +66,8 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", 
       steps = buildPortfolioQuest(project);
       break;
   }
-  const modeSteps = adaptQuestToDataMode(steps, project, mode);
+  const customizedSteps = applyCustomization(steps, project, customization ?? defaultCustomization(project.slug));
+  const modeSteps = adaptQuestToDataMode(customizedSteps, project, mode);
   return project.slug === "home-helper" ? buildHomeHelperGuide(project, mode, modeSteps) : modeSteps;
 }
 
