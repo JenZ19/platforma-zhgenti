@@ -48,6 +48,16 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     setCustomization(loadCustomization(project.slug, window.localStorage));
   }, [project.slug]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      window.scrollTo({ top: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [progress.activeStep]);
+
   const step = steps[progress.activeStep - 1] ?? steps[0];
   const percent = Math.round((progress.completed.length / 17) * 100);
   const finished = progress.completed.length === 17;
@@ -77,7 +87,6 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   function startRealQuest() {
     if (!preparation || preparation.mode !== "real" || !checklist.every((item) => preparation.checked.includes(item.id))) return;
     storePreparation({ ...preparation, ready: true });
-    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   function changeDataMode() {
@@ -91,7 +100,6 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     setProgress(next);
     saveProgress(project.slug, next, window.localStorage);
     setHelpOpen(false);
-    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   function finishStep() {
@@ -101,7 +109,6 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     saveProgress(project.slug, next, window.localStorage);
     setHelpOpen(false);
     if (!wasDone && step.reward) setReward(step.reward);
-    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   async function copy(text: string, kind: "main" | "help") {

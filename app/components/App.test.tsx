@@ -1,7 +1,7 @@
 import { act } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getBotPrototypeSpec } from "../content/bot-prototypes";
 import { agentCoverPrototypeSlugs, getAgentCoverPrototypeSpec } from "../content/agent-cover-prototypes";
@@ -182,25 +182,25 @@ describe("academy interface", () => {
     expect(localStorage.getItem(progressKey("planner"))).toContain('"completed":[1]');
   });
 
-  it("returns a desktop quest to the top after the learner presses next", () => {
+  it("returns a desktop quest to the top after the learner presses next", async () => {
     render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
 
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" }));
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
   });
 
-  it("returns a mobile quest to the top immediately after next", () => {
+  it("returns a mobile quest to the top immediately after next", async () => {
     render(<MobileQuest project={getProject("child-schedule")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — дальше/i }));
 
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" }));
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
   });
 
