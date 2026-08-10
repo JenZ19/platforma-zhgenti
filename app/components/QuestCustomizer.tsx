@@ -21,13 +21,6 @@ const axes: QuestCustomizationAxis[] = [
   "feature",
 ];
 
-const previewCopy: Record<string, { caption: string; metric: string; action: string }> = {
-  "family-expenses": { caption: "Осталось до конца месяца", metric: "62 450 ₽", action: "+ Добавить расход" },
-  planner: { caption: "Главное сегодня", metric: "1 важное дело", action: "+ Добавить дело" },
-  "idea-vault": { caption: "В моей копилке", metric: "12 идей", action: "+ Сохранить мысль" },
-  "child-schedule": { caption: "Сегодня", metric: "3 занятия", action: "+ Добавить занятие" },
-};
-
 function samePalette(left: QuestColorPalette, right: QuestColorPalette): boolean {
   return left.name === right.name && left.background === right.background && left.surface === right.surface && left.accent === right.accent && left.text === right.text;
 }
@@ -100,7 +93,7 @@ export function QuestCustomizer({
   }
 
   const customPalette = !questColorPalettes.some((palette) => samePalette(palette, selection.palette));
-  const preview = previewCopy[profile.slug] ?? previewCopy["family-expenses"];
+  const preview = profile.preview;
 
   return (
     <section

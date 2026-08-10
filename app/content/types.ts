@@ -68,7 +68,25 @@ export type QuestCustomizationProfile = {
   slug: string;
   title: string;
   promise: string;
+  preview: { caption: string; metric: string; action: string };
   axes: Record<QuestCustomizationAxis, QuestCustomizationAxisProfile>;
+};
+
+export type AgentContract = {
+  slug: string;
+  theme: string;
+  role: string;
+  inputExample: string;
+  voiceExample: string;
+  requiredFields: string[];
+  firstQuestion: string;
+  answerExample: string;
+  decisionRule: string;
+  resultTitle: string;
+  resultItems: string[];
+  selfCheck: string[];
+  confirmationRule: string;
+  handoff: string;
 };
 
 export type QuestStep = {

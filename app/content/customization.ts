@@ -4,6 +4,8 @@ import type {
   QuestCustomizationAxis,
   QuestCustomizationProfile,
 } from "./types";
+import { getAgentContract } from "./agent-contracts";
+import { getQuestProject } from "./projects";
 
 export const originalQuestSlugs = [
   "family-expenses",
@@ -32,6 +34,7 @@ const profiles: Record<OriginalQuestSlug, QuestCustomizationProfile> = {
     slug: "family-expenses",
     title: "Соберите свой семейный бюджет",
     promise: "Выберите, для кого он создаётся, что показывает первым и чем будет отличаться от чужих шаблонов.",
+    preview: { caption: "Осталось до конца месяца", metric: "62 450 ₽", action: "+ Добавить расход" },
     axes: {
       audience: { label: "Кто будет пользоваться", hint: "От этого зависят тексты и главный экран.", options: ["Я сама", "Мы вдвоём", "Семья с детьми", "Семья, которая копит на большую покупку"] },
       goal: { label: "Что важнее увидеть сразу", hint: "На главном экране останется один главный ответ.", options: ["Остаток до конца месяца", "Самые крупные категории", "Недельный лимит", "Сколько уже накоплено на цель"] },
@@ -45,6 +48,7 @@ const profiles: Record<OriginalQuestSlug, QuestCustomizationProfile> = {
     slug: "planner",
     title: "Соберите планер под свой ритм",
     promise: "Решите, что он показывает утром, как называет дела и какая одна функция снимает нагрузку.",
+    preview: { caption: "Главное сегодня", metric: "1 важное дело", action: "+ Добавить дело" },
     axes: {
       audience: { label: "Для кого планер", hint: "Выберите самый близкий ритм жизни.", options: ["Мама с малышом", "Эксперт с клиентами", "Студентка", "Человек с гибким графиком"] },
       goal: { label: "Что планер должен облегчить", hint: "Это станет главным обещанием проекта.", options: ["Не забывать важное", "Разгрузить голову", "Видеть одно главное дело", "Разделить дом и работу"] },
@@ -58,6 +62,7 @@ const profiles: Record<OriginalQuestSlug, QuestCustomizationProfile> = {
     slug: "idea-vault",
     title: "Соберите свою копилку идей",
     promise: "Выберите, какие мысли вы храните, как находите лучшее и что помогает перейти к действию.",
+    preview: { caption: "В моей копилке", metric: "12 идей", action: "+ Сохранить мысль" },
     axes: {
       audience: { label: "Для кого копилка", hint: "От этого зависят темы и примеры карточек.", options: ["Автор контента", "Рукодельница", "Предпринимательница", "Организатор семейных дел"] },
       goal: { label: "Что должно стать проще", hint: "Это главное действие на первом экране.", options: ["Не терять мысли", "Выбирать лучшую идею", "Раскладывать хаос по темам", "Превращать идеи в действия"] },
@@ -71,6 +76,7 @@ const profiles: Record<OriginalQuestSlug, QuestCustomizationProfile> = {
     slug: "child-schedule",
     title: "Соберите безопасное семейное расписание",
     promise: "Выберите утренний сценарий и удобные обозначения без ФИО, адреса и других лишних данных ребёнка.",
+    preview: { caption: "Сегодня", metric: "3 занятия", action: "+ Добавить занятие" },
     axes: {
       audience: { label: "Для какой семьи", hint: "Полные имена детей указывать не нужно.", options: ["Один ребёнок", "Двое детей", "Семья с несколькими секциями", "Семья с переменным расписанием"] },
       goal: { label: "Что важнее утром", hint: "Это будет видно сразу после открытия.", options: ["Ничего не забыть", "Увидеть пересечения", "Собрать нужные вещи", "Разделить расписания без имён"] },
@@ -90,7 +96,54 @@ export function isOriginalQuestSlug(slug: string): slug is OriginalQuestSlug {
 
 export function getCustomizationProfile(slug: string): QuestCustomizationProfile | undefined {
   const baseSlug = slug.replace(/^mobile:/, "");
-  return isOriginalQuestSlug(baseSlug) ? profiles[baseSlug] : undefined;
+  if (isOriginalQuestSlug(baseSlug)) return profiles[baseSlug];
+  const project = getQuestProject(baseSlug);
+  if (!project) return undefined;
+  const contract = project.kind === "agent" ? getAgentContract(project.slug) : undefined;
+  const result = contract?.resultTitle ?? project.outcome;
+  const kindLabel = project.kind === "agent" ? "ИИ-агента" : project.kind === "service" ? "сервис" : project.kind === "portfolio" ? "портфолио" : "сайт";
+  return {
+    slug: project.slug,
+    title: `Соберите свой ${kindLabel} «${project.title}»`,
+    promise: "Ответьте на шесть лёгких вопросов. Готовые варианты можно выбрать одним нажатием, а любой пункт — написать своими словами.",
+    preview: {
+      caption: result,
+      metric: project.demo[0],
+      action: project.features[0],
+    },
+    axes: {
+      audience: {
+        label: "Для кого вы делаете проект",
+        hint: "Можно сделать для себя, для учебного заказчика или для своей конкретной аудитории.",
+        options: [project.audience, "Для себя", "Для заказчика", "Для своей аудитории"],
+      },
+      goal: {
+        label: "Какой главный результат нужен",
+        hint: "Выберите один главный результат — остальные функции останутся внутри проекта.",
+        options: [result, ...project.features.slice(0, 2)],
+      },
+      name: {
+        label: "Как будет называться ваша версия",
+        hint: "Название можно изменить в любой момент.",
+        options: [project.title, `Мой ${project.entities[0]}`, `${project.symbol} ${project.entities[1]}`],
+      },
+      style: {
+        label: "Как выглядит проект",
+        hint: "Выберите форму экрана. Цветовую гамму зададите отдельно ниже.",
+        options: ["Чат как переписка", "Карточка результата", "Спокойная рабочая панель"],
+      },
+      tone: {
+        label: "Как проект разговаривает",
+        hint: "Этот тон будет в вопросах, подсказках и подтверждениях.",
+        options: ["Мягко и заботливо", "Коротко и нейтрально", "Делово без давления"],
+      },
+      feature: {
+        label: "Какая функция делает проект вашим",
+        hint: "Выберите одну особенность, которую покажете в портфолио.",
+        options: project.features.slice(0, 4),
+      },
+    },
+  };
 }
 
 export function defaultCustomization(slug: string): QuestCustomization | undefined {
@@ -103,7 +156,16 @@ export function defaultCustomization(slug: string): QuestCustomization | undefin
 }
 
 export function customizationSummary(slug: string, selection: QuestCustomization): string {
-  const project = getCustomizationProfile(slug);
-  if (!project) return "";
-  return `Я создаю «${selection.name}». Для кого: ${selection.audience}. Главная задача: ${selection.goal}. Устройство экрана: ${selection.style}. Цветовая гамма: ${paletteDescription(selection.palette)}. Тон подсказок: ${selection.tone}. Особенная функция: ${selection.feature}.`;
+  const baseSlug = slug.replace(/^mobile:/, "");
+  const profile = getCustomizationProfile(baseSlug);
+  const project = getQuestProject(baseSlug);
+  if (!profile || !project) return "";
+  const resultKind = project.kind === "agent"
+    ? "ИИ-агента"
+    : project.kind === "service"
+      ? "сервис"
+      : project.kind === "portfolio"
+        ? "портфолио"
+        : "сайт";
+  return `Я создаю ${resultKind} «${selection.name}». Для кого: ${selection.audience}. Главная задача: ${selection.goal}. Устройство экрана: ${selection.style}. Цветовая гамма: ${paletteDescription(selection.palette)}. Тон подсказок: ${selection.tone}. Особенная функция: ${selection.feature}.`;
 }
