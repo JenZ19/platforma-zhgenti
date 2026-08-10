@@ -1,4 +1,6 @@
-import type { ProjectDefinition } from "../content/types";
+import { isProjectBundle } from "../content/projects";
+import type { CatalogProject } from "../content/types";
+import { branchStorageSlug, loadOutputChoice, type QuestSurface } from "./output-format";
 
 export const LEVELS_PER_QUEST = 17;
 const PREFIX = "feya-academy-progress-v1";
@@ -77,8 +79,32 @@ export function resetProgress(slug: string, storage: StorageLike): void {
   storage.removeItem(progressKey(slug));
 }
 
-export function getAcademyStats(projects: ProjectDefinition[], storage: StorageLike) {
-  const values = projects.map((project) => loadProgress(project.slug, storage));
+export function getCatalogProjectProgress(
+  project: CatalogProject,
+  storage: StorageLike,
+  surface: QuestSurface = "desktop",
+): QuestProgress {
+  if (!isProjectBundle(project)) {
+    const storageSlug = `${surface === "mobile" ? "mobile:" : ""}${project.slug}`;
+    return loadProgress(storageSlug, storage);
+  }
+
+  const selected = loadOutputChoice(project.slug, surface, storage);
+  if (selected) {
+    return loadProgress(branchStorageSlug(project.slug, selected, surface), storage);
+  }
+
+  const service = loadProgress(branchStorageSlug(project.slug, "service", surface), storage);
+  const agent = loadProgress(branchStorageSlug(project.slug, "agent", surface), storage);
+  return agent.completed.length > service.completed.length ? agent : service;
+}
+
+export function getAcademyStats(
+  projects: CatalogProject[],
+  storage: StorageLike,
+  surface: QuestSurface = "desktop",
+) {
+  const values = projects.map((project) => getCatalogProjectProgress(project, storage, surface));
   return {
     totalProjects: projects.length,
     startedProjects: values.filter((progress) => progress.completed.length > 0).length,
@@ -88,3 +114,5 @@ export function getAcademyStats(projects: ProjectDefinition[], storage: StorageL
     score: values.reduce((total, progress) => total + progress.score, 0),
   };
 }
+
+export const getCatalogStats = getAcademyStats;

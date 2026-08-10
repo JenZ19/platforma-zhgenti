@@ -26,9 +26,30 @@ export function customizationKey(storageSlug: string): string {
   return `feya-quest:customization:${storageSlug}`;
 }
 
-export function loadCustomization(storageSlug: string, storage: StorageLike): QuestCustomization | undefined {
-  const defaults = defaultCustomization(storageSlug);
-  if (!defaults || !getCustomizationProfile(storageSlug)) return undefined;
+function legacyProfileSlug(storageSlug: string): string {
+  return storageSlug.replace(/^mobile:/, "").split(":")[0];
+}
+
+export function loadCustomization(
+  storageSlug: string,
+  profileSlug: string,
+  storage: StorageLike,
+): QuestCustomization | undefined;
+export function loadCustomization(
+  storageSlug: string,
+  storage: StorageLike,
+): QuestCustomization | undefined;
+export function loadCustomization(
+  storageSlug: string,
+  profileSlugOrStorage: string | StorageLike,
+  maybeStorage?: StorageLike,
+): QuestCustomization | undefined {
+  const profileSlug = typeof profileSlugOrStorage === "string"
+    ? profileSlugOrStorage
+    : legacyProfileSlug(storageSlug);
+  const storage = typeof profileSlugOrStorage === "string" ? maybeStorage! : profileSlugOrStorage;
+  const defaults = defaultCustomization(profileSlug);
+  if (!defaults || !getCustomizationProfile(profileSlug)) return undefined;
   try {
     const raw = storage.getItem(customizationKey(storageSlug));
     if (!raw) return defaults;
@@ -45,9 +66,34 @@ export function loadCustomization(storageSlug: string, storage: StorageLike): Qu
   }
 }
 
-export function saveCustomization(storageSlug: string, value: QuestCustomization, storage: StorageLike): void {
-  if (!getCustomizationProfile(storageSlug)) return;
-  const defaults = defaultCustomization(storageSlug)!;
+export function saveCustomization(
+  storageSlug: string,
+  profileSlug: string,
+  value: QuestCustomization,
+  storage: StorageLike,
+): void;
+export function saveCustomization(
+  storageSlug: string,
+  value: QuestCustomization,
+  storage: StorageLike,
+): void;
+export function saveCustomization(
+  storageSlug: string,
+  profileSlugOrValue: string | QuestCustomization,
+  valueOrStorage: QuestCustomization | StorageLike,
+  maybeStorage?: StorageLike,
+): void {
+  const profileSlug = typeof profileSlugOrValue === "string"
+    ? profileSlugOrValue
+    : legacyProfileSlug(storageSlug);
+  const value = typeof profileSlugOrValue === "string"
+    ? valueOrStorage as QuestCustomization
+    : profileSlugOrValue;
+  const storage = typeof profileSlugOrValue === "string"
+    ? maybeStorage!
+    : valueOrStorage as StorageLike;
+  if (!getCustomizationProfile(profileSlug)) return;
+  const defaults = defaultCustomization(profileSlug)!;
   const safe = {
     ...Object.fromEntries(axes.map((axis) => [axis, value[axis].trim()])),
     palette: safePalette(value.palette, defaults.palette),

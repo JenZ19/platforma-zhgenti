@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { projects } from "../content/projects";
+import { branchStorageSlug, saveOutputChoice } from "./output-format";
 import {
   completeStep,
   createEmptyProgress,
@@ -42,19 +43,39 @@ describe("academy progress", () => {
     expect(parseProgress('{"version":2,"completed":[1]}')).toEqual(createEmptyProgress());
   });
 
-  it("calculates overall academy statistics", () => {
+  it("calculates statistics by catalogue card instead of summing both branches", () => {
     const storage = new MemoryStorage();
     let finished = createEmptyProgress();
     for (let id = 1; id <= 17; id += 1) finished = completeStep(finished, id);
-    saveProgress(projects[0].slug, finished, storage);
-    saveProgress(projects[1].slug, completeStep(createEmptyProgress(), 1), storage);
+    saveOutputChoice("planning", "desktop", "agent", storage);
+    saveProgress(branchStorageSlug("planning", "agent", "desktop"), finished, storage);
+    saveProgress(branchStorageSlug("planning", "service", "desktop"), completeStep(createEmptyProgress(), 1), storage);
+    saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage);
     expect(getAcademyStats(projects, storage)).toEqual({
-      totalProjects: 52,
+      totalProjects: 38,
       startedProjects: 2,
       completedProjects: 1,
       completedSteps: 18,
-      totalSteps: 884,
+      totalSteps: 646,
       score: 180,
+    });
+  });
+
+  it("uses the most advanced branch when a bundle has no valid saved choice", () => {
+    const storage = new MemoryStorage();
+    saveProgress(
+      branchStorageSlug("planning", "service", "desktop"),
+      completeStep(createEmptyProgress(), 1),
+      storage,
+    );
+    let agent = createEmptyProgress();
+    agent = completeStep(agent, 1);
+    agent = completeStep(agent, 2);
+    saveProgress(branchStorageSlug("planning", "agent", "desktop"), agent, storage);
+    expect(getAcademyStats(projects, storage)).toMatchObject({
+      startedProjects: 1,
+      completedSteps: 2,
+      score: 20,
     });
   });
 });
