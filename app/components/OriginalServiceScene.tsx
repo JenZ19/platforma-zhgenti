@@ -14,6 +14,9 @@ type Stage =
   | "capture"
   | "organize"
   | "search"
+  | "activity"
+  | "week"
+  | "morning"
   | "style"
   | "feature"
   | "flow"
@@ -74,6 +77,25 @@ const ideaStages: Stage[] = [
   "style",
   "feature",
   "search",
+  "backup",
+  "phone",
+  "publish",
+  "client-copy",
+  "client-brief",
+  "portfolio",
+];
+const childStages: Stage[] = [
+  "final",
+  "concept",
+  "data",
+  "workspace",
+  "passport",
+  "foundation",
+  "activity",
+  "week",
+  "style",
+  "feature",
+  "morning",
   "backup",
   "phone",
   "publish",
@@ -1174,6 +1196,197 @@ function IdeaClient({ stage }: { stage: Stage }) {
   );
 }
 
+function ChildConcept() {
+  return (
+    <div className="oc-concept">
+      <header>
+        <small>КОНСТРУКТОР НАШЕЙ НЕДЕЛИ</small>
+        <h3>Как расписание поможет утром?</h3>
+        <p>Шесть решений превращают общий шаблон в семейный помощник.</p>
+      </header>
+      <main>
+        {[
+          ["01", "Для кого", "Двое детей"],
+          ["02", "Главное утром", "Ничего не забыть"],
+          ["03", "Название", "Неделя без спешки"],
+          ["04", "Стиль", "Мягкие цветовые дни"],
+          ["05", "Подсказки", "По-семейному"],
+          ["06", "Функция", "Что взять с собой"],
+        ].map(([number, label, value]) => (
+          <article key={number}>
+            <i>{number}</i>
+            <small>{label}</small>
+            <b>{value}</b>
+            <span>выбрано ✓</span>
+          </article>
+        ))}
+      </main>
+      <footer>
+        <p>«Неделя без спешки» утром показывает занятие, время и нужные вещи.</p>
+        <button>Сохранить мою версию</button>
+      </footer>
+    </div>
+  );
+}
+
+function ChildData() {
+  return (
+    <div className="oc-data">
+      <aside>
+        <small>МАТЕРИАЛЫ РАСПИСАНИЯ</small>
+        <h3>Неделя готова</h3>
+        {[
+          ["занятия-недели.txt", "8 занятий"],
+          ["правила-расписания.txt", "повторы и дни"],
+          ["вид-недели.txt", "утренний экран"],
+        ].map(([file, note], index) => (
+          <div key={file} className={index === 0 ? "active" : ""}>
+            <i>{index === 0 ? "◷" : "≡"}</i>
+            <span><b>{file}</b><small>{note}</small></span>
+            <strong>✓</strong>
+          </div>
+        ))}
+      </aside>
+      <main>
+        <header><b>занятия-недели.txt</b><span>Без личных данных ✓</span></header>
+        <section>
+          <div><b>Занятие</b><b>Кто</b><b>Когда</b><b>Что взять</b></div>
+          {[
+            ["Плавание", "Ребёнок А", "Вт · 17:30", "Форма, вода"],
+            ["Музыка", "Ребёнок Б", "Чт · 16:00", "Папка"],
+            ["Рисование", "Ребёнок А", "Сб · 11:00", "Фартук"],
+          ].map((row) => <div key={row[0]}>{row.map((cell) => <span key={cell}>{cell}</span>)}</div>)}
+        </section>
+        <footer>Нет школы, адресов и контактов <b>Можно продолжать ✓</b></footer>
+      </main>
+    </div>
+  );
+}
+
+function ChildWorkspace({ stage }: { stage: Stage }) {
+  return (
+    <div className="oc-workspace">
+      <aside>
+        <b>⌘ Codex</b>
+        <button>＋ Новая задача</button>
+        <button className="active">▱ Открыть папку</button>
+        <small>ПРОЕКТЫ</small>
+        <span className="selected">◷ child-schedule</span>
+        <span>✦ idea-vault</span>
+      </aside>
+      <main>
+        <header><b>{stage === "workspace" ? "child-schedule" : "Паспорт расписания"}</b><span>закрытая папка ✓</span></header>
+        {stage === "workspace" ? (
+          <div className="oc-folder"><i>◷</i><h3>child-schedule</h3><p>Открыта отдельная папка расписания</p><div>Документы / child-schedule</div></div>
+        ) : (
+          <div className="oc-passport">
+            <small>НАША НЕДЕЛЯ</small>
+            <h3>Неделя без спешки</h3>
+            {[
+              ["Для кого", "Двое детей"],
+              ["Утром", "Ничего не забыть"],
+              ["Стиль", "Мягкие цветовые дни"],
+              ["Функция", "Что взять с собой"],
+            ].map(([label, value]) => <p key={label}><span>{label}</span><b>{value}</b></p>)}
+            <footer>Основа: сегодня · неделя · занятие · время · вещи</footer>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+const childActivities = [
+  { who: "А", title: "Плавание", time: "17:30", color: "blue", things: ["Форма", "Вода"] },
+  { who: "Б", title: "Музыка", time: "18:15", color: "yellow", things: ["Папка", "Ноты"] },
+];
+
+function ChildBoard({ stage }: { stage: Stage }) {
+  const published = stage === "publish";
+  return (
+    <div className={`oc-board ${stage}`}>
+      <header>
+        <div><small>НЕДЕЛЯ БЕЗ СПЕШКИ</small><h3>{published ? "Закрытое расписание готово" : "Сегодня · вторник"}</h3></div>
+        <button>{published ? "Открыть ссылку ↗" : "＋ Добавить занятие"}</button>
+      </header>
+      <nav>
+        <span className="active">Сегодня</span><span>Вся неделя</span><span>Что взять</span>
+        <div><b className="all">Все</b><b className="a">А</b><b className="b">Б</b></div>
+      </nav>
+      <main>
+        <section>
+          {stage === "activity" && (
+            <div className="oc-form">
+              <small>НОВОЕ ЗАНЯТИЕ</small><h4>Плавание</h4>
+              <div><span>Кто</span><b>Ребёнок А</b></div>
+              <div><span>Когда</span><b>Вторник · 17:30</b></div>
+              <div><span>Что взять</span><b>Форма и вода</b></div>
+              <button>Сохранить занятие</button>
+            </div>
+          )}
+          <div className="oc-activities">
+            {childActivities.map((activity, index) => (
+              <article className={activity.color} key={activity.title}>
+                <i>{activity.who}</i>
+                <time>{activity.time}</time>
+                <div><small>РЕБЁНОК {activity.who}</small><h4>{activity.title}</h4><p>Сегодня · каждую неделю</p></div>
+                <aside><small>ЧТО ВЗЯТЬ</small>{activity.things.map((thing, thingIndex) => <span key={thing}>{stage === "feature" && index === 0 && thingIndex === 0 ? "✓" : "○"} {thing}</span>)}</aside>
+              </article>
+            ))}
+          </div>
+          {stage === "morning" && <div className="oc-overlap"><i>!</i><p><b>Внимание к времени</b><span>Между занятиями 45 минут — проверьте, успеваете ли вы.</span></p><button>Понятно</button></div>}
+          {stage === "backup" && <div className="oc-backup"><button>↓ Сохранить JSON</button><span>8 занятий · копия готова ✓</span></div>}
+        </section>
+        <aside>
+          <header><small>НЕДЕЛЯ 17–23 АВГУСТА</small><b>8 занятий</b></header>
+          {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"].map((day, index) => (
+            <div className={index === 1 ? "today" : ""} key={day}>
+              <b>{day}</b><span>{["—", "А  Б", "А", "Б", "—", "А"][index]}</span><small>{["свободно", "2 занятия", "1 занятие", "1 занятие", "свободно", "1 занятие"][index]}</small>
+            </div>
+          ))}
+          {stage === "style" && <footer><b>Мягкие цветовые дни</b><span>Голубой — А · жёлтый — Б</span></footer>}
+          {stage === "week" && <footer><b>Фильтр недели</b><span>Все → Ребёнок А → Ребёнок Б ✓</span></footer>}
+          {stage === "phone" && <footer><b>390 px · проверено</b><span>Время и вещи доступны одной рукой ✓</span></footer>}
+          {published && <footer className="private"><b>Доступ ограничен</b><span>Только обезличенные занятия ✓</span></footer>}
+        </aside>
+      </main>
+    </div>
+  );
+}
+
+function ChildClient({ stage }: { stage: Stage }) {
+  if (stage === "client-copy") return (
+    <div className="oc-copy">
+      <header><small>СЕМЕЙНОЕ ОСТАЁТСЯ ЛИЧНЫМ</small><h3>Две независимые недели</h3></header>
+      <main>
+        <article><span>МОЁ РАСПИСАНИЕ</span><i>◷</i><h4>child-schedule</h4><p>Неделя без спешки</p><b>Не изменяется ✓</b></article>
+        <strong>→</strong>
+        <article className="client"><span>ДЛЯ ЗАКАЗЧИКА</span><i>◷</i><h4>child-schedule-client</h4><p>Готово к адаптации</p><b>Создано отдельно ✓</b></article>
+      </main>
+    </div>
+  );
+  if (stage === "client-brief") return (
+    <div className="oc-brief">
+      <aside><small>БРИФ СЕМЬИ</small><h3>8 ответов о неделе</h3>{["Кто пользуется?","Сколько расписаний?","Что видно утром?","Дни и повторы?","Какие обозначения?","Какой стиль?","Какая функция?","Что не показывать?"].map((question, index) => <p key={question}><i>{index + 1}</i><span>{question}</span><b>{index < 7 ? "✓" : "—"}</b></p>)}</aside>
+      <main><small>СОГЛАСОВАНИЕ</small><h3>Было → станет</h3>{[
+        ["Название", "Неделя без спешки", "Наш семейный ритм"],
+        ["Обозначения", "А / Б", "Солнце / Луна"],
+        ["Функция", "Что взять", "Пересечения"],
+      ].map(([label, before, after]) => <p key={label}><small>{label}</small><span>{before}</span><i>→</i><b>{after}</b></p>)}<button>Подтвердить изменения</button></main>
+    </div>
+  );
+  return (
+    <div className="oc-portfolio">
+      <header><small>ПОРТФОЛИО · ДВЕ ВЕРСИИ</small><h3>Расписание, которое понимает ритм семьи</h3><p>Безопасная основа и заметная адаптация под другого заказчика.</p></header>
+      <main>
+        <article><small>СЕМЕЙНАЯ ВЕРСИЯ</small><h4>Неделя без спешки</h4><p>Двое детей · Мягкие цветовые дни</p><div>Список «Что взять»</div></article>
+        <article className="client"><small>КЛИЕНТСКАЯ ВЕРСИЯ</small><h4>Наш семейный ритм</h4><p>Солнце / Луна · Спокойные карточки</p><div>Предупреждение о пересечении</div></article>
+      </main>
+      <footer><b>Моя услуга</b><span>Адаптирую семейное расписание под вашу неделю, обозначения и одну полезную функцию.</span><button>Показать проект ↗</button></footer>
+    </div>
+  );
+}
+
 export function OriginalServiceScene({
   slug,
   step,
@@ -1244,6 +1457,14 @@ export function OriginalServiceScene({
         ) : (
           <IdeaBoard stage={ideaStage} />
         )}
+      </div>
+    );
+  }
+  if (slug === "child-schedule") {
+    const childStage = childStages[step - 1] ?? "final";
+    return (
+      <div className={`original-service-scene child-schedule-scene ${mobile ? "mobile" : ""}`} data-original-service={slug} data-original-stage={childStage}>
+        {childStage === "concept" ? <ChildConcept /> : childStage === "data" ? <ChildData /> : ["workspace", "passport"].includes(childStage) ? <ChildWorkspace stage={childStage} /> : ["client-copy", "client-brief", "portfolio"].includes(childStage) ? <ChildClient stage={childStage} /> : <ChildBoard stage={childStage} />}
       </div>
     );
   }

@@ -4,11 +4,12 @@ import type { ProjectDefinition, QuestCustomization } from "../types";
 import { buildFamilyExpensesQuest } from "./family-expenses";
 import { buildPlannerQuest } from "./planner";
 import { buildIdeaVaultQuest } from "./idea-vault";
+import { buildChildScheduleQuest } from "./child-schedule";
 
 function actionFor(slug: string, step: number): MobileAction {
-  if (step === 13) return { tool: "screenshot", label: "Отправить мобильную проверку Фее", note: slug === "planner" ? "Пришлите экран «Сегодня», добавление дела и результат переноса на завтра." : slug === "idea-vault" ? "Пришлите быстрый ввод, новую карточку и результат поиска." : "Пришлите первый экран, форму расхода и новый остаток." };
+  if (step === 13) return { tool: "screenshot", label: "Отправить мобильную проверку Фее", note: slug === "planner" ? "Пришлите экран «Сегодня», добавление дела и результат переноса на завтра." : slug === "idea-vault" ? "Пришлите быстрый ввод, новую карточку и результат поиска." : slug === "child-schedule" ? "Пришлите сегодняшний день, список вещей и форму нового занятия." : "Пришлите первый экран, форму расхода и новый остаток." };
   if (step === 14) return { tool: "lovable", label: "Открыть публикацию", href: "https://lovable.dev/", note: "Откройте уже созданный проект и нажмите публикацию только после проверки." };
-  const clientCopy = slug === "planner" ? "планера" : slug === "idea-vault" ? "копилки" : "бюджета";
+  const clientCopy = slug === "planner" ? "планера" : slug === "idea-vault" ? "копилки" : slug === "child-schedule" ? "расписания" : "бюджета";
   return {
     tool: "telegram",
     label: step === 15 ? `Создать клиентскую копию ${clientCopy}` : step === 16 ? "Отправить бриф заказчика" : step === 17 ? "Получить карточку портфолио" : "Открыть Фею в Telegram",
@@ -76,14 +77,34 @@ const ideaVaultMobileActions = [
   "Получите карточку портфолио и проверьте, что личная и клиентская копилки показаны отдельно без чужих закрытых идей.",
 ];
 
+const childScheduleMobileActions = [
+  "Откройте комнату расписания в Telegram. Фея покажет готовый пример: найдите сегодняшний день, обозначение ребёнка, время, «Что взять» и всю неделю.",
+  "Выберите шесть ответов в конструкторе, прочитайте резюме и нажмите «Сохранить мою версию». Мобильный выбор хранится отдельно.",
+  "Откройте сообщение «занятия-недели.txt». Проверьте каждую строку: занятие, день, время, Ребёнок А или Б и вещи. Полные имена, школу, адреса и контакты не отправляйте.",
+  "В Telegram нажмите «Мои проекты» → «Новый проект», напишите child-schedule и дождитесь сообщения «Серверная папка создана». Локальная папка телефона не нужна.",
+  "Нажмите «Скопировать команду», вставьте её одним сообщением в чат Феи и дождитесь паспорта вашего расписания.",
+  "Нажмите «Запустить мой Codex». Фея создаст основу в серверной папке child-schedule и пришлёт ссылку предпросмотра; телефон можно закрыть.",
+  "Откройте предпросмотр, нажмите «Добавить занятие», выберите Ребёнок А, день и время, заполните «Что взять» и сохраните.",
+  "Добавьте занятие для Ребёнка Б. Откройте всю неделю, по очереди нажмите «Все», «Ребёнок А» и «Ребёнок Б», затем вернитесь к сегодняшнему дню.",
+  "Отправьте Фее команду оформления. По новой ссылке проверьте крупное время, различимые дни и постоянные цветовые обозначения детей.",
+  "Отправьте команду на одну выбранную функцию расписания. Проверьте её на занятии, затем снова добавьте обычное занятие.",
+  "Откройте «Сегодня», выберите Ребёнок А, отметьте вещи собранными и создайте безопасное пересечение во времени для проверки предупреждения.",
+  "Измените время безопасного занятия, обновите страницу, удалите другой пример с подтверждением и скачайте JSON-копию недели.",
+  "Откройте ссылку на телефоне, выберите Ребёнок А, откройте «Что взять» и добавьте безопасное занятие одной рукой.",
+  "Оставьте только обезличенные занятия, откройте публикацию, включите ограниченный доступ и проверьте «Сегодня» и всю неделю по ссылке.",
+  "В Telegram откройте child-schedule и нажмите «Создать копию для клиента». Дождитесь отдельной комнаты child-schedule-client.",
+  "Соберите восемь ответов заказчика, отправьте их одним сообщением в child-schedule-client и подтвердите экран «было / станет» до изменений.",
+  "Получите карточку портфолио и проверьте, что семейное и клиентское расписания показаны отдельно без имён, адресов и выдуманного отзыва.",
+];
+
 export function buildOriginalMobileQuest(
   project: ProjectDefinition,
   mode: DataMode,
   customization: QuestCustomization,
 ): MobileQuestStep[] | undefined {
-  const build = project.slug === "family-expenses" ? buildFamilyExpensesQuest : project.slug === "planner" ? buildPlannerQuest : project.slug === "idea-vault" ? buildIdeaVaultQuest : undefined;
+  const build = project.slug === "family-expenses" ? buildFamilyExpensesQuest : project.slug === "planner" ? buildPlannerQuest : project.slug === "idea-vault" ? buildIdeaVaultQuest : project.slug === "child-schedule" ? buildChildScheduleQuest : undefined;
   if (!build) return undefined;
-  const actions = project.slug === "planner" ? plannerMobileActions : project.slug === "idea-vault" ? ideaVaultMobileActions : mobileActions;
+  const actions = project.slug === "planner" ? plannerMobileActions : project.slug === "idea-vault" ? ideaVaultMobileActions : project.slug === "child-schedule" ? childScheduleMobileActions : mobileActions;
   return build(project, mode, customization).map((step) => {
     const action = actionFor(project.slug, step.id);
     return {

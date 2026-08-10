@@ -66,4 +66,14 @@ describe("mobile quest builder", () => {
     expect(steps[14].action).toContain("idea-vault-client");
     expect(steps[15].action).toMatch(/восемь ответов.+idea-vault-client/i);
   });
+
+  it("gives the child schedule a private server-room and client-copy phone path", () => {
+    const child = projects.find((item) => item.slug === "child-schedule")!;
+    const steps = buildMobileQuest(child, "real");
+    expect(steps[3].action).toMatch(/Telegram.+Новый проект.+child-schedule.+серверн/i);
+    expect(steps[12].action).toMatch(/телефоне.+Ребёнок А.+Что взять/i);
+    expect(steps[14].action).toContain("child-schedule-client");
+    expect(steps[15].action).toMatch(/восемь ответов.+child-schedule-client/i);
+    expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" ")).toMatch(/не сохраняем ФИО ребёнка.+домашний адрес.+геолокацию/i);
+  });
 });
