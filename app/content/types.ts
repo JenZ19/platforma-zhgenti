@@ -1,15 +1,17 @@
 export type ProjectKind =
   | "service"
-  | "bot"
   | "agent"
   | "simple-site"
   | "advanced-site"
   | "portfolio";
 
+export type ProjectFormat = "service" | "agent";
+export type ProjectWeek = 1 | 2 | 3 | 4 | 5 | 6;
+
 export type ProjectDefinition = {
   slug: string;
   title: string;
-  week: 1 | 2 | 3 | 4 | 5 | 6;
+  week: ProjectWeek;
   kind: ProjectKind;
   track: string;
   symbol: string;
@@ -22,6 +24,19 @@ export type ProjectDefinition = {
   safety: string;
   portfolioAngle: string;
 };
+
+export type ProjectBundleDefinition = {
+  slug: string;
+  title: string;
+  weeks: readonly [1, 2];
+  track: "Сервис или ИИ-агент";
+  symbol: string;
+  outcome: string;
+  device: "телефон или ноутбук";
+  formats: Record<ProjectFormat, ProjectDefinition>;
+};
+
+export type CatalogProject = ProjectDefinition | ProjectBundleDefinition;
 
 export type QuestCustomizationAxis =
   | "audience"
