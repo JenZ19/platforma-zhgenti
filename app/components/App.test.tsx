@@ -3,8 +3,7 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getBotPrototypeSpec } from "../content/bot-prototypes";
-import { agentCoverPrototypeSlugs, getAgentCoverPrototypeSpec } from "../content/agent-cover-prototypes";
+import { getAgentContract } from "../content/agent-contracts";
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
@@ -60,19 +59,6 @@ describe("academy interface", () => {
         expect(container, project.slug).not.toHaveTextContent(profile.rulesFile);
       }
       expect(container, project.slug).toHaveTextContent(/Codex|создан/i);
-    }
-  });
-
-  it("renders a dedicated final-product interface for every bot", () => {
-    const bots = projects.filter((project) => project.kind === "bot");
-    const { container } = render(<>{bots.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
-
-    for (const project of bots) {
-      const spec = getBotPrototypeSpec(project.slug);
-      const prototype = container.querySelector(`[data-prototype-marker="${spec.marker}"]`);
-      expect(prototype, project.slug).not.toBeNull();
-      expect(prototype).toHaveTextContent(spec.headline);
-      expect(prototype).toHaveTextContent(spec.metric);
     }
   });
 
@@ -136,20 +122,23 @@ describe("academy interface", () => {
     expect(screen.getByRole("img", { name: /пример уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.png");
   });
 
-  it("renders a content-specific cover for the next ten agents", () => {
-    const featuredProjects = agentCoverPrototypeSlugs.map((slug) => getQuestProject(slug)).filter(Boolean);
-    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+  it("renders a unique conversational prototype for every AI agent", () => {
+    const agents = questProjects.filter((project) => project.kind === "agent");
+    const { container } = render(<>{agents.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
-    for (const project of featuredProjects) {
-      const spec = getAgentCoverPrototypeSpec(project.slug);
-      const prototype = container.querySelector(`[data-agent-cover-marker="${spec.marker}"]`);
+    expect(agents).toHaveLength(21);
+    for (const project of agents) {
+      const contract = getAgentContract(project.slug);
+      const prototype = container.querySelector(`[data-agent-prototype="${project.slug}"]`);
       expect(prototype, project.slug).not.toBeNull();
-      expect(prototype).toHaveTextContent(spec.headline);
-      expect(prototype).toHaveTextContent(spec.metric);
+      expect(prototype, project.slug).toHaveTextContent(contract.inputExample);
+      expect(prototype, project.slug).toHaveTextContent(contract.firstQuestion);
+      expect(prototype, project.slug).toHaveTextContent(contract.resultTitle);
     }
+    expect(new Set(agents.map((project) => getAgentContract(project.slug).theme)).size).toBe(21);
   });
 
-  it("renders a unique content-specific cover for the following ten projects", () => {
+  it("renders a unique content-specific cover for the following site projects", () => {
     const featuredProjects = thirdCoverPrototypeSlugs.map((slug) => getQuestProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 

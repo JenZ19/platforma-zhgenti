@@ -2,12 +2,11 @@
 
 import type { ProjectDefinition } from "../content/types";
 import { hasFirstCoverPrototype } from "../content/first-cover-prototypes";
-import { hasAgentCoverPrototype } from "../content/agent-cover-prototypes";
 import { hasThirdCoverPrototype } from "../content/third-cover-prototypes";
 import { hasFinalCoverPrototype } from "../content/final-cover-prototypes";
 import { defaultCustomization } from "../content/customization";
 import { FirstCoverPrototypeScene } from "./FirstCoverPrototypeScene";
-import { AgentCoverPrototypeScene } from "./AgentCoverPrototypeScene";
+import { AgentPrototypeScene } from "./AgentPrototypeScene";
 import { ThirdCoverPrototypeScene } from "./ThirdCoverPrototypeScene";
 import { FinalCoverPrototypeScene } from "./FinalCoverPrototypeScene";
 import { OriginalServiceScene } from "./OriginalServiceScene";
@@ -47,8 +46,8 @@ function Visual({ project, step }: { project: ProjectDefinition; step: number })
   if (["family-expenses", "planner", "idea-vault", "child-schedule"].includes(project.slug)) return <OriginalServiceScene slug={project.slug} step={step} />;
   if (step <= 4) return <SetupScene project={project} step={step} />;
   if (step >= 15) return <FinalScene project={project} step={step} />;
+  if (project.kind === "agent") return <AgentPrototypeScene project={project} step={step} />;
   if (hasFirstCoverPrototype(project.slug)) return <FirstCoverPrototypeScene project={project} step={step} />;
-  if (hasAgentCoverPrototype(project.slug)) return <AgentCoverPrototypeScene project={project} step={step} />;
   if (hasThirdCoverPrototype(project.slug)) return <ThirdCoverPrototypeScene project={project} step={step} />;
   if (hasFinalCoverPrototype(project.slug)) return <FinalCoverPrototypeScene project={project} step={step} />;
   if (project.kind === "service") return <ServiceScene project={project} step={step} />;

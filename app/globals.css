@@ -1,7 +1,6 @@
 @import "tailwindcss";
-@import "./bot-prototypes.css";
+@import "./agent-prototypes.css";
 @import "./first-cover-prototypes.css";
-@import "./agent-cover-prototypes.css";
 @import "./third-cover-prototypes.css";
 @import "./final-cover-prototypes.css";
 

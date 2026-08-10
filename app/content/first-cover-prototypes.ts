@@ -18,7 +18,6 @@ const firstCoverPrototypeSpecs = [
   { slug: "recipe-book", theme: "tomato-recipes", marker: "recipe-gallery-shopping", eyebrow: "МОИ РЕЦЕПТЫ", headline: "Ужин найден за минуту", metric: "25 минут", status: "сырники уже в избранном" },
   { slug: "personal-organizer", theme: "indigo-organizer", marker: "personal-command-center", eyebrow: "ЛИЧНЫЙ ОРГАНАЙЗЕР", headline: "Важное всегда под рукой", metric: "5 разделов", status: "дела, события, ссылки и заметки" },
   { slug: "home-helper", theme: "terracotta-home", marker: "home-chores-board", eyebrow: "ДОМАШНИЕ ДЕЛА", headline: "Дом не держится в голове", metric: "3 задачи", status: "распределены между близкими" },
-  { slug: "day-planner-agent", theme: "midnight-agent", marker: "ai-day-plan-timeline", eyebrow: "ИИ-ПЛАНИРОВЩИК", headline: "Собрала реалистичный день", metric: "30 минут", status: "оставлено про запас" },
 ] as const satisfies readonly FirstCoverPrototypeSpec[];
 
 export const firstCoverPrototypeSlugs = firstCoverPrototypeSpecs.map((spec) => spec.slug);

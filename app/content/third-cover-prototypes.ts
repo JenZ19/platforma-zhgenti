@@ -9,10 +9,6 @@ export type ThirdCoverPrototypeSpec = {
 };
 
 const thirdCoverPrototypeSpecs = [
-  { slug: "online-school-agent", theme: "mint-school", marker: "course-route-lesson-help", eyebrow: "ПОМОЩНИК ОНЛАЙН-ШКОЛЫ", headline: "Показала, что делать дальше", metric: "3 шага", status: "до пятницы по программе курса" },
-  { slug: "event-organizer-agent", theme: "orange-event", marker: "event-launch-control", eyebrow: "ИИ-ОРГАНИЗАТОР", headline: "Событие собрано без паники", metric: "24 часа", status: "до финальной проверки вебинара" },
-  { slug: "client-care-agent", theme: "sage-client", marker: "client-dialog-next-step", eyebrow: "ЗАБОТА О КЛИЕНТАХ", headline: "Ни одно обещание не потерялось", metric: "3 пункта", status: "сохранены из переписки" },
-  { slug: "fairy-team-agent", theme: "aurora-fairies", marker: "three-fairy-handoff", eyebrow: "КОМАНДА ИЗ ТРЁХ ИИ-ФЕЙ", headline: "Каждая фея делает свою часть", metric: "3 роли", status: "и одна финальная проверка" },
   { slug: "expert-site", theme: "wine-expert", marker: "expert-service-editorial", eyebrow: "САЙТ ЭКСПЕРТА", headline: "Услуга понятна с первого экрана", metric: "60 минут", status: "карьерная консультация" },
   { slug: "psychologist-site", theme: "lavender-psychology", marker: "psychology-safe-booking", eyebrow: "САЙТ ПСИХОЛОГА", headline: "Спокойно объясняет и ведёт к записи", metric: "50 минут", status: "бережная онлайн-встреча" },
   { slug: "beauty-site", theme: "onyx-beauty", marker: "beauty-gallery-booking", eyebrow: "САЙТ БЬЮТИ-МАСТЕРА", headline: "Работы говорят раньше текста", metric: "6 образов", status: "в портфолио с разрешением" },

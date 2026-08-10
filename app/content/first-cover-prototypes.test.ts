@@ -11,7 +11,6 @@ const expectedSlugs = [
   "recipe-book",
   "personal-organizer",
   "home-helper",
-  "day-planner-agent",
 ];
 
 describe("first cover prototype registry", () => {
@@ -22,8 +21,8 @@ describe("first cover prototype registry", () => {
   it("gives every project a unique visual marker and theme", () => {
     const specs = firstCoverPrototypeSlugs.map(getFirstCoverPrototypeSpec);
 
-    expect(new Set(specs.map((spec) => spec.marker)).size).toBe(10);
-    expect(new Set(specs.map((spec) => spec.theme)).size).toBe(10);
+    expect(new Set(specs.map((spec) => spec.marker)).size).toBe(9);
+    expect(new Set(specs.map((spec) => spec.theme)).size).toBe(9);
   });
 
   it("fails loudly when a project has no dedicated cover", () => {

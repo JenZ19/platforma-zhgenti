@@ -3,10 +3,6 @@ import { getProject } from "./projects";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "./third-cover-prototypes";
 
 const expectedSlugs = [
-  "online-school-agent",
-  "event-organizer-agent",
-  "client-care-agent",
-  "fairy-team-agent",
   "expert-site",
   "psychologist-site",
   "beauty-site",
@@ -19,7 +15,6 @@ describe("third cover prototype registry", () => {
   it("maps the next ten projects after the AI consultant in catalogue order", () => {
     expect(thirdCoverPrototypeSlugs).toEqual(expectedSlugs);
     expect(thirdCoverPrototypeSlugs.map((slug) => getProject(slug)?.kind)).toEqual([
-      "agent", "agent", "agent", "agent",
       "simple-site", "simple-site", "simple-site", "simple-site", "simple-site", "simple-site",
     ]);
   });
