@@ -512,6 +512,63 @@ button {
   background: var(--rose);
   transition: width 0.3s ease;
 }
+.quest-reset-control {
+  min-height: 52px;
+  margin: 18px auto 0;
+  padding: 8px 16px 8px 9px;
+  display: inline-grid;
+  grid-template-columns: 34px auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(163, 108, 105, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.56);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.quest-reset-control:hover {
+  transform: translateY(-1px);
+  border-color: rgba(163, 108, 105, 0.55);
+  background: rgba(255, 255, 255, 0.84);
+}
+.quest-reset-control:focus-visible {
+  outline: 3px solid rgba(163, 108, 105, 0.24);
+  outline-offset: 3px;
+}
+.quest-reset-control > span:first-child {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(163, 108, 105, 0.12);
+  color: var(--rose);
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1;
+}
+.quest-reset-control > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+.quest-reset-control b {
+  font-size: 9px;
+  line-height: 1.25;
+}
+.quest-reset-control small {
+  color: var(--muted);
+  font-size: 7px;
+  line-height: 1.35;
+}
+.quest-reset-control.mobile {
+  border-color: rgba(99, 128, 109, 0.3);
+}
+.quest-reset-control.mobile > span:first-child {
+  background: var(--phone-green-pale);
+  color: var(--phone-green);
+}
 .quest-layout {
   width: min(1200px, calc(100% - 48px));
   margin: 0 auto 90px;
@@ -616,16 +673,6 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 2px;
-}
-.reset-link {
-  display: block;
-  border: 0;
-  background: none;
-  text-decoration: underline;
-  color: var(--muted);
-  margin: 12px auto 0;
-  font-size: 8px;
-  cursor: pointer;
 }
 .level-card {
   border: 1px solid var(--line);
@@ -2216,17 +2263,6 @@ button {
   font-size: 9px;
   line-height: 1.5;
 }
-.mobile-reset {
-  display: block;
-  margin: 17px auto 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  text-decoration: underline;
-  font-size: 8px;
-  cursor: pointer;
-}
-
 /* Phone screenshots */
 .mobile-capture {
   --phone-green: #63806d;
@@ -4553,6 +4589,10 @@ button {
   }
   .quest-hero h1 {
     font-size: 55px;
+  }
+  .quest-reset-control {
+    width: min(100%, 390px);
+    min-height: 56px;
   }
   .quest-layout {
     width: calc(100% - 22px);

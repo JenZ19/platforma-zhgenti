@@ -27,6 +27,7 @@ import {
 import { QuestPreparation } from "./QuestPreparation";
 import { QuestGuide } from "./QuestGuide";
 import { QuestCustomizer } from "./QuestCustomizer";
+import { QuestResetButton } from "./QuestResetButton";
 
 export function Quest({ project, onHome }: { project: ProjectDefinition; onHome: () => void }) {
   const [preparation, setPreparation] = useState<PreparationState | null>(null);
@@ -118,7 +119,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   }
 
   function reset() {
-    if (!window.confirm(`Начать квест «${project.title}» заново?`)) return;
+    if (!window.confirm(`Сбросить проект «${project.title}» и начать с нуля?\n\nБудут удалены прогресс, ответы и оформление только этого проекта. Остальные проекты сохранятся.`)) return;
     resetProgress(project.slug, window.localStorage);
     resetPreparation(project.slug, window.localStorage);
     resetCustomization(project.slug, window.localStorage);
@@ -126,6 +127,9 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     setPreparation(createEmptyPreparation());
     setCustomization(defaultCustomization(project.slug));
     setHelpOpen(false);
+    setCopied(null);
+    setReward(null);
+    setImageOpen(false);
   }
 
   return (
@@ -141,6 +145,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
         <h1>{project.title}</h1>
         <p>{project.outcome}</p>
         <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / 17</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
+        <QuestResetButton onReset={reset} />
         {preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
       </section>
 
@@ -164,7 +169,6 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
               return <button key={item.id} type="button" aria-label={`Уровень ${item.id}: ${item.title}${unlocked ? "" : ", закрыт"}`} disabled={!unlocked} onClick={() => chooseStep(item.id)} className={`${item.id === step.id ? "active" : ""} ${done ? "done" : ""}`}><span>{done ? "✓" : unlocked ? item.id : "⌁"}</span><b><small>{item.eyebrow}</small>{item.title}</b></button>;
             })}
           </div>
-          <button type="button" className="reset-link" onClick={reset}>Начать этот квест заново</button>
         </aside>
 
         <article className="level-card" aria-live="polite">

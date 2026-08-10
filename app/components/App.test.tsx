@@ -251,6 +251,60 @@ describe("academy interface", () => {
     expect(localStorage.getItem(preparationKey("planner"))).toContain('"mode":"demo"');
   });
 
+  it("shows a reset action before data mode selection on desktop and mobile", () => {
+    const project = getProject("planner")!;
+    render(<><Quest project={project} onHome={vi.fn()} /><MobileQuest project={project} onHome={vi.fn()} /></>);
+
+    expect(screen.getAllByRole("button", { name: /сбросить проект и начать с нуля/i })).toHaveLength(2);
+  });
+
+  it("cancels safely and then resets only the current desktop project", async () => {
+    const current = getProject("planner")!;
+    localStorage.setItem(progressKey("planner"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    localStorage.setItem(preparationKey("planner"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(customizationKey("planner"), JSON.stringify({ audience: "Моя семья" }));
+    localStorage.setItem(progressKey("recipe-book"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    const confirmReset = vi.spyOn(window, "confirm").mockReturnValue(false);
+
+    render(<Quest project={current} onHome={vi.fn()} />);
+    const reset = await screen.findByRole("button", { name: /сбросить проект и начать с нуля/i });
+    fireEvent.click(reset);
+
+    expect(localStorage.getItem(progressKey("planner"))).not.toBeNull();
+    expect(localStorage.getItem(preparationKey("planner"))).not.toBeNull();
+    expect(localStorage.getItem(customizationKey("planner"))).not.toBeNull();
+
+    confirmReset.mockReturnValue(true);
+    fireEvent.click(reset);
+
+    expect(confirmReset).toHaveBeenLastCalledWith(expect.stringMatching(/остальные проекты сохранятся/i));
+    expect(localStorage.getItem(progressKey("planner"))).toBeNull();
+    expect(localStorage.getItem(preparationKey("planner"))).toBeNull();
+    expect(localStorage.getItem(customizationKey("planner"))).toBeNull();
+    expect(localStorage.getItem(progressKey("recipe-book"))).not.toBeNull();
+    expect(screen.getByRole("heading", { name: /на каких данных будем работать/i })).toBeInTheDocument();
+    confirmReset.mockRestore();
+  });
+
+  it("resets the mobile project without touching its desktop version", async () => {
+    const project = getProject("planner")!;
+    localStorage.setItem(progressKey("mobile:planner"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    localStorage.setItem(preparationKey("mobile:planner"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(customizationKey("mobile:planner"), JSON.stringify({ audience: "Моя семья" }));
+    localStorage.setItem(progressKey("planner"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    const confirmReset = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(<MobileQuest project={project} onHome={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: /сбросить проект и начать с нуля/i }));
+
+    expect(localStorage.getItem(progressKey("mobile:planner"))).toBeNull();
+    expect(localStorage.getItem(preparationKey("mobile:planner"))).toBeNull();
+    expect(localStorage.getItem(customizationKey("mobile:planner"))).toBeNull();
+    expect(localStorage.getItem(progressKey("planner"))).not.toBeNull();
+    expect(screen.getByRole("heading", { name: /на каких данных будем работать/i })).toBeInTheDocument();
+    confirmReset.mockRestore();
+  });
+
   it("blocks a real-data quest until its personal checklist is complete", () => {
     render(<Quest project={getProject("psychologist-site")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));

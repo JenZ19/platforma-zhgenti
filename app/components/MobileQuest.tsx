@@ -12,6 +12,7 @@ import { completeStep, createEmptyProgress, isStepUnlocked, loadProgress, resetP
 import { MobileActionButton } from "./MobileActionButton";
 import { QuestPreparation } from "./QuestPreparation";
 import { QuestCustomizer } from "./QuestCustomizer";
+import { QuestResetButton } from "./QuestResetButton";
 
 export function MobileQuest({ project, onHome }: { project: ProjectDefinition; onHome: () => void }) {
   const storageSlug = `mobile:${project.slug}`;
@@ -73,19 +74,22 @@ export function MobileQuest({ project, onHome }: { project: ProjectDefinition; o
   }
 
   function reset() {
-    if (!window.confirm(`Начать мобильный квест «${project.title}» заново?`)) return;
+    if (!window.confirm(`Сбросить проект «${project.title}» и начать с нуля?\n\nБудут удалены прогресс, ответы и оформление только этого проекта. Остальные проекты сохранятся.`)) return;
     resetProgress(storageSlug, window.localStorage);
     resetPreparation(storageSlug, window.localStorage);
     resetCustomization(storageSlug, window.localStorage);
     setProgress(createEmptyProgress());
     setPreparation(createEmptyPreparation());
     setCustomization(defaultCustomization(storageSlug));
+    setCopied(false);
+    setHelpOpen(false);
+    setImageOpen(false);
   }
 
   return (
     <main className="mobile-quest-shell">
       <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>S</span><b>SUBMARINE<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● только телефон</span></header>
-      <section className="mobile-quest-hero"><button type="button" onClick={onHome}>← Все мобильные проекты</button><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><p>Неделя {project.week} · {project.track}</p><h1>{project.title}</h1><span>{project.outcome}</span><div className="mobile-progress"><div><b>{progress.completed.length} из 17</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div></section>
+      <section className="mobile-quest-hero"><button type="button" onClick={onHome}>← Все мобильные проекты</button><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><p>Неделя {project.week} · {project.track}</p><h1>{project.title}</h1><span>{project.outcome}</span><div className="mobile-progress"><div><b>{progress.completed.length} из 17</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div><QuestResetButton mobile onReset={reset} /></section>
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим мобильный квест…</section> : !ready ? <QuestPreparation project={project} preparation={preparation} mobile onChooseDemo={() => storePreparation({ version: 1, mode: "demo", checked: [], ready: true })} onChooseReal={() => storePreparation({ version: 1, mode: "real", checked: [], ready: false })} onToggle={togglePreparation} onStartReal={() => checklist.every((item) => preparation.checked.includes(item.id)) && storePreparation({ ...preparation, ready: true })} onBack={() => { resetPreparation(storageSlug, window.localStorage); setPreparation(createEmptyPreparation()); }} /> : (
         <section className="mobile-level-wrap">
@@ -100,7 +104,6 @@ export function MobileQuest({ project, onHome }: { project: ProjectDefinition; o
             <div className="mobile-level-actions"><button type="button" onClick={() => setHelpOpen((value) => !value)}>Нужна помощь</button><button type="button" onClick={finishStep}>{progress.completed.includes(step.id) ? step.id === 17 ? "Квест пройден ✦" : "Перейти дальше →" : "Я сделала — дальше →"}</button></div>
             {helpOpen && <section className="mobile-help"><b>?</b><div><h3>{step.help.title}</h3><p>{step.help.body}</p></div></section>}
           </article>
-          <button type="button" className="mobile-reset" onClick={reset}>Начать этот мобильный квест заново</button>
         </section>
       )}
       <footer className="mobile-footer"><span>SUBMARINE</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
