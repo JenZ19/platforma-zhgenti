@@ -5,9 +5,11 @@ export const root = path.resolve(import.meta.dirname, "..");
 
 export function projectSlugs() {
   const source = fs.readFileSync(path.join(root, "app/content/projects.ts"), "utf8");
-  const slugs = [...source.matchAll(/\bslug:\s*"([a-z0-9-]+)"/g)].map((match) => match[1]);
+  const manifest = source.match(/export const captureProjectSlugs = \[([\s\S]*?)\] as const;/)?.[1];
+  if (!manifest) throw new Error("Не найден captureProjectSlugs в app/content/projects.ts");
+  const slugs = [...manifest.matchAll(/"([a-z0-9-]+)"/g)].map((match) => match[1]);
   const unique = [...new Set(slugs)];
-  if (unique.length !== 52) throw new Error(`Ожидалось 52 проекта, найдено ${unique.length}`);
+  if (unique.length !== 45 || unique.length !== slugs.length) throw new Error(`Ожидалось 45 уникальных путей, найдено ${unique.length}`);
   return unique;
 }
 

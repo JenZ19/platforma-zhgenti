@@ -1,6 +1,6 @@
 "use client";
 
-import { getAgentContract } from "../content/agent-contracts";
+import { agentContracts, getAgentContract } from "../content/agent-contracts";
 import type { ProjectDefinition } from "../content/types";
 
 const accents = [
@@ -17,7 +17,7 @@ const backgrounds = [
 
 export function AgentPrototypeScene({ project, step }: { project: ProjectDefinition; step: number }) {
   const contract = getAgentContract(project.slug);
-  const themeIndex = Math.max(0, [...project.slug].reduce((sum, char) => sum + char.charCodeAt(0), 0) % accents.length);
+  const themeIndex = Math.max(0, agentContracts.findIndex((item) => item.slug === project.slug));
   const reveal = Math.max(7, step);
   const style = {
     "--agent-accent": accents[themeIndex],

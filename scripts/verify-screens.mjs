@@ -61,10 +61,10 @@ for (const slug of originalQuestSlugs) {
   }
 }
 
-if (missing.length || wrongSize.length || count !== 2092) {
+if (missing.length || wrongSize.length || count !== 1854) {
   if (missing.length) console.error(`Нет файлов: ${missing.length}\n${missing.slice(0, 8).join("\n")}`);
   if (wrongSize.length) console.error(`Неверный размер: ${wrongSize.length}\n${wrongSize.slice(0, 8).join("\n")}`);
   process.exit(1);
 }
 
-console.log(`Проверено ${count} PNG-экранов: 1768 общих, 120 подробных home-helper и 204 кадра четырёх оригинальных квестов, все 1200x800.`);
+console.log(`Проверено ${count} PNG-экранов: 1530 общих, 120 подробных home-helper и 204 кадра четырёх оригинальных квестов, все 1200x800.`);

@@ -28,6 +28,14 @@ function p(input: ProjectInput): ProjectDefinition {
   };
 }
 
+export const captureProjectSlugs = [
+  "family-expenses", "planner", "idea-vault", "child-schedule", "pressure-diary", "fitness-tracker", "recipe-book", "personal-organizer", "home-helper",
+  "day-planner-agent", "home-organizer-agent", "meal-planning-agent", "study-agent", "idea-analysis-agent", "expense-agent", "family-schedule-agent", "habit-agent",
+  "lead-agent", "booking-agent", "brief-agent", "selector-agent", "content-agent", "expert-assistant-agent", "sales-manager-agent", "administrator-agent", "consultant-agent", "online-school-agent", "event-organizer-agent", "client-care-agent", "fairy-team-agent",
+  "expert-site", "psychologist-site", "beauty-site", "photographer-site", "designer-site", "consultation-site", "course-site", "event-site", "small-shop-site", "portfolio-site",
+  "expert-pro-site", "school-pro-site", "service-pro-site", "catalog-pro-site", "graduate-portfolio",
+] as const;
+
 const concreteProjects: ProjectDefinition[] = [
   p({ slug: "family-expenses", title: "Учёт расходов семьи", week: 1, kind: "service", track: "Бытовые сервисы", symbol: "₽", audience: "для семьи, которая хочет видеть расходы за месяц", outcome: "мобильный сервис с бюджетом, категориями, остатком и резервной копией", entities: ["бюджет", "расход", "категория", "месяц"], features: ["добавление расхода", "итоги месяца", "фильтр по категориям", "JSON и CSV"], demo: ["Бюджет 100 000 ₽", "Продукты 3 450 ₽", "Ребёнок 1 290 ₽"], portfolioAngle: "понятный семейный финансовый помощник без подключения к банку" }),
   p({ slug: "planner", title: "Планер на день и неделю", week: 1, kind: "service", track: "Бытовые сервисы", symbol: "✓", audience: "для занятой девушки, которой нужен спокойный план дня", outcome: "планер с главным делом, приоритетами, неделей и отметками выполнения", entities: ["задача", "день", "приоритет", "статус"], features: ["задачи на день", "план недели", "главное сегодня", "отметка готово"], demo: ["Записать ребёнка к врачу", "Купить продукты", "30 минут на себя"], portfolioAngle: "лёгкий планер, которым удобно пользоваться одной рукой" }),
