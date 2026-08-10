@@ -17,7 +17,7 @@ function SmallShopSite({ detail }: { detail: boolean }) {
 }
 
 function PortfolioSite({ detail }: { detail: boolean }) {
-  return <div className="final-personal-portfolio"><nav><b>ELINA / AI CREATOR</b><span>Проекты · Навыки · Обо мне</span><button>Обсудить задачу</button></nav><header><small>СОЗДАЮ БЕЗ КОДА</small><h4>ИИ-сервисы, боты и сайты, которыми удобно пользоваться</h4><div><b>5</b><span>работ в портфолио</span></div></header><section>{[["01", "Семейный планер", "СЕРВИС"], ["02", "ИИ-консультант", "АГЕНТ"], ["03", "Сайт эксперта", "САЙТ"]].slice(0, detail ? 3 : 2).map(([num, title, type]) => <article key={title}><small>{num} / {type}</small><b>{title}</b><span>Учебный проект · открыть ↗</span></article>)}</section></div>;
+  return <div className="final-personal-portfolio"><nav><b>ELINA / AI CREATOR</b><span>Проекты · Навыки · Обо мне</span><button>Обсудить задачу</button></nav><header><small>СОЗДАЮ БЕЗ КОДА</small><h4>ИИ-сервисы, агенты и сайты, которыми удобно пользоваться</h4><div><b>5</b><span>работ в портфолио</span></div></header><section>{[["01", "Семейный планер", "СЕРВИС"], ["02", "ИИ-консультант", "АГЕНТ"], ["03", "Сайт эксперта", "САЙТ"]].slice(0, detail ? 3 : 2).map(([num, title, type]) => <article key={title}><small>{num} / {type}</small><b>{title}</b><span>Учебный проект · открыть ↗</span></article>)}</section></div>;
 }
 
 function ExpertProSite({ detail }: { detail: boolean }) {

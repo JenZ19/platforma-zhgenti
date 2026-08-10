@@ -10,9 +10,9 @@ function telegramHref(base: string, slug: string, step: number): string {
 
 export function MobileActionButton({ action, projectSlug, step }: { action: MobileAction; projectSlug: string; step: number }) {
   const [notice, setNotice] = useState("");
-  const botUrl = process.env.NEXT_PUBLIC_COURSE_BOT_URL?.trim() ?? "";
+  const telegramUrl = process.env.NEXT_PUBLIC_COURSE_BOT_URL?.trim() ?? "";
   const isTelegram = action.tool === "telegram" || action.tool === "screenshot";
-  const href = isTelegram && botUrl ? telegramHref(botUrl, projectSlug, step) : action.href;
+  const href = isTelegram && telegramUrl ? telegramHref(telegramUrl, projectSlug, step) : action.href;
 
   if (href) {
     return (
@@ -27,7 +27,7 @@ export function MobileActionButton({ action, projectSlug, step }: { action: Mobi
     return (
       <div className="mobile-action mobile-action-telegram unavailable">
         <button type="button" disabled>{action.label}</button>
-        <p><b>Бот подключается куратором.</b> Пока сохраните этот уровень — ссылка появится здесь автоматически.</p>
+        <p><b>Telegram называет оболочку ботом, но внутри неё работает ваш ИИ-агент.</b> Технические шаги BotFather и Telegram Bot API выполнит куратор по инструкции. Пока сохраните этот уровень — ссылка появится здесь автоматически.</p>
       </div>
     );
   }

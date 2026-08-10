@@ -362,7 +362,7 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     expect(screen.getByRole("heading", { name: /увидела, каким станет мой бюджет/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /открыть фею в telegram/i })).toBeDisabled();
-    expect(screen.getByText(/бот подключается куратором/i)).toBeInTheDocument();
+    expect(screen.getByText(/Telegram называет оболочку ботом, но внутри неё работает ваш ИИ-агент/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
     expect(localStorage.getItem(progressKey("mobile:family-expenses"))).toContain('"completed":[1]');
     expect(localStorage.getItem(progressKey("family-expenses"))).toBeNull();
