@@ -1,6 +1,28 @@
-import type { ProjectDefinition } from "../content/types";
+import { isProjectBundle } from "../content/projects";
+import type { CatalogProject } from "../content/types";
 
-export function ProjectPreview({ project }: { project: ProjectDefinition }) {
+export function ProjectPreview({ project }: { project: CatalogProject }) {
+  if (isProjectBundle(project)) {
+    return (
+      <figure className="project-preview project-preview-bundle">
+        <div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/screens/${project.formats.service.slug}/step-14.png`}
+            alt={`Сервис проекта «${project.title}»`}
+            loading="lazy"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/screens/${project.formats.agent.slug}/step-14.png`}
+            alt={`ИИ-агент проекта «${project.title}»`}
+            loading="lazy"
+          />
+        </div>
+        <figcaption><span>✦</span> 2 формата внутри</figcaption>
+      </figure>
+    );
+  }
   return (
     <figure className={`project-preview project-preview-${project.kind}`}>
       {/* Static course screenshots are already compressed and must preserve their exact crop. */}

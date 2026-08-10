@@ -5,8 +5,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildQuest } from "../content/quests";
 import { defaultCustomization, getCustomizationProfile } from "../content/customization";
-import type { ProjectDefinition, QuestCustomization } from "../content/types";
+import { isProjectBundle, resolveProjectVariant } from "../content/projects";
+import type { CatalogProject, ProjectDefinition, ProjectFormat, QuestCustomization } from "../content/types";
 import { loadCustomization, resetCustomization, saveCustomization } from "../lib/customization";
+import { branchStorageSlug, loadOutputChoice, resetBundleState, saveOutputChoice } from "../lib/output-format";
 import {
   buildRealDataChecklist,
   createEmptyPreparation,
@@ -28,26 +30,104 @@ import { QuestPreparation } from "./QuestPreparation";
 import { QuestGuide } from "./QuestGuide";
 import { QuestCustomizer } from "./QuestCustomizer";
 import { QuestResetButton } from "./QuestResetButton";
+import { QuestFormatChoice } from "./QuestFormatChoice";
 
-export function Quest({ project, onHome }: { project: ProjectDefinition; onHome: () => void }) {
+export function Quest({
+  project,
+  initialOutput,
+  onOutputChange = () => undefined,
+  onHome,
+}: {
+  project: CatalogProject;
+  initialOutput?: ProjectFormat;
+  onOutputChange?: (output?: ProjectFormat) => void;
+  onHome: () => void;
+}) {
+  const bundled = isProjectBundle(project);
+  const [output, setOutput] = useState<ProjectFormat | undefined>(initialOutput);
+  const [choiceLoaded, setChoiceLoaded] = useState(!bundled || Boolean(initialOutput));
+
+  useEffect(() => {
+    if (!bundled) return;
+    const next = initialOutput ?? loadOutputChoice(project.slug, "desktop", window.localStorage);
+    if (initialOutput) saveOutputChoice(project.slug, "desktop", initialOutput, window.localStorage);
+    // Choice is device-local and restored only after the browser mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOutput(next);
+    setChoiceLoaded(true);
+  }, [bundled, initialOutput, project.slug]);
+
+  if (bundled && !choiceLoaded) {
+    return <main className="quest-shell"><section className="preparation-card preparation-loading">Готовим выбор формата…</section></main>;
+  }
+
+  function choose(format: ProjectFormat) {
+    saveOutputChoice(project.slug, "desktop", format, window.localStorage);
+    setOutput(format);
+    onOutputChange(format);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function resetBundle() {
+    if (!bundled) return;
+    if (!window.confirm(`Сбросить проект «${project.title}» и начать с нуля?\n\nБудут удалены выбор формата, прогресс, ответы и оформление сервиса и ИИ-агента только в этом проекте. Остальные проекты сохранятся.`)) return;
+    resetBundleState(project.slug, "desktop", window.localStorage);
+    setOutput(undefined);
+    onOutputChange(undefined);
+  }
+
+  if (bundled && !output) {
+    return <QuestFormatChoice project={project} onChoose={choose} onHome={onHome} onReset={resetBundle} />;
+  }
+
+  const concrete = resolveProjectVariant(project, output);
+  if (!concrete) return null;
+  const storageSlug = bundled ? branchStorageSlug(project.slug, output!, "desktop") : concrete.slug;
+  return (
+    <QuestBody
+      project={concrete}
+      storageSlug={storageSlug}
+      profileSlug={concrete.slug}
+      format={bundled ? output : undefined}
+      bundle={bundled ? { slug: project.slug, title: project.title, onReset: () => { setOutput(undefined); onOutputChange(undefined); } } : undefined}
+      onHome={onHome}
+    />
+  );
+}
+
+function QuestBody({
+  project,
+  storageSlug,
+  profileSlug,
+  format,
+  bundle,
+  onHome,
+}: {
+  project: ProjectDefinition;
+  storageSlug: string;
+  profileSlug: string;
+  format?: ProjectFormat;
+  bundle?: { slug: string; title: string; onReset: () => void };
+  onHome: () => void;
+}) {
   const [preparation, setPreparation] = useState<PreparationState | null>(null);
   const [progress, setProgress] = useState(createEmptyProgress);
   const [helpOpen, setHelpOpen] = useState(false);
   const [copied, setCopied] = useState<"main" | "help" | null>(null);
   const [reward, setReward] = useState<string | null>(null);
   const [imageOpen, setImageOpen] = useState(false);
-  const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(project.slug));
-  const profile = useMemo(() => getCustomizationProfile(project.slug), [project.slug]);
+  const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(profileSlug));
+  const profile = useMemo(() => getCustomizationProfile(profileSlug), [profileSlug]);
   const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization), [project, preparation?.mode, customization]);
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
 
   useEffect(() => {
     // Quest progress is stored in this browser and restored after mount.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProgress(loadProgress(project.slug, window.localStorage));
-    setPreparation(loadPreparation(project.slug, window.localStorage));
-    setCustomization(loadCustomization(project.slug, window.localStorage));
-  }, [project.slug]);
+    setProgress(loadProgress(storageSlug, window.localStorage));
+    setPreparation(loadPreparation(storageSlug, window.localStorage));
+    setCustomization(loadCustomization(storageSlug, profileSlug, window.localStorage));
+  }, [profileSlug, storageSlug]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -66,7 +146,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
 
   function storePreparation(next: PreparationState) {
     setPreparation(next);
-    savePreparation(project.slug, next, window.localStorage);
+    savePreparation(storageSlug, next, window.localStorage);
   }
 
   function chooseDemo() {
@@ -91,7 +171,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   }
 
   function changeDataMode() {
-    resetPreparation(project.slug, window.localStorage);
+    resetPreparation(storageSlug, window.localStorage);
     setPreparation(createEmptyPreparation());
   }
 
@@ -99,7 +179,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     if (!isStepUnlocked(progress, id)) return;
     const next = { ...progress, activeStep: id };
     setProgress(next);
-    saveProgress(project.slug, next, window.localStorage);
+    saveProgress(storageSlug, next, window.localStorage);
     setHelpOpen(false);
   }
 
@@ -107,7 +187,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
     const wasDone = progress.completed.includes(step.id);
     const next = completeStep(progress, step.id);
     setProgress(next);
-    saveProgress(project.slug, next, window.localStorage);
+    saveProgress(storageSlug, next, window.localStorage);
     setHelpOpen(false);
     if (!wasDone && step.reward) setReward(step.reward);
   }
@@ -119,17 +199,25 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
   }
 
   function reset() {
-    if (!window.confirm(`Сбросить проект «${project.title}» и начать с нуля?\n\nБудут удалены прогресс, ответы и оформление только этого проекта. Остальные проекты сохранятся.`)) return;
-    resetProgress(project.slug, window.localStorage);
-    resetPreparation(project.slug, window.localStorage);
-    resetCustomization(project.slug, window.localStorage);
+    const title = bundle?.title ?? project.title;
+    const warning = bundle
+      ? "Будут удалены выбор формата, прогресс, ответы и оформление сервиса и ИИ-агента только в этом проекте. Остальные проекты сохранятся."
+      : "Будут удалены прогресс, ответы и оформление только этого проекта. Остальные проекты сохранятся.";
+    if (!window.confirm(`Сбросить проект «${title}» и начать с нуля?\n\n${warning}`)) return;
+    if (bundle) resetBundleState(bundle.slug, "desktop", window.localStorage);
+    else {
+      resetProgress(storageSlug, window.localStorage);
+      resetPreparation(storageSlug, window.localStorage);
+      resetCustomization(storageSlug, window.localStorage);
+    }
     setProgress(createEmptyProgress());
     setPreparation(createEmptyPreparation());
-    setCustomization(defaultCustomization(project.slug));
+    setCustomization(defaultCustomization(profileSlug));
     setHelpOpen(false);
     setCopied(null);
     setReward(null);
     setImageOpen(false);
+    bundle?.onReset();
   }
 
   return (
@@ -142,10 +230,11 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
       <section className="quest-hero">
         <button type="button" className="back-link" onClick={onHome}>← Вернуться ко всем проектам</button>
         <p className="kicker"><span /> {project.track} · {project.device}</p>
-        <h1>{project.title}</h1>
+        <h1>{bundle?.title ?? project.title}</h1>
         <p>{project.outcome}</p>
         <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / 17</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
         <QuestResetButton onReset={reset} />
+        {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
         {preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
       </section>
 
@@ -175,7 +264,7 @@ export function Quest({ project, onHome }: { project: ProjectDefinition; onHome:
           <header className="level-header"><div><p>Уровень {String(step.id).padStart(2, "0")} <i>✦</i></p><h2>{step.title}</h2></div><span>≈ {step.id < 5 ? 5 : step.id < 13 ? 7 : 10} мин</span></header>
           <section className="why-card"><b>Зачем это</b><p>{step.why}</p></section>
 
-          {step.id === 2 && profile && customization && <QuestCustomizer profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(project.slug, next, window.localStorage); setCustomization(next); }} />}
+          {step.id === 2 && profile && customization && <QuestCustomizer profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
 
           <section className="action-section">
             <p className="section-kicker">Что сделать</p>

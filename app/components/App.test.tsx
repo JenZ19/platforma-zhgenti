@@ -8,8 +8,8 @@ import { agentCoverPrototypeSlugs, getAgentCoverPrototypeSpec } from "../content
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
-import { getProject, projects } from "../content/projects";
-import { getPreparationProfile } from "../content/preparation";
+import { getQuestProject, projects, questProjects } from "../content/projects";
+import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
 import { customizationKey } from "../lib/customization";
@@ -33,30 +33,32 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/");
   });
 
-  it("shows all 52 course projects", () => {
+  it("shows all 38 course projects", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(52);
-    expect(screen.getByText("52 проекта")).toBeInTheDocument();
+    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(38);
+    expect(screen.getByText("38 проектов")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
   });
 
   it("shows the finished prototype on every desktop project card", () => {
-    render(<Academy />);
-    const previews = screen.getAllByRole("img", { name: /прототип результата проекта/i });
-    expect(previews).toHaveLength(52);
-    expect(screen.getByRole("img", { name: /учёт расходов семьи/i })).toHaveAttribute(
+    const { container } = render(<Academy />);
+    expect(container.querySelectorAll(".project-preview img")).toHaveLength(45);
+    expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",
     );
   });
 
   it("renders every mobile collection screen without asking for prepared files", () => {
-    const { container, rerender } = render(<MobileExpectedScene project={projects[0]} step={4} />);
-    for (const project of projects) {
+    const { container, rerender } = render(<MobileExpectedScene project={questProjects[0]} step={4} />);
+    const prepared = new Set(getPreparationProfileSlugs());
+    for (const project of questProjects) {
       rerender(<MobileExpectedScene project={project} step={4} />);
-      const profile = getPreparationProfile(project.slug);
-      expect(container, project.slug).not.toHaveTextContent(profile.sourceFile);
-      expect(container, project.slug).not.toHaveTextContent(profile.rulesFile);
+      if (prepared.has(project.slug)) {
+        const profile = getPreparationProfile(project.slug);
+        expect(container, project.slug).not.toHaveTextContent(profile.sourceFile);
+        expect(container, project.slug).not.toHaveTextContent(profile.rulesFile);
+      }
       expect(container, project.slug).toHaveTextContent(/Codex|создан/i);
     }
   });
@@ -75,7 +77,7 @@ describe("academy interface", () => {
   });
 
   it("renders a content-specific final-product cover for the first ten projects", () => {
-    const featuredProjects = firstCoverPrototypeSlugs.filter((slug) => !["family-expenses", "planner", "idea-vault", "child-schedule"].includes(slug)).map((slug) => getProject(slug)!);
+    const featuredProjects = firstCoverPrototypeSlugs.filter((slug) => !["family-expenses", "planner", "idea-vault", "child-schedule"].includes(slug)).map((slug) => getQuestProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     for (const project of featuredProjects) {
@@ -88,7 +90,7 @@ describe("academy interface", () => {
   });
 
   it("renders distinct family-budget stages instead of a generic service mockup", () => {
-    const project = getProject("family-expenses")!;
+    const project = getQuestProject("family-expenses")!;
     const stages = new Map([[2, "concept"], [7, "expense"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
     const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={step} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={step} />)}</>);
 
@@ -100,7 +102,7 @@ describe("academy interface", () => {
   });
 
   it("renders distinct planner stages with a personal and client version", () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     const stages = new Map([[2, "concept"], [7, "task"], [8, "focus"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
     const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={step} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={step} />)}</>);
 
@@ -111,7 +113,7 @@ describe("academy interface", () => {
   });
 
   it("renders distinct idea-vault stages from capture to client portfolio", () => {
-    const project = getProject("idea-vault")!;
+    const project = getQuestProject("idea-vault")!;
     const stages = new Map([[2,"concept"],[7,"capture"],[8,"organize"],[10,"feature"],[11,"search"],[15,"client-copy"],[16,"client-brief"],[17,"portfolio"]]);
     const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={step}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={step}/>)}</>);
     for (const [step,stage] of stages) expect(container.querySelectorAll(`[data-original-service="idea-vault"][data-original-stage="${stage}"]`),`step ${step}`).toHaveLength(2);
@@ -119,7 +121,7 @@ describe("academy interface", () => {
   });
 
   it("renders distinct child-schedule stages from week planning to client portfolio", () => {
-    const project = getProject("child-schedule")!;
+    const project = getQuestProject("child-schedule")!;
     const stages = new Map([[2,"concept"],[7,"activity"],[8,"week"],[10,"feature"],[11,"morning"],[15,"client-copy"],[16,"client-brief"],[17,"portfolio"]]);
     const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={step}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={step}/>)}</>);
     for (const [step,stage] of stages) expect(container.querySelectorAll(`[data-original-service="child-schedule"][data-original-stage="${stage}"]`),`step ${step}`).toHaveLength(2);
@@ -127,7 +129,7 @@ describe("academy interface", () => {
   });
 
   it("shows both click-by-click pictures and the final project prototype in an original quest", () => {
-    render(<Quest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     const guide = screen.getByRole("region", { name: /делайте по картинкам/i });
     expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(3);
@@ -135,7 +137,7 @@ describe("academy interface", () => {
   });
 
   it("renders a content-specific cover for the next ten agents", () => {
-    const featuredProjects = agentCoverPrototypeSlugs.map((slug) => getProject(slug)!);
+    const featuredProjects = agentCoverPrototypeSlugs.map((slug) => getQuestProject(slug)).filter(Boolean);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     for (const project of featuredProjects) {
@@ -148,7 +150,7 @@ describe("academy interface", () => {
   });
 
   it("renders a unique content-specific cover for the following ten projects", () => {
-    const featuredProjects = thirdCoverPrototypeSlugs.map((slug) => getProject(slug)!);
+    const featuredProjects = thirdCoverPrototypeSlugs.map((slug) => getQuestProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     for (const project of featuredProjects) {
@@ -161,7 +163,7 @@ describe("academy interface", () => {
   });
 
   it("renders a unique content-specific cover for every project through the course finale", () => {
-    const featuredProjects = finalCoverPrototypeSlugs.map((slug) => getProject(slug)!);
+    const featuredProjects = finalCoverPrototypeSlugs.map((slug) => getQuestProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     for (const project of featuredProjects) {
@@ -177,7 +179,7 @@ describe("academy interface", () => {
     render(<Academy />);
     fireEvent.click(screen.getByRole("button", { name: /неделя 2/i }));
     const catalogue = screen.getByRole("region", { name: /каталог проектов/i });
-    expect(within(catalogue).getAllByRole("link", { name: /открыть квест/i })).toHaveLength(13);
+    expect(within(catalogue).getAllByRole("link", { name: /открыть квест/i })).toHaveLength(8);
     fireEvent.change(screen.getByRole("searchbox", { name: /найти проект/i }), { target: { value: "психолог" } });
     expect(within(catalogue).getByText(/ничего не найдено/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /все проекты/i }));
@@ -185,7 +187,7 @@ describe("academy interface", () => {
   });
 
   it("unlocks quest levels sequentially and saves project-specific progress", () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
@@ -196,7 +198,7 @@ describe("academy interface", () => {
   });
 
   it("returns a desktop quest to the top after the learner presses next", async () => {
-    render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
 
@@ -207,7 +209,7 @@ describe("academy interface", () => {
   });
 
   it("returns a mobile quest to the top immediately after next", async () => {
-    render(<MobileQuest project={getProject("child-schedule")!} onHome={vi.fn()} />);
+    render(<MobileQuest project={getQuestProject("child-schedule")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
 
@@ -218,7 +220,7 @@ describe("academy interface", () => {
   });
 
   it("opens contextual help inside a quest", () => {
-    const project = getProject("recipe-book")!;
+    const project = getQuestProject("recipe-book")!;
     render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /нужна помощь/i }));
@@ -226,7 +228,7 @@ describe("academy interface", () => {
   });
 
   it("hydrates project cards without changing saved progress during hydration", async () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     localStorage.setItem(progressKey("planner"), JSON.stringify({ completed: [1, 2], activeStep: 3, score: 20 }));
     const html = renderToString(<ProjectCard project={project} />);
     expect(html).toContain("Не начато");
@@ -243,7 +245,7 @@ describe("academy interface", () => {
   });
 
   it("asks for a data mode before opening each quest", () => {
-    render(<Quest project={getProject("planner")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("planner")!} onHome={vi.fn()} />);
     expect(screen.getByRole("heading", { name: /на каких данных будем работать/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /уровень 1:/i })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
@@ -252,14 +254,14 @@ describe("academy interface", () => {
   });
 
   it("shows a reset action before data mode selection on desktop and mobile", () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     render(<><Quest project={project} onHome={vi.fn()} /><MobileQuest project={project} onHome={vi.fn()} /></>);
 
     expect(screen.getAllByRole("button", { name: /сбросить проект и начать с нуля/i })).toHaveLength(2);
   });
 
   it("cancels safely and then resets only the current desktop project", async () => {
-    const current = getProject("planner")!;
+    const current = getQuestProject("planner")!;
     localStorage.setItem(progressKey("planner"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
     localStorage.setItem(preparationKey("planner"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
     localStorage.setItem(customizationKey("planner"), JSON.stringify({ audience: "Моя семья" }));
@@ -287,7 +289,7 @@ describe("academy interface", () => {
   });
 
   it("resets the mobile project without touching its desktop version", async () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     localStorage.setItem(progressKey("mobile:planner"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
     localStorage.setItem(preparationKey("mobile:planner"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
     localStorage.setItem(customizationKey("mobile:planner"), JSON.stringify({ audience: "Моя семья" }));
@@ -306,7 +308,7 @@ describe("academy interface", () => {
   });
 
   it("blocks a real-data quest until its personal checklist is complete", () => {
-    render(<Quest project={getProject("psychologist-site")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("psychologist-site")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     const checks = screen.getAllByRole("checkbox");
     expect(checks).toHaveLength(5);
@@ -320,7 +322,7 @@ describe("academy interface", () => {
   });
 
   it("does not make a family-expenses learner create folders or files by hand", () => {
-    render(<Quest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
 
     expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
@@ -335,7 +337,7 @@ describe("academy interface", () => {
   });
 
   it("does not ask a pressure-diary learner to prepare a folder or data file", () => {
-    render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
     expect(screen.getAllByText(/Codex сам создаст проект pressure-diary, папки, файлы и нужные поля/i).length).toBeGreaterThan(0);
@@ -346,16 +348,16 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
     expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(52);
-    expect(screen.getAllByRole("img", { name: /прототип результата проекта/i })).toHaveLength(52);
-    expect(screen.getByRole("img", { name: /учёт расходов семьи/i })).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(38);
+    expect(document.querySelectorAll(".project-preview img")).toHaveLength(45);
+    expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",
     );
   });
 
   it("stores phone progress separately and shows a safe Telegram fallback", () => {
-    const project = getProject("family-expenses")!;
+    const project = getQuestProject("family-expenses")!;
     render(<MobileQuest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     expect(screen.getByRole("heading", { name: /увидела, каким станет мой бюджет/i })).toBeInTheDocument();
@@ -367,7 +369,7 @@ describe("academy interface", () => {
   });
 
   it("lets a learner personalize the first four quests and restores her choice", () => {
-    const project = getProject("family-expenses")!;
+    const project = getQuestProject("family-expenses")!;
     const { unmount } = render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
@@ -395,7 +397,7 @@ describe("academy interface", () => {
   });
 
   it("lets a learner assemble her own color palette without leaving the quest", () => {
-    render(<Quest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
 
@@ -419,7 +421,7 @@ describe("academy interface", () => {
       feature: "Недельные конверты",
     }));
 
-    render(<MobileQuest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    render(<MobileQuest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
 
@@ -429,7 +431,7 @@ describe("academy interface", () => {
   });
 
   it("walks a real home-helper learner through every click with pictures", () => {
-    render(<Quest project={getProject("home-helper")!} onHome={vi.fn()} />);
+    render(<Quest project={getQuestProject("home-helper")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     expect(screen.queryByRole("img", { name: /подготовка home-helper/i })).not.toBeInTheDocument();
     expect(screen.getByText(/Codex сам создаст проект home-helper, папки, файлы и нужные поля/i)).toBeInTheDocument();
@@ -492,9 +494,9 @@ describe("academy interface", () => {
   });
 
   it("keeps shared result screenshots neutral for real and training routes", async () => {
-    window.history.replaceState({}, "", "/?capture=planner-bot--step-09");
+    window.history.replaceState({}, "", "/?capture=day-planner-agent--step-09");
     render(<AppEntry />);
-    expect(await screen.findByText(/безопасные проверочные данные/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /ничего не потерялось/i })).toBeInTheDocument();
     expect(screen.queryByText(/вымышлен|учебной папке/i)).not.toBeInTheDocument();
   });
 

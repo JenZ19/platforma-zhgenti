@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { projects } from "../content/projects";
+import { isProjectBundle, projects } from "../content/projects";
 import { getAcademyStats } from "../lib/progress";
 import { ProjectCard } from "./ProjectCard";
 
@@ -10,7 +10,7 @@ const weekLabels = ["Все проекты", "Неделя 1", "Неделя 2",
 export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   const [week, setWeek] = useState(0);
   const [query, setQuery] = useState("");
-  const [stats, setStats] = useState({ totalProjects: 52, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: 884, score: 0 });
+  const [stats, setStats] = useState({ totalProjects: 38, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: 646, score: 0 });
 
   useEffect(() => {
     // Overall progress is device-local and can only be read after the page mounts.
@@ -21,7 +21,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   const visible = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase("ru");
     return projects.filter((project) => {
-      const inWeek = week === 0 || project.week === week;
+      const inWeek = week === 0 || (isProjectBundle(project) ? project.weeks.includes(week as 1 | 2) : project.week === week);
       const inSearch = !needle || `${project.title} ${project.outcome} ${project.track}`.toLocaleLowerCase("ru").includes(needle);
       return inWeek && inSearch;
     });
@@ -42,7 +42,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
         <h1>Выбери проект.<br /><em>Сделай его шаг за шагом.</em></h1>
         <p className="hero-lead">Никакого пустого листа. В каждом квесте уже есть готовые команды для Codex, понятные проверки и экран того, что должно получиться.</p>
         <div className="academy-stats" aria-label="Общий прогресс">
-          <div><strong>52</strong><span>проекта</span></div>
+          <div><strong>38</strong><span>проектов</span></div>
           <div><strong>{stats.startedProjects}</strong><span>начато</span></div>
           <div><strong>{stats.completedProjects}</strong><span>готово</span></div>
           <div><strong>{stats.completedSteps}</strong><span>уровней пройдено</span></div>
@@ -51,7 +51,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
 
       <section className="catalogue" aria-label="Каталог проектов">
         <div className="catalogue-head">
-          <div><p className="section-kicker">Твоя мастерская</p><h2>52 проекта</h2></div>
+          <div><p className="section-kicker">Твоя мастерская</p><h2>38 проектов</h2></div>
           <label className="search-field"><span>⌕</span><input type="search" aria-label="Найти проект" placeholder="Найти проект…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         </div>
         <div className="week-tabs" role="group" aria-label="Фильтр по неделям">

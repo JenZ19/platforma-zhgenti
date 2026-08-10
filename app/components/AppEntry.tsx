@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getProject } from "../content/projects";
+import { getProject, getQuestProject } from "../content/projects";
+import { canonicalQuestQuery, resolvePublicProjectRoute } from "../content/project-routes";
+import type { ProjectFormat } from "../content/types";
 import { Academy } from "./Academy";
 import { ExpectedScene } from "./ExpectedScene";
 import { MobileAcademy } from "./MobileAcademy";
@@ -15,7 +17,7 @@ import { buildQuest } from "../content/quests";
 
 type Route =
   | { type: "home"; format: "desktop" | "mobile" }
-  | { type: "quest"; slug: string; format: "desktop" | "mobile" }
+  | { type: "quest"; slug: string; output?: ProjectFormat; format: "desktop" | "mobile" }
   | { type: "capture"; slug: string; step: number }
   | { type: "capture-mobile"; slug: string; step: number }
   | { type: "capture-guide"; slug: string; mode: "real" | "demo"; step: number; frame: number };
@@ -30,7 +32,12 @@ function readRoute(): Route {
   if (capture) return { type: "capture", slug: capture[1], step: Number(capture[2]) };
   const quest = query.get("quest");
   const format = query.get("format") === "mobile" ? "mobile" : "desktop";
-  return quest ? { type: "quest", slug: quest, format } : { type: "home", format };
+  if (!quest) return { type: "home", format };
+  const resolved = resolvePublicProjectRoute(quest, query.get("output") ?? undefined);
+  if (!resolved) return { type: "home", format };
+  const canonical = canonicalQuestQuery(resolved, format === "mobile");
+  if (window.location.search !== canonical) window.history.replaceState({}, "", canonical);
+  return { type: "quest", slug: resolved.slug, output: resolved.output, format };
 }
 
 export function AppEntry() {
@@ -51,6 +58,15 @@ export function AppEntry() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function changeOutput(output?: ProjectFormat) {
+    if (route.type !== "quest") return;
+    const next = { ...route, output };
+    const query = canonicalQuestQuery({ slug: route.slug, output, legacy: false }, route.format === "mobile");
+    window.history.replaceState({}, "", query);
+    setRoute(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function home() {
     const format = route.type === "home" || route.type === "quest" ? route.format : "desktop";
     window.history.pushState({}, "", format === "mobile" ? `${window.location.pathname}?format=mobile` : window.location.pathname);
@@ -59,23 +75,23 @@ export function AppEntry() {
   }
 
   if (route.type === "capture") {
-    const project = getProject(route.slug);
+    const project = getQuestProject(route.slug);
     return project ? <ExpectedScene project={project} step={route.step} /> : <div>Проект не найден</div>;
   }
   if (route.type === "capture-guide") {
-    const project = getProject(route.slug);
+    const project = getQuestProject(route.slug);
     const frame = project ? buildQuest(project, route.mode)[route.step - 1]?.guide?.[route.frame - 1] : undefined;
     if (!project || !frame) return <div>Кадр не найден</div>;
     return isOriginalQuestSlug(project.slug) ? <OriginalQuestGuideScene project={project} frame={frame} step={route.step} mode={route.mode} /> : <HomeHelperGuideScene frame={frame} step={route.step} mode={route.mode} />;
   }
   if (route.type === "capture-mobile") {
-    const project = getProject(route.slug);
+    const project = getQuestProject(route.slug);
     return project ? <MobileExpectedScene project={project} step={route.step} /> : <div>Проект не найден</div>;
   }
   if (route.type === "quest") {
     const project = getProject(route.slug);
-    if (route.format === "mobile") return project ? <MobileQuest project={project} onHome={home} /> : <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} />;
-    return project ? <Quest project={project} onHome={home} /> : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />;
+    if (route.format === "mobile") return project ? <MobileQuest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} /> : <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} />;
+    return project ? <Quest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} /> : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />;
   }
   return route.format === "mobile" ? <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} /> : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />;
 }
