@@ -18,7 +18,7 @@ try {
   await mobile.goto(origin, { waitUntil: "domcontentloaded" });
   await mobile.evaluate(() => document.fonts?.ready);
   await mobile.screenshot({ path: path.join(artifacts, "academy-mobile.png"), fullPage: true });
-  await mobile.goto(`${origin}/?quest=family-expenses`, { waitUntil: "domcontentloaded" });
+  await mobile.goto(`${origin}/?format=mobile&quest=planning&output=agent`, { waitUntil: "domcontentloaded" });
   await mobile.evaluate(() => document.fonts?.ready);
   await mobile.screenshot({ path: path.join(artifacts, "quest-mobile.png"), fullPage: true });
   console.log(`Сохранено 3 контрольных снимка в ${artifacts}`);

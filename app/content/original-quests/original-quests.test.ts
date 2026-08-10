@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { defaultCustomization, questColorPalettes } from "../customization";
-import { getProject } from "../projects";
+import { getQuestProject } from "../projects";
 import { buildFamilyExpensesQuest } from "./family-expenses";
 import { buildPlannerQuest } from "./planner";
 import { buildIdeaVaultQuest } from "./idea-vault";
@@ -15,7 +15,7 @@ function text(value: unknown): string {
 
 describe("first four original quests", () => {
   it("builds a fully bespoke family-expenses learning and client path", () => {
-    const project = getProject("family-expenses")!;
+    const project = getQuestProject("family-expenses")!;
     const customization = {
       ...defaultCustomization(project.slug)!,
       audience: "Семья с детьми",
@@ -52,7 +52,7 @@ describe("first four original quests", () => {
   });
 
   it("makes Codex create the family-expenses workspace and data files itself", () => {
-    const project = getProject("family-expenses")!;
+    const project = getQuestProject("family-expenses")!;
     const steps = buildFamilyExpensesQuest(project, "real", defaultCustomization(project.slug)!);
     const all = text(steps);
     expect(all).toMatch(/Codex сам создаст|создай сам/i);
@@ -66,7 +66,7 @@ describe("first four original quests", () => {
   });
 
   it("builds a calm, original planner that can be repeated for a client", () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     const customization = {
       ...defaultCustomization(project.slug)!,
       audience: "Мама с малышом",
@@ -99,7 +99,7 @@ describe("first four original quests", () => {
   });
 
   it("builds the real planner from a short Codex interview", () => {
-    const project = getProject("planner")!;
+    const project = getQuestProject("planner")!;
     const all = text(buildPlannerQuest(project, "real", defaultCustomization(project.slug)!));
     expect(all).toMatch(/по одному вопросу.+голосом или текстом/i);
     expect(all).toMatch(/Codex сам создаст|создай новое рабочее место planner/i);
@@ -109,7 +109,7 @@ describe("first four original quests", () => {
   });
 
   it("builds an original idea vault with a small-step client adaptation", () => {
-    const project = getProject("idea-vault")!;
+    const project = getQuestProject("idea-vault")!;
     const customization = { ...defaultCustomization(project.slug)!, audience: "Автор контента", name: "Лови мысль", style: "Яркая доска", tone: "Вдохновляюще", feature: "Следующий маленький шаг" };
     const steps = buildIdeaVaultQuest(project, "demo", customization);
     expect(steps).toHaveLength(17);
@@ -130,7 +130,7 @@ describe("first four original quests", () => {
   });
 
   it("builds the real idea vault from a short Codex interview", () => {
-    const project = getProject("idea-vault")!;
+    const project = getQuestProject("idea-vault")!;
     const all = text(buildIdeaVaultQuest(project, "real", defaultCustomization(project.slug)!));
     expect(all).toMatch(/по одному вопросу.+голосом или текстом/i);
     expect(all).toMatch(/Codex сам создаст|создай новое рабочее место idea-vault/i);
@@ -140,7 +140,7 @@ describe("first four original quests", () => {
   });
 
   it("builds a private child schedule with a distinct client adaptation", () => {
-    const project = getProject("child-schedule")!;
+    const project = getQuestProject("child-schedule")!;
     const customization = { ...defaultCustomization(project.slug)!, audience: "Семья с двумя детьми", name: "Неделя без спешки", style: "Мягкие цветовые дни", tone: "По-семейному", feature: "Что взять с собой" };
     const steps = buildChildScheduleQuest(project, "demo", customization);
     expect(steps).toHaveLength(17);
@@ -164,7 +164,7 @@ describe("first four original quests", () => {
   });
 
   it("builds the real child schedule from a private Codex interview", () => {
-    const project = getProject("child-schedule")!;
+    const project = getQuestProject("child-schedule")!;
     const all = text(buildChildScheduleQuest(project, "real", defaultCustomization(project.slug)!));
     expect(all).toMatch(/по одному вопросу.+голосом или текстом/i);
     expect(all).toMatch(/Codex сам создаст|создай новое рабочее место child-schedule/i);

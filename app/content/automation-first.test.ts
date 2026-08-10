@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildRealDataChecklist } from "../lib/preparation";
 import { buildMobileQuest } from "./mobile";
-import { projects } from "./projects";
+import { questProjects } from "./projects";
 import { getPreparationProfile } from "./preparation";
 import { buildQuest } from "./quests";
 
@@ -19,7 +19,7 @@ const manualPreparation = /создайте[^.!?\n]{0,100}(?:папк|файл)|
 
 describe("Codex-first preparation across every track", () => {
   it("never asks a learner to create preparation folders, text files or tables", () => {
-    for (const project of projects) {
+    for (const project of questProjects) {
       for (const surface of ["desktop", "mobile"] as const) {
         const checklist = buildRealDataChecklist(project, surface);
         const copy = JSON.stringify(checklist);
@@ -32,7 +32,7 @@ describe("Codex-first preparation across every track", () => {
   });
 
   it("collects real information in dialogue and lets Codex create every service file", () => {
-    for (const project of projects) {
+    for (const project of questProjects) {
       const profile = getPreparationProfile(project.slug);
       const steps = buildQuest(project, "real");
       const prompts = steps.flatMap((step) => step.prompt ?? []).join(" ");
@@ -52,7 +52,7 @@ describe("Codex-first preparation across every track", () => {
   });
 
   it("keeps the phone path conversational instead of asking for FILE messages", () => {
-    for (const project of projects) {
+    for (const project of questProjects) {
       const profile = getPreparationProfile(project.slug);
       const steps = buildMobileQuest(project, "real");
       const openingLearnerCopy = steps.slice(0, 6).map(learnerText).join(" ");

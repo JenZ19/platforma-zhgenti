@@ -19,7 +19,7 @@ export function ProjectCard({
     // Keep the first browser render identical to the server, then restore local progress.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompleted(getCatalogProjectProgress(project, window.localStorage).completed.length);
-  }, [project.slug]);
+  }, [project]);
   const status = completed === LEVELS_PER_QUEST ? "Готово" : completed > 0 ? `${completed} из 17` : "Не начато";
 
   function open(event: MouseEvent<HTMLAnchorElement>) {

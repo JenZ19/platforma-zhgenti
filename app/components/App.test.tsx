@@ -7,7 +7,7 @@ import { getAgentContract } from "../content/agent-contracts";
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
-import { getQuestProject, projects, questProjects } from "../content/projects";
+import { getQuestProject, questProjects } from "../content/projects";
 import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
