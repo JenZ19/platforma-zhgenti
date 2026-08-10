@@ -11,8 +11,32 @@ function Pointer({ frame }: { frame: QuestGuideFrame }) {
   return <div className="original-guide-pointer"><span>{pointerText(frame)}</span><b>↓</b><strong>{frame.target}</strong></div>;
 }
 
+function PaletteGuide() {
+  const palettes = [
+    ["Мятная свежесть", "#F3F8F5", "#2F6B5D"],
+    ["Пудровое тепло", "#FFF5F4", "#8E4F5B"],
+    ["Лавандовый вечер", "#F7F3FC", "#66517F"],
+  ];
+  return (
+    <section className="original-guide-palette">
+      <header><small>ШАГ 07</small><b>Выберите цветовую гамму</b><span>Цвета вашего проекта, не сайта курса</span></header>
+      <div>
+        {palettes.map(([name, background, accent], index) => (
+          <article className={index === 1 ? "selected" : ""} key={name}>
+            <i style={{ background: `linear-gradient(135deg, ${background} 0 50%, ${accent} 50% 100%)` }} />
+            <b>{name}</b>
+            <small>{index === 1 ? "выбрано ✓" : "нажмите"}</small>
+          </article>
+        ))}
+      </div>
+      <button>＋ Собрать свою гамму</button>
+      <footer><small>ЖИВОЙ ПРЕДПРОСМОТР</small><b>Ваше название проекта</b><span>Кнопки · карточки · текст</span></footer>
+    </section>
+  );
+}
+
 function AcademyGuide({ project, frame, step }: { project: ProjectDefinition; frame: QuestGuideFrame; step: number }) {
-  return <div className="original-guide-app original-guide-academy"><header><span>S</span><b>Академия квестов</b><small>{project.title}</small></header><aside><b>КАРТА КВЕСТА</b>{[step - 1, step, step + 1].filter((item) => item > 0 && item < 18).map((item) => <div key={item} className={item === step ? "active" : ""}><i>{String(item).padStart(2, "0")}</i><span>{item === step ? frame.title : `Соседний уровень ${item}`}</span></div>)}</aside><main><small>УРОВЕНЬ {String(step).padStart(2, "0")} · ТЕКСТ УЖЕ ГОТОВ</small><h3>{frame.title}</h3><p>{frame.action}</p>{frame.exactText && <div className="original-guide-command"><span>ГОТОВАЯ КОМАНДА</span><p>{frame.exactText.slice(0, 370)}…</p><button>Скопировать команду</button></div>}<Pointer frame={frame}/></main></div>;
+  return <div className="original-guide-app original-guide-academy"><header><span>S</span><b>Академия квестов</b><small>{project.title}</small></header><aside><b>КАРТА КВЕСТА</b>{[step - 1, step, step + 1].filter((item) => item > 0 && item < 18).map((item) => <div key={item} className={item === step ? "active" : ""}><i>{String(item).padStart(2, "0")}</i><span>{item === step ? frame.title : `Соседний уровень ${item}`}</span></div>)}</aside><main><small>УРОВЕНЬ {String(step).padStart(2, "0")} · ТЕКСТ УЖЕ ГОТОВ</small><h3>{frame.title}</h3><p>{frame.action}</p>{step === 2 ? <PaletteGuide /> : frame.exactText && <div className="original-guide-command"><span>ГОТОВАЯ КОМАНДА</span><p>{frame.exactText.slice(0, 370)}…</p><button>Скопировать команду</button></div>}<Pointer frame={frame}/></main></div>;
 }
 
 function CodexGuide({ project, frame, step }: { project: ProjectDefinition; frame: QuestGuideFrame; step: number }) {

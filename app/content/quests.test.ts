@@ -112,6 +112,13 @@ describe("quest builders", () => {
     expect(prompts).not.toMatch(/логотип|подтверждённые цены|публичные контакты/i);
   });
 
+  it("never forces the course brand palette onto a learner project", () => {
+    const project = projects.find((item) => item.slug === "pressure-diary")!;
+    const styling = buildQuest(project)[12];
+    expect(styling.prompt).not.toMatch(/стиле SUBMARINE/i);
+    expect(styling.prompt).toMatch(/выбранн.+цветов.+гамм/i);
+  });
+
   it("builds a click-by-click guide for every home-helper level", () => {
     for (const mode of ["demo", "real"] as const) {
       const steps = buildQuest(projects.find((project) => project.slug === "home-helper")!, mode);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultCustomization } from "../customization";
+import { defaultCustomization, questColorPalettes } from "../customization";
 import { getProject } from "../projects";
 import { buildFamilyExpensesQuest } from "./family-expenses";
 import { buildPlannerQuest } from "./planner";
@@ -22,6 +22,7 @@ describe("first four original quests", () => {
       name: "Копим на море",
       style: "Пудровое спокойствие",
       feature: "Дни без покупок",
+      palette: questColorPalettes[1],
     };
     const steps = buildFamilyExpensesQuest(project, "demo", customization);
 
@@ -40,6 +41,9 @@ describe("first four original quests", () => {
       expect(step, `step ${id}`).toContain("Дни без покупок");
     }
     expect(text(steps[8])).toContain("Пудровое спокойствие");
+    expect(text(steps[8])).toContain(questColorPalettes[1].name);
+    expect(text(steps[8])).toContain(questColorPalettes[1].accent);
+    expect(text(steps[8])).not.toMatch(/стиле SUBMARINE/i);
     expect(text(steps[14])).toContain("family-expenses-client");
     expect(text(steps[15])).toMatch(/1\. Кто будет вести бюджет[\s\S]+8\. Какие данные нельзя показывать/);
     expect(text(steps[16])).toMatch(/личн.+верси.+клиентск.+верси/i);

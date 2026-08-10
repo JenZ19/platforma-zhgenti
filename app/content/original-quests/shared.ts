@@ -1,5 +1,6 @@
 import type { DataMode } from "../../lib/preparation";
 import { getPreparationProfile } from "../preparation";
+import { paletteDescription } from "../customization";
 import type {
   ProjectDefinition,
   QuestCustomization,
@@ -30,7 +31,7 @@ const rewardAt: Record<number, string> = {
 };
 
 function passport(customization: QuestCustomization): string {
-  return `Название: «${customization.name}». Для кого: ${customization.audience}. Главная задача: ${customization.goal}. Стиль: ${customization.style}. Тон подсказок: ${customization.tone}. Одна особенная функция: ${customization.feature}.`;
+  return `Название: «${customization.name}». Для кого: ${customization.audience}. Главная задача: ${customization.goal}. Устройство экрана: ${customization.style}. Цветовая гамма: ${paletteDescription(customization.palette)}. Тон подсказок: ${customization.tone}. Одна особенная функция: ${customization.feature}.`;
 }
 
 function dataContext(project: ProjectDefinition, mode: DataMode): string {

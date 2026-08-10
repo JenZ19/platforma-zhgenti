@@ -4,6 +4,7 @@ import {
   defaultCustomization,
   getCustomizationProfile,
   originalQuestSlugs,
+  questColorPalettes,
 } from "../content/customization";
 import {
   customizationKey,
@@ -34,16 +35,19 @@ describe("quest customization", () => {
       const defaults = defaultCustomization(slug)!;
       expect(Object.keys(profile.axes)).toEqual(["audience", "goal", "name", "style", "tone", "feature"]);
       expect(Object.values(profile.axes).every((axis) => axis.options.length >= 3), slug).toBe(true);
-      expect(Object.values(defaults).every((value) => value.trim().length > 2), slug).toBe(true);
+      expect(Object.values(defaults).filter((value) => typeof value === "string").every((value) => value.trim().length > 2), slug).toBe(true);
+      expect(defaults.palette).toEqual(questColorPalettes[0]);
       expect(customizationSummary(slug, defaults), slug).toContain(defaults.name);
       expect(customizationSummary(slug, defaults), slug).toContain(defaults.feature);
+      expect(customizationSummary(slug, defaults), slug).toContain(defaults.palette.name);
+      expect(customizationSummary(slug, defaults), slug).toContain(defaults.palette.accent);
     }
   });
 
   it("stores computer and phone choices independently", () => {
     const storage = new MemoryStorage();
-    const desktop = { ...defaultCustomization("family-expenses")!, name: "Копим на море" };
-    const mobile = { ...defaultCustomization("family-expenses")!, name: "Наши конверты" };
+    const desktop = { ...defaultCustomization("family-expenses")!, name: "Копим на море", palette: questColorPalettes[1] };
+    const mobile = { ...defaultCustomization("family-expenses")!, name: "Наши конверты", palette: questColorPalettes[3] };
 
     saveCustomization("family-expenses", desktop, storage);
     saveCustomization("mobile:family-expenses", mobile, storage);
@@ -51,6 +55,8 @@ describe("quest customization", () => {
     expect(customizationKey("family-expenses")).not.toBe(customizationKey("mobile:family-expenses"));
     expect(loadCustomization("family-expenses", storage)?.name).toBe("Копим на море");
     expect(loadCustomization("mobile:family-expenses", storage)?.name).toBe("Наши конверты");
+    expect(loadCustomization("family-expenses", storage)?.palette).toEqual(questColorPalettes[1]);
+    expect(loadCustomization("mobile:family-expenses", storage)?.palette).toEqual(questColorPalettes[3]);
   });
 
   it("recovers from malformed and incomplete saved data", () => {
@@ -63,6 +69,12 @@ describe("quest customization", () => {
       ...defaultCustomization("planner")!,
       feature: "Перенести на завтра",
     });
+
+    storage.setItem(customizationKey("planner"), JSON.stringify({
+      name: "Мой ритм",
+      palette: { name: "Сломанная", background: "pink", surface: "#fff", accent: "", text: "#111111" },
+    }));
+    expect(loadCustomization("planner", storage)?.palette).toEqual(questColorPalettes[0]);
   });
 
   it("resets one quest without touching another", () => {

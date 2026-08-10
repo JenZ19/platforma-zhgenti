@@ -83,6 +83,7 @@ describe("academy interface", () => {
     for (const [step, stage] of stages) {
       expect(container.querySelectorAll(`[data-original-service="family-expenses"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
     }
+    expect(container.querySelectorAll('[data-palette-choice="Мятная свежесть"]')).toHaveLength(2);
     expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
   });
 
@@ -291,17 +292,39 @@ describe("academy interface", () => {
 
     expect(screen.getByRole("heading", { name: /соберите свой семейный бюджет/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: "Семья с детьми" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Куда ушли деньги" }));
     fireEvent.click(screen.getByRole("radio", { name: "Дни без покупок" }));
+    expect(screen.getByRole("heading", { name: /^выберите цветовую гамму$/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /пудровое тепло/i }));
+    expect(screen.getByLabelText(/живой предпросмотр/i)).toHaveTextContent("Куда ушли деньги");
     fireEvent.click(screen.getByRole("button", { name: /сохранить мою версию/i }));
 
     expect(screen.getByRole("status")).toHaveTextContent("Семья с детьми");
     expect(screen.getByRole("status")).toHaveTextContent("Дни без покупок");
+    expect(screen.getByRole("status")).toHaveTextContent("Пудровое тепло");
     expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("Семья с детьми");
+    expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("Пудровое тепло");
     unmount();
 
     render(<Quest project={project} onHome={vi.fn()} />);
     expect(screen.getByRole("status")).toHaveTextContent("Семья с детьми");
     expect(screen.getByRole("radio", { name: "Дни без покупок" })).toBeChecked();
+    expect(screen.getByRole("button", { name: /пудровое тепло/i })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("lets a learner assemble her own color palette without leaving the quest", () => {
+    render(<Quest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+
+    fireEvent.click(screen.getByRole("button", { name: /собрать свою гамму/i }));
+    fireEvent.change(screen.getByLabelText("Фон проекта"), { target: { value: "#fef1f6" } });
+    fireEvent.change(screen.getByLabelText("Кнопки и акценты"), { target: { value: "#7b3655" } });
+    fireEvent.click(screen.getByRole("button", { name: /сохранить мою версию/i }));
+
+    expect(screen.getByRole("status")).toHaveTextContent("Моя гамма");
+    expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("#fef1f6");
+    expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("#7b3655");
   });
 
   it("keeps the phone customization separate from the computer quest", () => {
@@ -361,6 +384,14 @@ describe("academy interface", () => {
     expect(screen.getByText(/открыть папку family-expenses/i)).toBeInTheDocument();
     expect(screen.getAllByText(/family-expenses/i).length).toBeGreaterThan(1);
     expect(document.querySelector('[data-original-guide="family-expenses"]')).toBeInTheDocument();
+  });
+
+  it("shows exactly where to choose a palette in the level-two picture guide", async () => {
+    window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-02--frame-02");
+    render(<AppEntry />);
+    expect(await screen.findByText("Пудровое тепло")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /собрать свою гамму/i })).toBeInTheDocument();
+    expect(screen.getByText("ЖИВОЙ ПРЕДПРОСМОТР")).toBeInTheDocument();
   });
 
   it("keeps shared result screenshots neutral for real and training routes", async () => {

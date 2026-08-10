@@ -31,7 +31,17 @@ export type QuestCustomizationAxis =
   | "tone"
   | "feature";
 
-export type QuestCustomization = Record<QuestCustomizationAxis, string>;
+export type QuestColorPalette = {
+  name: string;
+  background: string;
+  surface: string;
+  accent: string;
+  text: string;
+};
+
+export type QuestCustomization = Record<QuestCustomizationAxis, string> & {
+  palette: QuestColorPalette;
+};
 
 export type QuestCustomizationAxisProfile = {
   label: string;
