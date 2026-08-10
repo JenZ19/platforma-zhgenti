@@ -180,20 +180,19 @@ function DataCheck() {
   return (
     <div className="os-data">
       <aside>
-        <small>МАТЕРИАЛЫ ПРОЕКТА</small>
-        <h3>Расходы готовы</h3>
+        <small>КОРОТКИЙ РАЗГОВОР</small>
+        <h3>4 простых ответа</h3>
         {[
-          "семейные-расходы.csv",
-          "правила-бюджета.txt",
-          "вид-расходов.txt",
-        ].map((file, index) => (
-          <div key={file} className={index === 0 ? "active" : ""}>
-            <i>{index === 0 ? "▦" : "≡"}</i>
+          ["Бюджет и валюта", "100 000 ₽"],
+          ["Начало месяца", "1-е число"],
+          ["Категории", "5 названий"],
+          ["Недавние расходы", "3 примера"],
+        ].map(([label, value], index) => (
+          <div key={label} className={index === 2 ? "active" : ""}>
+            <i>{index + 1}</i>
             <span>
-              <b>{file}</b>
-              <small>
-                {index === 0 ? "5 строк · проверено" : "правила сохранены"}
-              </small>
+              <b>{label}</b>
+              <small>{value}</small>
             </span>
             <strong>✓</strong>
           </div>
@@ -201,30 +200,26 @@ function DataCheck() {
       </aside>
       <main>
         <header>
-          <b>семейные-расходы.csv</b>
-          <span>Безопасная копия</span>
+          <b>Codex задаёт по одному вопросу</b>
+          <span>Можно ответить голосом</span>
         </header>
-        <div className="os-table">
-          <div>
-            <b>Дата</b>
-            <b>Сумма</b>
-            <b>Категория</b>
-            <b>Комментарий</b>
+        <div className="os-codex-chat">
+          <div className="codex">
+            <small>CODEX</small>
+            <p>Какой примерный бюджет семьи на месяц?</p>
           </div>
-          {[
-            ["12.08", "3 450 ₽", "Продукты", "Супермаркет"],
-            ["13.08", "1 290 ₽", "Ребёнок", "Книги"],
-            ["14.08", "780 ₽", "Транспорт", "Поездка"],
-          ].map((row) => (
-            <div key={row.join()}>
-              {row.map((cell) => (
-                <span key={cell}>{cell}</span>
-              ))}
-            </div>
-          ))}
+          <div className="learner">
+            <small>ВЫ</small>
+            <p>Около 100 000 рублей.</p>
+          </div>
+          <div className="codex">
+            <small>CODEX</small>
+            <p>Какие категории вы используете чаще всего?</p>
+          </div>
+          <div className="voice-answer"><i>◉</i><span><b>Голосовой ответ</b><small>Продукты, ребёнок, дом, транспорт…</small></span><strong>0:08</strong></div>
         </div>
         <footer>
-          Платёжных реквизитов нет <b>Проверено ✓</b>
+          Папки и таблицы создаст Codex <b>Вы только отвечаете ✓</b>
         </footer>
       </main>
     </div>
@@ -244,14 +239,14 @@ function Workspace({ stage }: { stage: Stage }) {
       <main>
         <header>
           <b>{stage === "workspace" ? "family-expenses" : "Паспорт проекта"}</b>
-          <span>безопасная папка ✓</span>
+          <span>{stage === "workspace" ? "создано Codex автоматически ✓" : "сохранено Codex ✓"}</span>
         </header>
         {stage === "workspace" ? (
           <div className="os-folder">
             <i>◇</i>
             <h3>family-expenses</h3>
-            <p>Открыта правильная рабочая папка</p>
-            <div>Документы / family-expenses</div>
+            <p>Codex сам создал рабочее место</p>
+            <div>✓ Папка&nbsp;&nbsp; ✓ Данные&nbsp;&nbsp; ✓ Настройки&nbsp;&nbsp; · ничего вручную</div>
           </div>
         ) : (
           <div className="os-passport">

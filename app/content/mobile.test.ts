@@ -32,7 +32,13 @@ describe("mobile quest builder", () => {
     for (const project of projects) {
       const steps = buildMobileQuest(project, "real");
       const prompts = steps.flatMap((step) => step.prompt ?? []);
-      expect(prompts.join(" "), project.slug).toContain(getPreparationProfile(project.slug).sourceFile);
+      if (project.slug === "family-expenses") {
+        expect(prompts.join(" "), project.slug).not.toContain(getPreparationProfile(project.slug).sourceFile);
+        expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
+        expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля создавай сам/i);
+      } else {
+        expect(prompts.join(" "), project.slug).toContain(getPreparationProfile(project.slug).sourceFile);
+      }
       if (project.kind === "advanced-site") {
         expect(steps.map((step) => step.mobileAction.tool), project.slug).toContain("curator");
       }

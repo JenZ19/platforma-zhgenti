@@ -51,12 +51,16 @@ describe("first four original quests", () => {
     expect(text(steps)).not.toMatch(/подключ.+банк|номер.+карт|банковск.+сч[её]т/i);
   });
 
-  it("keeps the real family-expenses route inside prepared files", () => {
+  it("makes Codex create the family-expenses workspace and data files itself", () => {
     const project = getProject("family-expenses")!;
     const steps = buildFamilyExpensesQuest(project, "real", defaultCustomization(project.slug)!);
     const all = text(steps);
-    expect(all).toContain("семейные-расходы.csv");
-    expect(all).toContain("правила-бюджета.txt");
+    expect(all).toMatch(/Codex сам создаст|создай сам/i);
+    expect(all).toMatch(/задавай.+по одному|один вопрос за раз/i);
+    expect(all).toMatch(/голосом или текстом/i);
+    expect(all).not.toMatch(/Откройте файл|Создайте.+папку|Создайте.+файл/i);
+    expect(steps[2].prompt).toMatch(/папки проекта ещё может не быть/i);
+    expect(steps[2].prompt).not.toMatch(/Работай только внутри папки текущего проекта/i);
     expect(all).not.toMatch(/вымышлен|демонстрацион|учебн/i);
     expect(all).not.toContain(project.demo.join("; "));
   });

@@ -36,8 +36,21 @@ function passport(customization: QuestCustomization): string {
 
 function dataContext(project: ProjectDefinition, mode: DataMode): string {
   if (mode === "demo") return `Используй только безопасные примеры без имён, карт, счетов и контактов: ${project.demo.join("; ")}.`;
+  if (project.slug === "family-expenses") {
+    return "РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Получай сведения только из ответов ученицы в этом диалоге. Задавай один короткий вопрос за раз, принимай ответы голосом или текстом и ничего не додумывай. Все нужные папки, файлы и поля создавай сам внутри текущего рабочего проекта. Никогда не проси ученицу вручную создавать, открывать или заполнять служебные файлы. Не запрашивай и не публикуй номера карт и счетов, коды, пароли и личные сведения членов семьи.";
+  }
   const profile = getPreparationProfile(project.slug);
   return `РЕЖИМ РЕАЛЬНЫХ ДАННЫХ. Работай только с копиями из папки «${profile.folderName}». Основные записи находятся в файле «${profile.sourceFile}», правила — в файле «${profile.rulesFile}». Ничего не додумывай, не публикуй личные сведения и не меняй оригиналы вне папки проекта.`;
+}
+
+function workspaceContext(project: ProjectDefinition, input: OriginalStepInput): string {
+  if (project.slug === "family-expenses" && input.id === 3) {
+    return "Папки проекта ещё может не быть. На этом уровне только проведи короткий опрос и дождись подтверждения сводки. Ничего не создавай до подтверждения и не трогай другие проекты или личные документы.";
+  }
+  if (project.slug === "family-expenses" && input.id === 4) {
+    return "Создай новое рабочее место family-expenses только внутри уже разрешённого пространства. Не меняй соседние проекты и личные документы.";
+  }
+  return "Работай только внутри папки текущего проекта и не удаляй работающие части.";
 }
 
 function domainWords(slug: string): { title: string; result: string } {
@@ -80,7 +93,7 @@ function guideFrames(project: ProjectDefinition, mode: DataMode, input: Original
       app,
       action: input.action,
       exactText: prompt,
-      after: `Действие выполнено только внутри проекта «${project.title}». Выбранный режим данных — ${mode === "real" ? "реальные данные из подготовленной папки" : "безопасные примеры"}.`,
+      after: `Действие выполнено только внутри проекта «${project.title}». Выбранный режим данных — ${mode === "real" ? project.slug === "family-expenses" ? "реальные ответы, которые Codex получил в диалоге" : "реальные данные из подготовленной папки" : "безопасные примеры"}.`,
       doneWhen: input.expected[0],
       fallback: `Если нужной кнопки или поля нет, не нажимайте случайные пункты. Откройте помощь этого уровня и скопируйте готовую команду для исправления проекта «${project.title}».`,
       screenshot: `${path}-frame-02.png`,
@@ -109,7 +122,7 @@ export function makeOriginalStep(
   input: OriginalStepInput,
 ): QuestStep {
   const domain = domainWords(project.slug);
-  const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». Работай только внутри папки текущего проекта и не удаляй работающие части. ${dataContext(project, mode)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
+  const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». ${workspaceContext(project, input)} ${dataContext(project, mode)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
   return {
     id: input.id,
     title: input.title,

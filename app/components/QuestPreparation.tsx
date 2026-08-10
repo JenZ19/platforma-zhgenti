@@ -29,14 +29,21 @@ export function QuestPreparation({
   const profile = getPreparationProfile(project.slug);
   const checklist = buildRealDataChecklist(project, mobile ? "mobile" : "desktop");
   const allChecked = checklist.every((item) => preparation.checked.includes(item.id));
+  const codexCreatesEverything = project.slug === "family-expenses";
 
   if (preparation.mode === "real") {
     return (
       <section className="preparation-card real-checklist" aria-label="Подготовка реальных данных">
         <button type="button" className="preparation-back" onClick={onBack}>← Изменить выбор</button>
         <p className="section-kicker">Шаг 0 · Реальный проект</p>
-        <h2>Сначала соберите материалы</h2>
-        <p className="preparation-lead">{mobile ? <>Не нужно делать всё идеально. Соберите безопасные копии для комнаты <b>{profile.folderName}</b> в Telegram и отмечайте готовое.</> : <>Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{profile.folderName}</b> и отмечайте готовое.</>}</p>
+        <h2>{codexCreatesEverything ? "Ничего заранее создавать не нужно" : "Сначала соберите материалы"}</h2>
+        <p className="preparation-lead">
+          {codexCreatesEverything
+            ? "Codex сам создаст папку, файлы и структуру проекта. Вы только вспомните несколько простых ответов — назвать их можно будет голосом или текстом."
+            : mobile
+              ? <>Не нужно делать всё идеально. Соберите безопасные копии для комнаты <b>{profile.folderName}</b> в Telegram и отмечайте готовое.</>
+              : <>Не нужно делать всё идеально. Просто положите безопасные копии в папку <b>{profile.folderName}</b> и отмечайте готовое.</>}
+        </p>
         <div className="checklist-progress"><span>{preparation.checked.length} из {checklist.length}</span><i><b style={{ width: `${Math.round((preparation.checked.length / checklist.length) * 100)}%` }} /></i></div>
         <div className={`preparation-list ${checklist.some((item) => item.steps?.length) ? "detailed-preparation-list" : ""}`}>
           {checklist.map((item, index) => {
@@ -68,8 +75,8 @@ export function QuestPreparation({
             );
           })}
         </div>
-        <aside className="privacy-note"><span>!</span><p><b>Важно</b>{mobile ? " Codex получает только материалы из личной комнаты проекта. Оригиналы, пароли и закрытые документы в Telegram не отправляем." : " Codex получает только то, что лежит в этой папке. Оригиналы, пароли и закрытые документы туда не кладём."}</p></aside>
-        <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>Материалы готовы — начать квест →</button>
+        <aside className="privacy-note"><span>!</span><p><b>Важно</b>{codexCreatesEverything ? " Не называйте номера карт и счетов, коды из СМС, пароли и точные данные членов семьи. Для сервиса нужны только сумма, дата и категория расхода." : mobile ? " Codex получает только материалы из личной комнаты проекта. Оригиналы, пароли и закрытые документы в Telegram не отправляем." : " Codex получает только то, что лежит в этой папке. Оригиналы, пароли и закрытые документы туда не кладём."}</p></aside>
+        <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>{codexCreatesEverything ? "Готова отвечать Codex — начать квест →" : "Материалы готовы — начать квест →"}</button>
       </section>
     );
   }

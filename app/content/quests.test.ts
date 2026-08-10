@@ -56,7 +56,13 @@ describe("quest builders", () => {
       const profile = getPreparationProfile(project.slug);
       expect(prompts.every((prompt) => prompt.includes("РЕЖИМ РЕАЛЬНЫХ ДАННЫХ")), project.slug).toBe(true);
       expect(prompts.join(" "), project.slug).toContain(profile.folderName);
-      expect(prompts.join(" "), project.slug).toContain(profile.sourceFile);
+      if (project.slug === "family-expenses") {
+        expect(prompts.join(" "), project.slug).not.toContain(profile.sourceFile);
+        expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
+        expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля создавай сам/i);
+      } else {
+        expect(prompts.join(" "), project.slug).toContain(profile.sourceFile);
+      }
       expect(prompts.join(" "), project.slug).not.toMatch(/используй (только )?(этот |эти )?вымышлен/i);
       expect(prompts.join(" "), project.slug).not.toMatch(/не добавляем.+реальные контакты в сообщения/i);
       expect(realStepText, project.slug).not.toMatch(/вымышлен|демонстрацион/i);
@@ -84,8 +90,11 @@ describe("quest builders", () => {
     }
 
     const budget = buildQuest(projects.find((project) => project.slug === "family-expenses")!, "real");
-    expect(budget[3].action).toMatch(/Codex.+Открыть папку.+выберите/is);
-    expect(budget[4].action).toMatch(/Скопировать команду.+Codex.+вставьте.+отправ/is);
+    expect(budget[2].action).toMatch(/голосом или писать текстом/is);
+    expect(budget[2].prompt).toMatch(/Всё верно/is);
+    expect(budget[2].action).not.toMatch(/создайте.+файл|откройте.+папку/is);
+    expect(budget[3].action).toMatch(/Скопировать команду.+Codex.+ничего создавать/is);
+    expect(budget[4].action).toMatch(/Скопировать команду.+Codex.+сохранит/is);
     expect(budget[12].action).toMatch(/Telegram.+телефон/is);
 
     const planner = buildQuest(projects.find((project) => project.slug === "planner")!, "real");

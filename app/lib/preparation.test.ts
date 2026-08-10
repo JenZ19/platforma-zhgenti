@@ -50,6 +50,12 @@ describe("quest data preparation", () => {
 
     for (const project of projects) {
       const checklist = buildRealDataChecklist(project);
+      if (project.slug === "family-expenses") {
+        expect(checklist).toHaveLength(4);
+        expect(checklist.every((item) => item.steps === undefined), project.slug).toBe(true);
+        fingerprints.add(checklist.map((item) => `${item.text}|${item.detail}`).join("||"));
+        continue;
+      }
       expect(checklist, project.slug).toHaveLength(8);
       expect(checklist.every((item) => (item.steps?.length ?? 0) >= 3), project.slug).toBe(true);
       expect(checklist.every((item) => (item.doneWhen?.length ?? 0) > 20), project.slug).toBe(true);
@@ -69,7 +75,7 @@ describe("quest data preparation", () => {
   it("gives every phone checklist Telegram actions instead of computer instructions", () => {
     for (const project of projects) {
       const checklist = buildRealDataChecklist(project, "mobile");
-      const text = checklist.map((item) => item.steps?.join(" ") ?? "").join(" ");
+      const text = checklist.map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""}`).join(" ");
       expect(text, project.slug).toMatch(/Telegram/i);
       expect(text, project.slug).not.toMatch(/на компьютере|папку «Документы»|правой кнопкой/i);
     }
@@ -105,6 +111,18 @@ describe("quest data preparation", () => {
       expect(text, project.slug).not.toMatch(/вымышлен|демонстрацион/i);
       expect(text, project.slug).not.toMatch(/не добавляем.+реальные контакты в сообщения/i);
     }
+  });
+
+  it("lets a family-expenses learner prepare answers without creating folders or files", () => {
+    const checklist = buildRealDataChecklist(getProject("family-expenses")!);
+    const text = checklist
+      .map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""} ${item.doneWhen ?? ""}`)
+      .join(" ");
+
+    expect(checklist).toHaveLength(4);
+    expect(text).toMatch(/обычн.+слов|голос/i);
+    expect(text).toMatch(/Codex сам создаст/i);
+    expect(text).not.toMatch(/создайте.+(?:папк|файл)|откройте.+файл|\.csv|\.txt/i);
   });
 
   it("requires every real-data checklist item but lets demo mode start immediately", () => {

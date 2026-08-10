@@ -253,6 +253,21 @@ describe("academy interface", () => {
     expect(localStorage.getItem(preparationKey("psychologist-site"))).toContain('"ready":true');
   });
 
+  it("does not make a family-expenses learner create folders or files by hand", () => {
+    render(<Quest project={getProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
+
+    expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Codex сам создаст папку, файлы и структуру/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/создайте.+(?:папк|файл)/i)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("checkbox")).toHaveLength(4);
+
+    const start = screen.getByRole("button", { name: /готова отвечать Codex — начать квест/i });
+    expect(start).toBeDisabled();
+    screen.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
+    expect(start).toBeEnabled();
+  });
+
   it("shows the human project folder name instead of the technical slug", () => {
     render(<Quest project={getProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
@@ -380,10 +395,25 @@ describe("academy interface", () => {
   it("renders a project-specific guide scene for family expenses", async () => {
     window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-04--frame-02");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /создала и открыла папку family-expenses/i })).toBeInTheDocument();
-    expect(screen.getByText(/открыть папку family-expenses/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Codex сам подготовил рабочее место/i })).toBeInTheDocument();
+    expect(screen.getByText(/создать всё автоматически/i)).toBeInTheDocument();
     expect(screen.getAllByText(/family-expenses/i).length).toBeGreaterThan(1);
     expect(document.querySelector('[data-original-guide="family-expenses"]')).toBeInTheDocument();
+  });
+
+  it("shows the conversational result instead of prepared files in family-expenses screenshots", async () => {
+    window.history.replaceState({}, "", "/?capture=family-expenses--step-03");
+    render(<AppEntry />);
+    expect(await screen.findByRole("heading", { name: /ответила Codex обычными словами/i })).toBeInTheDocument();
+    expect(screen.getByText(/4 простых ответа/i)).toBeInTheDocument();
+    expect(screen.queryByText(/проверила данные расходов|семейные-расходы\.csv/i)).not.toBeInTheDocument();
+  });
+
+  it("does not show pre-created files before the family-expenses Codex interview", async () => {
+    window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-03--frame-02");
+    render(<AppEntry />);
+    expect(await screen.findByText(/новый проект — пока без файлов/i)).toBeInTheDocument();
+    expect(screen.queryByText(/паспорт-проекта\.txt|данные\.csv|правила\.txt/i)).not.toBeInTheDocument();
   });
 
   it("shows exactly where to choose a palette in the level-two picture guide", async () => {

@@ -62,8 +62,35 @@ export function resetPreparation(slug: string, storage: StorageLike): void {
 
 export function buildRealDataChecklist(project: ProjectDefinition, surface: PreparationSurface = "desktop"): PreparationItem[] {
   if (project.slug === "home-helper" && surface === "desktop") return buildHomeHelperChecklist();
+  if (project.slug === "family-expenses") return buildFamilyExpensesChecklist(surface);
   const profile = getPreparationProfile(project.slug);
   return buildProfileChecklist(project, profile, surface);
+}
+
+function buildFamilyExpensesChecklist(surface: PreparationSurface): PreparationItem[] {
+  const place = surface === "mobile" ? " в Telegram" : "";
+  return [
+    {
+      id: "budget-answer",
+      text: "Вспомните примерный бюджет и валюту",
+      detail: "Ничего записывать не нужно. Когда Codex спросит, назовите сумму обычными словами или ответьте «пока не знаю».",
+    },
+    {
+      id: "category-answer",
+      text: "Вспомните 3–8 привычных категорий",
+      detail: "Например: продукты, ребёнок, транспорт. Таблицу составлять не нужно — перечислите категории голосом или текстом.",
+    },
+    {
+      id: "expense-answer",
+      text: "Вспомните 3–5 недавних расходов",
+      detail: "Достаточно помнить дату, примерную сумму и категорию. Codex сам разложит ответы по нужным полям.",
+    },
+    {
+      id: "conversation-ready",
+      text: `Приготовьтесь ответить Codex${place}`,
+      detail: `Codex сам создаст папку, файлы и структуру проекта после четырёх коротких вопросов. Вы отвечаете по одному голосом или текстом — вручную ничего создавать не будете.`,
+    },
+  ];
 }
 
 function buildProfileChecklist(

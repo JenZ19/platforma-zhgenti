@@ -5790,6 +5790,68 @@ button {
 .os-table > div:not(:last-child) {
   border-bottom: 1px solid #e7ebe6;
 }
+.os-codex-chat {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.os-codex-chat > div:not(.voice-answer) {
+  max-width: 78%;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.os-codex-chat > div.codex {
+  background: #edf2ed;
+}
+.os-codex-chat > div.learner {
+  justify-self: end;
+  background: #eadbd2;
+}
+.os-codex-chat small {
+  display: block;
+  color: #7d8d84;
+  font-size: 5px;
+  letter-spacing: 0.12em;
+}
+.os-codex-chat p {
+  margin: 5px 0 0;
+  font-size: 8px;
+  line-height: 1.45;
+}
+.voice-answer {
+  width: 72%;
+  justify-self: end;
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 9px;
+  align-items: center;
+  border-radius: 14px;
+  background: #332d29;
+  color: white;
+  padding: 10px 12px;
+}
+.voice-answer > i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #b87871;
+  font-style: normal;
+}
+.voice-answer b,
+.voice-answer small {
+  display: block;
+  font-size: 6px;
+}
+.voice-answer small {
+  margin-top: 3px;
+  color: #c9c0ba;
+}
+.voice-answer strong {
+  font-size: 6px;
+  color: #c9c0ba;
+}
 .os-data main > footer {
   margin-top: 17px;
   color: #89948e;
