@@ -14,6 +14,7 @@ import { HomeHelperGuideScene } from "./HomeHelperGuideScene";
 import { OriginalQuestGuideScene } from "./OriginalQuestGuideScene";
 import { isOriginalQuestSlug } from "../content/customization";
 import { buildQuest } from "../content/quests";
+import { isSourcePrototypeSlug } from "./SourceProjectPrototypeScene";
 
 type Route =
   | { type: "home"; format: "desktop" | "mobile" }
@@ -82,7 +83,7 @@ export function AppEntry() {
     const project = getQuestProject(route.slug);
     const frame = project ? buildQuest(project, route.mode)[route.step - 1]?.guide?.[route.frame - 1] : undefined;
     if (!project || !frame) return <div>Кадр не найден</div>;
-    return isOriginalQuestSlug(project.slug) ? <OriginalQuestGuideScene project={project} frame={frame} step={route.step} mode={route.mode} /> : <HomeHelperGuideScene frame={frame} step={route.step} mode={route.mode} />;
+    return isOriginalQuestSlug(project.slug) || isSourcePrototypeSlug(project.slug) ? <OriginalQuestGuideScene project={project} frame={frame} step={route.step} mode={route.mode} /> : <HomeHelperGuideScene frame={frame} step={route.step} mode={route.mode} />;
   }
   if (route.type === "capture-mobile") {
     const project = getQuestProject(route.slug);

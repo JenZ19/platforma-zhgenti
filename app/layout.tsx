@@ -9,13 +9,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "42 проекта. Одна новая профессия.",
     description: "Выберите сервис или ИИ-агента, пройдите 17 шагов и добавьте готовую работу в портфолио.",
-    images: ["/og.png"],
+    images: ["/og-42-projects.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Академия квестов SUBMARINE",
     description: "42 проекта курса — шаг за шагом.",
-    images: ["/og.png"],
+    images: ["/og-42-projects.png"],
   },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };

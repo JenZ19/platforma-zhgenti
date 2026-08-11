@@ -159,6 +159,14 @@ describe("academy interface", () => {
     }
   });
 
+  it("renders a project-specific click guide for a source-backed quest", async () => {
+    window.history.replaceState({}, "", "/?capture-guide=threads-agent--real--step-11--frame-02");
+    render(<AppEntry />);
+    expect(await screen.findByText(/получила подборку по команде \/now/i)).toBeInTheDocument();
+    expect(document.querySelector('[data-original-guide="threads-agent"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-source-prototype="threads"]')).toBeInTheDocument();
+  });
+
   it("renders a unique content-specific cover for the following site projects", () => {
     const featuredProjects = thirdCoverPrototypeSlugs.map((slug) => getQuestProject(slug)!);
     const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
