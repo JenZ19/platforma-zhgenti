@@ -1,5 +1,6 @@
 import type { DataMode } from "../../lib/preparation";
 import { paletteDescription } from "../customization";
+import { getAgentContract } from "../agent-contracts";
 import type {
   ProjectDefinition,
   QuestCustomization,
@@ -58,7 +59,11 @@ function domainWords(slug: string): { title: string; result: string } {
   if (slug === "family-expenses") return { title: "Помощь с бюджетом на этом уровне", result: "бюджет или расход работает правильно" };
   if (slug === "planner") return { title: "Помощь с планером на этом уровне", result: "планер или дело работает правильно" };
   if (slug === "idea-vault") return { title: "Помощь с копилкой на этом уровне", result: "копилка или идея работает правильно" };
-  return { title: "Помощь с расписанием на этом уровне", result: "расписание или занятие работает правильно" };
+  if (slug === "child-schedule") return { title: "Помощь с расписанием на этом уровне", result: "расписание или занятие работает правильно" };
+  if (slug === "carousel-agent") return { title: "Помощь с каруселью на этом уровне", result: "карусель собирается правильно" };
+  if (slug === "threads-agent") return { title: "Помощь с Threads-агентом на этом уровне", result: "подборка тредов работает правильно" };
+  if (slug === "webinar-moderator-agent") return { title: "Помощь с модератором на этом уровне", result: "модератор работает безопасно" };
+  return { title: "Помощь с хабом здоровья на этом уровне", result: "хаб хранит и показывает данные правильно" };
 }
 
 function appFor(input: OriginalStepInput): string {
@@ -123,7 +128,11 @@ export function makeOriginalStep(
   input: OriginalStepInput,
 ): QuestStep {
   const domain = domainWords(project.slug);
-  const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». ${workspaceContext(project, input)} ${dataContext(project, mode, input.id)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
+  const contract = project.kind === "agent" ? getAgentContract(project.slug) : undefined;
+  const contractContext = contract
+    ? `\n\nНЕИЗМЕННЫЙ КОНТРАКТ АГЕНТА. Пример свободного текста или голоса: «${contract.inputExample}». Первый вопрос: «${contract.firstQuestion}». Результат: «${contract.resultTitle}». Задавай один вопрос за раз. Перед внешним действием дождись точной фразы «Да, подтверждаю». Граница: ${contract.handoff} Заверши самопроверкой.`
+    : "";
+  const prompt = `Ты помогаешь новичку без ручного кода сделать проект «${project.title}». ${workspaceContext(project, input)} ${dataContext(project, mode, input.id)}\n\nПАСПОРТ МОЕЙ ВЕРСИИ. ${passport(customization)}${contractContext}\n\nЗАДАЧА УРОВНЯ ${input.id}. ${input.request}\n\nПосле выполнения сам проверь результат, перечисли три видимых признака готовности и объясни мне только: что нажать, что увидеть и что делать, если экран отличается.`;
   return {
     id: input.id,
     title: input.title,

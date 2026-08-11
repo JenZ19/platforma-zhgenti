@@ -14,6 +14,10 @@ import { buildFamilyExpensesQuest } from "./original-quests/family-expenses";
 import { buildPlannerQuest } from "./original-quests/planner";
 import { buildIdeaVaultQuest } from "./original-quests/idea-vault";
 import { buildChildScheduleQuest } from "./original-quests/child-schedule";
+import { buildCarouselAgentQuest } from "./original-quests/carousel-agent";
+import { buildThreadsAgentQuest } from "./original-quests/threads-agent";
+import { buildWebinarModeratorAgentQuest } from "./original-quests/webinar-moderator-agent";
+import { buildFamilyHealthHubQuest } from "./original-quests/family-health-hub";
 
 function applyCustomization(
   steps: QuestStep[],
@@ -47,6 +51,18 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", 
   }
   if (project.slug === "child-schedule") {
     return buildChildScheduleQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  }
+  if (project.slug === "carousel-agent") {
+    return buildCarouselAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  }
+  if (project.slug === "threads-agent") {
+    return buildThreadsAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  }
+  if (project.slug === "webinar-moderator-agent") {
+    return buildWebinarModeratorAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+  }
+  if (project.slug === "family-health-hub") {
+    return buildFamilyHealthHubQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
   }
   let steps: QuestStep[];
   switch (project.kind) {

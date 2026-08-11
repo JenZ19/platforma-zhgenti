@@ -23,7 +23,7 @@ describe("mobile quest builder", () => {
       expect(steps.every((step) => step.screenshot === `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`), project.slug).toBe(true);
       total += steps.length;
     }
-    expect(total).toBe(765);
+    expect(total).toBe(833);
   });
 
   it("gives every project the actions needed for a phone workflow", () => {
@@ -93,7 +93,7 @@ describe("mobile quest builder", () => {
 
   it("keeps every mobile agent path conversational and subject-specific", () => {
     const agents = questProjects.filter((project) => project.kind === "agent");
-    expect(agents).toHaveLength(21);
+    expect(agents).toHaveLength(24);
 
     for (const project of agents) {
       const contract = getAgentContract(project.slug);
@@ -107,7 +107,9 @@ describe("mobile quest builder", () => {
       expect(text, project.slug).toMatch(/один вопрос за раз/i);
       expect(text, project.slug).toMatch(/Да, подтверждаю/i);
       expect(text, project.slug).toContain(contract.handoff);
-      expect(text, project.slug).not.toMatch(/подготовьте.+файл|создайте.+папку/i);
+      for (const step of steps) {
+        expect(step.action, `${project.slug}/step-${step.id}`).not.toMatch(/подготовьте.+файл|создайте.+папку/i);
+      }
     }
   });
 

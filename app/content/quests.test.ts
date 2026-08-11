@@ -77,7 +77,7 @@ describe("quest builders", () => {
   it("explains the previously ambiguous open, paste, and phone actions click by click", () => {
     for (const project of questProjects) {
       const steps = buildQuest(project, "real");
-      if (["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule"].includes(project.slug)) continue;
+      if (["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub"].includes(project.slug)) continue;
       expect(steps[0].action, `${project.slug}/create`).toMatch(/Codex.+Новая задача.+команд.+Проект.+создан/is);
       expect(steps[0].action, `${project.slug}/create`).not.toMatch(/создайте.+папку|создайте.+файл/is);
       expect(steps[1].action, `${project.slug}/open`).toMatch(/ответ Codex.+Открыть проект.+название/is);
@@ -239,8 +239,8 @@ describe("quest builders", () => {
     const nonAgents = questProjects.filter((project) => project.kind !== "agent");
     expect(nonAgents).toHaveLength(25);
     const originalSlugs = new Set(["family-expenses", "planner", "idea-vault", "child-schedule"]);
-    const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug));
-    expect(genericNonAgents).toHaveLength(21);
+    const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug) && project.slug !== "family-health-hub");
+    expect(genericNonAgents).toHaveLength(20);
 
     for (const project of genericNonAgents) {
       const customization = defaultCustomization(project.slug)!;
