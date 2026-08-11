@@ -40,7 +40,7 @@ describe("quest builders", () => {
         expect(step.beginnerTerms, `${project.slug}/${step.id}`).toBeDefined();
         if (step.screenshotKind === "real" || step.screenshotKind === "placeholder") {
           expect(step.screenshot).toMatch(
-            new RegExp(`^/screens/${project.slug}/(?:real|placeholder)-step-[0-9]{2}\\.(?:png|jpe?g|svg)$`),
+            new RegExp(`^/screens/${project.slug}/(?:real-step|placeholder-(?:mac-step|windows-step|step))-[0-9]{2}\\.(?:png|jpe?g|svg)$`),
           );
         } else {
           expect(step.screenshot).toBe(

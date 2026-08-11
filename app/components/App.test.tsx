@@ -110,6 +110,43 @@ describe("academy interface", () => {
     expect(screen.queryByRole("button", { name: /увеличить мобильный пример/i })).not.toBeInTheDocument();
   });
 
+  it("chooses and restores one short Codex installation path", async () => {
+    const project = getQuestProject("install-codex")!;
+    const first = render(<Quest project={project} onHome={vi.fn()} />);
+
+    expect(await screen.findByRole("heading", { name: /выберите свой компьютер/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /выбрать Mac/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /выбрать Windows/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /выбрать Mac/i }));
+    expect(await screen.findByText("6 коротких уровней")).toBeInTheDocument();
+    expect(screen.getByText("Компьютер: Mac")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /делайте по картинкам/i })).not.toBeInTheDocument();
+    expect(localStorage.getItem("submarine:setup-platform:desktop:install-codex")).toBe("mac");
+    first.unmount();
+
+    render(<Quest project={project} onHome={vi.fn()} />);
+    expect(await screen.findByText("Компьютер: Mac")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /выберите свой компьютер/i })).not.toBeInTheDocument();
+  });
+
+  it("resets the Codex installation path back to Mac or Windows choice", async () => {
+    const project = getQuestProject("install-codex")!;
+    localStorage.setItem("submarine:setup-platform:desktop:install-codex", "windows");
+    localStorage.setItem(progressKey("install-codex:windows"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    localStorage.setItem(progressKey("planner"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(<Quest project={project} onHome={vi.fn()} />);
+    expect(await screen.findByText("Компьютер: Windows")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /сбросить проект и начать с нуля/i }));
+
+    expect(await screen.findByRole("heading", { name: /выберите свой компьютер/i })).toBeInTheDocument();
+    expect(localStorage.getItem("submarine:setup-platform:desktop:install-codex")).toBeNull();
+    expect(localStorage.getItem(progressKey("install-codex:windows"))).toBeNull();
+    expect(localStorage.getItem(progressKey("planner"))).not.toBeNull();
+  });
+
   it("labels authentic server screens and the missing backup screen honestly", () => {
     const project = getQuestProject("server-152fz")!;
     localStorage.setItem(progressKey("server-152fz"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));

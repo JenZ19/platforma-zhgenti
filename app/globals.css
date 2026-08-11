@@ -8742,19 +8742,28 @@ button {
 }
 .format-option.service { background: linear-gradient(145deg, #fff, #eaf5ef); }
 .format-option.agent { background: radial-gradient(circle at 90% 10%, #ffe3c9, transparent 35%), linear-gradient(145deg, #fff8f1, #f3e7ff); }
+.format-option.mac { background: radial-gradient(circle at 92% 8%, rgba(211, 162, 156, .25), transparent 34%), linear-gradient(145deg, #fffdf9, #eee7df); }
+.format-option.windows { background: radial-gradient(circle at 92% 8%, rgba(83, 137, 168, .2), transparent 34%), linear-gradient(145deg, #fbfeff, #e8f1f5); }
 .format-option:hover, .format-option:focus-visible { transform: translateY(-4px); border-color: #b76453; box-shadow: 0 24px 70px rgba(75, 59, 49, .14); outline: 3px solid rgba(183, 100, 83, .17); outline-offset: 3px; }
 .format-option-icon { grid-row: 1 / 5; align-self: start; width: 54px; height: 54px; display: grid; place-items: center; border-radius: 18px; background: #2f6858; color: white; font-size: 24px; }
 .format-option.agent .format-option-icon { background: #b76453; }
+.format-option.mac .format-option-icon { background: #4c4641; }
+.format-option.windows .format-option-icon { background: #39789a; }
 .format-option small { color: #738079; font-weight: 700; }
 .format-option h3 { margin: 4px 0 0; font: 500 36px/1 var(--serif); }
 .format-option p { max-width: 440px; margin: 3px 0 17px; color: #68766f; font-size: 15px; line-height: 1.5; }
 .format-option b { color: #2f6858; font-size: 14px; }
 .format-option.agent b { color: #a64f40; }
+.format-option.mac b { color: #66564d; }
+.format-option.windows b { color: #286887; }
 .format-help-toggle { display: block; min-height: 44px; margin: 20px auto 0; border-bottom: 1px dashed #9a756d; background: transparent; color: #705e58; }
 .format-help { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 900px; margin: 16px auto 0; }
 .format-help p { margin: 0; border-radius: 16px; background: white; padding: 16px; color: #65736c; line-height: 1.45; }
 .format-help span { display: block; margin-bottom: 4px; color: #263930; font-weight: 800; }
 .data-mode-badge.output { background: #f4e9ff; color: #6a477a; }
+.data-mode-badge.setup-platform { background: #eaf2f5; color: #345d70; }
+.install-platform-hero > p:not(.kicker) { max-width: 650px; }
+.install-platform-card .format-option { min-height: 210px; }
 
 @media (max-width: 700px) {
   .format-choice-grid, .format-help { grid-template-columns: 1fr; }

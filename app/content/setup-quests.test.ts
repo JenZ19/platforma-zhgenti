@@ -23,12 +23,12 @@ describe("computer setup quests", () => {
     }
   });
 
-  it("builds the long click-by-click paths only where they are useful", () => {
-    for (const slug of ["install-codex", "api-keys"] as const) {
+  it("builds long click-by-click paths only for the API lesson", () => {
+    for (const slug of ["api-keys"] as const) {
       const project = getQuestProject(slug)!;
       const demo = buildQuest(project, "demo");
       const real = buildQuest(project, "real");
-      const expectedCount = slug === "api-keys" ? 14 : 17;
+      const expectedCount = 14;
       expect(demo, slug).toHaveLength(expectedCount);
       expect(real, slug).toEqual(demo);
       expect(demo.map((step) => step.id)).toEqual(Array.from({ length: expectedCount }, (_, index) => index + 1));
@@ -111,15 +111,35 @@ describe("computer setup quests", () => {
     expect(`${steps[5].why} ${steps[5].action}`).toMatch(/\.pub.+можно.+PRIVATE KEY.+нельзя/is);
   });
 
-  it("teaches the current desktop Codex installation path for Mac and Windows", () => {
-    const text = allText(buildQuest(getQuestProject("install-codex")!));
-    expect(text).toContain("https://chatgpt.com/download/");
-    expect(text).toMatch(/macOS 14.+M1|Apple Silicon|Intel/is);
-    expect(text).toMatch(/Windows/i);
-    expect(text).toMatch(/верхн.+лев.+Codex/is);
-    expect(text).toMatch(/Новая задача/is);
-    expect(text).toMatch(/тестов.+папк|учебн.+папк/is);
-    expect(text).toMatch(/не видит.+Codex|Codex.+не вид/i);
+  it("builds separate six-level Mac and Windows installation paths", () => {
+    const project = getQuestProject("install-codex")!;
+    const mac = buildQuest(project, "demo", undefined, "mac");
+    const windows = buildQuest(project, "demo", undefined, "windows");
+    const macText = allText(mac);
+    const windowsText = allText(windows);
+
+    for (const [platform, steps] of [["mac", mac], ["windows", windows]] as const) {
+      expect(steps, platform).toHaveLength(6);
+      expect(steps.map((step) => step.id), platform).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(steps.every((step) => step.guide === undefined), platform).toBe(true);
+      expect(steps.filter((step) => step.showScreenshot !== false).map((step) => step.id), platform).toEqual([1, 2, 3, 4]);
+      expect(allText(steps), platform).toContain("https://chatgpt.com/download/");
+      expect(allText(steps), platform).toMatch(/верхн.+лев.+Codex/is);
+      expect(allText(steps), platform).toMatch(/codex-test/i);
+      expect(allText(steps), platform).not.toMatch(/яблок|четыр.+квадрат|запиш.+лист|пропуст.+уров|если у вас (?:Mac|Windows).+идите дальше/is);
+    }
+
+    expect(macText).toMatch(/macOS 14/i);
+    expect(macText).toMatch(/\.dmg|Программы|Applications/i);
+    expect(macText).not.toMatch(/меню «Пуск»|\.exe/i);
+    expect(windowsText).toMatch(/Windows/i);
+    expect(windowsText).toMatch(/\.exe|установщик.+Пуск/is);
+    expect(windowsText).not.toMatch(/\.dmg|Applications/i);
+
+    expect(mac[0]).toMatchObject({ screenshotKind: "real", screenshot: "/screens/install-codex/real-step-01.jpg" });
+    expect(windows[0]).toMatchObject({ screenshotKind: "real", screenshot: "/screens/install-codex/real-step-01.jpg" });
+    expect(mac[1]).toMatchObject({ screenshotKind: "placeholder", screenshot: "/screens/install-codex/placeholder-mac-step-02.svg" });
+    expect(windows[1]).toMatchObject({ screenshotKind: "placeholder", screenshot: "/screens/install-codex/placeholder-windows-step-02.svg" });
   });
 
   it("does not misrepresent a Russian server as complete 152-FZ compliance", () => {

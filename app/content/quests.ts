@@ -4,7 +4,7 @@ import { buildPortfolioQuest } from "./builders/portfolio";
 import { buildServiceQuest } from "./builders/service";
 import { buildSimpleSiteQuest } from "./builders/simple-site";
 import { getQuestProject } from "./projects";
-import type { ProjectDefinition, QuestCustomization, QuestStep } from "./types";
+import type { ProjectDefinition, QuestCustomization, QuestStep, SetupPlatform } from "./types";
 import type { DataMode } from "../lib/preparation";
 import { adaptQuestToDataMode } from "./data-mode";
 import { buildHomeHelperGuide } from "./home-helper-guide";
@@ -43,12 +43,12 @@ function applyCustomization(
   });
 }
 
-export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): QuestStep[] {
+export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization, setupPlatform: SetupPlatform = "mac"): QuestStep[] {
   const finish = (steps: QuestStep[]) => addBeginnerLanguage(
     applyJourneyPlan(project, attachApiKeysQuestLinks(steps, project.slug), mode),
   );
   if (isSetupQuestSlug(project.slug)) {
-    return finish(buildSetupQuest(project));
+    return finish(buildSetupQuest(project, setupPlatform));
   }
   if (project.slug === "family-expenses") {
     return finish(buildFamilyExpensesQuest(project, mode, customization ?? defaultCustomization(project.slug)!));

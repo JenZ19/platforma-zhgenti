@@ -24,7 +24,7 @@ test("capture manifest contains all 49 concrete quest paths and no legacy duplic
 test("capture counts follow each full project path instead of one shared number", () => {
   assert.equal(projectStepCount("server-152fz"), 9);
   assert.equal(projectStepCount("api-keys"), 14);
-  assert.equal(projectStepCount("install-codex"), 17);
+  assert.equal(projectStepCount("install-codex"), 6);
   assert.equal(projectStepCount("pressure-diary"), 19);
   assert.equal(projectStepCount("client-care-agent"), 20);
   assert.equal(projectStepCount("catalog-pro-site"), 22);

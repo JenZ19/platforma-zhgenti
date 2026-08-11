@@ -1,6 +1,6 @@
 import type { DataMode } from "../lib/preparation";
 import { getPreparationProfile } from "./preparation";
-import type { ProjectDefinition, ProjectKind, QuestCustomization, QuestStep } from "./types";
+import type { ProjectDefinition, ProjectKind, QuestCustomization, QuestStep, SetupPlatform } from "./types";
 import { defaultCustomization } from "./customization";
 import { buildOriginalMobileQuest } from "./original-quests/mobile";
 import { getAgentContract } from "./agent-contracts";
@@ -173,10 +173,10 @@ export function getMobileCapability(project: ProjectDefinition): MobileCapabilit
   return capabilityByKind[project.kind];
 }
 
-export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): MobileQuestStep[] {
+export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization, setupPlatform: SetupPlatform = "mac"): MobileQuestStep[] {
   const finish = (steps: MobileQuestStep[]) => addBeginnerLanguage(steps);
   if (project.journey === "setup") {
-    return finish(buildQuest(project, mode, customization).map((step) => ({
+    return finish(buildQuest(project, mode, customization, setupPlatform).map((step) => ({
       ...step,
       screenshot: step.screenshotKind === "real" || step.screenshotKind === "placeholder"
         ? step.screenshot

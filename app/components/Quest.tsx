@@ -35,6 +35,8 @@ import { QuestLinks } from "./QuestLinks";
 import { ServerDiscountOffer } from "./ServerDiscountOffer";
 import { LessonText } from "./LessonText";
 import { BeginnerTerms } from "./BeginnerTerms";
+import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
+import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
 
 export function Quest({
   project,
@@ -48,8 +50,11 @@ export function Quest({
   onHome: () => void;
 }) {
   const bundled = isProjectBundle(project);
+  const installQuest = !bundled && project.slug === "install-codex";
   const [output, setOutput] = useState<ProjectFormat | undefined>(initialOutput);
   const [choiceLoaded, setChoiceLoaded] = useState(!bundled || Boolean(initialOutput));
+  const [setupPlatform, setSetupPlatform] = useState<SetupPlatform | undefined>();
+  const [setupChoiceLoaded, setSetupChoiceLoaded] = useState(!installQuest);
 
   useEffect(() => {
     if (!bundled) return;
@@ -61,8 +66,32 @@ export function Quest({
     setChoiceLoaded(true);
   }, [bundled, initialOutput, project.slug]);
 
-  if (bundled && !choiceLoaded) {
+  useEffect(() => {
+    if (!installQuest) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSetupPlatform(loadSetupPlatform("desktop", window.localStorage));
+    setSetupChoiceLoaded(true);
+  }, [installQuest]);
+
+  if ((bundled && !choiceLoaded) || (installQuest && !setupChoiceLoaded)) {
     return <main className="quest-shell" data-visual-theme="tactile-album"><section className="preparation-card preparation-loading">Готовим выбор формата…</section></main>;
+  }
+
+  function chooseSetupPlatform(platform: SetupPlatform) {
+    saveSetupPlatform("desktop", platform, window.localStorage);
+    setSetupPlatform(platform);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function resetInstallQuest() {
+    for (const platform of ["mac", "windows"] as const) {
+      const branch = `install-codex:${platform}`;
+      resetProgress(branch, window.localStorage);
+      resetPreparation(branch, window.localStorage);
+      resetCustomization(branch, window.localStorage);
+    }
+    resetSetupPlatform("desktop", window.localStorage);
+    setSetupPlatform(undefined);
   }
 
   function choose(format: ProjectFormat) {
@@ -84,9 +113,13 @@ export function Quest({
     return <QuestFormatChoice project={project} onChoose={choose} onHome={onHome} onReset={resetBundle} />;
   }
 
+  if (installQuest && !setupPlatform) {
+    return <InstallCodexPlatformChoice project={project} onChoose={chooseSetupPlatform} onHome={onHome} />;
+  }
+
   const concrete = resolveProjectVariant(project, output);
   if (!concrete) return null;
-  const storageSlug = bundled ? branchStorageSlug(project.slug, output!, "desktop") : concrete.slug;
+  const storageSlug = bundled ? branchStorageSlug(project.slug, output!, "desktop") : installQuest ? `install-codex:${setupPlatform}` : concrete.slug;
   return (
     <QuestBody
       project={concrete}
@@ -94,6 +127,8 @@ export function Quest({
       profileSlug={concrete.slug}
       format={bundled ? output : undefined}
       bundle={bundled ? { slug: project.slug, title: project.title, onReset: () => { setOutput(undefined); onOutputChange(undefined); } } : undefined}
+      setupPlatform={installQuest ? setupPlatform : undefined}
+      onSetupReset={installQuest ? resetInstallQuest : undefined}
       onHome={onHome}
     />
   );
@@ -105,6 +140,8 @@ function QuestBody({
   profileSlug,
   format,
   bundle,
+  setupPlatform,
+  onSetupReset,
   onHome,
 }: {
   project: ProjectDefinition;
@@ -112,6 +149,8 @@ function QuestBody({
   profileSlug: string;
   format?: ProjectFormat;
   bundle?: { slug: string; title: string; onReset: () => void };
+  setupPlatform?: SetupPlatform;
+  onSetupReset?: () => void;
   onHome: () => void;
 }) {
   const [preparation, setPreparation] = useState<PreparationState | null>(null);
@@ -122,7 +161,7 @@ function QuestBody({
   const [imageOpen, setImageOpen] = useState(false);
   const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(profileSlug));
   const profile = useMemo(() => getCustomizationProfile(profileSlug), [profileSlug]);
-  const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization), [project, preparation?.mode, customization]);
+  const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization, setupPlatform), [project, preparation?.mode, customization, setupPlatform]);
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
   const setupQuest = project.journey === "setup";
 
@@ -153,7 +192,7 @@ function QuestBody({
   const preparationReady = setupQuest || (preparation ? isPreparationReady(preparation, checklist) : false);
   const screenshotBadge = step.screenshotKind === "real" ? "реальный экран" : step.screenshotKind === "placeholder" ? "заглушка для замены" : "прототип";
   const screenshotAlt = step.screenshotKind === "real"
-    ? `Реальный экран AdminVPS — ${step.title}`
+    ? `Реальный экран ${project.slug === "install-codex" ? "OpenAI" : "AdminVPS"} — ${step.title}`
     : step.screenshotKind === "placeholder"
       ? `Заглушка для будущего скриншота — ${step.title}`
       : `Прототип уровня ${step.id}: ${step.title}`;
@@ -232,6 +271,7 @@ function QuestBody({
     setReward(null);
     setImageOpen(false);
     bundle?.onReset();
+    onSetupReset?.();
   }
 
   return (
@@ -249,6 +289,7 @@ function QuestBody({
         <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / {totalLevels}</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
         <QuestResetButton onReset={reset} />
         {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
+        {setupPlatform && <div className="data-mode-badge setup-platform"><span>{setupPlatform === "mac" ? "⌘" : "⊞"}</span> Компьютер: {setupPlatform === "mac" ? "Mac" : "Windows"}</div>}
         {!setupQuest && preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
       </section>
 

@@ -1,4 +1,4 @@
-import type { ProjectDefinition, QuestGuideFrame, QuestGuideScene, QuestLink, QuestStep } from "./types";
+import type { ProjectDefinition, QuestGuideFrame, QuestGuideScene, QuestLink, QuestStep, SetupPlatform } from "./types";
 import { serverSteps } from "./setup-server-adminvps";
 
 export const API_KEYS_QUEST_HREF = "?quest=api-keys";
@@ -96,7 +96,7 @@ function guide(project: ProjectDefinition, input: SetupStepInput): QuestGuideFra
 function makeStep(project: ProjectDefinition, input: SetupStepInput): QuestStep {
   const reward = project.slug === "server-152fz" && input.id === 9
     ? "Фея безопасного сервера"
-    : project.slug !== "server-152fz" && input.id === 17
+    : project.slug === "install-codex" && input.id === 6
       ? "Хранительница рабочего места"
       : undefined;
 
@@ -142,6 +142,104 @@ const installCodexSteps: SetupStepInput[] = [
   { id:16,title:"Поняла, что делать, если Codex не виден",eyebrow:"Спасательный маршрут",why:"Интерфейс может обновляться, а доступ к функциям зависит от аккаунта. Вместо случайных переустановок нужен один понятный порядок проверки.",action:"Проверьте по порядку: приложение скачано с chatgpt.com; вы вошли в нужный аккаунт; приложение обновлено; в левом верхнем меню раскрыт список ChatGPT/Codex. Если Codex всё равно не виден, сделайте один скриншот всего окна без личных данных и отправьте куратору.",expected:["Проверены четыре пункта по порядку","Приложение не переустанавливалось многократно","Куратору передан один понятный скриншот при необходимости"],app:"ChatGPT",scene:"codex",target:"Меню и версия приложения",help:"Не создавайте новый аккаунт и не покупайте подписку наугад. Доступ сначала проверяет куратор по вашему экрану.",links:[external("Официальная справка о новом приложении","https://help.openai.com/en/articles/20001276-moving-to-the-new-chatgpt-desktop-app","Актуальный путь перехода к Codex на macOS и Windows.")] },
   { id:17,title:"Подготовила Codex ко всему курсу",eyebrow:"Финиш установки",why:"Финальная проверка подтверждает, что дальше вы сможете открывать отдельные проекты, отправлять готовые команды и видеть результат без ручного кода.",action:"Сверьте четыре результата: ChatGPT установлен; в меню выбран Codex; папка «Проекты Codex» подключается; тестовая страница открылась. Удалять codex-test не нужно — она останется безопасной проверкой.",expected:["Codex установлен и открывается","Учебная папка подключается","Тестовая страница работает"],app:"Codex",scene:"preview",target:"Все четыре результата готовы",help:"Если один пункт не готов, вернитесь только к соответствующему уровню. Не проходите установку с начала и не меняйте уже работающие настройки." },
 ];
+
+function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] {
+  const mac = platform === "mac";
+  const platformName = mac ? "Mac" : "Windows";
+  const downloadLink = external("Скачать ChatGPT с Codex", "https://chatgpt.com/download/", `Официальная загрузка приложения для ${platformName}.`);
+  const helpLink = external("Официальная инструкция OpenAI", "https://help.openai.com/en/articles/20001276-moving-to-the-new-chatgpt-desktop-app", "В новом приложении ChatGPT находятся Chat, Work и Codex.");
+
+  return [
+    {
+      id: 1,
+      title: `Скачала приложение для ${platformName}`,
+      eyebrow: "Официальная загрузка",
+      why: `Нужен официальный установщик именно для ${platformName}, чтобы приложение установилось безопасно и без лишних файлов.`,
+      action: `Откройте официальную страницу по кнопке ниже и нажмите загрузку для ${platformName}. Дождитесь, пока файл появится в «Загрузках».`,
+      expected: ["Открыт сайт chatgpt.com", `Скачан установщик для ${platformName}`, "Файл находится в «Загрузках»"],
+      app: "официальная страница OpenAI",
+      target: `Загрузка для ${platformName}`,
+      help: "Если загрузка не началась, обновите официальную страницу и нажмите кнопку ещё раз.",
+      links: [downloadLink, helpLink],
+      screenshot: "/screens/install-codex/real-step-01.jpg",
+      screenshotKind: "real",
+      showGuide: false,
+    },
+    {
+      id: 2,
+      title: "Установила приложение и вошла",
+      eyebrow: mac ? "Установка на Mac" : "Установка на Windows",
+      why: mac ? "Приложению нужна macOS 14 или новее." : "После установки приложение будет доступно из меню «Пуск».",
+      action: mac
+        ? "Откройте скачанный файл .dmg. Перетащите ChatGPT в папку «Программы», откройте приложение и войдите в свой аккаунт ChatGPT."
+        : "Откройте скачанный файл .exe, завершите установку, запустите ChatGPT через установщик и меню «Пуск», затем войдите в свой аккаунт.",
+      expected: ["Приложение ChatGPT открыто", "Вход в аккаунт выполнен", mac ? "ChatGPT находится в «Программах»" : "ChatGPT запускается через «Пуск»"],
+      app: mac ? "установщик macOS" : "установщик Windows",
+      target: mac ? "ChatGPT → Программы" : "ChatGPT → Пуск",
+      help: mac ? "Если macOS ниже версии 14, сначала обновите систему." : "Если Windows блокирует файл, проверьте, что он скачан с chatgpt.com/download.",
+      links: [downloadLink, helpLink],
+      screenshot: `/screens/install-codex/placeholder-${platform}-step-02.svg`,
+      screenshotKind: "placeholder",
+      showGuide: false,
+    },
+    {
+      id: 3,
+      title: "Открыла Codex",
+      eyebrow: "Один переключатель",
+      why: "Codex — раздел приложения, который работает с папками и создаёт проекты.",
+      action: "Нажмите меню в верхнем левом углу приложения и выберите Codex. Затем нажмите «Новая задача».",
+      expected: ["В верхнем левом углу выбран Codex", "Открыта новая задача", "Внизу видно поле для команды"],
+      app: "ChatGPT",
+      target: "Верхнее левое меню → Codex",
+      help: "Если пункта Codex нет, обновите приложение. Если он не появился, покажите куратору один скриншот всего окна без личных данных.",
+      links: [helpLink],
+      screenshot: "/screens/install-codex/placeholder-step-03.svg",
+      screenshotKind: "placeholder",
+      showGuide: false,
+    },
+    {
+      id: 4,
+      title: "Открыла папку первого проекта",
+      eyebrow: "Рабочее место",
+      why: "Отдельная папка не смешивает учебный проект с другими файлами.",
+      action: "В Codex нажмите «Открыть папку». Создайте папку codex-test в удобном месте, выберите её и подтвердите открытие.",
+      expected: ["В Codex открыта папка codex-test", "Открыта новая задача", "Codex не получил доступ ко всему диску"],
+      app: "Codex",
+      target: "Открыть папку → codex-test",
+      help: "Если открылась другая папка, закройте её и снова выберите только codex-test.",
+      screenshot: "/screens/install-codex/placeholder-step-04.svg",
+      screenshotKind: "placeholder",
+      showGuide: false,
+    },
+    {
+      id: 5,
+      title: "Отправила первую команду",
+      eyebrow: "Готовый промпт",
+      why: "Одна короткая задача сразу проверит, что Codex умеет создавать файлы и показывать результат.",
+      action: "Скопируйте команду ниже, вставьте её в поле Codex и отправьте. Подтвердите создание файлов только внутри папки codex-test.",
+      prompt: "Создай в открытой папке codex-test простую автономную страницу index.html. На странице напиши крупно «Codex работает», добавь кнопку «Я готова» и спокойный светлый фон. Не устанавливай пакеты и не проси меня создавать файлы вручную. После создания открой предпросмотр страницы.",
+      expected: ["Codex создал index.html сам", "Появилась кнопка или ссылка предпросмотра", "Никакие пакеты не устанавливались"],
+      app: "Codex",
+      target: "Поле команды",
+      help: "Если Codex просит создать файл вручную, отправьте следом: «Создай все нужные файлы сам внутри открытой папки».",
+      showGuide: false,
+      showScreenshot: false,
+    },
+    {
+      id: 6,
+      title: "Открыла результат",
+      eyebrow: "Codex готов",
+      why: "Видимая страница подтверждает, что установка и первый проект работают.",
+      action: "Откройте предпросмотр из ответа Codex. На странице должны быть текст «Codex работает» и кнопка «Я готова».",
+      expected: ["Страница открылась", "Текст «Codex работает» виден", "Кнопка «Я готова» нажимается"],
+      app: "предпросмотр",
+      target: "Codex работает",
+      help: "Если страница не открывается, напишите в Codex: «Проверь index.html и снова открой предпросмотр».",
+      showGuide: false,
+      showScreenshot: false,
+    },
+  ];
+}
 
 const apiSteps: SetupStepInput[] = [
   { id:1,title:"Поняла API без технических слов",eyebrow:"Служебная дверь",why:"API — это способ, которым две программы общаются без ручного копирования. Сайт отправляет аккуратный запрос, сервис выполняет его и возвращает ответ.",action:"Представьте кафе: приложение — посетитель, API — окно выдачи, запрос — заказ, ответ — готовое блюдо. Пользователь не заходит на кухню и не меняет внутреннюю систему. Запишите одним предложением: «API помогает моему проекту попросить другой сервис сделать действие и получить результат».",expected:["API объяснён как общение программ","Запрос и ответ не перепутаны","Есть своё простое предложение"],app:"Академия квестов",scene:"academy",target:"Схема «проект → API → сервис»",help:"Если слово API всё ещё пугает, заменяйте его в голове на «служебная дверь между программами». Для этого квеста такого понимания достаточно." },
@@ -193,10 +291,13 @@ export function isSetupQuestSlug(slug: string): slug is SetupQuestSlug {
 }
 
 export function getSetupQuestStepTitle(slug: string, step: number): string | undefined {
-  return isSetupQuestSlug(slug) ? definitions[slug][step - 1]?.title : undefined;
+  if (!isSetupQuestSlug(slug)) return undefined;
+  const inputs = slug === "install-codex" ? buildShortInstallCodexSteps("mac") : definitions[slug];
+  return inputs[step - 1]?.title;
 }
 
-export function buildSetupQuest(project: ProjectDefinition): QuestStep[] {
+export function buildSetupQuest(project: ProjectDefinition, platform: SetupPlatform = "mac"): QuestStep[] {
   if (!isSetupQuestSlug(project.slug)) return [];
-  return attachApiKeysQuestLinks(definitions[project.slug].map((input) => makeStep(project, input)), project.slug);
+  const inputs = project.slug === "install-codex" ? buildShortInstallCodexSteps(platform) : definitions[project.slug];
+  return attachApiKeysQuestLinks(inputs.map((input) => makeStep(project, input)), project.slug);
 }

@@ -27,7 +27,7 @@ export function projectStepCount(slug) {
 }
 
 export function originalGuideStepCount(slug) {
-  return slug === "api-keys" ? 14 : 17;
+  return slug === "api-keys" ? 14 : slug === "install-codex" ? 6 : 17;
 }
 
 export function screenPath(slug, step) {

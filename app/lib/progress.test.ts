@@ -77,7 +77,7 @@ describe("academy progress", () => {
       startedProjects: 2,
       completedProjects: 1,
       completedSteps: 18,
-      totalSteps: 769,
+      totalSteps: 758,
       score: 180,
     });
   });

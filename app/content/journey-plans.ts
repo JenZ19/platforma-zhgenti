@@ -40,7 +40,7 @@ export type JourneyCheckKey =
   | "restore";
 
 export const questLevelCounts = {
-  "install-codex": 17,
+  "install-codex": 6,
   "server-152fz": 9,
   "api-keys": 14,
   "family-expenses": 18,

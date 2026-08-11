@@ -6,6 +6,7 @@ export type ProjectKind =
   | "portfolio";
 
 export type ProjectFormat = "service" | "agent";
+export type SetupPlatform = "mac" | "windows";
 export type ProjectWeek = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type ProjectDefinition = {
