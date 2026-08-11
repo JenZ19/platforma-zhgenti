@@ -15,6 +15,7 @@ import { customizationKey } from "../lib/customization";
 import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
 import { ExpectedScene } from "./ExpectedScene";
+import { MobileAcademy } from "./MobileAcademy";
 import { MobileQuest } from "./MobileQuest";
 import { MobileExpectedScene } from "./MobileExpectedScene";
 import { ProjectCard } from "./ProjectCard";
@@ -45,6 +46,18 @@ describe("academy interface", () => {
 
     expect(screen.getByRole("link", { name: /добавляем API-ключи/i })).toHaveAttribute("href", "?quest=api-keys");
     expect(screen.getByRole("link", { name: /добавляем API-ключи/i })).not.toHaveAttribute("target", "_blank");
+  });
+
+  it("shows the AdminVPS discount and full PDF guide in both server quest formats", () => {
+    const project = getQuestProject("server-152fz")!;
+    render(<><Quest project={project} onHome={vi.fn()} /><MobileQuest project={project} onHome={vi.fn()} /></>);
+
+    expect(screen.getAllByRole("heading", { name: /скидка 60% на сервер/i })).toHaveLength(2);
+    expect(screen.getAllByText("SUBMARINE123")).toHaveLength(2);
+    expect(screen.getAllByRole("img", { name: /пример применения промокода/i })).toHaveLength(2);
+    for (const link of screen.getAllByRole("link", { name: /скачать полную инструкцию в PDF/i })) {
+      expect(link).toHaveAttribute("href", "/materials/adminvps-vps-instruction.pdf");
+    }
   });
 
   it("shows the finished prototype on every desktop project card", () => {
@@ -210,6 +223,32 @@ describe("academy interface", () => {
     expect(within(catalogue).getByText(/ничего не найдено/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /все проекты/i }));
     expect(within(catalogue).getAllByRole("link", { name: /открыть квест/i })).toHaveLength(1);
+  });
+
+  it("helps a beginner choose a desktop quest by difficulty, goal and familiar words", () => {
+    render(<Academy />);
+    const catalogue = screen.getByRole("region", { name: /каталог проектов/i });
+
+    expect(within(catalogue).getByText(/показано: 45 из 45/i)).toBeInTheDocument();
+    expect(within(catalogue).getAllByText(/уровень: стартовый/i).length).toBeGreaterThan(0);
+
+    fireEvent.change(screen.getByRole("combobox", { name: /что хочется сделать/i }), { target: { value: "Здоровье" } });
+    fireEvent.click(screen.getByRole("button", { name: /сложность: стартовый/i }));
+    expect(within(catalogue).getByRole("heading", { name: /дневник давления/i })).toBeInTheDocument();
+    expect(within(catalogue).queryByRole("heading", { name: /семейный бюджет/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /сбросить все фильтры/i }));
+    fireEvent.change(screen.getByRole("searchbox", { name: /найти проект/i }), { target: { value: "мама" } });
+    expect(within(catalogue).getByRole("heading", { name: /семейное расписание/i })).toBeInTheDocument();
+  });
+
+  it("uses the same helpful quest filters in the phone-only academy", () => {
+    render(<MobileAcademy onOpen={vi.fn()} />);
+    const catalogue = screen.getByRole("region", { name: /мобильный каталог проектов/i });
+
+    fireEvent.change(screen.getByRole("combobox", { name: /что хочется сделать с телефона/i }), { target: { value: "Контент" } });
+    expect(within(catalogue).getAllByText(/контент/i).length).toBeGreaterThan(0);
+    expect(within(catalogue).getByText(/показано:/i)).toBeInTheDocument();
   });
 
   it("unlocks quest levels sequentially and saves project-specific progress", () => {

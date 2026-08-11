@@ -32,6 +32,7 @@ import { QuestCustomizer } from "./QuestCustomizer";
 import { QuestResetButton } from "./QuestResetButton";
 import { QuestFormatChoice } from "./QuestFormatChoice";
 import { QuestLinks } from "./QuestLinks";
+import { ServerDiscountOffer } from "./ServerDiscountOffer";
 
 export function Quest({
   project,
@@ -239,6 +240,8 @@ function QuestBody({
         {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
         {!setupQuest && preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
       </section>
+
+      {project.slug === "server-152fz" && <ServerDiscountOffer />}
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим квест…</section> : !preparationReady ? (
         <QuestPreparation

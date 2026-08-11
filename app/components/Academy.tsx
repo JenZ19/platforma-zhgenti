@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { isProjectBundle, projects } from "../content/projects";
+import {
+  difficultyLabels,
+  filterAndSortProjects,
+  goalKeywords,
+  type DifficultyFilter,
+  type GoalFilter,
+} from "../content/discovery";
+import { projects } from "../content/projects";
 import { getAcademyStats } from "../lib/progress";
 import { ProjectCard } from "./ProjectCard";
 
@@ -9,6 +16,8 @@ const weekLabels = ["Все проекты", "Неделя 1", "Неделя 2",
 
 export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   const [week, setWeek] = useState(0);
+  const [difficulty, setDifficulty] = useState<DifficultyFilter>(0);
+  const [goal, setGoal] = useState<GoalFilter>("Все цели");
   const [query, setQuery] = useState("");
   const [stats, setStats] = useState({ totalProjects: 45, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: 765, score: 0 });
 
@@ -19,13 +28,17 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   }, []);
 
   const visible = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase("ru");
-    return projects.filter((project) => {
-      const inWeek = week === 0 || (isProjectBundle(project) ? project.weeks.includes(week as 1 | 2) : project.week === week);
-      const inSearch = !needle || `${project.title} ${project.outcome} ${project.track}`.toLocaleLowerCase("ru").includes(needle);
-      return inWeek && inSearch;
-    });
-  }, [query, week]);
+    return filterAndSortProjects(projects, { week, difficulty, goal, query });
+  }, [difficulty, goal, query, week]);
+
+  const hasFilters = week !== 0 || difficulty !== 0 || goal !== "Все цели" || query.trim() !== "";
+
+  function resetFilters() {
+    setWeek(0);
+    setDifficulty(0);
+    setGoal("Все цели");
+    setQuery("");
+  }
 
   return (
     <main className="academy-shell">
@@ -56,6 +69,15 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
         </div>
         <div className="week-tabs" role="group" aria-label="Фильтр по неделям">
           {weekLabels.map((label, index) => <button type="button" key={label} className={week === index ? "active" : ""} aria-label={label} onClick={() => setWeek(index)}>{label}</button>)}
+        </div>
+        <div className="discovery-panel">
+          <div className="difficulty-filter" role="group" aria-label="Выберите сложность">
+            <span>Сложность</span>
+            <button type="button" className={difficulty === 0 ? "active" : ""} aria-label="Сложность: любая" onClick={() => setDifficulty(0)}>Любая</button>
+            {([1, 2, 3, 4] as const).map((level) => <button type="button" key={level} className={difficulty === level ? "active" : ""} aria-label={`Сложность: ${difficultyLabels[level]}`} onClick={() => setDifficulty(level)}><b>{level}</b>{difficultyLabels[level]}</button>)}
+          </div>
+          <label className="goal-filter"><span>Что хочется сделать</span><select aria-label="Что хочется сделать" value={goal} onChange={(event) => setGoal(event.target.value as GoalFilter)}><option>Все цели</option>{goalKeywords.map((keyword) => <option key={keyword}>{keyword}</option>)}</select></label>
+          <div className="discovery-summary"><p>Показано: {visible.length} из {projects.length}</p>{hasFilters && <button type="button" onClick={resetFilters} aria-label="Сбросить все фильтры">Сбросить фильтры ×</button>}</div>
         </div>
         {visible.length ? <div className="project-grid">{visible.map((project) => <ProjectCard key={project.slug} project={project} onOpen={onOpen} />)}</div> : <div className="empty-catalogue"><span>✦</span><h3>Ничего не найдено</h3><p>Попробуйте другое слово или откройте все проекты.</p></div>}
       </section>

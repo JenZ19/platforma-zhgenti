@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
+import { getCatalogDiscoveryProfile } from "../content/discovery";
 import { isProjectBundle } from "../content/projects";
 import type { CatalogProject } from "../content/types";
 import { getCatalogProjectProgress, LEVELS_PER_QUEST } from "../lib/progress";
@@ -21,6 +22,7 @@ export function ProjectCard({
     setCompleted(getCatalogProjectProgress(project, window.localStorage).completed.length);
   }, [project]);
   const status = completed === LEVELS_PER_QUEST ? "Готово" : completed > 0 ? `${completed} из 17` : "Не начато";
+  const discovery = getCatalogDiscoveryProfile(project);
 
   function open(event: MouseEvent<HTMLAnchorElement>) {
     if (!onOpen) return;
@@ -36,6 +38,7 @@ export function ProjectCard({
         <span className={`project-status ${completed === 17 ? "complete" : ""}`}>{status}</span>
       </div>
       <p className="project-track">{isProjectBundle(project) ? "Недели 1–2" : `Неделя ${project.week}`} · {project.track}</p>
+      <div className="project-discovery-line"><strong>Уровень: {discovery.label}</strong>{discovery.keywords.slice(0, 3).map((keyword) => <i key={keyword}>{keyword}</i>)}</div>
       <h3>{project.title}</h3>
       <p className="project-outcome">{project.outcome}</p>
       <div className="project-meta"><span>{isProjectBundle(project) ? "17 уровней в выбранном пути" : "17 уровней"}</span><span>{project.device}</span></div>

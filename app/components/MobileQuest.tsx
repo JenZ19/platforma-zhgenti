@@ -17,6 +17,7 @@ import { QuestCustomizer } from "./QuestCustomizer";
 import { QuestResetButton } from "./QuestResetButton";
 import { QuestFormatChoice } from "./QuestFormatChoice";
 import { QuestLinks } from "./QuestLinks";
+import { ServerDiscountOffer } from "./ServerDiscountOffer";
 
 export function MobileQuest({
   project,
@@ -178,6 +179,8 @@ function MobileQuestBody({
     <main className="mobile-quest-shell">
       <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>S</span><b>SUBMARINE<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
       <section className="mobile-quest-hero"><button type="button" onClick={onHome}>← Все мобильные проекты</button><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><p>Неделя {project.week} · {project.track}</p><h1>{bundle?.title ?? project.title}</h1><span>{project.outcome}</span>{format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}<div className="mobile-progress"><div><b>{progress.completed.length} из 17</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div><QuestResetButton mobile onReset={reset} /></section>
+
+      {project.slug === "server-152fz" && <ServerDiscountOffer mobile />}
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим мобильный квест…</section> : !ready ? <QuestPreparation project={project} preparation={preparation} mobile onChooseDemo={() => storePreparation({ version: 1, mode: "demo", checked: [], ready: true })} onChooseReal={() => storePreparation({ version: 1, mode: "real", checked: [], ready: false })} onToggle={togglePreparation} onStartReal={() => checklist.every((item) => preparation.checked.includes(item.id)) && storePreparation({ ...preparation, ready: true })} onBack={() => { resetPreparation(storageSlug, window.localStorage); setPreparation(createEmptyPreparation()); }} /> : (
         <section className="mobile-level-wrap">

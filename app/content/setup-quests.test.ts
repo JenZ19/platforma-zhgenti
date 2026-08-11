@@ -63,8 +63,35 @@ describe("computer setup quests", () => {
     expect(text).toMatch(/резервн.+копи/is);
     expect(text).toMatch(/SSH|фаервол|firewall/is);
     expect(text).toMatch(/трансгранич|иностранн.+API/is);
-    expect(text).toContain("https://docs.selectel.ru/cloud-servers/about/152-fz-cloud-server/");
+    expect(text).toContain("https://my.adminvps.ru/knowledgebase/291/mery-zashchity-personalnykh-dannykh-152-f3.html");
     expect(text).toContain(API_KEYS_QUEST_HREF);
+  });
+
+  it("repeats the supplied AdminVPS guide as a complete beginner path", () => {
+    const text = allText(buildQuest(getQuestProject("server-152fz")!));
+    expect(text).toContain("https://adminvps.ru/");
+    expect(text).toContain("/materials/adminvps-vps-instruction.pdf");
+    expect(text).toMatch(/5.?10 минут/i);
+    expect(text).toMatch(/Россия.+Беларусь.+Казахстан.+Нидерланды.+Германия.+Финляндия.+Польша/is);
+    expect(text).toMatch(/Promo.+499.+1.+3[,.]5.+2 ГБ.+15 ГБ/is);
+    expect(text).toMatch(/Micro.+799.+2 CPU.+4 ГБ.+30 ГБ/is);
+    expect(text).toMatch(/Start.+1289.+4 CPU.+8 ГБ.+60 ГБ/is);
+    expect(text).toMatch(/Standard.+2149.+8 CPU.+12 ГБ.+100 ГБ/is);
+    expect(text).toMatch(/Ubuntu 22\.04/i);
+    expect(text).toMatch(/Оперативная память.+Диск.+IPv4.+Еженедельный бэкап/is);
+    expect(text).toMatch(/Фамилия.+Имя.+Телефон.+Email.+пароль/is);
+    expect(text).toMatch(/Услуги.+Товары\/Услуги.+IP/is);
+    expect(text).toMatch(/Active.+Следующ.+оплат/is);
+    expect(text).toMatch(/перезагруз.+выключ.+включ.+смен.+тариф.+резервн/is);
+    expect(text).toMatch(/SSH Keys.+Добавить.+публичн.+ключ/is);
+    expect(text).not.toMatch(/панел[ьи] Selectel|my\.selectel\.ru|мастер сервера Selectel/i);
+  });
+
+  it("includes the SUBMARINE first-month offer without hiding the terms", () => {
+    const text = allText(buildQuest(getQuestProject("server-152fz")!));
+    expect(text).toMatch(/скидк.+60%/i);
+    expect(text).toContain("SUBMARINE123");
+    expect(text).toMatch(/одному серверу.+один раз.+1 месяц.+кроме Lite/is);
   });
 
   it("explains API and gives four provider-specific safe routes", () => {
