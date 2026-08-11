@@ -37,11 +37,11 @@ describe("quest builders", () => {
         expect(text, `${project.slug}/${step.id}`).not.toMatch(placeholder);
       }
     }
-    expect(total).toBe(833);
+    expect(total).toBe(884);
   });
 
   it("uses detailed copy-ready Codex prompts", () => {
-    for (const project of questProjects) {
+    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const prompts = buildQuest(project).flatMap((step) => step.prompt ?? []);
       expect(prompts.length, project.slug).toBeGreaterThanOrEqual(11);
       expect(prompts.every((prompt) => prompt.length > 150), project.slug).toBe(true);
@@ -50,7 +50,7 @@ describe("quest builders", () => {
   });
 
   it("switches every command to a conversational real-data mode", () => {
-    for (const project of questProjects) {
+    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const realSteps = buildQuest(project, "real");
       const realStepText = stepText(realSteps);
       const prompts = realSteps.flatMap((step) => step.prompt ?? []);
@@ -66,7 +66,7 @@ describe("quest builders", () => {
   });
 
   it("keeps real-data actions concrete instead of prefixing every step with a folder instruction", () => {
-    for (const project of questProjects) {
+    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const steps = buildQuest(project, "real");
       const text = stepText(steps);
       expect(text, project.slug).not.toContain("Возьмите подходящий материал из подготовленной папки");
@@ -77,7 +77,7 @@ describe("quest builders", () => {
   it("explains the previously ambiguous open, paste, and phone actions click by click", () => {
     for (const project of questProjects) {
       const steps = buildQuest(project, "real");
-      if (["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub"].includes(project.slug)) continue;
+      if (project.journey === "setup" || ["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub"].includes(project.slug)) continue;
       expect(steps[0].action, `${project.slug}/create`).toMatch(/Codex.+Новая задача.+команд.+Проект.+создан/is);
       expect(steps[0].action, `${project.slug}/create`).not.toMatch(/создайте.+папку|создайте.+файл/is);
       expect(steps[1].action, `${project.slug}/open`).toMatch(/ответ Codex.+Открыть проект.+название/is);
@@ -236,7 +236,7 @@ describe("quest builders", () => {
   );
 
   it("teaches every non-agent project as a personal version and a client copy", () => {
-    const nonAgents = questProjects.filter((project) => project.kind !== "agent");
+    const nonAgents = questProjects.filter((project) => project.kind !== "agent" && project.journey !== "setup");
     expect(nonAgents).toHaveLength(25);
     const originalSlugs = new Set(["family-expenses", "planner", "idea-vault", "child-schedule"]);
     const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug) && project.slug !== "family-health-hub");

@@ -62,6 +62,7 @@ export function resetPreparation(slug: string, storage: StorageLike): void {
 }
 
 export function buildRealDataChecklist(project: ProjectDefinition, surface: PreparationSurface = "desktop"): PreparationItem[] {
+  if (project.journey === "setup") return [];
   if (project.slug === "family-expenses") return buildFamilyExpensesChecklist(surface);
   const sourceChecklist = buildSourceProjectChecklist(project, surface);
   if (sourceChecklist) return sourceChecklist;

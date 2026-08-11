@@ -18,6 +18,7 @@ import { buildCarouselAgentQuest } from "./original-quests/carousel-agent";
 import { buildThreadsAgentQuest } from "./original-quests/threads-agent";
 import { buildWebinarModeratorAgentQuest } from "./original-quests/webinar-moderator-agent";
 import { buildFamilyHealthHubQuest } from "./original-quests/family-health-hub";
+import { attachApiKeysQuestLinks, buildSetupQuest, isSetupQuestSlug } from "./setup-quests";
 
 function applyCustomization(
   steps: QuestStep[],
@@ -40,29 +41,33 @@ function applyCustomization(
 }
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): QuestStep[] {
+  const finish = (steps: QuestStep[]) => attachApiKeysQuestLinks(steps, project.slug);
+  if (isSetupQuestSlug(project.slug)) {
+    return buildSetupQuest(project);
+  }
   if (project.slug === "family-expenses") {
-    return buildFamilyExpensesQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildFamilyExpensesQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "planner") {
-    return buildPlannerQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildPlannerQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "idea-vault") {
-    return buildIdeaVaultQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildIdeaVaultQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "child-schedule") {
-    return buildChildScheduleQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildChildScheduleQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "carousel-agent") {
-    return buildCarouselAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildCarouselAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "threads-agent") {
-    return buildThreadsAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildThreadsAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "webinar-moderator-agent") {
-    return buildWebinarModeratorAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildWebinarModeratorAgentQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   if (project.slug === "family-health-hub") {
-    return buildFamilyHealthHubQuest(project, mode, customization ?? defaultCustomization(project.slug)!);
+    return finish(buildFamilyHealthHubQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   let steps: QuestStep[];
   switch (project.kind) {
@@ -84,7 +89,7 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", 
   }
   const customizedSteps = applyCustomization(steps, project, customization ?? defaultCustomization(project.slug));
   const modeSteps = adaptQuestToDataMode(customizedSteps, project, mode);
-  return project.slug === "home-helper" ? buildHomeHelperGuide(project, mode, modeSteps) : modeSteps;
+  return finish(project.slug === "home-helper" ? buildHomeHelperGuide(project, mode, modeSteps) : modeSteps);
 }
 
 export function getQuest(slug: string): QuestStep[] | undefined {

@@ -10,7 +10,7 @@ const weekLabels = ["Все проекты", "Неделя 1", "Неделя 2",
 export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   const [week, setWeek] = useState(0);
   const [query, setQuery] = useState("");
-  const [stats, setStats] = useState({ totalProjects: 42, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: 714, score: 0 });
+  const [stats, setStats] = useState({ totalProjects: 45, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: 765, score: 0 });
 
   useEffect(() => {
     // Overall progress is device-local and can only be read after the page mounts.
@@ -42,7 +42,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
         <h1>Выбери проект.<br /><em>Сделай его шаг за шагом.</em></h1>
         <p className="hero-lead">Никакого пустого листа. В каждом квесте уже есть готовые команды для Codex, понятные проверки и экран того, что должно получиться.</p>
         <div className="academy-stats" aria-label="Общий прогресс">
-          <div><strong>42</strong><span>проекта</span></div>
+          <div><strong>45</strong><span>проектов</span></div>
           <div><strong>{stats.startedProjects}</strong><span>начато</span></div>
           <div><strong>{stats.completedProjects}</strong><span>готово</span></div>
           <div><strong>{stats.completedSteps}</strong><span>уровней пройдено</span></div>
@@ -51,7 +51,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
 
       <section className="catalogue" aria-label="Каталог проектов">
         <div className="catalogue-head">
-          <div><p className="section-kicker">Твоя мастерская</p><h2>42 проекта</h2></div>
+          <div><p className="section-kicker">Твоя мастерская</p><h2>45 проектов</h2></div>
           <label className="search-field"><span>⌕</span><input type="search" aria-label="Найти проект" placeholder="Найти проект…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         </div>
         <div className="week-tabs" role="group" aria-label="Фильтр по неделям">

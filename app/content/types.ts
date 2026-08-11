@@ -17,7 +17,8 @@ export type ProjectDefinition = {
   symbol: string;
   audience: string;
   outcome: string;
-  device: "телефон" | "телефон или ноутбук" | "лучше ноутбук";
+  device: "телефон" | "телефон или ноутбук" | "лучше ноутбук" | "компьютер";
+  journey?: "project" | "setup";
   entities: string[];
   features: string[];
   demo: string[];
@@ -102,6 +103,14 @@ export type QuestStep = {
   reward?: string;
   help: { title: string; body: string; prompt: string };
   guide?: QuestGuideFrame[];
+  links?: QuestLink[];
+};
+
+export type QuestLink = {
+  label: string;
+  href: string;
+  note?: string;
+  external?: boolean;
 };
 
 export type QuestGuideScene = "finder" | "codex" | "academy" | "preview" | "publish" | "portfolio";

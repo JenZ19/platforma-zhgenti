@@ -22,7 +22,7 @@ class MemoryStorage {
 }
 
 describe("quest customization", () => {
-  it("keeps the four fully handcrafted profiles and customizes all 49 paths", () => {
+  it("keeps the four fully handcrafted profiles and customizes all 49 project-building paths", () => {
     expect(originalQuestSlugs).toEqual([
       "family-expenses",
       "planner",
@@ -42,8 +42,8 @@ describe("quest customization", () => {
       expect(customizationSummary(slug, defaults), slug).toContain(defaults.palette.accent);
     }
 
-    expect(questProjects).toHaveLength(49);
-    for (const project of questProjects) {
+    expect(questProjects).toHaveLength(52);
+    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const profile = getCustomizationProfile(project.slug)!;
       const defaults = defaultCustomization(project.slug)!;
       expect(Object.keys(profile.axes), project.slug).toEqual(["audience", "goal", "name", "style", "tone", "feature"]);

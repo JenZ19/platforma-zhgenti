@@ -159,6 +159,7 @@ export function getCustomizationProfile(slug: string): QuestCustomizationProfile
   if (sourceProjectProfiles[baseSlug]) return sourceProjectProfiles[baseSlug];
   const project = getQuestProject(baseSlug);
   if (!project) return undefined;
+  if (project.journey === "setup") return undefined;
   const contract = project.kind === "agent" ? getAgentContract(project.slug) : undefined;
   const result = contract?.resultTitle ?? project.outcome;
   const kindLabel = project.kind === "agent" ? "ИИ-агента" : project.kind === "service" ? "сервис" : project.kind === "portfolio" ? "портфолио" : "сайт";

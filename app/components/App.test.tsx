@@ -19,6 +19,7 @@ import { MobileQuest } from "./MobileQuest";
 import { MobileExpectedScene } from "./MobileExpectedScene";
 import { ProjectCard } from "./ProjectCard";
 import { Quest } from "./Quest";
+import { QuestLinks } from "./QuestLinks";
 
 Object.assign(navigator, {
   clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -32,16 +33,23 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/");
   });
 
-  it("shows all 42 course projects", () => {
+  it("shows all 45 course projects", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(42);
-    expect(screen.getByText("42 проекта")).toBeInTheDocument();
+    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(45);
+    expect(screen.getByText("45 проектов")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
+  });
+
+  it("renders the API lesson as an internal quest link", () => {
+    render(<QuestLinks links={[{ label: "Сначала пройти квест «Добавляем API-ключи»", href: "?quest=api-keys", note: "Безопасная настройка секрета." }]} />);
+
+    expect(screen.getByRole("link", { name: /добавляем API-ключи/i })).toHaveAttribute("href", "?quest=api-keys");
+    expect(screen.getByRole("link", { name: /добавляем API-ключи/i })).not.toHaveAttribute("target", "_blank");
   });
 
   it("shows the finished prototype on every desktop project card", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll(".project-preview img")).toHaveLength(49);
+    expect(container.querySelectorAll(".project-preview img")).toHaveLength(52);
     expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",
@@ -58,7 +66,7 @@ describe("academy interface", () => {
         expect(container, project.slug).not.toHaveTextContent(profile.sourceFile);
         expect(container, project.slug).not.toHaveTextContent(profile.rulesFile);
       }
-      expect(container, project.slug).toHaveTextContent(/Codex|создан/i);
+      expect(container, project.slug).toHaveTextContent(project.journey === "setup" ? /компьютер|сервер|API|Codex/i : /Codex|создан/i);
     }
   });
 
@@ -366,8 +374,8 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
     expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(42);
-    expect(document.querySelectorAll(".project-preview img")).toHaveLength(49);
+    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(45);
+    expect(document.querySelectorAll(".project-preview img")).toHaveLength(52);
     expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",

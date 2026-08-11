@@ -4,6 +4,7 @@ import type { ProjectDefinition, ProjectKind, QuestCustomization, QuestStep } fr
 import { defaultCustomization } from "./customization";
 import { buildOriginalMobileQuest } from "./original-quests/mobile";
 import { getAgentContract } from "./agent-contracts";
+import { buildSetupQuest } from "./setup-quests";
 
 export type MobileCapability = "phone-full" | "phone-template" | "curator";
 export type MobileTool = "telegram" | "lovable" | "chatium" | "screenshot" | "curator";
@@ -211,10 +212,20 @@ function actionText(project: ProjectDefinition, step: number, mode: DataMode): s
 }
 
 export function getMobileCapability(project: ProjectDefinition): MobileCapabilityInfo {
+  if (project.journey === "setup") return { id: "curator", label: "Действия на компьютере", detail: "Телефон можно держать рядом как инструкцию" };
   return capabilityByKind[project.kind];
 }
 
 export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): MobileQuestStep[] {
+  if (project.journey === "setup") {
+    return buildSetupQuest(project).map((step) => ({
+      ...step,
+      screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+      mobileAction: step.links?.[0]
+        ? { tool: "curator", label: step.links[0].label, href: step.links[0].href, note: step.links[0].note }
+        : { tool: "curator", label: "Продолжить у компьютера", note: "Читайте этот уровень на телефоне, а указанное действие выполняйте на Mac или Windows." },
+    }));
+  }
   const selectedCustomization = customization ?? defaultCustomization(project.slug)!;
   const original = buildOriginalMobileQuest(project, mode, selectedCustomization);
   if (original) return original;

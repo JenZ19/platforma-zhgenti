@@ -8,7 +8,7 @@ import {
   screenPath,
 } from "./projects.mjs";
 
-const originalQuestSlugs = ["family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub"];
+const originalQuestSlugs = ["family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub", "install-codex", "server-152fz", "api-keys"];
 
 const missing = [];
 const wrongSize = [];
@@ -61,10 +61,10 @@ for (const slug of originalQuestSlugs) {
   }
 }
 
-if (missing.length || wrongSize.length || count !== 2194) {
+if (missing.length || wrongSize.length || count !== 2449) {
   if (missing.length) console.error(`Нет файлов: ${missing.length}\n${missing.slice(0, 8).join("\n")}`);
   if (wrongSize.length) console.error(`Неверный размер: ${wrongSize.length}\n${wrongSize.slice(0, 8).join("\n")}`);
   process.exit(1);
 }
 
-console.log(`Проверено ${count} PNG-экранов: 1666 общих, 120 подробных home-helper и 408 кадров восьми подробных квестов, все 1200x800.`);
+console.log(`Проверено ${count} PNG-экранов: 1768 общих, 120 подробных home-helper и 561 кадр одиннадцати подробных квестов, все 1200x800.`);

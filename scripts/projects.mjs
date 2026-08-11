@@ -9,7 +9,7 @@ export function projectSlugs() {
   if (!manifest) throw new Error("Не найден captureProjectSlugs в app/content/projects.ts");
   const slugs = [...manifest.matchAll(/"([a-z0-9-]+)"/g)].map((match) => match[1]);
   const unique = [...new Set(slugs)];
-  if (unique.length !== 49 || unique.length !== slugs.length) throw new Error(`Ожидалось 49 уникальных путей, найдено ${unique.length}`);
+  if (unique.length !== 52 || unique.length !== slugs.length) throw new Error(`Ожидалось 52 уникальных пути, найдено ${unique.length}`);
   return unique;
 }
 

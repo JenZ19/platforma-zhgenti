@@ -19,17 +19,22 @@ describe("mobile quest builder", () => {
       const steps = buildMobileQuest(project, "demo");
       expect(steps, project.slug).toHaveLength(17);
       expect(steps.map((step) => step.id), project.slug).toEqual(Array.from({ length: 17 }, (_, index) => index + 1));
-      expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" "), project.slug).not.toMatch(/терминал|npm|\bgit\b|папк.+компьютер/i);
+      if (project.journey !== "setup") expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" "), project.slug).not.toMatch(/терминал|npm|\bgit\b|папк.+компьютер/i);
       expect(steps.every((step) => step.screenshot === `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`), project.slug).toBe(true);
       total += steps.length;
     }
-    expect(total).toBe(833);
+    expect(total).toBe(884);
   });
 
   it("gives every project the actions needed for a phone workflow", () => {
     for (const project of questProjects) {
       const steps = buildMobileQuest(project, "demo");
       const tools = steps.map((step) => step.mobileAction.tool);
+      if (project.journey === "setup") {
+        expect(getMobileCapability(project).label).toMatch(/компьютер/i);
+        expect(tools.every((tool) => tool === "curator"), project.slug).toBe(true);
+        continue;
+      }
       expect(tools, project.slug).toContain("telegram");
       expect(tools, project.slug).toContain("screenshot");
       expect(tools.some((tool) => tool === "lovable" || tool === "chatium"), project.slug).toBe(true);
@@ -38,7 +43,7 @@ describe("mobile quest builder", () => {
   });
 
   it("routes advanced setup to a curator and keeps real prompts grounded", () => {
-    for (const project of questProjects) {
+    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const steps = buildMobileQuest(project, "real");
       const prompts = steps.flatMap((step) => step.prompt ?? []);
       expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);

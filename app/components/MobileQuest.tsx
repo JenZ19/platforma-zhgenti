@@ -16,6 +16,7 @@ import { QuestPreparation } from "./QuestPreparation";
 import { QuestCustomizer } from "./QuestCustomizer";
 import { QuestResetButton } from "./QuestResetButton";
 import { QuestFormatChoice } from "./QuestFormatChoice";
+import { QuestLinks } from "./QuestLinks";
 
 export function MobileQuest({
   project,
@@ -104,6 +105,7 @@ function MobileQuestBody({
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
   const steps = useMemo(() => buildMobileQuest(project, preparation?.mode ?? "demo", customization), [project, preparation?.mode, customization]);
   const capability = getMobileCapability(project);
+  const setupQuest = project.journey === "setup";
 
   useEffect(() => {
     // Mobile data is isolated from the computer quest by storageSlug.
@@ -124,7 +126,7 @@ function MobileQuestBody({
   }, [progress.activeStep]);
 
   const step = steps[progress.activeStep - 1] ?? steps[0];
-  const ready = preparation ? isPreparationReady(preparation, checklist) : false;
+  const ready = setupQuest || (preparation ? isPreparationReady(preparation, checklist) : false);
   const percent = Math.round((progress.completed.length / 17) * 100);
 
   function storePreparation(next: PreparationState) {
@@ -174,7 +176,7 @@ function MobileQuestBody({
 
   return (
     <main className="mobile-quest-shell">
-      <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>S</span><b>SUBMARINE<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● только телефон</span></header>
+      <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>S</span><b>SUBMARINE<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
       <section className="mobile-quest-hero"><button type="button" onClick={onHome}>← Все мобильные проекты</button><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><p>Неделя {project.week} · {project.track}</p><h1>{bundle?.title ?? project.title}</h1><span>{project.outcome}</span>{format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}<div className="mobile-progress"><div><b>{progress.completed.length} из 17</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div><QuestResetButton mobile onReset={reset} /></section>
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим мобильный квест…</section> : !ready ? <QuestPreparation project={project} preparation={preparation} mobile onChooseDemo={() => storePreparation({ version: 1, mode: "demo", checked: [], ready: true })} onChooseReal={() => storePreparation({ version: 1, mode: "real", checked: [], ready: false })} onToggle={togglePreparation} onStartReal={() => checklist.every((item) => preparation.checked.includes(item.id)) && storePreparation({ ...preparation, ready: true })} onBack={() => { resetPreparation(storageSlug, window.localStorage); setPreparation(createEmptyPreparation()); }} /> : (
@@ -185,7 +187,8 @@ function MobileQuestBody({
             <section className="mobile-why"><b>Зачем</b><p>{step.why}</p></section>
             {step.id === 2 && profile && customization && <QuestCustomizer compact profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
             <section className="mobile-do"><p className="section-kicker">Одно действие</p><h3>{step.action}</h3><MobileActionButton action={step.mobileAction} projectSlug={project.slug} step={step.id} /></section>
-            <section className="mobile-prompt"><header><span>Команда уже готова</span><b>Codex</b></header><p>{step.prompt}</p><button type="button" onClick={copyPrompt}>{copied ? "Скопировано ✓" : "Скопировать на всякий случай"}</button></section>
+            {step.prompt && <section className="mobile-prompt"><header><span>Команда уже готова</span><b>Codex</b></header><p>{step.prompt}</p><button type="button" onClick={copyPrompt}>{copied ? "Скопировано ✓" : "Скопировать на всякий случай"}</button></section>}
+            <QuestLinks links={step.links} />
             <section className="mobile-result"><div><p className="section-kicker">Что должно получиться</p><h3>Сверьте экран</h3></div><button type="button" onClick={() => setImageOpen(true)} aria-label="Увеличить мобильный пример"><img src={step.screenshot} alt={`Мобильный пример уровня ${step.id}`} /><span>Увеличить</span></button><ul>{step.expected.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul></section>
             <div className="mobile-level-actions"><button type="button" onClick={() => setHelpOpen((value) => !value)}>Нужна помощь</button><button type="button" onClick={finishStep}>{progress.completed.includes(step.id) ? step.id === 17 ? "Квест пройден ✦" : "Перейти дальше →" : "Я сделала — дальше →"}</button></div>
             {helpOpen && <section className="mobile-help"><b>?</b><div><h3>{step.help.title}</h3><p>{step.help.body}</p></div></section>}

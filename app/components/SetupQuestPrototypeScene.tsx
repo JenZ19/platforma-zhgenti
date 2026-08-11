@@ -1,0 +1,32 @@
+import { getSetupQuestStepTitle } from "../content/setup-quests";
+import type { ProjectDefinition } from "../content/types";
+
+function Check({ done, children }: { done: boolean; children: React.ReactNode }) {
+  return <div className={done ? "done" : ""}><i>{done ? "✓" : "○"}</i><span>{children}</span></div>;
+}
+
+function CodexSetup({ step }: { step: number }) {
+  const stage = step <= 5 ? "download" : step <= 8 ? "login" : step <= 13 ? "workspace" : "ready";
+  return <div className="setup-ui codex-setup-ui"><aside><b>ChatGPT</b><span className={stage === "download" ? "active" : ""}>↓ Установка</span><span className={stage === "login" ? "active" : ""}>◉ Codex</span><span className={stage === "workspace" ? "active" : ""}>▱ Проекты Codex</span><span className={stage === "ready" ? "active" : ""}>✓ Готово</span><footer>Mac · Windows</footer></aside><main><header><div><small>ПОДГОТОВКА К РАБОТЕ</small><h3>{stage === "download" ? "Официальное приложение" : stage === "login" ? "Codex выбран" : stage === "workspace" ? "Учебная папка подключена" : "Codex работает"}</h3></div><b>{String(step).padStart(2,"0")}/17</b></header><section>{stage === "download" && <div className="setup-download"><span>⌘</span><b>chatgpt.com/download</b><small>macOS или Windows определится автоматически</small><button>Скачать приложение</button></div>}{stage === "login" && <div className="setup-menu"><span>ChatGPT⌄</span><b>Chat</b><b>Work</b><b className="selected">Codex ✓</b></div>}{stage === "workspace" && <div className="setup-workspace"><small>РАБОЧАЯ ПАПКА</small><b>Документы / Проекты Codex / codex-test</b><div className="setup-prompt">Создай страницу «Codex работает»… <button>↑</button></div></div>}{stage === "ready" && <div className="setup-checks"><Check done>Приложение установлено</Check><Check done>Codex выбран</Check><Check done>Папка подключена</Check><Check done={step >= 17}>Тестовая страница работает</Check></div>}</section><footer>Пароль и личные документы не передаются</footer></main></div>;
+}
+
+function ServerSetup({ step }: { step: number }) {
+  const stage = step <= 4 ? "law" : step <= 7 ? "account" : step <= 12 ? "server" : step <= 15 ? "protect" : "legal";
+  return <div className="setup-ui server-setup-ui"><header><div><small>SELECTEL · РОССИЙСКОЕ ОБЛАКО</small><h3>{stage === "law" ? "Сервер — только часть 152-ФЗ" : stage === "account" ? "Проект и баланс" : stage === "server" ? "feya-app-01" : stage === "protect" ? "Защита и резервные копии" : "Чек-лист оператора"}</h3></div><span>{stage === "server" ? "ACTIVE" : "ПРОВЕРКА"}</span></header><nav>{["Данные","Аккаунт","Сервер","Защита","Документы"].map((item,index)=><b key={item} className={index <= ["law","account","server","protect","legal"].indexOf(stage) ? "done" : ""}>{index+1}<small>{item}</small></b>)}</nav><main>{stage === "server" ? <><section><small>РАЗМЕЩЕНИЕ</small><b>Россия</b><span>Ubuntu LTS</span></section><section><small>СЕТЬ</small><b>Публичный IP</b><span>Лишние порты закрыты</span></section><section><small>ДОСТУП</small><b>SSH-ключ</b><span>Пароль не отправлен</span></section></> : <div className="setup-checks"><Check done={step >= 3}>Статьи 18 и 19 прочитаны</Check><Check done={step >= 8}>База размещается в России</Check><Check done={step >= 14}>Бэкапы включены</Check><Check done={step >= 15}>Поручение запрошено</Check><Check done={step >= 17}>Внешние API проверены</Check></div>}</main><footer><b>Важно:</b> один российский сервер не подтверждает полное соответствие 152-ФЗ</footer></div>;
+}
+
+function ApiSetup({ step }: { step: number }) {
+  const providers = [
+    ["Polza.ai","агрегатор · РФ"],
+    ["OpenRouter","агрегатор · международный"],
+    ["Qwen","модели Alibaba"],
+    ["OpenAI","прямой провайдер"],
+  ];
+  const stage = step <= 4 ? "choose" : step <= 8 ? "provider" : step <= 13 ? "secret" : "test";
+  return <div className="setup-ui api-setup-ui"><header><div><small>БЕЗОПАСНОЕ API-ПОДКЛЮЧЕНИЕ</small><h3>{stage === "choose" ? "Проект → API → модель" : stage === "provider" ? "Выберите одного провайдера" : stage === "secret" ? "Секрет хранится на сервере" : "Тест и контроль расходов"}</h3></div><span>КЛЮЧ СКРЫТ</span></header>{stage === "provider" || stage === "choose" ? <main className="provider-grid">{providers.map(([name,type],index)=><section key={name} className={stage === "provider" && index === Math.min(3, Math.max(0, step-5)) ? "selected" : ""}><i>{index === 0 ? "P" : index === 1 ? "O" : index === 2 ? "Q" : "AI"}</i><b>{name}</b><small>{type}</small></section>)}</main> : stage === "secret" ? <main className="secret-flow"><section><small>СЕРВЕРНАЯ ПЕРЕМЕННАЯ</small><b>{step === 11 ? "OPENROUTER_API_KEY" : "PROVIDER_API_KEY"}</b><span>sk-••••••••••••</span></section><b>→</b><section><small>БРАУЗЕР</small><b>Секрета нет</b><span>только безопасный ответ</span></section></main> : <main className="setup-checks"><Check done>Один короткий запрос</Check><Check done={step >= 15}>Код ошибки понятен</Check><Check done={step >= 16}>Кнопка отзыва найдена</Check><Check done={step >= 17}>Лимит расходов установлен</Check></main>}<footer>Никогда не вставляйте настоящий ключ в Академию, чат, скриншот или публичный код</footer></div>;
+}
+
+export function SetupQuestPrototypeScene({ project, step, mobile = false }: { project: ProjectDefinition; step: number; mobile?: boolean }) {
+  const title = getSetupQuestStepTitle(project.slug, step) ?? project.title;
+  return <div className={`setup-prototype ${mobile ? "mobile" : ""}`} data-setup-prototype={project.slug}><div className="setup-prototype-title"><small>УРОВЕНЬ {String(step).padStart(2,"0")}</small><b>{title}</b></div>{project.slug === "install-codex" ? <CodexSetup step={step}/> : project.slug === "server-152fz" ? <ServerSetup step={step}/> : <ApiSetup step={step}/>}</div>;
+}

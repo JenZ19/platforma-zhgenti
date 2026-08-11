@@ -5,6 +5,8 @@ import type { ProjectDefinition } from "../content/types";
 import { OriginalServiceScene } from "./OriginalServiceScene";
 import { getAgentContract } from "../content/agent-contracts";
 import { getSourcePrototypeTitle, isSourcePrototypeSlug, SourceProjectPrototypeScene } from "./SourceProjectPrototypeScene";
+import { getSetupQuestStepTitle, isSetupQuestSlug } from "../content/setup-quests";
+import { SetupQuestPrototypeScene } from "./SetupQuestPrototypeScene";
 
 function Phone({ project, step }: { project: ProjectDefinition; step: number }) {
   const constructor = project.kind === "agent" ? "Чатиум" : "Lovable";
@@ -44,6 +46,10 @@ function Phone({ project, step }: { project: ProjectDefinition; step: number }) 
 
 export function MobileExpectedScene({ project, step }: { project: ProjectDefinition; step: number }) {
   const capability = getMobileCapability(project);
+  if (isSetupQuestSlug(project.slug)) {
+    const title = getSetupQuestStepTitle(project.slug, step)!;
+    return <main id="capture-scene" className="capture-canvas mobile-capture setup-mobile-capture"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>ПОДСКАЗКА НА ТЕЛЕФОНЕ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Действие выполняется на компьютере</p><h1>{title}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><div className="original-mobile-phone"><SetupQuestPrototypeScene project={project} step={step} mobile /></div><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{title}</h2><p>Телефон можно держать рядом как инструкцию. Нажимайте указанные кнопки на Mac или Windows.</p><div><b>✓</b> Один шаг за раз</div><div><b>✓</b> Секреты не вводятся в квест</div></aside></div></main>;
+  }
   if (isSourcePrototypeSlug(project.slug)) {
     const title = getSourcePrototypeTitle(project.slug, step)!;
     return <main id="capture-scene" className="capture-canvas mobile-capture source-mobile-capture"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>МОБИЛЬНЫЙ КВЕСТ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Вот что должно получиться на телефоне</p><h1>{title}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><SourceProjectPrototypeScene project={project} step={step} mobile/><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{title}</h2><p>Это точный прототип результата вашего проекта. Название, палитра и содержание будут вашими.</p><div><b>✓</b> Одно действие с телефона</div><div><b>✓</b> Личная и клиентская копии отдельно</div></aside></div></main>;

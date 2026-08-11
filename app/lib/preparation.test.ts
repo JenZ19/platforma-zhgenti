@@ -51,6 +51,10 @@ describe("quest data preparation", () => {
 
     for (const project of questProjects) {
       const checklist = buildRealDataChecklist(project);
+      if (project.journey === "setup") {
+        expect(checklist, project.slug).toEqual([]);
+        continue;
+      }
       if (project.slug === "family-expenses") {
         expect(checklist).toHaveLength(4);
         expect(checklist.every((item) => item.steps === undefined), project.slug).toBe(true);
@@ -69,12 +73,13 @@ describe("quest data preparation", () => {
       fingerprints.add(fingerprint);
     }
 
-    expect(fingerprints.size).toBe(questProjects.length);
-    expect(getPreparationProfileSlugs().sort()).toEqual(questProjects.map((project) => project.slug).sort());
+    const projectPaths = questProjects.filter((project) => project.journey !== "setup");
+    expect(fingerprints.size).toBe(projectPaths.length);
+    expect(getPreparationProfileSlugs().sort()).toEqual(projectPaths.map((project) => project.slug).sort());
   });
 
   it("gives every phone checklist Telegram actions instead of computer instructions", () => {
-    for (const project of questProjects) {
+    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const checklist = buildRealDataChecklist(project, "mobile");
       const text = checklist.map((item) => `${item.text} ${item.detail} ${item.steps?.join(" ") ?? ""}`).join(" ");
       expect(text, project.slug).toMatch(/Telegram/i);

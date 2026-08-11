@@ -29,6 +29,7 @@ function p(input: ProjectInput): ProjectDefinition {
 }
 
 export const captureProjectSlugs = [
+  "install-codex", "server-152fz", "api-keys",
   "family-expenses", "planner", "idea-vault", "child-schedule", "pressure-diary", "fitness-tracker", "recipe-book", "personal-organizer", "home-helper", "family-health-hub",
   "day-planner-agent", "home-organizer-agent", "meal-planning-agent", "study-agent", "idea-analysis-agent", "expense-agent", "family-schedule-agent", "habit-agent",
   "lead-agent", "booking-agent", "brief-agent", "selector-agent", "content-agent", "expert-assistant-agent", "sales-manager-agent", "administrator-agent", "consultant-agent", "online-school-agent", "event-organizer-agent", "client-care-agent", "fairy-team-agent", "carousel-agent", "threads-agent", "webinar-moderator-agent",
@@ -37,6 +38,9 @@ export const captureProjectSlugs = [
 ] as const;
 
 const concreteProjects: ProjectDefinition[] = [
+  p({ slug: "install-codex", title: "Устанавливаем Codex", week: 1, kind: "service", journey: "setup", track: "Старт на компьютере", symbol: "⌘", audience: "для ученицы, которая впервые открывает Codex на Mac или Windows", outcome: "установленный Codex, вход в аккаунт и первая безопасная задача в отдельной учебной папке", device: "компьютер", entities: ["компьютер", "приложение", "папка", "задача"], features: ["официальная установка", "вход в аккаунт", "выбор Codex", "первая тестовая задача"], demo: ["Mac или Windows определён", "Codex открыт", "Учебная папка подключена"], safety: "Скачиваем приложение только с официального сайта OpenAI, не передаём пароль и разрешаем работу только в выбранной учебной папке.", portfolioAngle: "готовое и безопасно настроенное рабочее место для всех компьютерных проектов курса" }),
+  p({ slug: "server-152fz", title: "Покупаем сервер по 152-ФЗ", week: 1, kind: "service", journey: "setup", track: "Старт на компьютере", symbol: "▣", audience: "для ученицы, которая публикует проект с персональными данными российских пользователей", outcome: "российский облачный сервер, базовая защита и понятный список оставшихся обязанностей оператора персональных данных", device: "компьютер", entities: ["сервер", "оператор", "доступ", "резервная копия"], features: ["российское размещение", "закрытый доступ", "резервные копии", "чек-лист 152-ФЗ"], demo: ["Регион в России", "Ubuntu LTS", "Бэкап включён"], safety: "Покупка российского сервера сама по себе не означает полное соответствие 152-ФЗ: нужны правовые, организационные и технические меры, а спорные случаи проверяет профильный специалист.", portfolioAngle: "инфраструктурная основа проекта с честным распределением ответственности и без ложного обещания юридической готовности" }),
+  p({ slug: "api-keys", title: "Добавляем API-ключи", week: 1, kind: "service", journey: "setup", track: "Старт на компьютере", symbol: "⌁", audience: "для ученицы, которой нужно безопасно подключить ИИ к сайту, агенту или серверу", outcome: "выбранный провайдер, отдельный API-ключ с лимитом и безопасное серверное подключение без публикации секрета", device: "компьютер", entities: ["API", "провайдер", "ключ", "лимит"], features: ["выбор провайдера", "создание ключа", "защищённое хранение", "тестовый запрос"], demo: ["Polza.ai или OpenRouter", "Qwen или OpenAI", "Ключ скрыт и работает"], safety: "API-ключ — секрет и платёжный доступ: не вставляем его в Академию, переписку, скриншоты, GitHub или браузерный код; при утечке сразу отзываем.", portfolioAngle: "безопасное подключение ИИ-провайдера, которое можно повторить для своего проекта и проекта заказчика" }),
   p({ slug: "family-expenses", title: "Учёт расходов семьи", week: 1, kind: "service", track: "Бытовые сервисы", symbol: "₽", audience: "для семьи, которая хочет видеть расходы за месяц", outcome: "мобильный сервис с бюджетом, категориями, остатком и резервной копией", entities: ["бюджет", "расход", "категория", "месяц"], features: ["добавление расхода", "итоги месяца", "фильтр по категориям", "JSON и CSV"], demo: ["Бюджет 100 000 ₽", "Продукты 3 450 ₽", "Ребёнок 1 290 ₽"], portfolioAngle: "понятный семейный финансовый помощник без подключения к банку" }),
   p({ slug: "planner", title: "Планер на день и неделю", week: 1, kind: "service", track: "Бытовые сервисы", symbol: "✓", audience: "для занятой девушки, которой нужен спокойный план дня", outcome: "планер с главным делом, приоритетами, неделей и отметками выполнения", entities: ["задача", "день", "приоритет", "статус"], features: ["задачи на день", "план недели", "главное сегодня", "отметка готово"], demo: ["Записать ребёнка к врачу", "Купить продукты", "30 минут на себя"], portfolioAngle: "лёгкий планер, которым удобно пользоваться одной рукой" }),
   p({ slug: "idea-vault", title: "Копилка идей", week: 1, kind: "service", track: "Бытовые сервисы", symbol: "✦", audience: "для человека, который теряет идеи в заметках и переписках", outcome: "красивая база идей с темами, метками, статусами и поиском", entities: ["идея", "тема", "метка", "статус"], features: ["карточки идей", "поиск", "фильтр по теме", "статус идеи"], demo: ["Рилс про утреннюю рутину", "Подарок маме", "Маршрут на выходные"], portfolioAngle: "универсальный органайзер идей для контента, подарков и поездок" }),
@@ -98,8 +102,10 @@ const bundles = createProjectBundles(concreteBySlug);
 const standaloneProjects = concreteProjects.filter(
   (project) => !bundledConcreteSlugs.has(project.slug),
 );
+const setupProjects = standaloneProjects.filter((project) => project.journey === "setup");
+const portfolioProjects = standaloneProjects.filter((project) => project.journey !== "setup");
 
-export const projects: CatalogProject[] = [...bundles, ...standaloneProjects];
+export const projects: CatalogProject[] = [...setupProjects, ...bundles, ...portfolioProjects];
 
 export const questProjects: ProjectDefinition[] = projects.flatMap((project) =>
   isProjectBundle(project) ? [project.formats.service, project.formats.agent] : [project],

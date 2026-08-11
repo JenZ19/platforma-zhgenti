@@ -31,6 +31,7 @@ import { QuestGuide } from "./QuestGuide";
 import { QuestCustomizer } from "./QuestCustomizer";
 import { QuestResetButton } from "./QuestResetButton";
 import { QuestFormatChoice } from "./QuestFormatChoice";
+import { QuestLinks } from "./QuestLinks";
 
 export function Quest({
   project,
@@ -120,6 +121,7 @@ function QuestBody({
   const profile = useMemo(() => getCustomizationProfile(profileSlug), [profileSlug]);
   const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization), [project, preparation?.mode, customization]);
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
+  const setupQuest = project.journey === "setup";
 
   useEffect(() => {
     // Quest progress is stored in this browser and restored after mount.
@@ -142,7 +144,7 @@ function QuestBody({
   const step = steps[progress.activeStep - 1] ?? steps[0];
   const percent = Math.round((progress.completed.length / 17) * 100);
   const finished = progress.completed.length === 17;
-  const preparationReady = preparation ? isPreparationReady(preparation, checklist) : false;
+  const preparationReady = setupQuest || (preparation ? isPreparationReady(preparation, checklist) : false);
 
   function storePreparation(next: PreparationState) {
     setPreparation(next);
@@ -235,7 +237,7 @@ function QuestBody({
         <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / 17</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
         <QuestResetButton onReset={reset} />
         {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
-        {preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
+        {!setupQuest && preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
       </section>
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим квест…</section> : !preparationReady ? (
@@ -272,6 +274,8 @@ function QuestBody({
             {!step.guide && step.prompt && <div className="prompt-card"><div><span>Готовая команда для Codex</span><i>✦</i></div><pre>{step.prompt}</pre><button type="button" onClick={() => copy(step.prompt!, "main")}>{copied === "main" ? "Скопировано ✓" : "Скопировать команду"}</button></div>}
           </section>
 
+          <QuestLinks links={step.links} />
+
           {step.guide && <QuestGuide frames={step.guide} />}
 
           <section className="expected-section">
@@ -283,7 +287,7 @@ function QuestBody({
           <div className="level-actions"><button type="button" className="secondary-button" onClick={() => setHelpOpen((value) => !value)}>{helpOpen ? "Скрыть помощь" : "Нужна помощь"}</button><button type="button" className="primary-button" disabled={finished && step.id === 17} onClick={finishStep}>{progress.completed.includes(step.id) ? (step.id === 17 ? "Квест пройден ✦" : "Перейти дальше →") : "Я сделала — следующий шаг →"}</button></div>
 
           {helpOpen && <section className="help-card"><span>?</span><div><p className="section-kicker">{step.help.title}</p><p>{step.help.body}</p><div className="help-copy"><p>{step.help.prompt}</p><button type="button" onClick={() => copy(step.help.prompt, "help")}>{copied === "help" ? "Готово ✓" : "Скопировать"}</button></div></div></section>}
-          {finished && step.id === 17 && <section className="finish-card"><i>✦</i><p>Квест завершён</p><h3>Теперь этот проект — часть твоего портфолио</h3><span>Ссылка, описание и безопасные экраны готовы к показу.</span></section>}
+          {finished && step.id === 17 && <section className="finish-card"><i>✦</i><p>Квест завершён</p><h3>{setupQuest ? "Рабочее место готово к следующим проектам" : "Теперь этот проект — часть твоего портфолио"}</h3><span>{setupQuest ? "Все обязательные проверки пройдены — сохраните итоговый чек-лист." : "Ссылка, описание и безопасные экраны готовы к показу."}</span></section>}
         </article>
       </div>}
 

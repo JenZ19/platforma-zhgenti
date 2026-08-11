@@ -24,7 +24,7 @@ export function ProjectPreview({ project }: { project: CatalogProject }) {
     );
   }
   return (
-    <figure className={`project-preview project-preview-${project.kind}`}>
+    <figure className={`project-preview project-preview-${project.kind} ${project.journey === "setup" ? "project-preview-setup" : ""}`}>
       {/* Static course screenshots are already compressed and must preserve their exact crop. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -32,7 +32,7 @@ export function ProjectPreview({ project }: { project: CatalogProject }) {
         alt={`Прототип результата проекта «${project.title}»`}
         loading="lazy"
       />
-      <figcaption><span>✦</span> Прототип результата</figcaption>
+      <figcaption><span>✦</span> {project.journey === "setup" ? "Что будет готово" : "Прототип результата"}</figcaption>
     </figure>
   );
 }
