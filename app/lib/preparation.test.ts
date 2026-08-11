@@ -126,6 +126,20 @@ describe("quest data preparation", () => {
     expect(text).not.toMatch(/создайте.+(?:папк|файл)|откройте.+файл|\.csv|\.txt/i);
   });
 
+  it.each([
+    ["carousel-agent", ["утверждённый текст", "фотографии", "призыв", "нейрофон"]],
+    ["threads-agent", ["профиль Threads", "свои источники", "внешние источники", "примеры голоса"]],
+    ["webinar-moderator-agent", ["тестовый вебинар", "утверждённые шаблоны", "база знаний", "расписание"]],
+    ["family-health-hub", ["безопасные копии", "варианты имени", "оригинальный PDF", "резервной копии"]],
+  ])("prepares exact source materials for %s without asking the learner to create technical files", (slug, phrases) => {
+    const checklist = buildRealDataChecklist(getQuestProject(slug)!);
+    const text = checklist.map((item) => `${item.text} ${item.detail}`).join(" ");
+
+    expect(checklist).toHaveLength(5);
+    for (const phrase of phrases) expect(text).toMatch(new RegExp(phrase, "i"));
+    expect(text).not.toMatch(/создайте.+(?:csv|txt|файл)|откройте.+файл/i);
+  });
+
   it("requires every real-data checklist item but lets demo mode start immediately", () => {
     const checklist = buildRealDataChecklist(getQuestProject("planner")!);
     expect(isPreparationReady({ version: 1, mode: "demo", checked: [], ready: true }, checklist)).toBe(true);

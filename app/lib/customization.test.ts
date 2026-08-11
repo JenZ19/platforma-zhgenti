@@ -22,7 +22,7 @@ class MemoryStorage {
 }
 
 describe("quest customization", () => {
-  it("keeps the four fully handcrafted profiles and customizes all 45 paths", () => {
+  it("keeps the four fully handcrafted profiles and customizes all 49 paths", () => {
     expect(originalQuestSlugs).toEqual([
       "family-expenses",
       "planner",
@@ -42,7 +42,7 @@ describe("quest customization", () => {
       expect(customizationSummary(slug, defaults), slug).toContain(defaults.palette.accent);
     }
 
-    expect(questProjects).toHaveLength(45);
+    expect(questProjects).toHaveLength(49);
     for (const project of questProjects) {
       const profile = getCustomizationProfile(project.slug)!;
       const defaults = defaultCustomization(project.slug)!;
@@ -53,6 +53,20 @@ describe("quest customization", () => {
       expect(defaults.palette, project.slug).toEqual(questColorPalettes[0]);
       expect(customizationSummary(project.slug, defaults), project.slug).toMatch(/Я создаю (сервис|ИИ-агента|сайт|портфолио)/);
     }
+  });
+
+  it.each([
+    ["carousel-agent", ["11 арт-направлений", "нейрофоны", "слайда"]],
+    ["threads-agent", ["паспорт голоса", "источники", "10 тредов"]],
+    ["webinar-moderator-agent", ["observe", "assist", "auto"]],
+    ["family-health-hub", ["люди и животные", "неразобранные", "резервная копия"]],
+  ])("offers source-backed customization for %s", (slug, phrases) => {
+    const profile = getCustomizationProfile(slug)!;
+    const text = Object.values(profile.axes)
+      .flatMap((axis) => [axis.label, axis.hint, ...axis.options])
+      .join(" ");
+
+    for (const phrase of phrases) expect(text).toMatch(new RegExp(phrase, "i"));
   });
 
   it("stores an agent's own audience, name and palette in separate desktop and mobile branches", () => {
