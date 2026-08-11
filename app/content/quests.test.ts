@@ -37,7 +37,7 @@ describe("quest builders", () => {
         expect(text, `${project.slug}/${step.id}`).not.toMatch(placeholder);
       }
     }
-    expect(total).toBe(765);
+    expect(total).toBe(833);
   });
 
   it("uses detailed copy-ready Codex prompts", () => {
@@ -190,7 +190,7 @@ describe("quest builders", () => {
   });
 
   it("turns every agent contract into a unique 17-level working path", () => {
-    expect(agentContracts).toHaveLength(21);
+    expect(agentContracts).toHaveLength(24);
 
     for (const contract of agentContracts) {
       const project = questProjects.find((item) => item.slug === contract.slug)!;
@@ -237,10 +237,10 @@ describe("quest builders", () => {
 
   it("teaches every non-agent project as a personal version and a client copy", () => {
     const nonAgents = questProjects.filter((project) => project.kind !== "agent");
-    expect(nonAgents).toHaveLength(24);
+    expect(nonAgents).toHaveLength(25);
     const originalSlugs = new Set(["family-expenses", "planner", "idea-vault", "child-schedule"]);
     const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug));
-    expect(genericNonAgents).toHaveLength(20);
+    expect(genericNonAgents).toHaveLength(21);
 
     for (const project of genericNonAgents) {
       const customization = defaultCustomization(project.slug)!;

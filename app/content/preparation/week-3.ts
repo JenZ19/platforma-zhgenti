@@ -15,6 +15,9 @@ const week3AgentSlugs = [
   "event-organizer-agent",
   "client-care-agent",
   "fairy-team-agent",
+  "carousel-agent",
+  "threads-agent",
+  "webinar-moderator-agent",
 ] as const;
 
 export const week3Profiles: PreparationProfileMap = Object.fromEntries(
