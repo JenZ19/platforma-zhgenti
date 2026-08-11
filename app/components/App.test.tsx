@@ -32,16 +32,16 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/");
   });
 
-  it("shows all 38 course projects", () => {
+  it("shows all 42 course projects", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(38);
-    expect(screen.getByText("38 проектов")).toBeInTheDocument();
+    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(42);
+    expect(screen.getByText("42 проекта")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
   });
 
   it("shows the finished prototype on every desktop project card", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll(".project-preview img")).toHaveLength(45);
+    expect(container.querySelectorAll(".project-preview img")).toHaveLength(49);
     expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",
@@ -123,7 +123,8 @@ describe("academy interface", () => {
   });
 
   it("renders a unique conversational prototype for every AI agent", () => {
-    const agents = questProjects.filter((project) => project.kind === "agent");
+    const sourceAgents = new Set(["carousel-agent", "threads-agent", "webinar-moderator-agent"]);
+    const agents = questProjects.filter((project) => project.kind === "agent" && !sourceAgents.has(project.slug));
     const { container } = render(<>{agents.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
 
     expect(agents).toHaveLength(21);
@@ -135,7 +136,27 @@ describe("academy interface", () => {
       expect(prototype, project.slug).toHaveTextContent(contract.firstQuestion);
       expect(prototype, project.slug).toHaveTextContent(contract.resultTitle);
     }
-    expect(new Set(agents.map((project) => getAgentContract(project.slug).theme)).size).toBe(21);
+    expect(new Set(questProjects.filter((project) => project.kind === "agent").map((project) => getAgentContract(project.slug).theme)).size).toBe(24);
+  });
+
+  it("renders exact final-product prototypes for the four source-backed projects on desktop and mobile", () => {
+    const expectations = [
+      ["carousel-agent", "carousel", ["PNG-альбом", "11 стилей", "Переделать слайд"]],
+      ["threads-agent", "threads", ["10 тредов", "Не беру", "Уже выложила"]],
+      ["webinar-moderator-agent", "webinar", ["observe", "ВОПРОС ИЗ ЧАТА", "Ответить"]],
+      ["family-health-hub", "health", ["ПРОФИЛИ СЕМЬИ", "Неразобранные", "Не ставит диагноз"]],
+    ] as const;
+    const projects = expectations.map(([slug]) => getQuestProject(slug)!);
+    const { container } = render(<>{projects.map((project) => <ExpectedScene key={`d-${project.slug}`} project={project} step={14} />)}{projects.map((project) => <MobileExpectedScene key={`m-${project.slug}`} project={project} step={14} />)}</>);
+
+    for (const [slug, marker, phrases] of expectations) {
+      const prototypes = container.querySelectorAll(`[data-source-prototype="${marker}"]`);
+      expect(prototypes, slug).toHaveLength(2);
+      for (const phrase of phrases) {
+        expect(prototypes[0], slug).toHaveTextContent(phrase);
+        expect(prototypes[1], slug).toHaveTextContent(phrase);
+      }
+    }
   });
 
   it("renders a unique content-specific cover for the following site projects", () => {
@@ -337,8 +358,8 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
     expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(38);
-    expect(document.querySelectorAll(".project-preview img")).toHaveLength(45);
+    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(42);
+    expect(document.querySelectorAll(".project-preview img")).toHaveLength(49);
     expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",

@@ -5,9 +5,9 @@ import { questProjects } from "./projects";
 describe("ai agent contracts", () => {
   it("defines one complete and unique contract for every agent", () => {
     const agents = questProjects.filter((project) => project.kind === "agent");
-    expect(agents).toHaveLength(21);
-    expect(agentContracts).toHaveLength(21);
-    expect(new Set(agentContracts.map((item) => item.slug)).size).toBe(21);
+    expect(agents).toHaveLength(24);
+    expect(agentContracts).toHaveLength(24);
+    expect(new Set(agentContracts.map((item) => item.slug)).size).toBe(24);
 
     for (const project of agents) {
       const contract = getAgentContract(project.slug);
@@ -18,7 +18,7 @@ describe("ai agent contracts", () => {
       expect(contract.inputExample, project.slug).not.toMatch(/нажмите кнопку|выберите кнопку/i);
     }
 
-    expect(new Set(agentContracts.map((item) => item.inputExample)).size).toBe(21);
-    expect(new Set(agentContracts.map((item) => item.resultTitle)).size).toBe(21);
+    expect(new Set(agentContracts.map((item) => item.inputExample)).size).toBe(24);
+    expect(new Set(agentContracts.map((item) => item.resultTitle)).size).toBe(24);
   });
 });

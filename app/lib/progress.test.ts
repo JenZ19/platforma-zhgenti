@@ -52,11 +52,11 @@ describe("academy progress", () => {
     saveProgress(branchStorageSlug("planning", "service", "desktop"), completeStep(createEmptyProgress(), 1), storage);
     saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage);
     expect(getAcademyStats(projects, storage)).toEqual({
-      totalProjects: 38,
+      totalProjects: 42,
       startedProjects: 2,
       completedProjects: 1,
       completedSteps: 18,
-      totalSteps: 646,
+      totalSteps: 714,
       score: 180,
     });
   });

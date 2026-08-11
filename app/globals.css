@@ -3,6 +3,7 @@
 @import "./first-cover-prototypes.css";
 @import "./third-cover-prototypes.css";
 @import "./final-cover-prototypes.css";
+@import "./source-project-prototypes.css";
 
 :root {
   --paper: #faf7f2;

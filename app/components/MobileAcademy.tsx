@@ -11,7 +11,7 @@ const weeks = ["Все", "1 неделя", "2 неделя", "3 неделя", "
 export function MobileAcademy({ onOpen }: { onOpen: (slug: string) => void }) {
   const [week, setWeek] = useState(0);
   const [query, setQuery] = useState("");
-  const [stats, setStats] = useState({ startedProjects: 0, completedProjects: 0, completedSteps: 0, totalProjects: 38, totalSteps: 646, score: 0 });
+  const [stats, setStats] = useState({ startedProjects: 0, completedProjects: 0, completedSteps: 0, totalProjects: 42, totalSteps: 714, score: 0 });
 
   useEffect(() => {
     // Mobile progress has its own namespace and is restored after mount.
@@ -38,7 +38,7 @@ export function MobileAcademy({ onOpen }: { onOpen: (slug: string) => void }) {
         <h1 aria-label="Академия с телефона">Академия<br /><em>с телефона</em></h1>
         <p>Фея ведёт по одному действию: открыли Telegram, запустили свой Codex, собрали проект в Lovable или Чатиуме и получили ссылку.</p>
         <div className="mobile-flow"><span>Telegram</span><b>→</b><span>свой Codex</span><b>→</b><span>проект</span></div>
-        <div className="mobile-stats"><div><b>38</b><span>проектов</span></div><div><b>{stats.startedProjects}</b><span>начато</span></div><div><b>{stats.completedProjects}</b><span>готово</span></div></div>
+        <div className="mobile-stats"><div><b>42</b><span>проекта</span></div><div><b>{stats.startedProjects}</b><span>начато</span></div><div><b>{stats.completedProjects}</b><span>готово</span></div></div>
       </section>
       <section className="mobile-catalogue" aria-label="Мобильный каталог проектов">
         <div className="mobile-catalogue-title"><div><p className="section-kicker">Выберите свою магию</p><h2>Все проекты</h2></div><label><span>⌕</span><input type="search" aria-label="Найти мобильный проект" placeholder="Найти проект…" value={query} onChange={(event) => setQuery(event.target.value)} /></label></div>
@@ -54,7 +54,7 @@ export function MobileAcademy({ onOpen }: { onOpen: (slug: string) => void }) {
           })}
         </div>
       </section>
-      <footer className="mobile-footer"><span>SUBMARINE</span><h2>Один телефон.<br />Тридцать восемь проектов.<br /><em>Новая профессия.</em></h2></footer>
+      <footer className="mobile-footer"><span>SUBMARINE</span><h2>Один телефон.<br />Сорок два проекта.<br /><em>Новая профессия.</em></h2></footer>
     </main>
   );
 }

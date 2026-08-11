@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   title: "Академия квестов SUBMARINE",
   description: "Все проекты курса «ИИ-агенты и ИИ-сайты» в формате пошаговых квестов.",
   openGraph: {
-    title: "38 проектов. Одна новая профессия.",
+    title: "42 проекта. Одна новая профессия.",
     description: "Выберите сервис или ИИ-агента, пройдите 17 шагов и добавьте готовую работу в портфолио.",
     images: ["/og.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Академия квестов SUBMARINE",
-    description: "38 проектов курса — шаг за шагом.",
+    description: "42 проекта курса — шаг за шагом.",
     images: ["/og.png"],
   },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
