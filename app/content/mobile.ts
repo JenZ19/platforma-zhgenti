@@ -4,7 +4,8 @@ import type { ProjectDefinition, ProjectKind, QuestCustomization, QuestStep } fr
 import { defaultCustomization } from "./customization";
 import { buildOriginalMobileQuest } from "./original-quests/mobile";
 import { getAgentContract } from "./agent-contracts";
-import { buildSetupQuest } from "./setup-quests";
+import { buildQuest } from "./quests";
+import { addBeginnerLanguage } from "./beginner-language";
 
 export type MobileCapability = "phone-full" | "phone-template" | "curator";
 export type MobileTool = "telegram" | "lovable" | "chatium" | "screenshot" | "curator";
@@ -37,50 +38,6 @@ const constructorByKind: Record<ProjectKind, "lovable" | "chatium"> = {
   "advanced-site": "lovable",
   portfolio: "lovable",
 };
-
-const titles = [
-  "Фея открыта в Telegram",
-  "Свой Codex подключён",
-  "Выбран режим данных",
-  "Ответы собраны в разговоре",
-  "Анкета проекта заполнена",
-  "Паспорт проекта готов",
-  "Мастер-задание запущено",
-  "Первый результат получен",
-  "Проект открыт в конструкторе",
-  "Первый экран проверен",
-  "Скриншот отправлен Фее",
-  "Исправление подготовлено",
-  "Главное действие работает",
-  "Безопасность проверена",
-  "Личная версия готова",
-  "Клиентская копия готова",
-  "Две версии в портфолио",
-];
-
-const agentTitles = [
-  "Фея открыла нужного агента",
-  "Свой Codex подключён",
-  "Выбрана моя версия агента",
-  "Свободное сообщение принято",
-  "Задан один нужный вопрос",
-  "Паспорт агента подтверждён",
-  "Мастер-инструкция установлена",
-  "Полезный результат получен",
-  "Агент открыт в Чатиуме",
-  "Голосовой ответ понят",
-  "Скриншот отправлен Фее",
-  "Самопроверка исправлена",
-  "Полный разговор пройден",
-  "Подтверждение защищено",
-  "Личная версия работает в Telegram",
-  "Клиентская копия готова",
-  "Две версии в портфолио",
-];
-
-const eyebrows = [
-  "Старт", "Подключение", "Данные", "Короткий разговор", "Короткая анкета", "План", "Запуск", "Результат", "Конструктор", "Первый экран", "Проверка", "Правка", "Сценарий", "Безопасность", "Аудит", "Публикация", "Финал",
-];
 
 function constructorAction(project: ProjectDefinition, label?: string): MobileAction {
   const tool = constructorByKind[project.kind];
@@ -217,47 +174,56 @@ export function getMobileCapability(project: ProjectDefinition): MobileCapabilit
 }
 
 export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): MobileQuestStep[] {
+  const finish = (steps: MobileQuestStep[]) => addBeginnerLanguage(steps);
   if (project.journey === "setup") {
-    return buildSetupQuest(project).map((step) => ({
+    return finish(buildQuest(project, mode, customization).map((step) => ({
       ...step,
-      screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
-      mobileAction: step.links?.[0]
-        ? { tool: "curator", label: step.links[0].label, href: step.links[0].href, note: step.links[0].note }
-        : { tool: "curator", label: "Продолжить у компьютера", note: "Читайте этот уровень на телефоне, а указанное действие выполняйте на Mac или Windows." },
-    }));
+      screenshot: step.screenshotKind === "real" || step.screenshotKind === "placeholder"
+        ? step.screenshot
+        : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+      mobileAction: project.slug === "server-152fz" && step.id === 8
+        ? { tool: "curator", label: "Открыть Codex на компьютере", note: "Читайте команду на телефоне, а работу с папкой проекта и сервером продолжайте в Codex на Mac или Windows." }
+        : project.slug === "server-152fz" && step.id === 9
+          ? { tool: "curator", label: "Открыть Codex или ChatGPT на компьютере", note: "Скопируйте готовую команду и отвечайте на вопросы по одному. Реальные данные людей и секреты не отправляйте." }
+          : step.links?.[0]
+            ? { tool: "curator", label: step.links[0].label, href: step.links[0].href, note: step.links[0].note }
+            : { tool: "curator", label: "Продолжить у компьютера", note: "Читайте этот уровень на телефоне, а указанное действие выполняйте на Mac или Windows." },
+    })));
   }
   const selectedCustomization = customization ?? defaultCustomization(project.slug)!;
   const original = buildOriginalMobileQuest(project, mode, selectedCustomization);
-  if (original) return original;
-  const stepTitles = project.kind === "agent" ? agentTitles : titles;
-  return stepTitles.map((title, index) => {
-    const id = index + 1;
-    const action = mobileAction(project, id);
+  if (original) return finish(original);
+  const desktopSteps = buildQuest(project, mode, selectedCustomization);
+  return finish(desktopSteps.map((desktopStep) => {
+    const id = desktopStep.id;
+    if (desktopStep.journeyCheck) {
+      return {
+        ...desktopStep,
+        action: `Откройте обе готовые версии с телефона. ${desktopStep.action} Отправьте Фее один скриншот результата без личных данных и секретов.`,
+        prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает через Telegram, личный Codex и мобильный предпросмотр. Не проси её открывать локальные папки или писать код.\n\n${desktopStep.prompt}`,
+        screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.png`,
+        mobileAction: { tool: "screenshot", label: "Отправить итог проверки Фее", note: "Пришлите только экран результата без личных данных, паролей и секретов." },
+      };
+    }
+    const source = desktopStep.sourceStepId ?? id;
+    const action = mobileAction(project, source);
     return {
-      id,
-      title,
-      eyebrow: eyebrows[index],
-      why: id === 1
-        ? "В мобильной версии Telegram становится вашей рабочей мастерской: здесь лежат задания, материалы, ссылки и ответы Феи."
-        : `Этот уровень ведёт к результату «${project.outcome}» без работы с кодом и без компьютера.`,
-      action: project.kind === "agent" ? agentActionText(project, id) : actionText(project, id, mode),
+      ...desktopStep,
+      action: project.kind === "agent" ? agentActionText(project, source) : actionText(project, source, mode),
       kind: "prompt",
       prompt: project.kind === "agent"
-        ? agentPromptFor(project, id, mode, selectedCustomization)
-        : promptFor(project, id, mode),
-      expected: [
-        title,
-        id < 16 ? "Следующее действие понятно и помещается на одном экране телефона" : "Результат можно безопасно показать другому человеку",
-        id === 14 ? project.safety : `Проект «${project.title}» остаётся в личной комнате ученицы`,
-      ],
+        ? agentPromptFor(project, source, mode, selectedCustomization)
+        : promptFor(project, source, mode),
       screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.png`,
-      reward: [4, 8, 12, 16, 17].includes(id) ? ["Фея материалов", "Фея первого результата", "Фея аккуратных правок", "Фея публикации", "Фея портфолио"][([4, 8, 12, 16, 17] as number[]).indexOf(id)] : undefined,
+      reward: desktopStep.reward,
       help: {
-        title: "Если застряли",
-        body: action.tool === "curator" ? "На этом шаге не нужно разбираться самостоятельно — отправьте куратору ссылку и дождитесь проверки." : "Вернитесь в чат Феи и напишите «Объясни этот шаг ещё проще». Она даст одно действие без сложных слов.",
-        prompt: `Объясни уровень ${id} проекта «${project.title}» одной маме с грудным ребёнком: одно действие, одна кнопка и один понятный результат. ${modeLine(mode, project, id)}`,
+        ...desktopStep.help,
+        body: action.tool === "curator"
+          ? `${desktopStep.help.body} На этом шаге отправьте куратору ссылку и дождитесь проверки.`
+          : `${desktopStep.help.body} Если нужной кнопки не видно, вернитесь в Telegram и отправьте готовую команду помощи ниже.`,
+        prompt: `${desktopStep.help.prompt}\n\nМОБИЛЬНАЯ ПОМОЩЬ. Объясни только этот уровень одним нажатием на телефоне и сам выполни всю техническую часть, которую можно сделать без меня.`,
       },
       mobileAction: action,
     };
-  });
+  }));
 }

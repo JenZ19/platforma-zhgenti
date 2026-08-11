@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { isProjectBundle, projects, questProjects } from "./projects";
 
 describe("bundled project registry", () => {
-  it("contains 45 catalogue cards and 52 concrete quest paths", () => {
-    expect(projects).toHaveLength(45);
-    expect(new Set(projects.map((item) => item.slug)).size).toBe(45);
-    expect(questProjects).toHaveLength(52);
-    expect(new Set(questProjects.map((item) => item.slug)).size).toBe(52);
+  it("contains 42 catalogue cards and 49 concrete quest paths", () => {
+    expect(projects).toHaveLength(42);
+    expect(new Set(projects.map((item) => item.slug)).size).toBe(42);
+    expect(questProjects).toHaveLength(49);
+    expect(new Set(questProjects.map((item) => item.slug)).size).toBe(49);
   });
 
   it("contains exactly seven service-or-agent bundles", () => {

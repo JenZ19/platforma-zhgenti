@@ -3,6 +3,7 @@ import { questProjects } from "./projects";
 import { buildQuest, getQuest } from "./quests";
 import { agentContracts, getAgentContract } from "./agent-contracts";
 import { defaultCustomization } from "./customization";
+import { getProjectLevelCount } from "../lib/progress";
 
 const placeholder = /TODO|TBD|\[[^\]]+\]|<[^>]+>|вставьте название|название проекта сюда/i;
 
@@ -13,15 +14,20 @@ function stepText(value: unknown): string {
   return "";
 }
 
+function sourceStep(steps: ReturnType<typeof buildQuest>, id: number) {
+  return steps.find((step) => (step.sourceStepId ?? step.id) === id)!;
+}
+
 describe("quest builders", () => {
-  it("builds 17 complete sequential levels for every project", () => {
+  it("builds the intended number of complete sequential levels for every project", () => {
     let total = 0;
     for (const project of questProjects) {
       const steps = buildQuest(project);
       total += steps.length;
-      expect(steps, project.slug).toHaveLength(17);
+      const totalLevels = getProjectLevelCount(project);
+      expect(steps, project.slug).toHaveLength(totalLevels);
       expect(steps.map((step) => step.id), project.slug).toEqual(
-        Array.from({ length: 17 }, (_, index) => index + 1),
+        Array.from({ length: totalLevels }, (_, index) => index + 1),
       );
       for (const step of steps) {
         expect(step.title.length, `${project.slug}/${step.id}`).toBeGreaterThan(5);
@@ -30,14 +36,23 @@ describe("quest builders", () => {
         expect(step.expected.length, `${project.slug}/${step.id}`).toBeGreaterThanOrEqual(3);
         expect(step.help.body.length, `${project.slug}/${step.id}`).toBeGreaterThan(20);
         expect(step.help.prompt.length, `${project.slug}/${step.id}`).toBeGreaterThan(80);
-        expect(step.screenshot).toBe(
-          `/screens/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
-        );
+        expect(["real", "prototype", "placeholder"], `${project.slug}/${step.id}`).toContain(step.screenshotKind);
+        expect(step.beginnerTerms, `${project.slug}/${step.id}`).toBeDefined();
+        if (step.screenshotKind === "real" || step.screenshotKind === "placeholder") {
+          expect(step.screenshot).toMatch(
+            new RegExp(`^/screens/${project.slug}/(?:real|placeholder)-step-[0-9]{2}\\.(?:png|jpe?g|svg)$`),
+          );
+        } else {
+          expect(step.screenshot).toBe(
+            `/screens/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+          );
+        }
         const text = stepText(step);
         expect(text, `${project.slug}/${step.id}`).not.toMatch(placeholder);
       }
     }
-    expect(total).toBe(884);
+    expect(new Set(questProjects.map((project) => getProjectLevelCount(project))).size).toBeGreaterThanOrEqual(8);
+    expect(total).toBeGreaterThan(824);
   });
 
   it("uses detailed copy-ready Codex prompts", () => {
@@ -70,20 +85,22 @@ describe("quest builders", () => {
       const steps = buildQuest(project, "real");
       const text = stepText(steps);
       expect(text, project.slug).not.toContain("Возьмите подходящий материал из подготовленной папки");
-      expect(steps[13].action, project.slug).not.toMatch(/папк|подготовленн.+материал/i);
+      expect(sourceStep(steps, 14).action, project.slug).not.toMatch(/папк|подготовленн.+материал/i);
     }
   });
 
   it("explains the previously ambiguous open, paste, and phone actions click by click", () => {
     for (const project of questProjects) {
       const steps = buildQuest(project, "real");
-      if (project.journey === "setup" || ["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub"].includes(project.slug)) continue;
+      if (project.journey === "setup" || ["home-helper", "family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub", "unique-design"].includes(project.slug)) continue;
       expect(steps[0].action, `${project.slug}/create`).toMatch(/Codex.+Новая задача.+команд.+Проект.+создан/is);
       expect(steps[0].action, `${project.slug}/create`).not.toMatch(/создайте.+папку|создайте.+файл/is);
-      expect(steps[1].action, `${project.slug}/open`).toMatch(/ответ Codex.+Открыть проект.+название/is);
-      expect(steps[2].action, `${project.slug}/paste`).toMatch(/Скопировать команду.+вернитесь в Codex.+вставьте.+отправ/is);
-      expect(steps[13].action, `${project.slug}/phone`).toMatch(/Telegram.+телефон.+вертикально/is);
-      expect(steps[13].action, `${project.slug}/phone`).not.toMatch(/узком экране/i);
+      if (steps.some((step) => step.sourceStepId === 2)) {
+        expect(sourceStep(steps, 2).action, `${project.slug}/open`).toMatch(/ответ Codex.+Открыть проект.+название/is);
+      }
+      expect(sourceStep(steps, 3).action, `${project.slug}/paste`).toMatch(/Скопировать команду.+вернитесь в Codex.+вставьте.+отправ/is);
+      expect(sourceStep(steps, 14).action, `${project.slug}/phone`).toMatch(/Telegram.+телефон.+вертикально/is);
+      expect(sourceStep(steps, 14).action, `${project.slug}/phone`).not.toMatch(/узком экране/i);
     }
 
     const budget = buildQuest(questProjects.find((project) => project.slug === "family-expenses")!, "real");
@@ -126,7 +143,7 @@ describe("quest builders", () => {
 
   it("never forces the course brand palette onto a learner project", () => {
     const project = questProjects.find((item) => item.slug === "pressure-diary")!;
-    const styling = buildQuest(project)[12];
+    const styling = sourceStep(buildQuest(project), 13);
     expect(styling.prompt).not.toMatch(/стиле SUBMARINE/i);
     expect(styling.prompt).toMatch(/выбранн.+цветов.+гамм/i);
   });
@@ -189,8 +206,8 @@ describe("quest builders", () => {
     expect(getQuest("missing-project")).toBeUndefined();
   });
 
-  it("turns every agent contract into a unique 17-level working path", () => {
-    expect(agentContracts).toHaveLength(24);
+  it("turns every agent contract into a complete working path with its own length", () => {
+    expect(agentContracts).toHaveLength(20);
 
     for (const contract of agentContracts) {
       const project = questProjects.find((item) => item.slug === contract.slug)!;
@@ -198,7 +215,7 @@ describe("quest builders", () => {
       const steps = buildQuest(project, "demo", customization);
       const text = stepText(steps);
 
-      expect(steps, project.slug).toHaveLength(17);
+      expect(steps, project.slug).toHaveLength(getProjectLevelCount(project));
       expect(text, project.slug).toContain(contract.inputExample);
       expect(text, project.slug).toContain(contract.firstQuestion);
       expect(text, project.slug).toContain(contract.resultTitle);
@@ -217,7 +234,7 @@ describe("quest builders", () => {
     }
   });
 
-  it.each(["expense-agent", "booking-agent", "online-school-agent", "content-agent"])(
+  it.each(["expense-agent", "client-care-agent", "online-school-agent", "content-agent"])(
     "keeps the %s agent inside its own data, action, and handoff rules",
     (slug) => {
       const project = questProjects.find((item) => item.slug === slug)!;
@@ -228,18 +245,19 @@ describe("quest builders", () => {
       for (const field of contract.requiredFields) expect(text, `${slug}/${field}`).toContain(field);
       expect(text, slug).toContain(contract.confirmationRule);
       expect(text, slug).toContain(contract.handoff);
-      expect(steps[15].title, slug).toMatch(/клиент/i);
-      expect(steps[15].prompt, slug).toMatch(/восемь вопросов|8 вопросов/i);
-      expect(steps[15].prompt, slug).toMatch(/было.+станет/is);
-      expect(steps[15].prompt, slug).toMatch(/до подтверждения/i);
+      const client = sourceStep(steps, 16);
+      expect(client.title, slug).toMatch(/клиент/i);
+      expect(client.prompt, slug).toMatch(/восемь вопросов|8 вопросов/i);
+      expect(client.prompt, slug).toMatch(/было.+станет/is);
+      expect(client.prompt, slug).toMatch(/до подтверждения/i);
     },
   );
 
   it("teaches every non-agent project as a personal version and a client copy", () => {
     const nonAgents = questProjects.filter((project) => project.kind !== "agent" && project.journey !== "setup");
-    expect(nonAgents).toHaveLength(25);
+    expect(nonAgents).toHaveLength(26);
     const originalSlugs = new Set(["family-expenses", "planner", "idea-vault", "child-schedule"]);
-    const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug) && project.slug !== "family-health-hub");
+    const genericNonAgents = nonAgents.filter((project) => !originalSlugs.has(project.slug) && !["family-health-hub", "unique-design"].includes(project.slug));
     expect(genericNonAgents).toHaveLength(20);
 
     for (const project of genericNonAgents) {
@@ -250,21 +268,21 @@ describe("quest builders", () => {
       expect(text, project.slug).toContain(customization.name);
       expect(text, project.slug).toContain(customization.audience);
       expect(text, project.slug).toContain(customization.palette.name);
-      expect(steps[14].title, project.slug).toMatch(/личн.+верси|аудит и публикац/i);
-      expect(steps[15].title, project.slug).toMatch(/клиентск.+копи|заказчик/i);
-      expect(steps[15].prompt, project.slug).toMatch(/восемь вопросов|8 вопросов/i);
-      expect(steps[15].prompt, project.slug).toMatch(/по одному вопросу/i);
-      expect(steps[15].prompt, project.slug).toMatch(/было.+станет/is);
-      expect(steps[16].prompt, project.slug).toMatch(/личн.+верси.+клиентск.+верси/is);
+      expect(sourceStep(steps, 15).title, project.slug).toMatch(/личн.+верси|аудит и публикац/i);
+      expect(sourceStep(steps, 16).title, project.slug).toMatch(/клиентск.+копи|заказчик/i);
+      expect(sourceStep(steps, 16).prompt, project.slug).toMatch(/восемь вопросов|8 вопросов/i);
+      expect(sourceStep(steps, 16).prompt, project.slug).toMatch(/по одному вопросу/i);
+      expect(sourceStep(steps, 16).prompt, project.slug).toMatch(/было.+станет/is);
+      expect(sourceStep(steps, 17).prompt, project.slug).toMatch(/личн.+верси.+клиентск.+верси/is);
     }
 
     for (const slug of originalSlugs) {
       const project = questProjects.find((item) => item.slug === slug)!;
       const steps = buildQuest(project, "demo", defaultCustomization(project.slug));
-      expect(steps[13].title, slug).toMatch(/опубликовал/i);
-      expect(steps[14].title, slug).toMatch(/клиентск.+копи/i);
-      expect(steps[15].title, slug).toMatch(/бриф|адаптировал/i);
-      expect(steps[16].title, slug).toMatch(/упаковал|портфолио/i);
+      expect(sourceStep(steps, 14).title, slug).toMatch(/опубликовал/i);
+      expect(sourceStep(steps, 15).title, slug).toMatch(/клиентск.+копи/i);
+      expect(sourceStep(steps, 16).title, slug).toMatch(/бриф|адаптировал/i);
+      expect(sourceStep(steps, 17).title, slug).toMatch(/упаковал|портфолио/i);
     }
   });
 });

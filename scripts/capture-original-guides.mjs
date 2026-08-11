@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
-import { originalGuideScreenPath } from "./projects.mjs";
+import { originalGuideScreenPath, originalGuideStepCount } from "./projects.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const force = process.env.FORCE_CAPTURE === "1";
-const selectedSlugs = (process.env.CAPTURE_SLUGS || "family-expenses").split(",").map((value) => value.trim()).filter(Boolean);
-const tasks = selectedSlugs.flatMap((slug) => Array.from({ length: 17 }, (_, stepIndex) => Array.from({ length: 3 }, (_, frameIndex) => ({ slug, step: stepIndex + 1, frame: frameIndex + 1 })))).flat();
+const selectedSlugs = (process.env.CAPTURE_SLUGS || "family-expenses").split(",").map((value) => value.trim()).filter((slug) => slug && slug !== "server-152fz");
+const tasks = selectedSlugs.flatMap((slug) => Array.from({ length: originalGuideStepCount(slug) }, (_, stepIndex) => Array.from({ length: 3 }, (_, frameIndex) => ({ slug, step: stepIndex + 1, frame: frameIndex + 1 })))).flat();
 let cursor = 0;
 let finished = 0;
 

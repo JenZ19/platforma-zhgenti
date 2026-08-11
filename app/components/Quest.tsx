@@ -33,6 +33,8 @@ import { QuestResetButton } from "./QuestResetButton";
 import { QuestFormatChoice } from "./QuestFormatChoice";
 import { QuestLinks } from "./QuestLinks";
 import { ServerDiscountOffer } from "./ServerDiscountOffer";
+import { LessonText } from "./LessonText";
+import { BeginnerTerms } from "./BeginnerTerms";
 
 export function Quest({
   project,
@@ -60,7 +62,7 @@ export function Quest({
   }, [bundled, initialOutput, project.slug]);
 
   if (bundled && !choiceLoaded) {
-    return <main className="quest-shell"><section className="preparation-card preparation-loading">Готовим выбор формата…</section></main>;
+    return <main className="quest-shell" data-visual-theme="tactile-album"><section className="preparation-card preparation-loading">Готовим выбор формата…</section></main>;
   }
 
   function choose(format: ProjectFormat) {
@@ -127,10 +129,10 @@ function QuestBody({
   useEffect(() => {
     // Quest progress is stored in this browser and restored after mount.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProgress(loadProgress(storageSlug, window.localStorage));
+    setProgress(loadProgress(storageSlug, window.localStorage, steps.length));
     setPreparation(loadPreparation(storageSlug, window.localStorage));
     setCustomization(loadCustomization(storageSlug, profileSlug, window.localStorage));
-  }, [profileSlug, storageSlug]);
+  }, [profileSlug, steps.length, storageSlug]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -143,9 +145,18 @@ function QuestBody({
   }, [progress.activeStep]);
 
   const step = steps[progress.activeStep - 1] ?? steps[0];
-  const percent = Math.round((progress.completed.length / 17) * 100);
-  const finished = progress.completed.length === 17;
+  const totalLevels = steps.length;
+  const lastLevel = totalLevels;
+  const percent = Math.round((progress.completed.length / totalLevels) * 100);
+  const finished = progress.completed.length === totalLevels;
+  const nextStep = steps[step.id];
   const preparationReady = setupQuest || (preparation ? isPreparationReady(preparation, checklist) : false);
+  const screenshotBadge = step.screenshotKind === "real" ? "реальный экран" : step.screenshotKind === "placeholder" ? "заглушка для замены" : "прототип";
+  const screenshotAlt = step.screenshotKind === "real"
+    ? `Реальный экран AdminVPS — ${step.title}`
+    : step.screenshotKind === "placeholder"
+      ? `Заглушка для будущего скриншота — ${step.title}`
+      : `Прототип уровня ${step.id}: ${step.title}`;
 
   function storePreparation(next: PreparationState) {
     setPreparation(next);
@@ -188,7 +199,7 @@ function QuestBody({
 
   function finishStep() {
     const wasDone = progress.completed.includes(step.id);
-    const next = completeStep(progress, step.id);
+    const next = completeStep(progress, step.id, totalLevels);
     setProgress(next);
     saveProgress(storageSlug, next, window.localStorage);
     setHelpOpen(false);
@@ -224,7 +235,7 @@ function QuestBody({
   }
 
   return (
-    <main className="quest-shell">
+    <main className="quest-shell" data-visual-theme="tactile-album">
       <header className="site-header quest-site-header">
         <button type="button" className="brand brand-button" onClick={onHome}><span>S</span><b>SUBMARINE<small>Все квесты</small></b></button>
         <div className="quest-head-meta"><span>Неделя {project.week}</span><span><i>✦</i> {progress.score} искр</span></div>
@@ -235,7 +246,7 @@ function QuestBody({
         <p className="kicker"><span /> {project.track} · {project.device}</p>
         <h1>{bundle?.title ?? project.title}</h1>
         <p>{project.outcome}</p>
-        <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / 17</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
+        <div className="quest-progress" aria-label={`Прогресс ${percent}%`}><div><span>Твоё превращение</span><strong>{progress.completed.length} / {totalLevels}</strong></div><i><b style={{ width: `${percent}%` }} /></i></div>
         <QuestResetButton onReset={reset} />
         {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
         {!setupQuest && preparationReady && <div className={`data-mode-badge ${preparation?.mode}`}><span>{preparation?.mode === "real" ? "◇" : "✦"}</span> Режим: {preparation?.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
@@ -255,7 +266,7 @@ function QuestBody({
         />
       ) : <div className="quest-layout">
         <aside className="quest-map" aria-label="Карта квеста">
-          <div className="map-heading"><span className="map-symbol">{project.symbol}</span><div><p>Карта превращения</p><small>17 коротких уровней</small></div></div>
+          <div className="map-heading"><span className="map-symbol">{project.symbol}</span><div><p>Карта превращения</p><small>{totalLevels} коротких уровней</small></div></div>
           <div className="level-list">
             {steps.map((item) => {
               const unlocked = isStepUnlocked(progress, item.id);
@@ -267,13 +278,14 @@ function QuestBody({
 
         <article className="level-card" aria-live="polite">
           <header className="level-header"><div><p>Уровень {String(step.id).padStart(2, "0")} <i>✦</i></p><h2>{step.title}</h2></div><span>≈ {step.id < 5 ? 5 : step.id < 13 ? 7 : 10} мин</span></header>
-          <section className="why-card"><b>Зачем это</b><p>{step.why}</p></section>
+          <BeginnerTerms terms={step.beginnerTerms} />
+          <section className="why-card"><b>Зачем это</b><LessonText text={step.why} kind="why" /></section>
 
           {step.id === 2 && profile && customization && <QuestCustomizer profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
 
           <section className="action-section">
             <p className="section-kicker">Что сделать</p>
-            <h3>{step.action}</h3>
+            <LessonText text={step.action} variant="action" kind="action" />
             {!step.guide && step.prompt && <div className="prompt-card"><div><span>Готовая команда для Codex</span><i>✦</i></div><pre>{step.prompt}</pre><button type="button" onClick={() => copy(step.prompt!, "main")}>{copied === "main" ? "Скопировано ✓" : "Скопировать команду"}</button></div>}
           </section>
 
@@ -282,21 +294,21 @@ function QuestBody({
           {step.guide && <QuestGuide frames={step.guide} />}
 
           <section className="expected-section">
-            <div className="expected-heading"><div><p className="section-kicker">Что должно получиться</p><h3>Сверь свой экран с примером</h3></div><span>пример</span></div>
-            <button type="button" className="reference-shot" onClick={() => setImageOpen(true)} aria-label="Увеличить пример результата"><img src={step.screenshot} alt={`Пример уровня ${step.id}: ${step.title}`} /><span>Увеличить</span></button>
+            <div className="expected-heading"><div><p className="section-kicker">Готово, если</p><h3>{step.showScreenshot === false ? "Проверь три коротких пункта" : step.screenshotKind === "placeholder" ? "Здесь появится ваш настоящий экран" : step.screenshotKind === "prototype" ? "Сверь свой экран с прототипом" : "Сверь свой экран с примером"}</h3></div>{step.showScreenshot !== false && <span>{screenshotBadge}</span>}</div>
+            {step.showScreenshot !== false && <button type="button" className={`reference-shot screenshot-${step.screenshotKind ?? "prototype"}`} onClick={() => setImageOpen(true)} aria-label="Увеличить пример результата"><img src={step.screenshot} alt={screenshotAlt} /><span>Увеличить</span></button>}
             <ul>{step.expected.map((item) => <li key={item}><span>✓</span>{item}</li>)}</ul>
           </section>
 
-          <div className="level-actions"><button type="button" className="secondary-button" onClick={() => setHelpOpen((value) => !value)}>{helpOpen ? "Скрыть помощь" : "Нужна помощь"}</button><button type="button" className="primary-button" disabled={finished && step.id === 17} onClick={finishStep}>{progress.completed.includes(step.id) ? (step.id === 17 ? "Квест пройден ✦" : "Перейти дальше →") : "Я сделала — следующий шаг →"}</button></div>
+          <div className="level-actions"><button type="button" className="secondary-button" onClick={() => setHelpOpen((value) => !value)}>{helpOpen ? "Скрыть помощь" : "Нужна помощь"}</button><button type="button" className="primary-button" disabled={finished && step.id === lastLevel} onClick={finishStep}>{progress.completed.includes(step.id) ? (step.id === lastLevel ? "Квест пройден ✦" : `Следующий шаг: ${nextStep?.title} →`) : step.id === lastLevel ? "Я сделала — завершить квест ✦" : `Я сделала — следующий шаг: ${nextStep?.title} →`}</button></div>
 
-          {helpOpen && <section className="help-card"><span>?</span><div><p className="section-kicker">{step.help.title}</p><p>{step.help.body}</p><div className="help-copy"><p>{step.help.prompt}</p><button type="button" onClick={() => copy(step.help.prompt, "help")}>{copied === "help" ? "Готово ✓" : "Скопировать"}</button></div></div></section>}
-          {finished && step.id === 17 && <section className="finish-card"><i>✦</i><p>Квест завершён</p><h3>{setupQuest ? "Рабочее место готово к следующим проектам" : "Теперь этот проект — часть твоего портфолио"}</h3><span>{setupQuest ? "Все обязательные проверки пройдены — сохраните итоговый чек-лист." : "Ссылка, описание и безопасные экраны готовы к показу."}</span></section>}
+          {helpOpen && <section className="help-card"><span>?</span><div><p className="section-kicker">{step.help.title}</p><LessonText text={step.help.body} kind="help" /><div className="help-copy"><p>{step.help.prompt}</p><button type="button" onClick={() => copy(step.help.prompt, "help")}>{copied === "help" ? "Готово ✓" : "Скопировать"}</button></div></div></section>}
+          {finished && step.id === lastLevel && <section className="finish-card"><i>✦</i><p>Квест завершён</p><h3>{setupQuest ? "Рабочее место готово к следующим проектам" : "Теперь этот проект — часть твоего портфолио"}</h3><span>{setupQuest ? "Все обязательные проверки пройдены — сохраните итоговый чек-лист." : "Ссылка, описание и безопасные экраны готовы к показу."}</span></section>}
         </article>
       </div>}
 
       <footer className="academy-footer"><span>SUBMARINE</span><p>Один проект за другим.<br />Так появляется новая профессия.</p></footer>
 
-      {imageOpen && <div className="image-modal" role="dialog" aria-modal="true" aria-label="Увеличенный пример"><button type="button" onClick={() => setImageOpen(false)}>×</button><img src={step.screenshot} alt={`Увеличенный пример уровня ${step.id}`} /></div>}
+      {imageOpen && step.showScreenshot !== false && <div className="image-modal" role="dialog" aria-modal="true" aria-label="Увеличенный пример"><button type="button" onClick={() => setImageOpen(false)}>×</button><img src={step.screenshot} alt={screenshotAlt} /></div>}
       {reward && <div className="reward-modal" role="dialog" aria-modal="true" aria-label="Новая награда"><div><p>✦ · ✧ · ✦</p><span>Новая награда</span><h3>{reward}</h3><b>+10 искр в твою коллекцию</b><button type="button" className="primary-button" onClick={() => setReward(null)}>Забрать награду</button></div></div>}
     </main>
   );

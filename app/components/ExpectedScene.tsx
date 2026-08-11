@@ -1,6 +1,7 @@
 "use client";
 
-import type { ProjectDefinition } from "../content/types";
+import type { ProjectDefinition, QuestStep } from "../content/types";
+import { buildQuest } from "../content/quests";
 import { hasFirstCoverPrototype } from "../content/first-cover-prototypes";
 import { hasThirdCoverPrototype } from "../content/third-cover-prototypes";
 import { hasFinalCoverPrototype } from "../content/final-cover-prototypes";
@@ -13,6 +14,9 @@ import { OriginalServiceScene } from "./OriginalServiceScene";
 import { getSourcePrototypeTitle, isSourcePrototypeSlug, SourceProjectPrototypeScene } from "./SourceProjectPrototypeScene";
 import { getSetupQuestStepTitle, isSetupQuestSlug } from "../content/setup-quests";
 import { SetupQuestPrototypeScene } from "./SetupQuestPrototypeScene";
+import { DesignReferenceScene } from "./DesignReferenceScene";
+import { uniqueDesignStepTitles } from "../content/original-quests/unique-design";
+import { JourneyCheckPrototypeScene } from "./JourneyCheckPrototypeScene";
 
 function Chrome({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="mock-window"><div className="mock-bar"><span>● ● ●</span><b>{title}</b><i /></div>{children}</div>;
@@ -45,8 +49,10 @@ function FinalScene({ project, step }: { project: ProjectDefinition; step: numbe
   return <div className="portfolio-scene"><span>ДВЕ ВЕРСИИ В ПОРТФОЛИО</span><h3>{customization.name}</h3><p>{project.portfolioAngle}</p><div><b>✓ Личная версия · {customization.audience}</b><b>✓ Клиентская версия · адаптация по брифу</b>{project.features.slice(0, 2).map((feature) => <b key={feature}>✓ {feature}</b>)}</div><footer><span>6 безопасных кадров</span><b>Открыть кейс ↗</b></footer></div>;
 }
 
-function Visual({ project, step }: { project: ProjectDefinition; step: number }) {
+function Visual({ project, step, questStep }: { project: ProjectDefinition; step: number; questStep: QuestStep }) {
+  if (questStep.journeyCheck) return <JourneyCheckPrototypeScene project={project} step={questStep} />;
   if (isSetupQuestSlug(project.slug)) return <SetupQuestPrototypeScene project={project} step={step} />;
+  if (project.slug === "unique-design") return <DesignReferenceScene step={step} />;
   if (isSourcePrototypeSlug(project.slug)) return <SourceProjectPrototypeScene project={project} step={step} />;
   if (["family-expenses", "planner", "idea-vault", "child-schedule"].includes(project.slug)) return <OriginalServiceScene slug={project.slug} step={step} />;
   if (step <= 4) return <SetupScene project={project} step={step} />;
@@ -63,8 +69,11 @@ function Visual({ project, step }: { project: ProjectDefinition; step: number })
 }
 
 export function ExpectedScene({ project, step }: { project: ProjectDefinition; step: number }) {
+  const questStep = buildQuest(project)[step - 1];
+  if (!questStep) return null;
+  const sourceStep = questStep.sourceStepId || step;
   const titles = project.slug === "family-expenses" ? ["Увидела готовый результат","Выбрала свою версию","Ответила Codex обычными словами","Codex создал всё сам","Получила паспорт проекта","Получила рабочую основу","Добавила первый расход","Настроила свои категории","Применила свой стиль","Добавила одну особенную функцию","Прошла семейный сценарий","Проверила сохранение и копию","Проверила одной рукой","Опубликовала личную версию","Codex создал клиентскую копию","Адаптировала по брифу","Упаковала две версии"] : project.slug === "planner" ? ["Увидела спокойный день","Выбрала характер планера","Ответила Codex о своей неделе","Codex создал planner","Передала паспорт ритма","Получила рабочую основу","Добавила первое дело","Выбрала главное сегодня","Применила свой стиль","Добавила одну особенную функцию","Прошла день целиком","Проверила сохранение","Проверила одной рукой","Опубликовала личную версию","Codex создал planner-client","Адаптировала по брифу","Упаковала два планера"] : project.slug === "idea-vault" ? ["Увидела живую копилку","Выбрала характер копилки","Ответила Codex о своих идеях","Codex создал idea-vault","Передала паспорт копилки","Получила рабочую основу","Поймала первую мысль","Настроила темы и статусы","Применила свой стиль","Добавила маленький шаг","Проверила поиск","Проверила сохранение и JSON","Сохранила идею одной рукой","Опубликовала безопасную подборку","Codex создал idea-vault-client","Адаптировала по брифу","Упаковала две копилки"] : project.slug === "child-schedule" ? ["Увидела спокойную неделю","Выбрала характер расписания","Ответила Codex о нашей неделе","Codex создал child-schedule","Передала паспорт расписания","Получила рабочую основу","Добавила первое занятие","Разделила расписания А и Б","Применила свой стиль","Добавила семейную функцию","Прошла утро и проверила пересечение","Проверила изменение и JSON","Проверила расписание одной рукой","Опубликовала закрытую версию","Codex создал child-schedule-client","Адаптировала по брифу","Упаковала два расписания"] : ["Codex создал безопасное место", "Codex подтвердил правильный проект", "Заполнен паспорт проекта", "Мастер-команда отправлена", "Рабочая основа готова", "Открыт первый экран", `Работает: ${project.features[0]}`, `Добавлено: ${project.features[1]}`, "Ничего не потерялось", "Исправление прошло проверку", "Пройден путь пользователя", "Codex сохранил безопасную версию", "Проект стал вашим", "Проверено с телефона", "Личная версия готова", "Клиентская копия готова", "Две версии в портфолио"];
-  const sourceTitle = getSourcePrototypeTitle(project.slug, step);
-  const setupTitle = getSetupQuestStepTitle(project.slug, step);
-  return <main id="capture-scene" className="capture-canvas"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>УРОВЕНЬ {String(step).padStart(2, "0")} · НЕДЕЛЯ {project.week}</div></header><section className="capture-title"><p>Вот что должно получиться</p><h1>{setupTitle ?? sourceTitle ?? titles[step - 1]}</h1><span>{project.title}</span></section><div className="capture-visual"><Visual project={project} step={step} /></div><aside className="capture-tip"><b>✦</b><p><strong>Сверь свой экран с примером.</strong><br />Мелкие отличия в тексте и цвете — это нормально.</p></aside></main>;
+  const sourceTitle = project.slug === "unique-design" ? uniqueDesignStepTitles[sourceStep - 1] : getSourcePrototypeTitle(project.slug, sourceStep);
+  const setupTitle = getSetupQuestStepTitle(project.slug, sourceStep);
+  return <main id="capture-scene" className="capture-canvas"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>УРОВЕНЬ {String(step).padStart(2, "0")} · НЕДЕЛЯ {project.week}</div></header><section className="capture-title"><p>Вот что должно получиться</p><h1>{questStep.title ?? setupTitle ?? sourceTitle ?? titles[sourceStep - 1]}</h1><span>{project.title}</span></section><div className="capture-visual"><Visual project={project} step={sourceStep} questStep={questStep} /></div><aside className="capture-tip"><b>✦</b><p><strong>Сверь свой экран с прототипом.</strong><br />Мелкие отличия в тексте и цвете — это нормально.</p></aside></main>;
 }

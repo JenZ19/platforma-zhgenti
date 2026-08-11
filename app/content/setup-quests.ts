@@ -19,6 +19,10 @@ export type SetupStepInput = {
   help: string;
   prompt?: string;
   links?: QuestLink[];
+  screenshot?: string;
+  screenshotKind?: "real" | "placeholder";
+  showGuide?: boolean;
+  showScreenshot?: boolean;
 };
 
 const external = (label: string, href: string, note: string): QuestLink => ({ label, href, note, external: true });
@@ -90,6 +94,12 @@ function guide(project: ProjectDefinition, input: SetupStepInput): QuestGuideFra
 }
 
 function makeStep(project: ProjectDefinition, input: SetupStepInput): QuestStep {
+  const reward = project.slug === "server-152fz" && input.id === 9
+    ? "Фея безопасного сервера"
+    : project.slug !== "server-152fz" && input.id === 17
+      ? "Хранительница рабочего места"
+      : undefined;
+
   return {
     id: input.id,
     title: input.title,
@@ -99,15 +109,17 @@ function makeStep(project: ProjectDefinition, input: SetupStepInput): QuestStep 
     kind: input.prompt ? "prompt" : "action",
     prompt: input.prompt,
     expected: input.expected,
-    screenshot: `/screens/${project.slug}/step-${String(input.id).padStart(2, "0")}.png`,
-    reward: input.id === 8 ? "Фея безопасной настройки" : input.id === 17 ? "Хранительница рабочего места" : undefined,
+    screenshot: input.screenshot ?? `/screens/${project.slug}/step-${String(input.id).padStart(2, "0")}.png`,
+    screenshotKind: input.screenshotKind,
+    showScreenshot: input.showScreenshot,
+    reward,
     help: {
       title: `Помощь: ${input.title}`,
       body: input.help,
       prompt: `Я новичок и прохожу квест «${project.title}», уровень ${input.id} «${input.title}». Мой экран не совпал с ожидаемым результатом. Не проси меня писать код и не проси присылать пароль, платёжные данные, API-ключ или секрет. Задай один короткий вопрос о том, что я вижу на экране, затем объясни одно безопасное действие обычными словами.`,
     },
     links: input.links,
-    guide: guide(project, input),
+    guide: input.showGuide === false ? undefined : guide(project, input),
   };
 }
 
@@ -151,10 +163,29 @@ const apiSteps: SetupStepInput[] = [
   { id:17,title:"Получила безопасное API-подключение",eyebrow:"Финальный чек-лист",why:"Финиш означает не просто «ключ работает», а понятный выбор провайдера, ограниченные расходы, серверное хранение и отсутствие персональных данных в тесте.",action:"Сверьте итог: выбран один провайдер; понятно, прямой он или агрегатор; ключ отдельный для проекта; установлен лимит; секрет хранится только на сервере; в браузерной части его нет; тест прошёл на обезличенном тексте; кнопка отзыва найдена. Для проекта заказчика повторите путь в его аккаунте и не отдавайте свой личный ключ.",expected:["Провайдер и модель записаны","Ключ скрыт, ограничен и проверен","Путь можно безопасно повторить для заказчика"],app:"карточка API-подключения",scene:"portfolio",target:"Восемь зелёных проверок",help:"В портфолио показывайте только схему подключения, название провайдера, маску ключа и успешный тест. Настоящий секрет, баланс и данные аккаунта не показываются." },
 ];
 
+const apiProviderSteps = apiSteps.slice(4, 8);
+const compactApiSteps: SetupStepInput[] = [
+  ...apiSteps.slice(0, 4),
+  {
+    ...apiProviderSteps[0],
+    id: 5,
+    title: "Получила ключ у выбранного провайдера",
+    eyebrow: "Прохожу только одну ветку",
+    why: "Вы уже выбрали одного провайдера. Сейчас нужен один ключ именно в его кабинете — проходить ещё три чужие ветки и создавать четыре секрета не нужно.",
+    action: `Откройте только раздел выбранного провайдера и выполните его путь. ${apiProviderSteps.map((step) => `${step.title.replace("Нашла ключ ", "")} — ${step.action.replace(/Если выбрали [^:]+:\s*/u, "")}`).join(" ")}`,
+    expected: ["Открыт кабинет одного выбранного провайдера", "Создан один отдельный ключ проекта", "Секрет не вставлен в чат или Академию"],
+    app: "кабинет выбранного провайдера",
+    target: "API Keys → создать один ключ",
+    help: "Не создавайте ключи во всех четырёх кабинетах. Вернитесь к уровню выбора, назовите один провайдер и используйте только его официальную ссылку.",
+    links: apiProviderSteps.flatMap((step) => step.links ?? []),
+  },
+  ...apiSteps.slice(8).map((step, index) => ({ ...step, id: index + 6 })),
+];
+
 const definitions: Record<SetupQuestSlug, SetupStepInput[]> = {
   "install-codex": installCodexSteps,
   "server-152fz": serverSteps,
-  "api-keys": apiSteps,
+  "api-keys": compactApiSteps,
 };
 
 export function isSetupQuestSlug(slug: string): slug is SetupQuestSlug {

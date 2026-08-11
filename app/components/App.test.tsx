@@ -8,6 +8,7 @@ import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
 import { getQuestProject, questProjects } from "../content/projects";
+import { buildQuest } from "../content/quests";
 import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
 import { preparationKey } from "../lib/preparation";
 import { progressKey } from "../lib/progress";
@@ -27,6 +28,12 @@ Object.assign(navigator, {
 });
 Object.defineProperty(window, "scrollTo", { value: vi.fn(), writable: true });
 
+function routeStepFor(project: NonNullable<ReturnType<typeof getQuestProject>>, sourceStep: number): number {
+  const index = buildQuest(project).findIndex((step) => step.sourceStepId === sourceStep);
+  if (index < 0) throw new Error(`Нет исходного уровня ${sourceStep} у ${project.slug}`);
+  return index + 1;
+}
+
 describe("academy interface", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -34,11 +41,37 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/");
   });
 
-  it("shows all 45 course projects", () => {
+  it("shows one unified client agent card and no repeated client-stage cards", () => {
+    render(<Academy />);
+    expect(screen.getAllByText("ИИ-агент для работы с клиентами")).toHaveLength(1);
+    for (const repeatedTitle of ["ИИ-агент для заявок", "ИИ-агент-подборщик", "ИИ-агент для записи", "Менеджер по продажам"]) {
+      expect(screen.queryByText(repeatedTitle)).not.toBeInTheDocument();
+    }
+    expect(screen.getByText("ИИ-администратор")).toBeInTheDocument();
+  });
+
+  it("shows all 42 course projects", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(45);
-    expect(screen.getByText("45 проектов")).toBeInTheDocument();
+    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(42);
+    expect(screen.getByText("42 проекта")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
+  });
+
+  it("uses the selected tactile-album design across the full desktop and mobile platform", () => {
+    const { container, rerender } = render(<Academy />);
+
+    expect(container.querySelector('main[data-visual-theme="tactile-album"]')).not.toBeNull();
+    expect(screen.getByRole("group", { name: /живой альбом готовых проектов/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("img", { name: /готовый проект:/i })).toHaveLength(3);
+
+    rerender(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
+    expect(container.querySelector('main.quest-shell[data-visual-theme="tactile-album"]')).not.toBeNull();
+
+    rerender(<MobileAcademy onOpen={vi.fn()} />);
+    expect(container.querySelector('main.mobile-academy-shell[data-visual-theme="tactile-album"]')).not.toBeNull();
+
+    rerender(<MobileQuest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
+    expect(container.querySelector('main.mobile-quest-shell[data-visual-theme="tactile-album"]')).not.toBeNull();
   });
 
   it("renders the API lesson as an internal quest link", () => {
@@ -60,32 +93,108 @@ describe("academy interface", () => {
     }
   });
 
+  it("shows the server lesson as nine fast levels without the repeated guide gallery", () => {
+    const project = getQuestProject("server-152fz")!;
+    const { rerender } = render(<Quest project={project} onHome={vi.fn()} />);
+
+    expect(screen.getByText("9 коротких уровней")).toBeInTheDocument();
+    expect(screen.getByText("0 / 9")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /делайте по картинкам/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /увеличить пример результата/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    expect(screen.getByRole("button", { name: /увеличить пример результата/i })).toBeInTheDocument();
+
+    rerender(<MobileQuest project={project} onHome={vi.fn()} />);
+    expect(screen.getByText("0 из 9")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /увеличить мобильный пример/i })).not.toBeInTheDocument();
+  });
+
+  it("labels authentic server screens and the missing backup screen honestly", () => {
+    const project = getQuestProject("server-152fz")!;
+    localStorage.setItem(progressKey("server-152fz"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    const desktop = render(<Quest project={project} onHome={vi.fn()} />);
+
+    expect(screen.getByText("реальный экран")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /реальный экран AdminVPS.+выбрала сервер в России/i })).toHaveAttribute(
+      "src",
+      "/screens/server-152fz/real-step-02.png",
+    );
+    desktop.unmount();
+
+    localStorage.setItem(progressKey("mobile:server-152fz"), JSON.stringify({ version: 1, activeStep: 7, completed: [1, 2, 3, 4, 5, 6], score: 60 }));
+    render(<MobileQuest project={project} onHome={vi.fn()} />);
+    expect(screen.getByText("заглушка для замены")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /заглушка.+резервн.+коп/i })).toHaveAttribute(
+      "src",
+      "/screens/server-152fz/placeholder-step-07.svg",
+    );
+    expect(screen.getAllByRole("link", { name: /открыть полную PDF-инструкцию/i })).toHaveLength(1);
+  });
+
+  it("formats long lesson instructions into readable blocks on desktop and mobile", () => {
+    const project = getQuestProject("server-152fz")!;
+    const finishedBeforeLast = { version: 1, activeStep: 8, completed: [1, 2, 3, 4, 5, 6, 7], score: 70 };
+    localStorage.setItem(progressKey("server-152fz"), JSON.stringify(finishedBeforeLast));
+
+    const desktop = render(<Quest project={project} onHome={vi.fn()} />);
+    const desktopAction = desktop.container.querySelector<HTMLElement>('[data-lesson-copy="action"]');
+    expect(desktopAction).not.toBeNull();
+    expect(desktopAction!.querySelectorAll("p").length).toBeGreaterThanOrEqual(3);
+    expect(within(desktopAction!).getAllByRole("listitem").length).toBeGreaterThanOrEqual(3);
+    expect(within(desktopAction!).getByText(/что сделать/i, { selector: "strong" })).toBeInTheDocument();
+    desktop.unmount();
+
+    localStorage.setItem(progressKey("mobile:server-152fz"), JSON.stringify(finishedBeforeLast));
+    const mobile = render(<MobileQuest project={project} onHome={vi.fn()} />);
+    const mobileAction = mobile.container.querySelector<HTMLElement>('[data-lesson-copy="action"]');
+    expect(mobileAction).not.toBeNull();
+    expect(mobileAction!.querySelectorAll("p").length).toBeGreaterThanOrEqual(3);
+    expect(within(mobileAction!).getAllByRole("listitem").length).toBeGreaterThanOrEqual(3);
+    expect(within(mobileAction!).getByText(/что сделать/i, { selector: "strong" })).toBeInTheDocument();
+  });
+
   it("shows the finished prototype on every desktop project card", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll(".project-preview img")).toHaveLength(52);
+    expect(container.querySelectorAll(".project-preview img")).toHaveLength(49);
     expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",
     );
   });
 
+  it("shows three different reference roles and the resulting original design", () => {
+    const project = getQuestProject("unique-design")!;
+    const { container, rerender } = render(<ExpectedScene project={project} step={8} />);
+
+    expect(container.querySelector('[data-design-marker="three-reference-original-design"]')).not.toBeNull();
+    expect(screen.getByText(/логика блоков/i)).toBeInTheDocument();
+    expect(screen.getByText(/настроение и типографика/i)).toBeInTheDocument();
+    expect(screen.getByText(/одна деталь/i)).toBeInTheDocument();
+    expect(screen.getByText(/моя версия/i)).toBeInTheDocument();
+
+    rerender(<MobileExpectedScene project={project} step={14} />);
+    expect(container.querySelector('[data-design-marker="three-reference-original-design"]')).not.toBeNull();
+    expect(screen.getAllByText(/390 px/i).length).toBeGreaterThan(0);
+  });
+
   it("renders every mobile collection screen without asking for prepared files", () => {
-    const { container, rerender } = render(<MobileExpectedScene project={questProjects[0]} step={4} />);
+    const { container, rerender } = render(<MobileExpectedScene project={questProjects[0]} step={routeStepFor(questProjects[0], 4)} />);
     const prepared = new Set(getPreparationProfileSlugs());
     for (const project of questProjects) {
-      rerender(<MobileExpectedScene project={project} step={4} />);
+      rerender(<MobileExpectedScene project={project} step={routeStepFor(project, 4)} />);
       if (prepared.has(project.slug)) {
         const profile = getPreparationProfile(project.slug);
         expect(container, project.slug).not.toHaveTextContent(profile.sourceFile);
         expect(container, project.slug).not.toHaveTextContent(profile.rulesFile);
       }
-      expect(container, project.slug).toHaveTextContent(project.journey === "setup" ? /компьютер|сервер|API|Codex/i : /Codex|создан/i);
+      expect(container, project.slug).toHaveTextContent(project.title);
     }
   });
 
   it("renders a content-specific final-product cover for the first ten projects", () => {
     const featuredProjects = firstCoverPrototypeSlugs.filter((slug) => !["family-expenses", "planner", "idea-vault", "child-schedule"].includes(slug)).map((slug) => getQuestProject(slug)!);
-    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={routeStepFor(project, 14)} />)}</>);
 
     for (const project of featuredProjects) {
       const spec = getFirstCoverPrototypeSpec(project.slug);
@@ -99,7 +208,7 @@ describe("academy interface", () => {
   it("renders distinct family-budget stages instead of a generic service mockup", () => {
     const project = getQuestProject("family-expenses")!;
     const stages = new Map([[2, "concept"], [7, "expense"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={step} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={step} />)}</>);
+    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)} />)}</>);
 
     for (const [step, stage] of stages) {
       expect(container.querySelectorAll(`[data-original-service="family-expenses"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
@@ -111,7 +220,7 @@ describe("academy interface", () => {
   it("renders distinct planner stages with a personal and client version", () => {
     const project = getQuestProject("planner")!;
     const stages = new Map([[2, "concept"], [7, "task"], [8, "focus"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={step} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={step} />)}</>);
+    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)} />)}</>);
 
     for (const [step, stage] of stages) {
       expect(container.querySelectorAll(`[data-original-service="planner"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
@@ -122,7 +231,7 @@ describe("academy interface", () => {
   it("renders distinct idea-vault stages from capture to client portfolio", () => {
     const project = getQuestProject("idea-vault")!;
     const stages = new Map([[2,"concept"],[7,"capture"],[8,"organize"],[10,"feature"],[11,"search"],[15,"client-copy"],[16,"client-brief"],[17,"portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={step}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={step}/>)}</>);
+    const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)}/>)}</>);
     for (const [step,stage] of stages) expect(container.querySelectorAll(`[data-original-service="idea-vault"][data-original-stage="${stage}"]`),`step ${step}`).toHaveLength(2);
     expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
   });
@@ -130,7 +239,7 @@ describe("academy interface", () => {
   it("renders distinct child-schedule stages from week planning to client portfolio", () => {
     const project = getQuestProject("child-schedule")!;
     const stages = new Map([[2,"concept"],[7,"activity"],[8,"week"],[10,"feature"],[11,"morning"],[15,"client-copy"],[16,"client-brief"],[17,"portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={step}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={step}/>)}</>);
+    const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)}/>)}</>);
     for (const [step,stage] of stages) expect(container.querySelectorAll(`[data-original-service="child-schedule"][data-original-stage="${stage}"]`),`step ${step}`).toHaveLength(2);
     expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
   });
@@ -140,15 +249,15 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     const guide = screen.getByRole("region", { name: /делайте по картинкам/i });
     expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(3);
-    expect(screen.getByRole("img", { name: /пример уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.png");
+    expect(screen.getByRole("img", { name: /прототип уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.png");
   });
 
   it("renders a unique conversational prototype for every AI agent", () => {
     const sourceAgents = new Set(["carousel-agent", "threads-agent", "webinar-moderator-agent"]);
     const agents = questProjects.filter((project) => project.kind === "agent" && !sourceAgents.has(project.slug));
-    const { container } = render(<>{agents.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+    const { container } = render(<>{agents.map((project) => <ExpectedScene key={project.slug} project={project} step={routeStepFor(project, 14)} />)}</>);
 
-    expect(agents).toHaveLength(21);
+    expect(agents).toHaveLength(17);
     for (const project of agents) {
       const contract = getAgentContract(project.slug);
       const prototype = container.querySelector(`[data-agent-prototype="${project.slug}"]`);
@@ -157,7 +266,7 @@ describe("academy interface", () => {
       expect(prototype, project.slug).toHaveTextContent(contract.firstQuestion);
       expect(prototype, project.slug).toHaveTextContent(contract.resultTitle);
     }
-    expect(new Set(questProjects.filter((project) => project.kind === "agent").map((project) => getAgentContract(project.slug).theme)).size).toBe(24);
+    expect(new Set(questProjects.filter((project) => project.kind === "agent").map((project) => getAgentContract(project.slug).theme)).size).toBe(20);
   });
 
   it("renders exact final-product prototypes for the four source-backed projects on desktop and mobile", () => {
@@ -168,7 +277,7 @@ describe("academy interface", () => {
       ["family-health-hub", "health", ["ПРОФИЛИ СЕМЬИ", "Неразобранные", "Не ставит диагноз"]],
     ] as const;
     const projects = expectations.map(([slug]) => getQuestProject(slug)!);
-    const { container } = render(<>{projects.map((project) => <ExpectedScene key={`d-${project.slug}`} project={project} step={14} />)}{projects.map((project) => <MobileExpectedScene key={`m-${project.slug}`} project={project} step={14} />)}</>);
+    const { container } = render(<>{projects.map((project) => <ExpectedScene key={`d-${project.slug}`} project={project} step={routeStepFor(project, 14)} />)}{projects.map((project) => <MobileExpectedScene key={`m-${project.slug}`} project={project} step={routeStepFor(project, 14)} />)}</>);
 
     for (const [slug, marker, phrases] of expectations) {
       const prototypes = container.querySelectorAll(`[data-source-prototype="${marker}"]`);
@@ -190,7 +299,7 @@ describe("academy interface", () => {
 
   it("renders a unique content-specific cover for the following site projects", () => {
     const featuredProjects = thirdCoverPrototypeSlugs.map((slug) => getQuestProject(slug)!);
-    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={routeStepFor(project, 14)} />)}</>);
 
     for (const project of featuredProjects) {
       const spec = getThirdCoverPrototypeSpec(project.slug);
@@ -203,7 +312,7 @@ describe("academy interface", () => {
 
   it("renders a unique content-specific cover for every project through the course finale", () => {
     const featuredProjects = finalCoverPrototypeSlugs.map((slug) => getQuestProject(slug)!);
-    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={14} />)}</>);
+    const { container } = render(<>{featuredProjects.map((project) => <ExpectedScene key={project.slug} project={project} step={routeStepFor(project, 14)} />)}</>);
 
     for (const project of featuredProjects) {
       const spec = getFinalCoverPrototypeSpec(project.slug);
@@ -229,7 +338,7 @@ describe("academy interface", () => {
     render(<Academy />);
     const catalogue = screen.getByRole("region", { name: /каталог проектов/i });
 
-    expect(within(catalogue).getByText(/показано: 45 из 45/i)).toBeInTheDocument();
+    expect(within(catalogue).getByText(/показано: 42 из 42/i)).toBeInTheDocument();
     expect(within(catalogue).getAllByText(/уровень: стартовый/i).length).toBeGreaterThan(0);
 
     fireEvent.change(screen.getByRole("combobox", { name: /что хочется сделать/i }), { target: { value: "Здоровье" } });
@@ -255,7 +364,7 @@ describe("academy interface", () => {
     const project = getQuestProject("planner")!;
     render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
+    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(buildQuest(project).length);
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
@@ -292,6 +401,36 @@ describe("academy interface", () => {
     expect(screen.getByText(/не создавайте папку сами/i)).toBeInTheDocument();
   });
 
+  it("renders the full beginner level contract on desktop and mobile", async () => {
+    const project = getQuestProject("recipe-book")!;
+    const desktop = render(<Quest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+
+    const desktopTerms = screen.getByRole("region", { name: /новые слова перед началом/i });
+    const desktopWhy = desktop.container.querySelector(".why-card")!;
+    expect(desktopTerms).toHaveTextContent(/Codex.+создаёт, проверяет и исправляет/is);
+    expect(desktopTerms.compareDocumentPosition(desktopWhy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText("прототип")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /следующий шаг: заполнен паспорт проекта/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
+    const desktopHelp = desktop.container.querySelector(".help-card")!;
+    fireEvent.click(within(desktopHelp).getByRole("button", { name: /скопировать/i }));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringMatching(/recipe-book.+не проси меня создавать/is)));
+    desktop.unmount();
+
+    const mobile = render(<MobileQuest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const mobileTerms = screen.getByRole("region", { name: /новые слова перед началом/i });
+    const mobileWhy = mobile.container.querySelector(".mobile-why")!;
+    expect(mobileTerms.compareDocumentPosition(mobileWhy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole("button", { name: /дальше: заполнен паспорт проекта/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /скопировать команду помощи/i }));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(expect.stringMatching(/мобильная помощь.+техническую часть/is)));
+  });
+
   it("hydrates project cards without changing saved progress during hydration", async () => {
     const project = getQuestProject("planner")!;
     localStorage.setItem(progressKey("planner"), JSON.stringify({ completed: [1, 2], activeStep: 3, score: 20 }));
@@ -310,11 +449,12 @@ describe("academy interface", () => {
   });
 
   it("asks for a data mode before opening each quest", () => {
-    render(<Quest project={getQuestProject("planner")!} onHome={vi.fn()} />);
+    const project = getQuestProject("planner")!;
+    render(<Quest project={project} onHome={vi.fn()} />);
     expect(screen.getByRole("heading", { name: /на каких данных будем работать/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /уровень 1:/i })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
+    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(buildQuest(project).length);
     expect(localStorage.getItem(preparationKey("planner"))).toContain('"mode":"demo"');
   });
 
@@ -382,7 +522,7 @@ describe("academy interface", () => {
     checks.forEach((check) => fireEvent.click(check));
     expect(start).toBeEnabled();
     fireEvent.click(start);
-    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(17);
+    expect(screen.getAllByRole("button", { name: /уровень/i })).toHaveLength(buildQuest(getQuestProject("psychologist-site")!).length);
     expect(localStorage.getItem(preparationKey("psychologist-site"))).toContain('"ready":true');
   });
 
@@ -413,8 +553,8 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
     expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(45);
-    expect(document.querySelectorAll(".project-preview img")).toHaveLength(52);
+    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(42);
+    expect(document.querySelectorAll(".project-preview img")).toHaveLength(49);
     expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
       "src",
       "/screens/family-expenses/step-14.png",
@@ -538,7 +678,7 @@ describe("academy interface", () => {
   it("shows the conversational result instead of prepared files in family-expenses screenshots", async () => {
     window.history.replaceState({}, "", "/?capture=family-expenses--step-03");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /ответила Codex обычными словами/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /готовые безопасные данные бюджета/i })).toBeInTheDocument();
     expect(screen.getByText(/4 простых ответа/i)).toBeInTheDocument();
     expect(screen.queryByText(/проверила данные расходов|семейные-расходы\.csv/i)).not.toBeInTheDocument();
   });
@@ -561,12 +701,12 @@ describe("academy interface", () => {
   it("keeps shared result screenshots neutral for real and training routes", async () => {
     window.history.replaceState({}, "", "/?capture=day-planner-agent--step-09");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /ничего не потерялось/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /оставила только нужный вопрос/i })).toBeInTheDocument();
     expect(screen.queryByText(/вымышлен|учебной папке/i)).not.toBeInTheDocument();
   });
 
   it("shows a voice-or-text interview instead of source files in the mobile screenshot", async () => {
-    window.history.replaceState({}, "", "/?capture-mobile=pressure-diary--step-04");
+    window.history.replaceState({}, "", "/?capture-mobile=pressure-diary--step-03");
     render(<AppEntry />);
     expect(await screen.findByText(/расскажите своими словами/i)).toBeInTheDocument();
     expect(screen.getByText(/Codex сам создаст комнату, поля и файлы/i)).toBeInTheDocument();

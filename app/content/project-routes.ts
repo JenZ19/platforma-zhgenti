@@ -29,10 +29,14 @@ const aliases = new Map<string, Omit<ResolvedProjectRoute, "legacy">>([
   ["personal-content-agent", { slug: "content-agent", output: undefined }],
   ["material-delivery-bot", { slug: "online-school-agent", output: undefined }],
   ["faq-bot", { slug: "online-school-agent", output: undefined }],
-  ["lead-bot", { slug: "lead-agent", output: undefined }],
-  ["booking-bot", { slug: "booking-agent", output: undefined }],
+  ["lead-agent", { slug: "client-care-agent", output: undefined }],
+  ["selector-agent", { slug: "client-care-agent", output: undefined }],
+  ["booking-agent", { slug: "client-care-agent", output: undefined }],
+  ["sales-manager-agent", { slug: "client-care-agent", output: undefined }],
+  ["lead-bot", { slug: "client-care-agent", output: undefined }],
+  ["booking-bot", { slug: "client-care-agent", output: undefined }],
   ["questionnaire-bot", { slug: "brief-agent", output: undefined }],
-  ["quiz-bot", { slug: "selector-agent", output: undefined }],
+  ["quiz-bot", { slug: "client-care-agent", output: undefined }],
 ]);
 
 export function resolvePublicProjectRoute(

@@ -9,7 +9,7 @@ import { getQuestProject, projects, questProjects } from "./projects";
 
 describe("quest discovery", () => {
   it("classifies every concrete quest with a difficulty and useful keywords", () => {
-    expect(questProjects).toHaveLength(52);
+    expect(questProjects).toHaveLength(49);
     for (const project of questProjects) {
       const profile = getQuestDiscoveryProfile(project.slug);
       expect(profile.difficulty, project.slug).toBeGreaterThanOrEqual(1);
@@ -22,7 +22,7 @@ describe("quest discovery", () => {
 
   it("sorts by week, then difficulty, then the stable course order", () => {
     const result = filterAndSortProjects(projects, { week: 0, difficulty: 0, goal: "Все цели", query: "" });
-    expect(result).toHaveLength(45);
+    expect(result).toHaveLength(42);
     expect(result.slice(0, 3).map((project) => project.slug)).toEqual(["install-codex", "planning", "ideas"]);
 
     for (let index = 1; index < result.length; index += 1) {

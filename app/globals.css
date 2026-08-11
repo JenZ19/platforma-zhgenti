@@ -4,6 +4,7 @@
 @import "./third-cover-prototypes.css";
 @import "./final-cover-prototypes.css";
 @import "./source-project-prototypes.css";
+@import "./design-reference-scene.css";
 
 :root {
   --paper: #faf7f2;
@@ -69,6 +70,10 @@ button {
 .academy-shell,
 .quest-shell {
   min-height: 100vh;
+  --quest-body-size: 18px;
+  --quest-support-size: 18px;
+  --quest-control-size: 16px;
+  --quest-label-size: 13px;
 }
 
 .site-header {
@@ -1000,12 +1005,84 @@ button {
 .action-section {
   padding-bottom: 40px;
 }
-.action-section > h3 {
+.lesson-text {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: inherit;
+  line-height: 1.65;
+}
+.lesson-text p,
+.lesson-text ul {
+  margin: 0;
+}
+.lesson-text strong {
+  font-weight: 800;
+}
+.lesson-text-action {
+  margin: 0 0 24px;
+  gap: 16px;
+  max-width: 900px;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.55;
+}
+.lesson-text-list-lead {
+  margin-bottom: -5px !important;
+}
+.lesson-text-list {
+  list-style: none;
+  display: grid;
+  gap: 9px;
+  padding: 0;
+}
+.lesson-text-list li {
+  position: relative;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid rgba(26, 35, 37, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.46);
+}
+.lesson-text-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  color: #7c6240;
+  font-weight: 900;
+}
+.lesson-text-result {
+  display: grid;
+  gap: 5px;
+  margin-top: 4px !important;
+  padding: 16px 18px;
+  border-left: 4px solid var(--gold);
+  background: rgba(203, 174, 117, 0.13);
+}
+.lesson-text-result strong {
+  color: #76562e;
+  font-size: 0.65em;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.lesson-text-result em {
   font-family: var(--serif);
-  font-size: 29px;
-  line-height: 1.14;
-  font-weight: 500;
-  margin: 0 0 22px;
+  font-size: 1.08em;
+  line-height: 1.4;
+}
+.why-card .lesson-text,
+.help-card .lesson-text {
+  color: inherit;
+}
+.why-card .lesson-text p,
+.why-card .lesson-text li {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.help-card .lesson-text p,
+.help-card .lesson-text li {
+  font-size: 13px;
 }
 .prompt-card {
   background: var(--ink);
@@ -1086,6 +1163,18 @@ button {
   width: 100%;
   aspect-ratio: 3/2;
   object-fit: cover;
+}
+.reference-shot.screenshot-real,
+.reference-shot.screenshot-placeholder,
+.mobile-result > button.screenshot-real,
+.mobile-result > button.screenshot-placeholder {
+  background: #eef0ed;
+}
+.reference-shot.screenshot-real img,
+.reference-shot.screenshot-placeholder img,
+.mobile-result > button.screenshot-real img,
+.mobile-result > button.screenshot-placeholder img {
+  object-fit: contain;
 }
 .reference-shot > span {
   position: absolute;
@@ -1817,6 +1906,10 @@ button {
 .mobile-academy-shell,
 .mobile-quest-shell {
   min-height: 100vh;
+  --quest-body-size: 17px;
+  --quest-support-size: 17px;
+  --quest-control-size: 16px;
+  --quest-label-size: 13px;
   --phone-green: #63806d;
   --phone-green-pale: #e6eee7;
   --telegram: #4c8fbd;
@@ -2336,12 +2429,11 @@ button {
   margin: 0 38px;
   padding: 12px 0 32px;
 }
-.mobile-do h3 {
-  font-family: var(--serif);
-  font-size: 29px;
-  line-height: 1.12;
-  font-weight: 500;
-  margin: 0 0 18px;
+.mobile-do .lesson-text-action {
+  margin: 0 0 20px;
+  gap: 14px;
+  font-size: 18px;
+  line-height: 1.55;
 }
 .mobile-action a,
 .mobile-action > button {
@@ -2429,6 +2521,15 @@ button {
   font-family: var(--serif);
   font-size: 30px;
   font-weight: 500;
+}
+.mobile-screenshot-badge {
+  display: inline-block;
+  margin: -7px 0 14px;
+  color: #6d5b3a;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 .mobile-result > button {
   width: 100%;
@@ -2528,6 +2629,19 @@ button {
   color: var(--muted);
   font-size: 9px;
   line-height: 1.5;
+}
+.mobile-help .lesson-text {
+  gap: 8px;
+}
+.mobile-why .lesson-text p,
+.mobile-why .lesson-text li {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.mobile-help .lesson-text p,
+.mobile-help .lesson-text li {
+  font-size: 13px;
+  line-height: 1.55;
 }
 /* Phone screenshots */
 .mobile-capture {
@@ -4942,8 +5056,9 @@ button {
     gap: 7px;
     padding: 17px;
   }
-  .action-section > h3 {
-    font-size: 25px;
+  .lesson-text-action {
+    font-size: 18px;
+    line-height: 1.58;
   }
   .prompt-card pre {
     font-size: 10px;
@@ -5137,8 +5252,8 @@ button {
   .mobile-prompt {
     margin: 0 12px 25px;
   }
-  .mobile-do h3 {
-    font-size: 25px;
+  .mobile-do .lesson-text-action {
+    font-size: 17px;
   }
   .mobile-result img {
     aspect-ratio: 4/3;
@@ -8708,4 +8823,373 @@ button {
 @media (max-width: 700px) {
   .quest-links { padding: 14px; }
   .quest-links a { min-height: 64px; }
+}
+
+/* Shared readable typography for every quest */
+.quest-shell .level-header h2 {
+  font-size: clamp(40px, 4.5vw, 56px);
+  line-height: 0.98;
+}
+.quest-shell .level-header p,
+.quest-shell .level-header > span,
+.quest-shell .section-kicker,
+.quest-shell .expected-heading > span {
+  font-size: var(--quest-label-size);
+}
+.quest-shell .lesson-text-action {
+  max-width: 780px;
+  font-size: var(--quest-body-size);
+  line-height: 1.62;
+}
+.quest-shell .why-card .lesson-text p,
+.quest-shell .why-card .lesson-text li {
+  font-size: var(--quest-support-size);
+  line-height: 1.62;
+}
+.quest-shell .why-card > b {
+  font-size: var(--quest-label-size);
+}
+.quest-shell .prompt-card pre {
+  font-size: var(--quest-control-size);
+  line-height: 1.65;
+}
+.quest-shell .prompt-card button,
+.quest-shell .quest-links a b,
+.quest-shell .quest-links a small {
+  font-size: 14px;
+}
+.quest-shell .expected-heading h3 {
+  font-size: 30px;
+  line-height: 1.12;
+}
+.quest-shell .expected-section li {
+  align-items: flex-start;
+  font-size: var(--quest-control-size);
+  line-height: 1.5;
+}
+.quest-shell .expected-section li > span {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+.quest-shell .level-actions button {
+  min-height: 56px;
+  font-size: var(--quest-control-size);
+}
+.quest-shell .help-card .lesson-text p,
+.quest-shell .help-card .lesson-text li,
+.quest-shell .help-copy p {
+  font-size: 15px;
+  line-height: 1.55;
+}
+.quest-shell .help-copy button {
+  font-size: 13px;
+}
+.quest-shell .map-heading small {
+  font-size: 11px;
+}
+.quest-shell .level-list button > b {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.quest-shell .level-list button small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+.quest-shell .quest-reset-control b {
+  font-size: 14px;
+}
+.quest-shell .quest-reset-control small {
+  font-size: 12px;
+}
+.quest-shell .server-offer-copy > p:first-child,
+.quest-shell .server-promo-code span,
+.quest-shell .server-offer-terms b {
+  font-size: var(--quest-label-size);
+}
+.quest-shell .server-offer-lead {
+  font-size: var(--quest-support-size);
+}
+.quest-shell .server-offer ol,
+.quest-shell .server-promo-code button,
+.quest-shell .server-pdf-link {
+  font-size: var(--quest-control-size);
+}
+.quest-shell .server-offer-terms span,
+.quest-shell .server-offer figcaption {
+  font-size: 13px;
+}
+.quest-shell .quest-customizer > header p,
+.quest-shell .customizer-summary small {
+  font-size: var(--quest-label-size);
+}
+.quest-shell .quest-customizer > header small {
+  font-size: 15px;
+}
+.quest-shell .customizer-axes legend small,
+.quest-shell .customizer-palette > header p,
+.quest-shell .customizer-summary p {
+  font-size: 14px;
+}
+.quest-shell .customizer-options label span {
+  font-size: 14px;
+}
+.quest-shell .customizer-input span,
+.quest-shell .customizer-summary b {
+  font-size: 13px;
+}
+.quest-shell .customizer-input input,
+.quest-shell .customizer-save,
+.quest-shell .palette-options button b {
+  font-size: var(--quest-control-size);
+}
+
+.mobile-quest-shell .mobile-level-card > header h2 {
+  font-size: clamp(36px, 8vw, 46px);
+  line-height: 1;
+}
+.mobile-quest-shell .mobile-level-card > header p,
+.mobile-quest-shell .mobile-level-card > header > span,
+.mobile-quest-shell .section-kicker,
+.mobile-quest-shell .mobile-screenshot-badge {
+  font-size: var(--quest-label-size);
+}
+.mobile-quest-shell .mobile-do .lesson-text-action {
+  font-size: var(--quest-body-size);
+  line-height: 1.62;
+}
+.mobile-quest-shell .mobile-why .lesson-text p,
+.mobile-quest-shell .mobile-why .lesson-text li {
+  font-size: var(--quest-support-size);
+  line-height: 1.6;
+}
+.mobile-quest-shell .mobile-why > b {
+  font-size: var(--quest-label-size);
+}
+.mobile-quest-shell .mobile-action a,
+.mobile-quest-shell .mobile-action > button,
+.mobile-quest-shell .mobile-prompt > button {
+  font-size: var(--quest-control-size);
+}
+.mobile-quest-shell .mobile-action p,
+.mobile-quest-shell .mobile-prompt > p {
+  font-size: 15px;
+  line-height: 1.55;
+}
+.mobile-quest-shell .mobile-result h3 {
+  font-size: 28px;
+  line-height: 1.12;
+}
+.mobile-quest-shell .mobile-result li {
+  font-size: var(--quest-control-size);
+  line-height: 1.5;
+}
+.mobile-quest-shell .mobile-result li span {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+.mobile-quest-shell .mobile-level-actions button {
+  min-height: 56px;
+  font-size: var(--quest-control-size);
+}
+.mobile-quest-shell .mobile-help .lesson-text p,
+.mobile-quest-shell .mobile-help .lesson-text li {
+  font-size: 15px;
+  line-height: 1.55;
+}
+.mobile-quest-shell .mobile-level-rail button {
+  font-size: 15px;
+}
+.mobile-quest-shell .quest-customizer.compact > header small,
+.mobile-quest-shell .quest-customizer.compact .customizer-axes legend small,
+.mobile-quest-shell .quest-customizer.compact .customizer-palette > header p,
+.mobile-quest-shell .quest-customizer.compact .customizer-summary p {
+  font-size: 14px;
+}
+.mobile-quest-shell .quest-customizer.compact .customizer-options label span {
+  font-size: 14px;
+}
+.mobile-quest-shell .quest-customizer.compact .customizer-save,
+.mobile-quest-shell .quest-customizer.compact .customizer-input input,
+.mobile-quest-shell .quest-customizer.compact .palette-options button b {
+  font-size: var(--quest-control-size);
+}
+
+@media (max-width: 700px) {
+  .quest-shell .level-header h2 {
+    font-size: 38px;
+  }
+  .quest-shell .expected-section ul {
+    gap: 12px;
+  }
+  .quest-shell .level-actions,
+  .mobile-quest-shell .mobile-level-actions {
+    gap: 12px;
+  }
+  .mobile-quest-shell .mobile-level-card > header h2 {
+    font-size: 36px;
+  }
+}
+
+/* Beginner contract shared by every quest */
+.beginner-terms {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(49, 76, 69, 0.18);
+  border-radius: 14px;
+  background: #edf4ef;
+  color: var(--ink);
+  font-family: var(--sans);
+}
+.beginner-terms > b {
+  color: #49665b;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.beginner-terms dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.beginner-terms dl > div {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.35fr) 1fr;
+  gap: 14px;
+  align-items: baseline;
+}
+.beginner-terms dt,
+.beginner-terms dd {
+  margin: 0;
+  font-size: var(--quest-support-size);
+  line-height: 1.55;
+}
+.beginner-terms dt { font-weight: 800; }
+.mobile-quest-shell .beginner-terms {
+  margin: 0 18px 18px;
+  padding: 16px;
+}
+.mobile-quest-shell .beginner-terms dl > div {
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+.mobile-help-prompt {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #172328;
+  color: #fff;
+}
+.mobile-help-prompt p {
+  margin: 0;
+  color: inherit;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+.mobile-help-prompt button {
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  background: #fff;
+  color: #172328;
+  font-size: 15px;
+  font-weight: 800;
+}
+.level-actions .primary-button,
+.mobile-level-actions button:last-child {
+  white-space: normal;
+  text-wrap: balance;
+}
+
+/* Honest visual prototype for route-specific final checks */
+.journey-check-prototype {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border: 1px solid rgba(28, 46, 49, 0.18);
+  border-radius: 18px;
+  background: #f4f0e8;
+  color: #1f3032;
+  font-family: var(--sans);
+}
+.journey-check-prototype > header,
+.journey-check-prototype > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  background: #1f3032;
+  color: #fff;
+}
+.journey-check-prototype > header span,
+.journey-check-prototype > header b {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+.journey-check-prototype > main {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  padding: 28px;
+}
+.journey-check-prototype > main > small {
+  color: #7b694a;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.journey-check-prototype h3 {
+  max-width: 760px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 34px;
+  line-height: 1.08;
+}
+.journey-check-prototype > main > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.journey-check-prototype section {
+  display: grid;
+  gap: 8px;
+  min-height: 138px;
+  padding: 18px;
+  border: 1px solid rgba(28, 46, 49, 0.12);
+  border-radius: 14px;
+  background: #fff;
+}
+.journey-check-prototype section i {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dcebe1;
+  font-style: normal;
+  font-weight: 900;
+}
+.journey-check-prototype section b {
+  font-size: 17px;
+  line-height: 1.25;
+}
+.journey-check-prototype section span,
+.journey-check-prototype > footer span,
+.journey-check-prototype > footer b { font-size: 13px; }
+.journey-check-prototype.mobile > main { padding: 18px; }
+.journey-check-prototype.mobile h3 { font-size: 28px; }
+.journey-check-prototype.mobile > main > div { grid-template-columns: 1fr; }
+.journey-check-prototype.mobile section {
+  min-height: 0;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
 }

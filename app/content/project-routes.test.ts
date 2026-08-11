@@ -2,6 +2,16 @@ import { describe, expect, it } from "vitest";
 import { canonicalQuestQuery, resolvePublicProjectRoute } from "./project-routes";
 
 describe("public project routes", () => {
+  it("redirects every former client-stage project to the unified client agent", () => {
+    for (const oldSlug of ["lead-agent", "selector-agent", "booking-agent", "sales-manager-agent", "lead-bot", "booking-bot", "quiz-bot"]) {
+      expect(resolvePublicProjectRoute(oldSlug), oldSlug).toEqual({
+        slug: "client-care-agent",
+        output: undefined,
+        legacy: true,
+      });
+    }
+  });
+
   it("maps every old project address to its new card and format", () => {
     const cases = [
       ["planner", "planning", "service"],
@@ -25,10 +35,10 @@ describe("public project routes", () => {
       ["personal-content-agent", "content-agent", undefined],
       ["material-delivery-bot", "online-school-agent", undefined],
       ["faq-bot", "online-school-agent", undefined],
-      ["lead-bot", "lead-agent", undefined],
-      ["booking-bot", "booking-agent", undefined],
+      ["lead-bot", "client-care-agent", undefined],
+      ["booking-bot", "client-care-agent", undefined],
       ["questionnaire-bot", "brief-agent", undefined],
-      ["quiz-bot", "selector-agent", undefined],
+      ["quiz-bot", "client-care-agent", undefined],
     ] as const;
 
     for (const [oldSlug, slug, output] of cases) {

@@ -92,6 +92,8 @@ export type AgentContract = {
 
 export type QuestStep = {
   id: number;
+  sourceStepId?: number;
+  journeyCheck?: string;
   title: string;
   eyebrow: string;
   why: string;
@@ -100,10 +102,18 @@ export type QuestStep = {
   prompt?: string;
   expected: string[];
   screenshot: string;
+  screenshotKind?: "real" | "prototype" | "placeholder";
+  showScreenshot?: boolean;
+  beginnerTerms?: BeginnerTerm[];
   reward?: string;
   help: { title: string; body: string; prompt: string };
   guide?: QuestGuideFrame[];
   links?: QuestLink[];
+};
+
+export type BeginnerTerm = {
+  term: string;
+  meaning: string;
 };
 
 export type QuestLink = {

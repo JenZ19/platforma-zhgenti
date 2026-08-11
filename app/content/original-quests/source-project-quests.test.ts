@@ -3,6 +3,11 @@ import { defaultCustomization } from "../customization";
 import { getQuestProject } from "../projects";
 import { buildQuest } from "../quests";
 import { buildMobileQuest } from "../mobile";
+import { getProjectLevelCount } from "../../lib/progress";
+
+function sourceStep(steps: ReturnType<typeof buildQuest>, id: number) {
+  return steps.find((step) => step.sourceStepId === id)!;
+}
 
 function questText(slug: string): string {
   const project = getQuestProject(slug)!;
@@ -22,9 +27,9 @@ describe("source-backed project quests", () => {
     const steps = buildQuest(project, "real", defaultCustomization(slug));
     const text = questText(slug);
 
-    expect(steps).toHaveLength(17);
-    expect(steps.map((step) => step.id)).toEqual(Array.from({ length: 17 }, (_, index) => index + 1));
-    expect(new Set(steps.map((step) => step.title)).size).toBe(17);
+    expect(steps).toHaveLength(getProjectLevelCount(project));
+    expect(steps.map((step) => step.id)).toEqual(Array.from({ length: steps.length }, (_, index) => index + 1));
+    expect(new Set(steps.map((step) => step.title)).size).toBe(steps.length);
     for (const phrase of phrases) expect(text).toMatch(new RegExp(phrase, "i"));
     expect(text).not.toMatch(/создайте.+(?:csv|txt)|вручную создайте.+файл/i);
   });
@@ -32,9 +37,9 @@ describe("source-backed project quests", () => {
   it("finishes every source-backed path with an independent client copy and honest portfolio case", () => {
     for (const slug of ["carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub"]) {
       const steps = buildQuest(getQuestProject(slug)!, "real", defaultCustomization(slug));
-      expect(`${steps[15].action} ${steps[15].prompt}`).toMatch(/клиент|заказчик/i);
-      expect(`${steps[16].action} ${steps[16].prompt}`).toMatch(/портфолио/i);
-      expect(`${steps[16].action} ${steps[16].prompt}`).toMatch(/не придумывай|без выдуман/i);
+      expect(`${sourceStep(steps, 16).action} ${sourceStep(steps, 16).prompt}`).toMatch(/клиент|заказчик/i);
+      expect(`${sourceStep(steps, 17).action} ${sourceStep(steps, 17).prompt}`).toMatch(/портфолио/i);
+      expect(`${sourceStep(steps, 17).action} ${sourceStep(steps, 17).prompt}`).toMatch(/не придумывай|без выдуман/i);
     }
   });
 
@@ -49,7 +54,7 @@ describe("source-backed project quests", () => {
     for (const [slug, pattern] of expectations) {
       const steps = buildMobileQuest(getQuestProject(slug)!, "real", defaultCustomization(slug));
       const text = steps.map((step) => `${step.action} ${step.prompt}`).join(" ");
-      expect(steps).toHaveLength(17);
+      expect(steps).toHaveLength(getProjectLevelCount(getQuestProject(slug)!));
       expect(text, slug).toMatch(pattern);
       for (const step of steps) {
         expect(step.action, `${slug}/step-${step.id}`).not.toMatch(/создайте.+(?:csv|txt)|откройте.+локальн.+папк/i);

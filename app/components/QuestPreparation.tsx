@@ -81,7 +81,7 @@ export function QuestPreparation({
       <p className="preparation-lead">Выбор сохранится только для квеста «{project.title}». В другом проекте мы спросим снова.</p>
       <div className="mode-options">
         <button type="button" onClick={onChooseDemo} aria-label="Работать на вымышленных данных">
-          <span>✦</span><small>Легче для первого раза</small><h3>На вымышленных</h3><p>Все примеры уже готовы. Можно сразу идти по 17 уровням и ни о чём не переживать.</p><b>Начать тренировку →</b>
+          <span>✦</span><small>Легче для первого раза</small><h3>На вымышленных</h3><p>Все примеры уже готовы. Можно сразу пройти весь путь проекта и ни о чём не переживать.</p><b>Начать тренировку →</b>
         </button>
         <button type="button" onClick={onChooseReal} aria-label="Работать на реальных данных">
           <span>◇</span><small>Для себя или клиента</small><h3>На реальных</h3><p>Сначала вспомним нужные ответы, затем Codex задаст вопросы и сам создаст всё остальное.</p><b>Открыть чек-лист →</b>

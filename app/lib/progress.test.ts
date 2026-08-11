@@ -38,6 +38,27 @@ describe("academy progress", () => {
     expect(isStepUnlocked(first, 2)).toBe(true);
   });
 
+  it("continues to the next level after reopening an already completed level", () => {
+    const completedFirst = completeStep(createEmptyProgress(), 1);
+    const reopenedFirst = { ...completedFirst, activeStep: 1 };
+
+    expect(completeStep(reopenedFirst, 1)).toEqual({
+      version: 1,
+      activeStep: 2,
+      completed: [1],
+      score: 10,
+    });
+  });
+
+  it("finishes a short quest on its actual last level", () => {
+    let progress = createEmptyProgress();
+    for (let id = 1; id <= 8; id += 1) progress = completeStep(progress, id, 8);
+
+    expect(progress.activeStep).toBe(8);
+    expect(progress.completed).toHaveLength(8);
+    expect(parseProgress(JSON.stringify(progress), 8)).toEqual(progress);
+  });
+
   it("recovers safely from malformed storage", () => {
     expect(parseProgress("broken json")).toEqual(createEmptyProgress());
     expect(parseProgress('{"version":2,"completed":[1]}')).toEqual(createEmptyProgress());
@@ -52,11 +73,11 @@ describe("academy progress", () => {
     saveProgress(branchStorageSlug("planning", "service", "desktop"), completeStep(createEmptyProgress(), 1), storage);
     saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage);
     expect(getAcademyStats(projects, storage)).toEqual({
-      totalProjects: 45,
+      totalProjects: 42,
       startedProjects: 2,
       completedProjects: 1,
       completedSteps: 18,
-      totalSteps: 765,
+      totalSteps: 769,
       score: 180,
     });
   });

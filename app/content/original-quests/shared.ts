@@ -63,6 +63,7 @@ function domainWords(slug: string): { title: string; result: string } {
   if (slug === "carousel-agent") return { title: "Помощь с каруселью на этом уровне", result: "карусель собирается правильно" };
   if (slug === "threads-agent") return { title: "Помощь с Threads-агентом на этом уровне", result: "подборка тредов работает правильно" };
   if (slug === "webinar-moderator-agent") return { title: "Помощь с модератором на этом уровне", result: "модератор работает безопасно" };
+  if (slug === "unique-design") return { title: "Помощь с дизайном на этом уровне", result: "свой дизайн собран оригинально и понятно" };
   return { title: "Помощь с хабом здоровья на этом уровне", result: "хаб хранит и показывает данные правильно" };
 }
 

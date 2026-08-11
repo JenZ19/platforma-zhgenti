@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- these are local, generated project previews */
 import { useEffect, useMemo, useState } from "react";
 import {
   difficultyLabels,
@@ -9,7 +10,7 @@ import {
   type GoalFilter,
 } from "../content/discovery";
 import { projects } from "../content/projects";
-import { getAcademyStats } from "../lib/progress";
+import { getAcademyStats, getProjectLevelCount } from "../lib/progress";
 import { ProjectCard } from "./ProjectCard";
 
 const weekLabels = ["Все проекты", "Неделя 1", "Неделя 2", "Неделя 3", "Неделя 4", "Неделя 5", "Неделя 6"];
@@ -19,7 +20,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   const [difficulty, setDifficulty] = useState<DifficultyFilter>(0);
   const [goal, setGoal] = useState<GoalFilter>("Все цели");
   const [query, setQuery] = useState("");
-  const [stats, setStats] = useState({ totalProjects: 45, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: 765, score: 0 });
+  const [stats, setStats] = useState({ totalProjects: projects.length, startedProjects: 0, completedProjects: 0, completedSteps: 0, totalSteps: projects.reduce((total, project) => total + getProjectLevelCount(project), 0), score: 0 });
 
   useEffect(() => {
     // Overall progress is device-local and can only be read after the page mounts.
@@ -41,7 +42,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
   }
 
   return (
-    <main className="academy-shell">
+    <main className="academy-shell" data-visual-theme="tactile-album">
       <header className="site-header">
         <a className="brand" href="https://submarineedu.ru/feya/" target="_blank" rel="noreferrer"><span>S</span><b>SUBMARINE<small>Академия квестов</small></b></a>
         <div className="header-actions">
@@ -51,11 +52,34 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
       </header>
 
       <section className="academy-hero">
-        <p className="kicker"><span /> Весь курс в формате игры</p>
-        <h1>Выбери проект.<br /><em>Сделай его шаг за шагом.</em></h1>
-        <p className="hero-lead">Никакого пустого листа. В каждом квесте уже есть готовые команды для Codex, понятные проверки и экран того, что должно получиться.</p>
+        <div className="academy-hero-copy">
+          <p className="kicker">Весь курс в формате игры</p>
+          <h1>Выбери проект.<br /><em>Собери свою версию.</em></h1>
+          <p className="hero-lead">Никакого пустого листа. В каждом квесте уже есть готовые команды для Codex, понятные проверки и экран того, что должно получиться.</p>
+        </div>
+        <section className="academy-album" role="group" aria-label="Живой альбом готовых проектов">
+          <header><span>Моя будущая коллекция</span><b>Три результата из {projects.length}</b></header>
+          <div className="album-leaves">
+            <figure>
+              <span className="album-tape" aria-hidden="true" />
+              <img src="/screens/planner/step-14.png" width="960" height="640" alt="Готовый проект: планер на день и неделю" />
+              <figcaption><b>Спокойный планер</b><span>сервис или ИИ-агент</span></figcaption>
+            </figure>
+            <figure>
+              <span className="album-tape" aria-hidden="true" />
+              <img src="/screens/family-expenses/step-14.png" width="960" height="640" alt="Готовый проект: учёт расходов семьи" />
+              <figcaption><b>Семейный бюджет</b><span>настоящие итоги и категории</span></figcaption>
+            </figure>
+            <figure>
+              <span className="album-tape" aria-hidden="true" />
+              <img src="/screens/webinar-moderator-agent/step-14.png" width="960" height="640" alt="Готовый проект: ИИ-агент модератор вебинаров" />
+              <figcaption><b>Модератор вебинара</b><span>ИИ-агент для клиента</span></figcaption>
+            </figure>
+          </div>
+          <p>Листай, выбирай и собирай свою версию</p>
+        </section>
         <div className="academy-stats" aria-label="Общий прогресс">
-          <div><strong>45</strong><span>проектов</span></div>
+          <div><strong>{projects.length}</strong><span>проекта</span></div>
           <div><strong>{stats.startedProjects}</strong><span>начато</span></div>
           <div><strong>{stats.completedProjects}</strong><span>готово</span></div>
           <div><strong>{stats.completedSteps}</strong><span>уровней пройдено</span></div>
@@ -64,7 +88,7 @@ export function Academy({ onOpen }: { onOpen?: (slug: string) => void }) {
 
       <section className="catalogue" aria-label="Каталог проектов">
         <div className="catalogue-head">
-          <div><p className="section-kicker">Твоя мастерская</p><h2>45 проектов</h2></div>
+          <div><p className="section-kicker">Твоя мастерская</p><h2>{projects.length} проекта</h2></div>
           <label className="search-field"><span>⌕</span><input type="search" aria-label="Найти проект" placeholder="Найти проект…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         </div>
         <div className="week-tabs" role="group" aria-label="Фильтр по неделям">

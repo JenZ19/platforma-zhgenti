@@ -18,7 +18,10 @@ import { buildCarouselAgentQuest } from "./original-quests/carousel-agent";
 import { buildThreadsAgentQuest } from "./original-quests/threads-agent";
 import { buildWebinarModeratorAgentQuest } from "./original-quests/webinar-moderator-agent";
 import { buildFamilyHealthHubQuest } from "./original-quests/family-health-hub";
+import { buildUniqueDesignQuest } from "./original-quests/unique-design";
 import { attachApiKeysQuestLinks, buildSetupQuest, isSetupQuestSlug } from "./setup-quests";
+import { applyJourneyPlan } from "./journey-plans";
+import { addBeginnerLanguage } from "./beginner-language";
 
 function applyCustomization(
   steps: QuestStep[],
@@ -41,9 +44,11 @@ function applyCustomization(
 }
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization): QuestStep[] {
-  const finish = (steps: QuestStep[]) => attachApiKeysQuestLinks(steps, project.slug);
+  const finish = (steps: QuestStep[]) => addBeginnerLanguage(
+    applyJourneyPlan(project, attachApiKeysQuestLinks(steps, project.slug), mode),
+  );
   if (isSetupQuestSlug(project.slug)) {
-    return buildSetupQuest(project);
+    return finish(buildSetupQuest(project));
   }
   if (project.slug === "family-expenses") {
     return finish(buildFamilyExpensesQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
@@ -68,6 +73,9 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", 
   }
   if (project.slug === "family-health-hub") {
     return finish(buildFamilyHealthHubQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
+  }
+  if (project.slug === "unique-design") {
+    return finish(buildUniqueDesignQuest(project, mode, customization ?? defaultCustomization(project.slug)!));
   }
   let steps: QuestStep[];
   switch (project.kind) {

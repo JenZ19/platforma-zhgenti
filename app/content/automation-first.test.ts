@@ -17,6 +17,10 @@ function learnerText(value: ReturnType<typeof buildQuest>[number]): string {
 
 const manualPreparation = /создайте[^.!?\n]{0,100}(?:папк|файл)|запишите[^.!?\n]{0,100}в файл|откройте[^.!?\n]{0,100}(?:\.txt|\.csv|файл)|ФАЙЛ:/i;
 
+function sourceStep(steps: ReturnType<typeof buildQuest>, id: number) {
+  return steps.find((step) => step.sourceStepId === id);
+}
+
 describe("Codex-first preparation across every track", () => {
   it("never asks a learner to create preparation folders, text files or tables", () => {
     for (const project of questProjects.filter((item) => item.journey !== "setup")) {
@@ -44,10 +48,10 @@ describe("Codex-first preparation across every track", () => {
       expect(prompts, project.slug).not.toContain(profile.sourceFile);
       expect(prompts, project.slug).not.toContain(profile.rulesFile);
       expect(openingLearnerCopy, project.slug).not.toMatch(manualPreparation);
-      expect(steps[0].prompt, `${project.slug}/step-1`).toMatch(/не начинай опрос/i);
-      expect(steps[1].prompt, `${project.slug}/step-2`).toMatch(/не начинай опрос/i);
-      expect(steps[2].prompt, `${project.slug}/step-3`).toMatch(/один раз собери|задавай строго один короткий вопрос за раз/i);
-      expect(steps[3].prompt, `${project.slug}/step-4`).toMatch(/не начинай опрос заново|используй уже подтверждённые ответы/i);
+      expect(sourceStep(steps, 1)?.prompt, `${project.slug}/source-1`).toMatch(/не начинай опрос/i);
+      if (sourceStep(steps, 2)) expect(sourceStep(steps, 2)?.prompt, `${project.slug}/source-2`).toMatch(/не начинай опрос/i);
+      expect(sourceStep(steps, 3)?.prompt, `${project.slug}/source-3`).toMatch(/один раз собери|задавай строго один короткий вопрос за раз/i);
+      expect(sourceStep(steps, 4)?.prompt, `${project.slug}/source-4`).toMatch(/не начинай опрос заново|используй уже подтверждённые ответы/i);
     }
   });
 

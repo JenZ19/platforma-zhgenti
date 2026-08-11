@@ -58,8 +58,8 @@ export const goalKeywords: GoalKeyword[] = [
 
 const difficultyGroups: Record<Difficulty, string[]> = {
   1: ["install-codex", "family-expenses", "planner", "idea-vault", "child-schedule", "pressure-diary", "fitness-tracker", "recipe-book", "personal-organizer", "home-helper", "portfolio-site"],
-  2: ["day-planner-agent", "home-organizer-agent", "meal-planning-agent", "study-agent", "idea-analysis-agent", "expense-agent", "family-schedule-agent", "habit-agent", "lead-agent", "brief-agent", "selector-agent", "content-agent", "expert-assistant-agent", "event-organizer-agent", "client-care-agent", "expert-site", "beauty-site", "photographer-site", "designer-site", "consultation-site", "event-site"],
-  3: ["api-keys", "family-health-hub", "booking-agent", "sales-manager-agent", "administrator-agent", "consultant-agent", "online-school-agent", "carousel-agent", "threads-agent", "psychologist-site", "course-site", "small-shop-site", "expert-pro-site", "service-pro-site", "graduate-portfolio"],
+  2: ["day-planner-agent", "home-organizer-agent", "meal-planning-agent", "study-agent", "idea-analysis-agent", "expense-agent", "family-schedule-agent", "habit-agent", "brief-agent", "content-agent", "expert-assistant-agent", "event-organizer-agent", "unique-design", "expert-site", "beauty-site", "photographer-site", "designer-site", "consultation-site", "event-site"],
+  3: ["api-keys", "family-health-hub", "client-care-agent", "administrator-agent", "consultant-agent", "online-school-agent", "carousel-agent", "threads-agent", "psychologist-site", "course-site", "small-shop-site", "expert-pro-site", "service-pro-site", "graduate-portfolio"],
   4: ["server-152fz", "fairy-team-agent", "webinar-moderator-agent", "school-pro-site", "catalog-pro-site"],
 };
 
@@ -70,7 +70,7 @@ const difficultyBySlug = new Map<string, Difficulty>(
 );
 
 const healthSlugs = new Set(["pressure-diary", "fitness-tracker", "habit-agent", "family-health-hub"]);
-const contentSlugs = new Set(["content-agent", "carousel-agent", "threads-agent", "course-site", "event-site", "event-organizer-agent", "webinar-moderator-agent"]);
+const contentSlugs = new Set(["content-agent", "carousel-agent", "threads-agent", "course-site", "event-site", "event-organizer-agent", "webinar-moderator-agent", "unique-design"]);
 const setupSlugs = new Set(["install-codex", "api-keys", "server-152fz"]);
 const personalPortfolioSlugs = new Set(["portfolio-site", "graduate-portfolio"]);
 

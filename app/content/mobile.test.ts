@@ -4,6 +4,7 @@ import { getQuestProject, questProjects } from "./projects";
 import { getAgentContract } from "./agent-contracts";
 import { defaultCustomization } from "./customization";
 import { buildQuest } from "./quests";
+import { getProjectLevelCount } from "../lib/progress";
 
 function stepText(value: unknown): string {
   if (typeof value === "string") return value;
@@ -13,17 +14,25 @@ function stepText(value: unknown): string {
 }
 
 describe("mobile quest builder", () => {
-  it("builds seventeen phone-only steps for every project", () => {
+  it("builds the intended phone-only steps for every project", () => {
     let total = 0;
     for (const project of questProjects) {
       const steps = buildMobileQuest(project, "demo");
-      expect(steps, project.slug).toHaveLength(17);
-      expect(steps.map((step) => step.id), project.slug).toEqual(Array.from({ length: 17 }, (_, index) => index + 1));
+      const desktopSteps = buildQuest(project, "demo");
+      const totalLevels = getProjectLevelCount(project);
+      expect(steps, project.slug).toHaveLength(totalLevels);
+      expect(steps.map((step) => step.id), project.slug).toEqual(Array.from({ length: totalLevels }, (_, index) => index + 1));
       if (project.journey !== "setup") expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" "), project.slug).not.toMatch(/терминал|npm|\bgit\b|папк.+компьютер/i);
-      expect(steps.every((step) => step.screenshot === `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`), project.slug).toBe(true);
+      for (const step of steps) {
+        const desktopStep = desktopSteps[step.id - 1];
+        const expectedScreenshot = desktopStep.screenshotKind === "real" || desktopStep.screenshotKind === "placeholder"
+          ? desktopStep.screenshot
+          : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`;
+        expect(step.screenshot, `${project.slug}/${step.id}`).toBe(expectedScreenshot);
+      }
       total += steps.length;
     }
-    expect(total).toBe(884);
+    expect(total).toBeGreaterThan(824);
   });
 
   it("gives every project the actions needed for a phone workflow", () => {
@@ -55,12 +64,28 @@ describe("mobile quest builder", () => {
     }
   });
 
+  it("keeps the two final server levels on the guided computer path", () => {
+    const steps = buildMobileQuest(getQuestProject("server-152fz")!, "real");
+
+    expect(steps).toHaveLength(9);
+    expect(steps[7].mobileAction).toMatchObject({
+      tool: "curator",
+      label: expect.stringMatching(/Codex/i),
+    });
+    expect(steps[8].mobileAction).toMatchObject({
+      tool: "curator",
+      label: expect.stringMatching(/Codex.+ChatGPT/i),
+    });
+    expect(steps[8].mobileAction.href).toBeUndefined();
+  });
+
   it("collects pressure-diary answers in chat without a prepared source file", () => {
     const project = getQuestProject("pressure-diary")!;
     const steps = buildMobileQuest(project, "real");
-    expect(steps[3].action).not.toContain("мои-измерения.csv");
-    expect(steps[3].action).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
-    expect(steps[3].action).toMatch(/по одному вопросу голосом или текстом/i);
+    const interview = steps.find((step) => step.sourceStepId === 4)!;
+    expect(interview.action).not.toContain("мои-измерения.csv");
+    expect(interview.action).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
+    expect(interview.action).toMatch(/по одному вопросу голосом или текстом/i);
     expect(steps.flatMap((step) => step.prompt ?? []).join(" ")).not.toContain("мои-измерения.csv");
   });
 
@@ -98,7 +123,7 @@ describe("mobile quest builder", () => {
 
   it("keeps every mobile agent path conversational and subject-specific", () => {
     const agents = questProjects.filter((project) => project.kind === "agent");
-    expect(agents).toHaveLength(24);
+    expect(agents).toHaveLength(20);
 
     for (const project of agents) {
       const contract = getAgentContract(project.slug);

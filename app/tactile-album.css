@@ -1,0 +1,1351 @@
+/*
+ * Tactile album: the selected visual system for the whole academy.
+ * The dark surface is the album cover; every working area is a real paper leaf.
+ */
+
+[data-visual-theme="tactile-album"] {
+  --album-cover: #263b48;
+  --album-cover-deep: #192d36;
+  --album-cover-soft: #34505a;
+  --album-paper: #edf0e4;
+  --album-paper-warm: #e7dbc2;
+  --album-paper-green: #c8d5cc;
+  --album-paper-clay: #d98e70;
+  --album-paper-blue: #c5d7d9;
+  --album-ink: #202b2d;
+  --album-muted: #58686a;
+  --album-thread: #b7604e;
+  --album-tape: rgba(221, 197, 151, 0.86);
+  --paper: var(--album-paper);
+  --paper-deep: #dbe1d5;
+  --ink: var(--album-ink);
+  --muted: var(--album-muted);
+  --gold: #9b743e;
+  --rose: var(--album-thread);
+  --rose-pale: #e8c5b8;
+  --line: rgba(32, 43, 45, 0.17);
+  --serif: Charter, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  --sans: "Avenir Next", Avenir, "Segoe UI", system-ui, sans-serif;
+  min-height: 100vh;
+  color: var(--album-ink);
+  font-family: var(--sans);
+  background-color: var(--album-cover);
+  background-image: repeating-linear-gradient(
+    98deg,
+    rgba(255, 255, 255, 0.018) 0,
+    rgba(255, 255, 255, 0.018) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+}
+
+body {
+  background: var(--album-cover, #263b48);
+}
+
+body::before {
+  display: none;
+}
+
+[data-visual-theme="tactile-album"] button,
+[data-visual-theme="tactile-album"] a,
+[data-visual-theme="tactile-album"] select,
+[data-visual-theme="tactile-album"] input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-visual-theme="tactile-album"] button:focus-visible,
+[data-visual-theme="tactile-album"] a:focus-visible,
+[data-visual-theme="tactile-album"] select:focus-visible,
+[data-visual-theme="tactile-album"] input:focus-visible {
+  outline: 3px solid #e7c97e;
+  outline-offset: 4px;
+}
+
+/* The paper bookmark navigation */
+[data-visual-theme="tactile-album"] .site-header,
+[data-visual-theme="tactile-album"] .mobile-topbar {
+  width: min(1220px, calc(100% - 36px));
+  min-height: 68px;
+  margin: 14px auto 0;
+  padding: 13px 18px;
+  border: 0;
+  border-bottom: 5px solid var(--album-thread);
+  border-radius: 3px 3px 1px 1px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 7px 13px -12px rgba(0, 0, 0, 0.8);
+}
+
+[data-visual-theme="tactile-album"] .brand {
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .brand > span {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1;
+  font-style: italic;
+}
+
+[data-visual-theme="tactile-album"] .brand b {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+[data-visual-theme="tactile-album"] .brand small {
+  color: #5a6260;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+
+[data-visual-theme="tactile-album"] .phone-version-link,
+[data-visual-theme="tactile-album"] .header-score,
+[data-visual-theme="tactile-album"] .quest-head-meta span,
+[data-visual-theme="tactile-album"] .format-choice-progress,
+[data-visual-theme="tactile-album"] .phone-mode-pill {
+  min-height: 36px;
+  border: 1px solid rgba(32, 43, 45, 0.25);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.34);
+  color: var(--album-ink);
+  padding: 8px 12px;
+  font-size: 9px;
+}
+
+[data-visual-theme="tactile-album"] .header-score {
+  background: #e3c777;
+  border-color: #a77e3b;
+}
+
+/* Home: one composed first screen, built around real project artefacts */
+[data-visual-theme="tactile-album"] .academy-hero {
+  width: min(1180px, calc(100% - 44px));
+  min-height: calc(100svh - 100px);
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 106px) 0 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
+  align-items: start;
+  column-gap: clamp(36px, 4vw, 56px);
+  color: #f5f2e8;
+  text-align: left;
+}
+
+[data-visual-theme="tactile-album"] .academy-hero-copy {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 3;
+}
+
+[data-visual-theme="tactile-album"] .kicker {
+  display: block;
+  margin: 0 0 20px;
+  color: #c9d7d7;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .kicker > span {
+  display: none;
+}
+
+[data-visual-theme="tactile-album"] .academy-hero h1 {
+  width: 100%;
+  max-width: none;
+  color: #f7f4e8;
+  font-family: var(--serif);
+  font-size: clamp(52px, 4.7vw, 76px);
+  font-weight: 500;
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+}
+
+[data-visual-theme="tactile-album"] .academy-hero h1 em {
+  color: #e7b59f;
+  font-style: italic;
+  font-weight: 500;
+}
+
+[data-visual-theme="tactile-album"] .hero-lead {
+  width: auto;
+  max-width: 420px;
+  margin: 28px 0 0;
+  color: #d1dcda;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+[data-visual-theme="tactile-album"] .academy-album {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  margin-top: 150px;
+  padding: 20px 20px 18px;
+  border: 1px solid rgba(245, 242, 232, 0.12);
+  border-radius: 6px;
+  background: var(--album-cover-deep);
+  box-shadow: 0 18px 28px -24px #071318;
+  transform: rotate(0.45deg);
+}
+
+[data-visual-theme="tactile-album"] .academy-album > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 18px;
+  color: #dbe5e3;
+}
+
+[data-visual-theme="tactile-album"] .academy-album > header span {
+  font-family: var(--serif);
+  font-size: 23px;
+}
+
+[data-visual-theme="tactile-album"] .academy-album > header b {
+  color: #9eb3b6;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+[data-visual-theme="tactile-album"] .album-leaves {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figure {
+  min-width: 0;
+  margin: 0;
+  padding: 13px 13px 15px;
+  position: relative;
+  color: var(--album-ink);
+  background: var(--album-paper-warm);
+  transform: rotate(-1.25deg);
+  box-shadow: 0 8px 15px -13px rgba(0, 0, 0, 0.9);
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figure:nth-child(2) {
+  margin-top: 22px;
+  background: var(--album-paper-green);
+  transform: rotate(1.05deg);
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figure:nth-child(3) {
+  background: var(--album-paper-clay);
+  transform: rotate(-0.45deg);
+}
+
+[data-visual-theme="tactile-album"] .album-tape {
+  width: 46px;
+  height: 14px;
+  position: absolute;
+  z-index: 2;
+  top: -7px;
+  left: calc(50% - 23px);
+  background: var(--album-tape);
+  transform: rotate(-2deg);
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figure:nth-child(2) .album-tape {
+  transform: rotate(2.5deg);
+}
+
+[data-visual-theme="tactile-album"] .album-leaves img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  object-position: top;
+  background: #f5f4e9;
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figcaption {
+  min-height: 74px;
+  padding-top: 12px;
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figcaption b,
+[data-visual-theme="tactile-album"] .album-leaves figcaption span {
+  display: block;
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figcaption b {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.05;
+}
+
+[data-visual-theme="tactile-album"] .album-leaves figcaption span {
+  margin-top: 6px;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+[data-visual-theme="tactile-album"] .academy-album > p {
+  margin: 18px 0 0;
+  color: #aabec0;
+  font-size: 10px;
+  text-align: right;
+}
+
+[data-visual-theme="tactile-album"] .academy-stats {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+  margin: 6px 0 0;
+  border: 0;
+  border-top: 2px dotted rgba(231, 219, 194, 0.45);
+  border-bottom: 2px dotted rgba(231, 219, 194, 0.45);
+}
+
+[data-visual-theme="tactile-album"] .academy-stats > div {
+  border-right: 2px dotted rgba(231, 219, 194, 0.3);
+}
+
+[data-visual-theme="tactile-album"] .academy-stats strong {
+  color: #f5f2e8;
+  font-size: 39px;
+}
+
+[data-visual-theme="tactile-album"] .academy-stats span {
+  color: #b9c9c8;
+  font-size: 9px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Catalogue: an open album with different paper leaves */
+[data-visual-theme="tactile-album"] .catalogue,
+[data-visual-theme="tactile-album"] .mobile-catalogue {
+  width: min(1220px, calc(100% - 44px));
+  margin-bottom: 90px;
+  padding-top: 56px;
+  color: #f5f2e8;
+}
+
+[data-visual-theme="tactile-album"] .catalogue-head h2,
+[data-visual-theme="tactile-album"] .mobile-catalogue-title h2 {
+  color: #f5f2e8;
+  font-size: clamp(48px, 6vw, 70px);
+  line-height: 1;
+}
+
+[data-visual-theme="tactile-album"] .section-kicker {
+  margin-bottom: 7px;
+  color: #b9cbcb;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .search-field,
+[data-visual-theme="tactile-album"] .mobile-catalogue-title label {
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 4px solid #bd6c58;
+  border-radius: 2px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+  transform: rotate(-0.35deg);
+}
+
+[data-visual-theme="tactile-album"] .search-field input,
+[data-visual-theme="tactile-album"] .mobile-catalogue-title input {
+  color: var(--album-ink);
+  font-size: 13px;
+}
+
+[data-visual-theme="tactile-album"] .week-tabs {
+  gap: 5px;
+  margin-bottom: 0;
+  padding: 0 0 0 10px;
+}
+
+[data-visual-theme="tactile-album"] .week-tabs button {
+  min-height: 42px;
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 5px 5px 0 0;
+  background: #9fb5b5;
+  color: #203034;
+  font-size: 10px;
+}
+
+[data-visual-theme="tactile-album"] .week-tabs button:nth-child(3n + 2) {
+  background: #d9c69a;
+}
+
+[data-visual-theme="tactile-album"] .week-tabs button:nth-child(3n + 3) {
+  background: #c98772;
+}
+
+[data-visual-theme="tactile-album"] .week-tabs button.active {
+  background: var(--album-paper);
+  color: var(--album-ink);
+  font-weight: 800;
+}
+
+[data-visual-theme="tactile-album"] .discovery-panel {
+  margin: 0 0 28px;
+  padding: 20px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--album-paper);
+  color: var(--album-ink);
+  box-shadow: 0 8px 14px -14px rgba(0, 0, 0, 0.9);
+}
+
+[data-visual-theme="tactile-album"] .difficulty-filter > span,
+[data-visual-theme="tactile-album"] .goal-filter > span {
+  color: #536468;
+  font-size: 9px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .difficulty-filter button,
+[data-visual-theme="tactile-album"] .goal-filter select {
+  min-height: 38px;
+  border: 1px solid rgba(32, 43, 45, 0.28);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--album-ink);
+  font-size: 9px;
+}
+
+[data-visual-theme="tactile-album"] .difficulty-filter button b {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+}
+
+[data-visual-theme="tactile-album"] .difficulty-filter button.active {
+  border-color: var(--album-cover);
+  background: var(--album-cover);
+  color: #fff;
+}
+
+[data-visual-theme="tactile-album"] .difficulty-filter button.active b {
+  background: none;
+  color: #fff;
+}
+
+[data-visual-theme="tactile-album"] .discovery-summary p,
+[data-visual-theme="tactile-album"] .discovery-summary button {
+  color: #4f6264;
+}
+
+[data-visual-theme="tactile-album"] .project-grid,
+[data-visual-theme="tactile-album"] .mobile-project-grid {
+  gap: 22px 18px;
+  align-items: stretch;
+}
+
+[data-visual-theme="tactile-album"] .project-card,
+[data-visual-theme="tactile-album"] .mobile-project-card {
+  min-height: 520px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+  box-shadow: 0 9px 18px -17px rgba(0, 0, 0, 0.95);
+  transform: rotate(-0.22deg);
+  transition: filter 180ms ease, transform 180ms ease;
+}
+
+[data-visual-theme="tactile-album"] .project-card:nth-child(4n + 2),
+[data-visual-theme="tactile-album"] .mobile-project-card:nth-child(4n + 2) {
+  background: var(--album-paper-green);
+  transform: rotate(0.2deg);
+}
+
+[data-visual-theme="tactile-album"] .project-card:nth-child(4n + 3),
+[data-visual-theme="tactile-album"] .mobile-project-card:nth-child(4n + 3) {
+  background: #e2b29e;
+  transform: rotate(-0.12deg);
+}
+
+[data-visual-theme="tactile-album"] .project-card:nth-child(4n),
+[data-visual-theme="tactile-album"] .mobile-project-card:nth-child(4n) {
+  background: var(--album-paper-blue);
+  transform: rotate(0.28deg);
+}
+
+[data-visual-theme="tactile-album"] .project-card:hover,
+[data-visual-theme="tactile-album"] .mobile-project-card:hover {
+  transform: rotate(0deg);
+  filter: saturate(1.04) brightness(1.015);
+  box-shadow: 0 9px 18px -17px rgba(0, 0, 0, 0.95);
+}
+
+[data-visual-theme="tactile-album"] .project-preview,
+[data-visual-theme="tactile-album"] .mobile-project-card .project-preview {
+  height: 194px;
+  margin: -12px -12px 22px;
+  border: 9px solid #f7f5ea;
+  border-bottom-width: 20px;
+  border-radius: 1px;
+  background: #f7f5ea;
+  transform: rotate(-0.6deg);
+}
+
+[data-visual-theme="tactile-album"] .project-card:nth-child(2n) .project-preview,
+[data-visual-theme="tactile-album"] .mobile-project-card:nth-child(2n) .project-preview {
+  transform: rotate(0.55deg);
+}
+
+[data-visual-theme="tactile-album"] .project-card:hover .project-preview img {
+  width: 142%;
+}
+
+[data-visual-theme="tactile-album"] .project-preview figcaption {
+  left: 8px;
+  bottom: -17px;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #425255;
+  font-size: 7px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .project-symbol,
+[data-visual-theme="tactile-album"] .mobile-project-card > header > span {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #6b4d31;
+  font-size: 31px;
+}
+
+[data-visual-theme="tactile-album"] .project-status,
+[data-visual-theme="tactile-album"] .project-discovery-line strong,
+[data-visual-theme="tactile-album"] .project-discovery-line i,
+[data-visual-theme="tactile-album"] .project-meta span,
+[data-visual-theme="tactile-album"] .mobile-capability {
+  border-radius: 2px;
+}
+
+[data-visual-theme="tactile-album"] .project-status,
+[data-visual-theme="tactile-album"] .project-meta span,
+[data-visual-theme="tactile-album"] .project-discovery-line i {
+  border-color: rgba(32, 43, 45, 0.24);
+  background: rgba(255, 255, 255, 0.2);
+  color: #4c5b5c;
+}
+
+[data-visual-theme="tactile-album"] .project-discovery-line strong {
+  background: rgba(38, 59, 72, 0.88);
+  color: #f6f3e8;
+}
+
+[data-visual-theme="tactile-album"] .project-track,
+[data-visual-theme="tactile-album"] .project-outcome,
+[data-visual-theme="tactile-album"] .mobile-project-card > p,
+[data-visual-theme="tactile-album"] .mobile-project-card footer > span {
+  color: #435356;
+}
+
+[data-visual-theme="tactile-album"] .project-track {
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 700;
+}
+
+[data-visual-theme="tactile-album"] .project-card h3,
+[data-visual-theme="tactile-album"] .mobile-project-card h3 {
+  font-size: 34px;
+  line-height: 1;
+}
+
+[data-visual-theme="tactile-album"] .project-card > a {
+  min-height: 46px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 2px;
+  align-items: center;
+  background: var(--album-cover);
+  color: #fff;
+}
+
+[data-visual-theme="tactile-album"] .project-card > a span {
+  color: #e7c97e;
+}
+
+[data-visual-theme="tactile-album"] .mobile-project-card footer > a {
+  border-radius: 2px;
+  background: var(--album-cover);
+}
+
+[data-visual-theme="tactile-album"] .academy-principle {
+  width: min(1020px, calc(100% - 44px));
+  margin-bottom: 90px;
+  padding: 28px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--album-paper-green);
+  color: var(--album-ink);
+  transform: rotate(-0.25deg);
+}
+
+[data-visual-theme="tactile-album"] .academy-principle span {
+  color: var(--album-thread);
+}
+
+[data-visual-theme="tactile-album"] .academy-footer,
+[data-visual-theme="tactile-album"] .mobile-footer {
+  min-height: 270px;
+  margin: 0 18px 18px;
+  padding: 66px max(28px, calc((100vw - 1160px) / 2));
+  border-radius: 5px;
+  background: var(--album-cover-deep);
+  color: #f5f2e8;
+}
+
+[data-visual-theme="tactile-album"] .academy-footer p {
+  color: #f5f2e8;
+}
+
+/* Every quest becomes a clear paper spread */
+[data-visual-theme="tactile-album"].quest-shell,
+[data-visual-theme="tactile-album"].mobile-quest-shell,
+[data-visual-theme="tactile-album"].format-choice-shell {
+  background-color: var(--album-cover);
+  background-image: repeating-linear-gradient(
+    98deg,
+    rgba(255, 255, 255, 0.016) 0,
+    rgba(255, 255, 255, 0.016) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+}
+
+[data-visual-theme="tactile-album"] .quest-hero,
+[data-visual-theme="tactile-album"] .mobile-quest-hero,
+[data-visual-theme="tactile-album"] .format-choice-hero {
+  color: #f5f2e8;
+}
+
+[data-visual-theme="tactile-album"] .quest-hero h1,
+[data-visual-theme="tactile-album"] .mobile-quest-hero h1,
+[data-visual-theme="tactile-album"] .format-choice-hero h1 {
+  color: #f5f2e8;
+  font-family: var(--serif);
+  font-size: clamp(52px, 7.2vw, 92px);
+  line-height: 0.94;
+  letter-spacing: -0.02em;
+}
+
+[data-visual-theme="tactile-album"] .quest-hero > p:not(.kicker),
+[data-visual-theme="tactile-album"] .mobile-quest-hero > span,
+[data-visual-theme="tactile-album"] .format-choice-hero > p:not(.kicker),
+[data-visual-theme="tactile-album"] .back-link,
+[data-visual-theme="tactile-album"] .mobile-quest-hero > button {
+  color: #c7d4d3;
+}
+
+[data-visual-theme="tactile-album"] .quest-progress > div,
+[data-visual-theme="tactile-album"] .mobile-progress > div {
+  color: #c7d4d3;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .quest-progress strong {
+  color: #f5f2e8;
+}
+
+[data-visual-theme="tactile-album"] .quest-progress > i,
+[data-visual-theme="tactile-album"] .mobile-progress > i {
+  height: 8px;
+  border-radius: 1px;
+  background: rgba(245, 242, 232, 0.16);
+}
+
+[data-visual-theme="tactile-album"] .quest-progress > i b,
+[data-visual-theme="tactile-album"] .mobile-progress > i b {
+  background: var(--album-paper-clay);
+}
+
+[data-visual-theme="tactile-album"] .quest-reset-control,
+[data-visual-theme="tactile-album"] .data-mode-badge {
+  border-radius: 3px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .data-mode-badge.output {
+  background: var(--album-paper-blue);
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .quest-layout {
+  grid-template-columns: 302px minmax(0, 1fr);
+  gap: 24px;
+}
+
+[data-visual-theme="tactile-album"] .quest-map {
+  border: 0;
+  border-radius: 3px;
+  background: var(--album-paper-green);
+  padding: 24px 14px 18px 30px;
+  box-shadow: 0 9px 18px -17px rgba(0, 0, 0, 0.95);
+}
+
+[data-visual-theme="tactile-album"] .quest-map::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 14px;
+  width: 4px;
+  border-radius: 3px;
+  background: var(--album-thread);
+}
+
+[data-visual-theme="tactile-album"] .map-heading {
+  border-bottom: 2px dotted rgba(32, 43, 45, 0.26);
+}
+
+[data-visual-theme="tactile-album"] .map-symbol,
+[data-visual-theme="tactile-album"] .level-list button > span,
+[data-visual-theme="tactile-album"] .mobile-level-rail button {
+  border-radius: 2px;
+}
+
+[data-visual-theme="tactile-album"] .map-symbol {
+  border: 0;
+  color: #6b4d31;
+  font-size: 27px;
+}
+
+[data-visual-theme="tactile-album"] .level-list button {
+  border-radius: 2px;
+}
+
+[data-visual-theme="tactile-album"] .level-list button:hover:not(:disabled),
+[data-visual-theme="tactile-album"] .level-list button.active {
+  background: rgba(255, 255, 255, 0.43);
+}
+
+[data-visual-theme="tactile-album"] .level-list button.active > span {
+  background: var(--album-cover);
+  border-color: var(--album-cover);
+}
+
+[data-visual-theme="tactile-album"] .level-list button.done > span {
+  background: var(--album-thread);
+  border-color: var(--album-thread);
+}
+
+[data-visual-theme="tactile-album"] .level-card,
+[data-visual-theme="tactile-album"] .preparation-card,
+[data-visual-theme="tactile-album"] .format-choice-card,
+[data-visual-theme="tactile-album"] .mobile-level-card {
+  border: 0;
+  border-radius: 3px;
+  background: var(--album-paper);
+  color: var(--album-ink);
+  box-shadow: 0 12px 24px -21px rgba(0, 0, 0, 0.95);
+  position: relative;
+}
+
+[data-visual-theme="tactile-album"] .level-card::before,
+[data-visual-theme="tactile-album"] .preparation-card::before,
+[data-visual-theme="tactile-album"] .format-choice-card::before,
+[data-visual-theme="tactile-album"] .mobile-level-card::before {
+  content: "";
+  width: 72px;
+  height: 18px;
+  position: absolute;
+  z-index: 3;
+  top: -9px;
+  left: calc(50% - 36px);
+  background: var(--album-tape);
+  transform: rotate(-1.2deg);
+  pointer-events: none;
+}
+
+[data-visual-theme="tactile-album"] .level-header,
+[data-visual-theme="tactile-album"] .mobile-level-card > header {
+  border-bottom: 2px dotted rgba(32, 43, 45, 0.24);
+}
+
+[data-visual-theme="tactile-album"] .level-header > span,
+[data-visual-theme="tactile-album"] .expected-heading > span,
+[data-visual-theme="tactile-album"] .quest-guide-heading > span,
+[data-visual-theme="tactile-album"] .mobile-level-card > header > span {
+  border-radius: 2px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .level-header h2,
+[data-visual-theme="tactile-album"] .expected-heading h3,
+[data-visual-theme="tactile-album"] .quest-guide-heading h3,
+[data-visual-theme="tactile-album"] .mobile-level-card > header h2,
+[data-visual-theme="tactile-album"] .mobile-result h3 {
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+[data-visual-theme="tactile-album"] .lesson-text-list li,
+[data-visual-theme="tactile-album"] .lesson-text-result {
+  border-radius: 2px;
+}
+
+[data-visual-theme="tactile-album"] .lesson-text-result {
+  background: var(--album-paper-warm);
+  transform: rotate(-0.15deg);
+}
+
+[data-visual-theme="tactile-album"] .why-card,
+[data-visual-theme="tactile-album"] .mobile-why {
+  border-radius: 2px;
+  background: #e5ce91;
+  transform: rotate(-0.25deg);
+}
+
+[data-visual-theme="tactile-album"] .why-card b,
+[data-visual-theme="tactile-album"] .mobile-why > b {
+  color: #694e2c;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .prompt-card,
+[data-visual-theme="tactile-album"] .mobile-prompt,
+[data-visual-theme="tactile-album"] .guide-copy-card {
+  border-radius: 3px;
+  background: var(--album-cover-deep);
+}
+
+[data-visual-theme="tactile-album"] .prompt-card button,
+[data-visual-theme="tactile-album"] .mobile-prompt > button,
+[data-visual-theme="tactile-album"] .guide-copy-card button,
+[data-visual-theme="tactile-album"] .primary-button,
+[data-visual-theme="tactile-album"] .secondary-button,
+[data-visual-theme="tactile-album"] .mobile-level-actions button {
+  border-radius: 3px;
+}
+
+[data-visual-theme="tactile-album"] .primary-button,
+[data-visual-theme="tactile-album"] .mobile-level-actions button:last-child {
+  background: var(--album-cover);
+  border-color: var(--album-cover);
+}
+
+[data-visual-theme="tactile-album"] .reference-shot,
+[data-visual-theme="tactile-album"] .guide-shot,
+[data-visual-theme="tactile-album"] .mobile-result > button,
+[data-visual-theme="tactile-album"] .quest-guide-frame,
+[data-visual-theme="tactile-album"] .preparation-guide-item,
+[data-visual-theme="tactile-album"] .preparation-list label,
+[data-visual-theme="tactile-album"] .mode-options > button {
+  border-radius: 3px;
+}
+
+[data-visual-theme="tactile-album"] .quest-guide-frame {
+  border: 0;
+  background: var(--album-paper-warm);
+  box-shadow: none;
+}
+
+[data-visual-theme="tactile-album"] .quest-guide-frame:nth-child(2n) {
+  background: var(--album-paper-green);
+}
+
+[data-visual-theme="tactile-album"] .help-card,
+[data-visual-theme="tactile-album"] .mobile-help,
+[data-visual-theme="tactile-album"] .privacy-note,
+[data-visual-theme="tactile-album"] .finish-card {
+  border-radius: 3px;
+}
+
+[data-visual-theme="tactile-album"] .finish-card {
+  background: var(--album-paper-clay);
+}
+
+[data-visual-theme="tactile-album"] .mode-options > button {
+  border: 0;
+  background: var(--album-paper-warm);
+  box-shadow: none;
+}
+
+[data-visual-theme="tactile-album"] .mode-options > button:nth-child(2) {
+  background: var(--album-paper-green);
+}
+
+[data-visual-theme="tactile-album"] .mode-options > button:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: inset 0 0 0 3px var(--album-thread);
+}
+
+[data-visual-theme="tactile-album"] .mode-options > button > span {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  color: #6b4d31;
+  font-size: 32px;
+}
+
+/* Originality constructor belongs to the same album, but project colours stay the learner's */
+[data-visual-theme="tactile-album"] .quest-customizer {
+  border: 0;
+  border-radius: 3px;
+  background: var(--album-paper-warm);
+  box-shadow: none;
+}
+
+[data-visual-theme="tactile-album"] .quest-customizer > header > span,
+[data-visual-theme="tactile-album"] .customizer-axes legend i,
+[data-visual-theme="tactile-album"] .customizer-palette > header > i {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #6b4d31;
+  font-family: var(--serif);
+  font-size: 25px;
+}
+
+[data-visual-theme="tactile-album"] .customizer-axes fieldset,
+[data-visual-theme="tactile-album"] .customizer-palette,
+[data-visual-theme="tactile-album"] .customizer-summary,
+[data-visual-theme="tactile-album"] .customizer-options label span,
+[data-visual-theme="tactile-album"] .customizer-input input,
+[data-visual-theme="tactile-album"] .palette-options button,
+[data-visual-theme="tactile-album"] .palette-live-preview,
+[data-visual-theme="tactile-album"] .palette-live-preview article,
+[data-visual-theme="tactile-album"] .customizer-save {
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-visual-theme="tactile-album"] .customizer-options label.selected span,
+[data-visual-theme="tactile-album"] .customizer-summary {
+  background: var(--album-cover);
+}
+
+[data-visual-theme="tactile-album"] .customizer-save {
+  background: var(--album-thread);
+}
+
+/* Service or agent choice: two materially different pages, no candy gradient */
+[data-visual-theme="tactile-album"] .format-choice-card {
+  margin-bottom: 82px;
+  padding: 38px;
+}
+
+[data-visual-theme="tactile-album"] .format-choice-heading small {
+  color: #6f5136;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .format-choice-grid {
+  gap: 22px;
+}
+
+[data-visual-theme="tactile-album"] .format-option,
+[data-visual-theme="tactile-album"] .format-option.service,
+[data-visual-theme="tactile-album"] .format-option.agent {
+  border: 0;
+  border-radius: 3px;
+  background: var(--album-paper-green);
+  box-shadow: none;
+  color: var(--album-ink);
+  transition: filter 180ms ease, box-shadow 180ms ease;
+}
+
+[data-visual-theme="tactile-album"] .format-option.agent {
+  background: var(--album-paper-clay);
+}
+
+[data-visual-theme="tactile-album"] .format-option:hover,
+[data-visual-theme="tactile-album"] .format-option:focus-visible {
+  transform: none;
+  border-color: transparent;
+  box-shadow: inset 0 0 0 3px var(--album-cover);
+}
+
+[data-visual-theme="tactile-album"] .format-option-icon {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: #435f52;
+  font-size: 38px;
+}
+
+[data-visual-theme="tactile-album"] .format-option.agent .format-option-icon {
+  background: none;
+  color: #7b402f;
+}
+
+[data-visual-theme="tactile-album"] .format-option small,
+[data-visual-theme="tactile-album"] .format-option p,
+[data-visual-theme="tactile-album"] .format-choice-heading p {
+  color: #435456;
+}
+
+[data-visual-theme="tactile-album"] .format-option b,
+[data-visual-theme="tactile-album"] .format-option.agent b {
+  color: var(--album-cover-deep);
+}
+
+[data-visual-theme="tactile-album"] .format-help p,
+[data-visual-theme="tactile-album"] .quest-links,
+[data-visual-theme="tactile-album"] .quest-links a {
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+/* Phone edition keeps the album metaphor and large touch targets */
+[data-visual-theme="tactile-album"] .mobile-academy-hero {
+  width: min(920px, calc(100% - 32px));
+  margin: 58px auto 76px;
+  color: #f5f2e8;
+}
+
+[data-visual-theme="tactile-album"] .mobile-academy-hero h1,
+[data-visual-theme="tactile-album"] .mobile-academy-hero h1 em {
+  color: #f5f2e8;
+  line-height: 0.92;
+}
+
+[data-visual-theme="tactile-album"] .mobile-academy-hero h1 em {
+  color: #e7b59f;
+}
+
+[data-visual-theme="tactile-album"] .mobile-academy-hero > p:not(.kicker) {
+  color: #c7d4d3;
+}
+
+[data-visual-theme="tactile-album"] .mobile-orbit {
+  width: 174px;
+  height: 132px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--album-paper-green);
+  transform: rotate(-1deg);
+}
+
+[data-visual-theme="tactile-album"] .mobile-orbit > span {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--album-cover);
+  font-size: 34px;
+}
+
+[data-visual-theme="tactile-album"] .mobile-orbit i {
+  border: 0;
+  border-radius: 2px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .mobile-flow {
+  border: 0;
+  border-radius: 2px;
+  background: var(--album-paper-warm);
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .mobile-stats {
+  border-top: 2px dotted rgba(231, 219, 194, 0.45);
+  border-bottom: 2px dotted rgba(231, 219, 194, 0.45);
+}
+
+[data-visual-theme="tactile-album"] .mobile-stats > div {
+  border-color: rgba(231, 219, 194, 0.35);
+}
+
+[data-visual-theme="tactile-album"] .mobile-stats b,
+[data-visual-theme="tactile-album"] .mobile-stats span {
+  color: #f5f2e8;
+}
+
+[data-visual-theme="tactile-album"] .mobile-stats span {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-visual-theme="tactile-album"] .mobile-level-rail button {
+  border: 0;
+  background: var(--album-paper-warm);
+}
+
+[data-visual-theme="tactile-album"] .mobile-level-rail button.active {
+  background: #e3c777;
+  color: var(--album-ink);
+}
+
+[data-visual-theme="tactile-album"] .mobile-level-rail button.done {
+  background: var(--album-thread);
+}
+
+[data-visual-theme="tactile-album"] .mobile-action a,
+[data-visual-theme="tactile-album"] .mobile-action > button {
+  border-radius: 3px;
+}
+
+[data-visual-theme="tactile-album"] .mobile-action-telegram a,
+[data-visual-theme="tactile-album"] .mobile-action-telegram > button,
+[data-visual-theme="tactile-album"] .mobile-action-screenshot a {
+  background: #356b87;
+}
+
+[data-visual-theme="tactile-album"] .mobile-action-lovable a {
+  background: #92506e;
+}
+
+[data-visual-theme="tactile-album"] .mobile-action-chatium a {
+  background: #645789;
+}
+
+@media (max-width: 980px) {
+  [data-visual-theme="tactile-album"] .academy-hero {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 42px;
+    padding-top: 70px;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-hero-copy,
+  [data-visual-theme="tactile-album"] .academy-album,
+  [data-visual-theme="tactile-album"] .academy-stats {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-hero-copy {
+    max-width: 720px;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-album {
+    margin-top: 0;
+  }
+
+  [data-visual-theme="tactile-album"] .quest-layout {
+    grid-template-columns: 242px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  [data-visual-theme="tactile-album"] .site-header,
+  [data-visual-theme="tactile-album"] .mobile-topbar {
+    width: calc(100% - 20px);
+    margin-top: 10px;
+    padding: 11px 12px;
+  }
+
+  [data-visual-theme="tactile-album"] .brand small {
+    display: none;
+  }
+
+  [data-visual-theme="tactile-album"] .phone-version-link {
+    max-width: 150px;
+    line-height: 1.2;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-hero {
+    width: calc(100% - 28px);
+    padding: 58px 0 44px;
+    gap: 42px;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-hero h1 {
+    font-size: clamp(50px, 14.8vw, 70px);
+    line-height: 0.96;
+  }
+
+  [data-visual-theme="tactile-album"] .hero-lead {
+    font-size: 14px;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-album {
+    padding: 18px 14px 16px;
+    overflow: hidden;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-album > header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  [data-visual-theme="tactile-album"] .album-leaves {
+    width: 100%;
+    display: flex;
+    gap: 13px;
+    overflow-x: auto;
+    padding: 8px 5px 18px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  [data-visual-theme="tactile-album"] .album-leaves figure,
+  [data-visual-theme="tactile-album"] .album-leaves figure:nth-child(2),
+  [data-visual-theme="tactile-album"] .album-leaves figure:nth-child(3) {
+    flex: 0 0 76vw;
+    max-width: 290px;
+    margin-top: 0;
+    scroll-snap-align: center;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-stats > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-stats > div:nth-child(-n + 2) {
+    border-bottom: 2px dotted rgba(231, 219, 194, 0.3);
+  }
+
+  [data-visual-theme="tactile-album"] .catalogue,
+  [data-visual-theme="tactile-album"] .mobile-catalogue {
+    width: calc(100% - 22px);
+    padding-top: 34px;
+  }
+
+  [data-visual-theme="tactile-album"] .catalogue-head,
+  [data-visual-theme="tactile-album"] .mobile-catalogue-title {
+    align-items: stretch;
+  }
+
+  [data-visual-theme="tactile-album"] .search-field,
+  [data-visual-theme="tactile-album"] .mobile-catalogue-title label {
+    width: 100%;
+  }
+
+  [data-visual-theme="tactile-album"] .discovery-panel {
+    padding: 16px;
+  }
+
+  [data-visual-theme="tactile-album"] .project-grid,
+  [data-visual-theme="tactile-album"] .mobile-project-grid {
+    gap: 16px;
+  }
+
+  [data-visual-theme="tactile-album"] .project-card,
+  [data-visual-theme="tactile-album"] .mobile-project-card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  [data-visual-theme="tactile-album"] .project-preview,
+  [data-visual-theme="tactile-album"] .mobile-project-card .project-preview {
+    margin: -8px -8px 22px;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-principle {
+    width: calc(100% - 22px);
+    padding: 24px 18px;
+  }
+
+  [data-visual-theme="tactile-album"] .academy-footer,
+  [data-visual-theme="tactile-album"] .mobile-footer {
+    margin: 0 10px 10px;
+  }
+
+  [data-visual-theme="tactile-album"] .quest-hero,
+  [data-visual-theme="tactile-album"] .mobile-quest-hero {
+    width: calc(100% - 24px);
+  }
+
+  [data-visual-theme="tactile-album"] .quest-layout {
+    width: calc(100% - 20px);
+    grid-template-columns: 1fr;
+  }
+
+  [data-visual-theme="tactile-album"] .quest-map {
+    position: relative;
+    top: auto;
+    max-height: none;
+  }
+
+  [data-visual-theme="tactile-album"] .level-card,
+  [data-visual-theme="tactile-album"] .preparation-card {
+    border-radius: 2px;
+  }
+
+  [data-visual-theme="tactile-album"] .format-choice-card {
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 26px 18px;
+  }
+
+  [data-visual-theme="tactile-album"] .format-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-visual-theme="tactile-album"] .mobile-level-wrap {
+    width: calc(100% - 18px);
+  }
+
+  [data-visual-theme="tactile-album"] .mobile-level-card > header,
+  [data-visual-theme="tactile-album"] .mobile-do,
+  [data-visual-theme="tactile-album"] .mobile-prompt,
+  [data-visual-theme="tactile-album"] .mobile-result,
+  [data-visual-theme="tactile-album"] .mobile-level-actions {
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  [data-visual-theme="tactile-album"] .mobile-why,
+  [data-visual-theme="tactile-album"] .mobile-help {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-visual-theme="tactile-album"] *,
+  [data-visual-theme="tactile-album"] *::before,
+  [data-visual-theme="tactile-album"] *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

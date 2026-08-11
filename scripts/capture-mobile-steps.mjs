@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
 import { selectedNumbers } from "./capture-selection.mjs";
-import { mobileScreenPath, projectSlugs } from "./projects.mjs";
+import { mobileScreenPath, projectSlugs, projectStepCount } from "./projects.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
 const force = process.env.FORCE_SCREENS === "1";
@@ -11,7 +11,7 @@ const selectedSteps = selectedNumbers(process.env.CAPTURE_STEPS);
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const tasks = projectSlugs()
   .filter((slug) => selectedSlugs.size === 0 || selectedSlugs.has(slug))
-  .flatMap((slug) => Array.from({ length: 17 }, (_, index) => ({ slug, step: index + 1 })))
+  .flatMap((slug) => Array.from({ length: projectStepCount(slug) }, (_, index) => ({ slug, step: index + 1 })))
   .filter(({ step }) => selectedSteps.size === 0 || selectedSteps.has(step));
 let cursor = 0;
 let finished = 0;

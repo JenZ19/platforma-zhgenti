@@ -23,14 +23,15 @@ describe("computer setup quests", () => {
     }
   });
 
-  it("builds 17 click-by-click levels without the real-or-demo detour", () => {
-    for (const slug of setupSlugs) {
+  it("builds the long click-by-click paths only where they are useful", () => {
+    for (const slug of ["install-codex", "api-keys"] as const) {
       const project = getQuestProject(slug)!;
       const demo = buildQuest(project, "demo");
       const real = buildQuest(project, "real");
-      expect(demo, slug).toHaveLength(17);
+      const expectedCount = slug === "api-keys" ? 14 : 17;
+      expect(demo, slug).toHaveLength(expectedCount);
       expect(real, slug).toEqual(demo);
-      expect(demo.map((step) => step.id)).toEqual(Array.from({ length: 17 }, (_, index) => index + 1));
+      expect(demo.map((step) => step.id)).toEqual(Array.from({ length: expectedCount }, (_, index) => index + 1));
       for (const step of demo) {
         expect(step.guide, `${slug}/${step.id}`).toHaveLength(3);
         expect(step.why.length, `${slug}/${step.id}`).toBeGreaterThan(45);
@@ -39,6 +40,75 @@ describe("computer setup quests", () => {
       }
       expect(allText(demo), slug).not.toMatch(/РЕЖИМ РЕАЛЬНЫХ ДАННЫХ|вымышленные данные/i);
     }
+  });
+
+  it("keeps the server purchase lesson fast and removes repeated picture guides", () => {
+    const project = getQuestProject("server-152fz")!;
+    const steps = buildQuest(project, "real");
+
+    expect(steps).toHaveLength(9);
+    expect(steps.map((step) => step.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(steps.every((step) => step.guide === undefined)).toBe(true);
+    expect(steps.filter((step) => step.showScreenshot !== false).map((step) => step.id)).toEqual([2, 3, 4, 5, 6, 7]);
+    expect(allText(steps)).not.toMatch(/остановитесь и сверьте|название окна и основная кнопка совпадают/i);
+  });
+
+  it("uses only authentic AdminVPS screens or an explicit replacement placeholder", () => {
+    const steps = buildQuest(getQuestProject("server-152fz")!, "real");
+
+    expect(steps.slice(1, 6).map((step) => step.screenshotKind)).toEqual(["real", "real", "real", "real", "real"]);
+    expect(steps.slice(1, 6).map((step) => step.screenshot)).toEqual([
+      "/screens/server-152fz/real-step-02.png",
+      "/screens/server-152fz/real-step-03.jpg",
+      "/screens/server-152fz/real-step-04.png",
+      "/screens/server-152fz/real-step-05.png",
+      "/screens/server-152fz/real-step-06.png",
+    ]);
+    expect(steps[6]).toMatchObject({
+      screenshotKind: "placeholder",
+      screenshot: "/screens/server-152fz/placeholder-step-07.svg",
+    });
+    expect(steps[0].showScreenshot).toBe(false);
+    expect(steps[7].showScreenshot).toBe(false);
+    expect(steps[8].showScreenshot).toBe(false);
+  });
+
+  it("gives the learner one safe everyday command for using the server", () => {
+    const usage = buildQuest(getQuestProject("server-152fz")!, "real")[7];
+    const text = allText(usage);
+
+    expect(usage.title).toMatch(/пользоваться сервером/i);
+    expect(text).toMatch(/впервые опубликовать.+обновить.+найти.+проблем/is);
+    expect(text).toMatch(/покаж.+план.+до.+изменен/is);
+    expect(text).toMatch(/резервн.+копи.+рискован/is);
+    expect(text).toMatch(/приватн.+SSH.+парол.+не.+прос/is);
+    expect(text).toMatch(/проект.+адрес.+проверк/is);
+  });
+
+  it("collects legal facts one question at a time without making decisions for the learner", () => {
+    const legal = buildQuest(getQuestProject("server-152fz")!, "real")[8];
+    const text = allText(legal);
+
+    expect(legal.title).toMatch(/факт.+152.?ФЗ/i);
+    expect(text).toMatch(/один.+вопрос.+за раз/is);
+    expect(text).toMatch(/не знаю/i);
+    expect(text).toMatch(/не выбира.+правов.+основан/is);
+    expect(text).toMatch(/не реша.+уведомлен.+Роскомнадзор/is);
+    expect(text).toMatch(/не заявля.+соответств.+152.?ФЗ/is);
+    expect(text).toMatch(/подтвержд.+факт.+неизвестн.+стоп.+вопрос.+специалист.+материал/is);
+    expect(text).toMatch(/не проси.+реальн.+персональн.+данн.+парол.+SSH/is);
+    expect(legal.reward).toBe("Фея полностью проверенного результата");
+    expect(buildQuest(getQuestProject("server-152fz")!, "real")[7].reward).toBeUndefined();
+  });
+
+  it("explains server and SSH key terms before asking the learner to act", () => {
+    const steps = buildQuest(getQuestProject("server-152fz")!, "real");
+
+    expect(`${steps[0].why} ${steps[0].action}`).toMatch(/сервер.+отдельн.+компьютер.+дата-центр.+круглосуточ/is);
+    expect(`${steps[0].why} ${steps[0].action}`).toMatch(/сам.+по себе.+не означает.+152.?ФЗ/is);
+    expect(`${steps[5].why} ${steps[5].action}`).toMatch(/SSH-ключ.+без.+пересылк.+парол/is);
+    expect(`${steps[5].why} ${steps[5].action}`).toMatch(/публичн.+част.+AdminVPS.+приватн.+част.+только.+компьютер/is);
+    expect(`${steps[5].why} ${steps[5].action}`).toMatch(/\.pub.+можно.+PRIVATE KEY.+нельзя/is);
   });
 
   it("teaches the current desktop Codex installation path for Mac and Windows", () => {

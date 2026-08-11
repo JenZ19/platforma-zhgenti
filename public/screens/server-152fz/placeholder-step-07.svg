@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">Заглушка для реального скриншота резервных копий</title>
+  <desc id="description">Сюда будет добавлен настоящий экран раздела Резервные копии из личного кабинета AdminVPS.</desc>
+  <rect width="1200" height="800" fill="#f2f0e8"/>
+  <rect x="70" y="70" width="1060" height="660" rx="8" fill="#faf9f4" stroke="#9a8762" stroke-width="4" stroke-dasharray="16 14"/>
+  <circle cx="600" cy="254" r="64" fill="#e1d4b6"/>
+  <path d="M566 257h68v49h-68zM578 257v-19c0-14 10-26 22-26s22 12 22 26v19" fill="none" stroke="#66573b" stroke-width="10" stroke-linejoin="round"/>
+  <text x="600" y="382" text-anchor="middle" fill="#1f292a" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="3">ЗАГЛУШКА ДЛЯ ЗАМЕНЫ</text>
+  <text x="600" y="453" text-anchor="middle" fill="#1f292a" font-family="Georgia, serif" font-size="48">Здесь будет реальный экран</text>
+  <text x="600" y="516" text-anchor="middle" fill="#1f292a" font-family="Georgia, serif" font-size="48" font-style="italic">«Резервные копии»</text>
+  <text x="600" y="594" text-anchor="middle" fill="#756f64" font-family="Arial, sans-serif" font-size="23">Добавьте скрин из своего кабинета AdminVPS без паролей и платёжных данных.</text>
+</svg>

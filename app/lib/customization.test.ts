@@ -22,12 +22,13 @@ class MemoryStorage {
 }
 
 describe("quest customization", () => {
-  it("keeps the four fully handcrafted profiles and customizes all 49 project-building paths", () => {
+  it("keeps the five fully handcrafted profiles and customizes all 50 project-building paths", () => {
     expect(originalQuestSlugs).toEqual([
       "family-expenses",
       "planner",
       "idea-vault",
       "child-schedule",
+      "unique-design",
     ]);
     for (const slug of originalQuestSlugs) {
       const profile = getCustomizationProfile(slug)!;
@@ -42,7 +43,7 @@ describe("quest customization", () => {
       expect(customizationSummary(slug, defaults), slug).toContain(defaults.palette.accent);
     }
 
-    expect(questProjects).toHaveLength(52);
+    expect(questProjects).toHaveLength(49);
     for (const project of questProjects.filter((item) => item.journey !== "setup")) {
       const profile = getCustomizationProfile(project.slug)!;
       const defaults = defaultCustomization(project.slug)!;
@@ -72,23 +73,23 @@ describe("quest customization", () => {
   it("stores an agent's own audience, name and palette in separate desktop and mobile branches", () => {
     const storage = new MemoryStorage();
     const desktop = {
-      ...defaultCustomization("lead-agent")!,
+      ...defaultCustomization("client-care-agent")!,
       audience: "Для семейного фотографа",
       name: "Лида",
       palette: questColorPalettes[2],
     };
     const mobile = {
-      ...defaultCustomization("lead-agent")!,
+      ...defaultCustomization("client-care-agent")!,
       audience: "Для мастера маникюра",
       name: "Мия",
       palette: questColorPalettes[4],
     };
 
-    saveCustomization("lead-agent", "lead-agent", desktop, storage);
-    saveCustomization("mobile:lead-agent", "lead-agent", mobile, storage);
+    saveCustomization("client-care-agent", "client-care-agent", desktop, storage);
+    saveCustomization("mobile:client-care-agent", "client-care-agent", mobile, storage);
 
-    expect(loadCustomization("lead-agent", "lead-agent", storage)).toMatchObject(desktop);
-    expect(loadCustomization("mobile:lead-agent", "lead-agent", storage)).toMatchObject(mobile);
+    expect(loadCustomization("client-care-agent", "client-care-agent", storage)).toMatchObject(desktop);
+    expect(loadCustomization("mobile:client-care-agent", "client-care-agent", storage)).toMatchObject(mobile);
   });
 
   it("stores computer and phone choices independently", () => {

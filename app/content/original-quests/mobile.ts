@@ -1,14 +1,7 @@
 import type { DataMode } from "../../lib/preparation";
 import type { MobileAction, MobileQuestStep } from "../mobile";
 import type { ProjectDefinition, QuestCustomization } from "../types";
-import { buildFamilyExpensesQuest } from "./family-expenses";
-import { buildPlannerQuest } from "./planner";
-import { buildIdeaVaultQuest } from "./idea-vault";
-import { buildChildScheduleQuest } from "./child-schedule";
-import { buildCarouselAgentQuest } from "./carousel-agent";
-import { buildThreadsAgentQuest } from "./threads-agent";
-import { buildWebinarModeratorAgentQuest } from "./webinar-moderator-agent";
-import { buildFamilyHealthHubQuest } from "./family-health-hub";
+import { buildQuest } from "../quests";
 
 function actionFor(slug: string, step: number): MobileAction {
   if (step === 13) return { tool: "screenshot", label: "Отправить мобильную проверку Фее", note: slug === "planner" ? "Пришлите экран «Сегодня», добавление дела и результат переноса на завтра." : slug === "idea-vault" ? "Пришлите быстрый ввод, новую карточку и результат поиска." : slug === "child-schedule" ? "Пришлите сегодняшний день, список вещей и форму нового занятия." : "Пришлите первый экран, форму расхода и новый остаток." };
@@ -178,6 +171,25 @@ const sourceMobileActions: Record<string, string[]> = {
     "Создайте для заказчика чистый family-health-hub-client. Ни один личный профиль, документ или пароль переносить нельзя.",
     "Получите две карточки портфолио только на обезличенных учебных данных, без диагнозов и медицинских обещаний.",
   ],
+  "unique-design": [
+    "Откройте в Telegram комнату unique-design и посмотрите готовый пример. Найдите три подписи: структура, настроение и одна деталь.",
+    "На странице квеста выберите для кого проект, цель, название, настроение, тон, фирменную деталь и палитру. Нажмите «Сохранить мою версию».",
+    "Нажмите «Начать короткий опрос» и отвечайте Фее голосом или текстом строго по одному вопросу. В конце подтвердите сводку без догадок.",
+    "После подтверждения нажмите «Создать проект». Личный Codex сам создаст серверную комнату unique-design, папки и файлы и пришлёт сообщение о готовности.",
+    "Откройте Landingfolio, Landing.Gallery или Lapa Ninja в браузере телефона. Скопируйте ссылку на страницу с понятным порядком блоков и отправьте Фее с подписью «Только структура».",
+    "Откройте Land-book или другую визуальную галерею. Отправьте вторую ссылку с подписью «Только настроение и типографика».",
+    "Сделайте скриншот ровно одной интересной детали третьего проекта и отправьте Фее. Голосом объясните, что именно вам нравится.",
+    "Попросите Фею показать таблицу «Берём как принцип — не копируем — меняем под нас» по всем трём референсам и подтвердите её.",
+    "Попросите использовать ui-ux-pro-max. Если скилла нет, нажмите «Проверить без скилла» — Фея применит встроенный чек-лист целиком.",
+    "Дождитесь двух карточек концептов A и B. Выберите одну кнопкой или голосом скажите, что берём из каждого варианта.",
+    "Откройте мобильный предпросмотр первого экрана и проверьте: за пять секунд понятны аудитория, результат и главная кнопка.",
+    "Пролистайте все блоки или пройдите главный сценарий сервиса. В каждом месте должно быть понятно, зачем оно и что нажать дальше.",
+    "Откройте дизайн-паспорт: цвета, кириллические шрифты, отступы и состояния кнопок. Попросите Фею исправить только непонятные пункты.",
+    "Откройте ссылку на телефоне шириной около 390 пикселей и одной рукой пройдите главное действие. Отправьте три безопасных скриншота Фее.",
+    "Запустите аудит оригинальности, устраните слишком похожие места и опубликуйте личную версию только после проверки прав, фактов и контактов.",
+    "Нажмите «Создать копию для заказчика». В unique-design-client пройдите новый бриф и отправьте три новых референса с теми же разными ролями.",
+    "Получите карточку портфолио с личной и клиентской версиями, таблицей преобразований и честной подписью статуса проекта.",
+  ],
 };
 
 function sourceMobileAction(project: ProjectDefinition, step: number): MobileAction {
@@ -195,22 +207,25 @@ export function buildOriginalMobileQuest(
   mode: DataMode,
   customization: QuestCustomization,
 ): MobileQuestStep[] | undefined {
-  const build = project.slug === "family-expenses" ? buildFamilyExpensesQuest
-    : project.slug === "planner" ? buildPlannerQuest
-      : project.slug === "idea-vault" ? buildIdeaVaultQuest
-        : project.slug === "child-schedule" ? buildChildScheduleQuest
-          : project.slug === "carousel-agent" ? buildCarouselAgentQuest
-            : project.slug === "threads-agent" ? buildThreadsAgentQuest
-              : project.slug === "webinar-moderator-agent" ? buildWebinarModeratorAgentQuest
-                : project.slug === "family-health-hub" ? buildFamilyHealthHubQuest
-                  : undefined;
-  if (!build) return undefined;
+  const originalSlugs = new Set(["family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub", "unique-design"]);
+  if (!originalSlugs.has(project.slug)) return undefined;
   const actions = sourceMobileActions[project.slug] ?? (project.slug === "planner" ? plannerMobileActions : project.slug === "idea-vault" ? ideaVaultMobileActions : project.slug === "child-schedule" ? childScheduleMobileActions : mobileActions);
-  return build(project, mode, customization).map((step) => {
-    const action = sourceMobileActions[project.slug] ? sourceMobileAction(project, step.id) : actionFor(project.slug, step.id);
+  return buildQuest(project, mode, customization).map((step) => {
+    if (step.journeyCheck) {
+      return {
+        ...step,
+        action: `Откройте обе готовые версии с телефона. ${step.action} Отправьте Фее один безопасный экран результата.`,
+        prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает только через Telegram, личный Codex на сервере и мобильный предпросмотр. Не проси открывать локальную папку телефона и не показывай служебные данные сервера.\n\n${step.prompt}`,
+        screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+        guide: undefined,
+        mobileAction: { tool: "screenshot", label: "Отправить итог проверки Фее", note: "Пришлите только экран результата без личных данных и секретов." },
+      };
+    }
+    const source = step.sourceStepId ?? step.id;
+    const action = sourceMobileActions[project.slug] ? sourceMobileAction(project, source) : actionFor(project.slug, source);
     return {
       ...step,
-      action: actions[step.id - 1],
+      action: actions[source - 1],
       prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает только через Telegram, личный Codex на сервере и мобильный предпросмотр. Не проси открывать локальную папку телефона и не показывай служебные данные сервера.\n\n${step.prompt}`,
       screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
       guide: undefined,

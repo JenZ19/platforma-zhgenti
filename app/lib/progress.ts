@@ -1,6 +1,7 @@
 import { isProjectBundle } from "../content/projects";
 import type { CatalogProject } from "../content/types";
 import { branchStorageSlug, loadOutputChoice, type QuestSurface } from "./output-format";
+import { getJourneyLevelCount } from "../content/journey-plans";
 
 export const LEVELS_PER_QUEST = 17;
 const PREFIX = "feya-academy-progress-v1";
@@ -26,35 +27,44 @@ export function createEmptyProgress(): QuestProgress {
   return { version: 1, activeStep: 1, completed: [], score: 0 };
 }
 
+export function getProjectLevelCount(project: Pick<CatalogProject, "slug"> | string): number {
+  const slug = typeof project === "string" ? project : project.slug;
+  return getJourneyLevelCount(slug);
+}
+
 export function isStepUnlocked(progress: QuestProgress, stepId: number): boolean {
   return stepId === 1 || progress.completed.includes(stepId - 1);
 }
 
-export function completeStep(progress: QuestProgress, stepId: number): QuestProgress {
-  if (!isStepUnlocked(progress, stepId) || progress.completed.includes(stepId)) return progress;
+export function completeStep(progress: QuestProgress, stepId: number, totalLevels = LEVELS_PER_QUEST): QuestProgress {
+  if (!isStepUnlocked(progress, stepId)) return progress;
+  if (progress.completed.includes(stepId)) {
+    const activeStep = Math.min(stepId + 1, totalLevels);
+    return activeStep === progress.activeStep ? progress : { ...progress, activeStep };
+  }
   const completed = [...progress.completed, stepId].sort((a, b) => a - b);
   return {
     version: 1,
-    activeStep: Math.min(stepId + 1, LEVELS_PER_QUEST),
+    activeStep: Math.min(stepId + 1, totalLevels),
     completed,
     score: completed.length * 10,
   };
 }
 
-export function parseProgress(raw: string | null): QuestProgress {
+export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST): QuestProgress {
   if (!raw) return createEmptyProgress();
   try {
     const value = JSON.parse(raw) as Partial<QuestProgress>;
     if (value.version !== 1 || !Array.isArray(value.completed)) return createEmptyProgress();
     const unique = [...new Set(value.completed)]
-      .filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= LEVELS_PER_QUEST)
+      .filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= totalLevels)
       .sort((a, b) => a - b);
     const sequential: number[] = [];
-    for (let id = 1; id <= LEVELS_PER_QUEST; id += 1) {
+    for (let id = 1; id <= totalLevels; id += 1) {
       if (!unique.includes(id)) break;
       sequential.push(id);
     }
-    const maxActive = Math.min(sequential.length + 1, LEVELS_PER_QUEST);
+    const maxActive = Math.min(sequential.length + 1, totalLevels);
     const requestedActive = typeof value.activeStep === "number" ? value.activeStep : maxActive;
     return {
       version: 1,
@@ -67,8 +77,8 @@ export function parseProgress(raw: string | null): QuestProgress {
   }
 }
 
-export function loadProgress(slug: string, storage: StorageLike): QuestProgress {
-  return parseProgress(storage.getItem(progressKey(slug)));
+export function loadProgress(slug: string, storage: StorageLike, totalLevels = LEVELS_PER_QUEST): QuestProgress {
+  return parseProgress(storage.getItem(progressKey(slug)), totalLevels);
 }
 
 export function saveProgress(slug: string, progress: QuestProgress, storage: StorageLike): void {
@@ -86,7 +96,7 @@ export function getCatalogProjectProgress(
 ): QuestProgress {
   if (!isProjectBundle(project)) {
     const storageSlug = `${surface === "mobile" ? "mobile:" : ""}${project.slug}`;
-    return loadProgress(storageSlug, storage);
+    return loadProgress(storageSlug, storage, getProjectLevelCount(project));
   }
 
   const selected = loadOutputChoice(project.slug, surface, storage);
@@ -104,14 +114,17 @@ export function getAcademyStats(
   storage: StorageLike,
   surface: QuestSurface = "desktop",
 ) {
-  const values = projects.map((project) => getCatalogProjectProgress(project, storage, surface));
+  const values = projects.map((project) => ({
+    progress: getCatalogProjectProgress(project, storage, surface),
+    totalLevels: getProjectLevelCount(project),
+  }));
   return {
     totalProjects: projects.length,
-    startedProjects: values.filter((progress) => progress.completed.length > 0).length,
-    completedProjects: values.filter((progress) => progress.completed.length === LEVELS_PER_QUEST).length,
-    completedSteps: values.reduce((total, progress) => total + progress.completed.length, 0),
-    totalSteps: projects.length * LEVELS_PER_QUEST,
-    score: values.reduce((total, progress) => total + progress.score, 0),
+    startedProjects: values.filter(({ progress }) => progress.completed.length > 0).length,
+    completedProjects: values.filter(({ progress, totalLevels }) => progress.completed.length === totalLevels).length,
+    completedSteps: values.reduce((total, { progress }) => total + progress.completed.length, 0),
+    totalSteps: values.reduce((total, { totalLevels }) => total + totalLevels, 0),
+    score: values.reduce((total, { progress }) => total + progress.score, 0),
   };
 }
 

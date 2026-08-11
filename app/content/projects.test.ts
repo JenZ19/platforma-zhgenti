@@ -2,16 +2,34 @@ import { describe, expect, it } from "vitest";
 import { getProject, getQuestProject, isProjectBundle, projects, questProjects } from "./projects";
 
 describe("project registry", () => {
-  it("contains the complete approved collection of 45 unique catalogue projects", () => {
-    expect(projects).toHaveLength(45);
-    expect(new Set(projects.map((project) => project.slug)).size).toBe(45);
+  it("uses one complete client agent instead of five repeated projects", () => {
+    const clientAgent = getQuestProject("client-care-agent");
+
+    expect(clientAgent?.title).toBe("ИИ-агент для работы с клиентами");
+    expect(clientAgent?.features).toEqual(expect.arrayContaining([
+      "приём заявки",
+      "уточнение запроса",
+      "подбор и объяснение",
+      "подготовка записи",
+      "продажа и сопровождение",
+    ]));
+
+    for (const repeatedSlug of ["lead-agent", "selector-agent", "booking-agent", "sales-manager-agent"]) {
+      expect(getQuestProject(repeatedSlug), repeatedSlug).toBeUndefined();
+    }
+    expect(getQuestProject("administrator-agent")?.title).toBe("ИИ-администратор");
+  });
+
+  it("contains the complete approved collection of 42 unique catalogue projects", () => {
+    expect(projects).toHaveLength(42);
+    expect(new Set(projects.map((project) => project.slug)).size).toBe(42);
   });
 
   it("matches the exact concrete project counts by kind", () => {
     const count = (kind: string) => questProjects.filter((project) => project.kind === kind && project.journey !== "setup").length;
     expect(count("service")).toBe(10);
-    expect(count("agent")).toBe(24);
-    expect(count("simple-site")).toBe(10);
+    expect(count("agent")).toBe(20);
+    expect(count("simple-site")).toBe(11);
     expect(count("advanced-site")).toBe(4);
     expect(count("portfolio")).toBe(1);
     expect(questProjects.filter((project) => project.journey === "setup")).toHaveLength(3);

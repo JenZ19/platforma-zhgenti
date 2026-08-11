@@ -1,12 +1,14 @@
 "use client";
 
-import { getMobileCapability } from "../content/mobile";
+import { buildMobileQuest, getMobileCapability } from "../content/mobile";
 import type { ProjectDefinition } from "../content/types";
 import { OriginalServiceScene } from "./OriginalServiceScene";
 import { getAgentContract } from "../content/agent-contracts";
-import { getSourcePrototypeTitle, isSourcePrototypeSlug, SourceProjectPrototypeScene } from "./SourceProjectPrototypeScene";
-import { getSetupQuestStepTitle, isSetupQuestSlug } from "../content/setup-quests";
+import { isSourcePrototypeSlug, SourceProjectPrototypeScene } from "./SourceProjectPrototypeScene";
+import { isSetupQuestSlug } from "../content/setup-quests";
 import { SetupQuestPrototypeScene } from "./SetupQuestPrototypeScene";
+import { DesignReferenceScene } from "./DesignReferenceScene";
+import { JourneyCheckPrototypeScene } from "./JourneyCheckPrototypeScene";
 
 function Phone({ project, step }: { project: ProjectDefinition; step: number }) {
   const constructor = project.kind === "agent" ? "Чатиум" : "Lovable";
@@ -46,20 +48,23 @@ function Phone({ project, step }: { project: ProjectDefinition; step: number }) 
 
 export function MobileExpectedScene({ project, step }: { project: ProjectDefinition; step: number }) {
   const capability = getMobileCapability(project);
+  const questStep = buildMobileQuest(project)[step - 1];
+  if (!questStep) return null;
+  const sourceStep = questStep.sourceStepId || step;
+  const title = questStep.title;
+  const frame = (visual: React.ReactNode, className = "") => <main id="capture-scene" className={`capture-canvas mobile-capture ${className}`}><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>МОБИЛЬНЫЙ КВЕСТ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Вот что должно получиться на телефоне</p><h1>{title}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><div className="original-mobile-phone">{visual}</div><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{title}</h2><p>Это честный прототип результата этого уровня. Название, палитра и содержание будут вашими.</p><div><b>✓</b> Одно действие с телефона</div><div><b>✓</b> Код вручную не нужен</div></aside></div></main>;
+  if (questStep.journeyCheck) return frame(<JourneyCheckPrototypeScene project={project} step={questStep} mobile />, "journey-check-mobile-capture");
+  if (project.slug === "unique-design") {
+    return frame(<DesignReferenceScene step={sourceStep} mobile />, "original-mobile-capture");
+  }
   if (isSetupQuestSlug(project.slug)) {
-    const title = getSetupQuestStepTitle(project.slug, step)!;
-    return <main id="capture-scene" className="capture-canvas mobile-capture setup-mobile-capture"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>ПОДСКАЗКА НА ТЕЛЕФОНЕ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Действие выполняется на компьютере</p><h1>{title}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><div className="original-mobile-phone"><SetupQuestPrototypeScene project={project} step={step} mobile /></div><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{title}</h2><p>Телефон можно держать рядом как инструкцию. Нажимайте указанные кнопки на Mac или Windows.</p><div><b>✓</b> Один шаг за раз</div><div><b>✓</b> Секреты не вводятся в квест</div></aside></div></main>;
+    return frame(<SetupQuestPrototypeScene project={project} step={sourceStep} mobile />, "setup-mobile-capture");
   }
   if (isSourcePrototypeSlug(project.slug)) {
-    const title = getSourcePrototypeTitle(project.slug, step)!;
-    return <main id="capture-scene" className="capture-canvas mobile-capture source-mobile-capture"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>МОБИЛЬНЫЙ КВЕСТ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Вот что должно получиться на телефоне</p><h1>{title}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><SourceProjectPrototypeScene project={project} step={step} mobile/><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{title}</h2><p>Это точный прототип результата вашего проекта. Название, палитра и содержание будут вашими.</p><div><b>✓</b> Одно действие с телефона</div><div><b>✓</b> Личная и клиентская копии отдельно</div></aside></div></main>;
+    return frame(<SourceProjectPrototypeScene project={project} step={sourceStep} mobile/>, "source-mobile-capture");
   }
   if (["family-expenses", "planner", "idea-vault", "child-schedule"].includes(project.slug)) {
-    const titles = project.slug === "family-expenses" ? ["Готовый бюджет на телефоне","Моя версия сохранена","Расходы проверены","Серверная комната создана","Паспорт отправлен Фее","Основа готова","Первый расход сохранён","Свои категории добавлены","Свой стиль применён","Особенная функция работает","Семейный путь пройден","Изменение и копия проверены","Проверка одной рукой пройдена","Личная версия опубликована","Клиентская копия создана","Бриф заказчика применён","Две версии в портфолио"] : project.slug === "planner" ? ["Спокойный день на телефоне","Моя версия планера сохранена","Дела недели проверены","Комната planner создана","Паспорт ритма отправлен","Основа планера готова","Первое дело сохранено","Главное сегодня выбрано","Свой стиль применён","Особенная функция работает","День пройден целиком","Изменение и JSON проверены","Проверка одной рукой пройдена","Личная версия опубликована","planner-client создан","Бриф заказчика применён","Два планера в портфолио"] : project.slug === "idea-vault" ? ["Живая копилка на телефоне","Моя версия копилки сохранена","Десять идей проверены","Комната idea-vault создана","Паспорт копилки отправлен","Основа готова","Первая мысль сохранена","Темы и статусы настроены","Свой стиль применён","Маленький шаг работает","Поиск проверен","Изменение и JSON проверены","Идея сохранена одной рукой","Подборка опубликована","idea-vault-client создан","Бриф заказчика применён","Две копилки в портфолио"] : ["Спокойная неделя на телефоне","Моя версия расписания сохранена","Занятия проверены","Комната child-schedule создана","Паспорт расписания отправлен","Основа недели готова","Первое занятие сохранено","Расписания А и Б разделены","Свой стиль применён","Семейная функция работает","Утро и пересечение проверены","Изменение и JSON проверены","Расписание проверено одной рукой","Закрытая версия опубликована","child-schedule-client создан","Бриф семьи применён","Два расписания в портфолио"];
-    return <main id="capture-scene" className={`capture-canvas mobile-capture original-mobile-capture ${project.slug === "child-schedule" ? "child-mobile-capture" : ""}`}><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>МОБИЛЬНЫЙ КВЕСТ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Вот что должно получиться на телефоне</p><h1>{titles[step-1]}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><div className="original-mobile-phone"><OriginalServiceScene slug={project.slug} step={step} mobile /></div><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{titles[step-1]}</h2><p>Этот экран относится только к проекту «{project.title}». Цвет и название могут быть вашими.</p><div><b>✓</b> Одно действие с телефона</div><div><b>✓</b> Клиентская копия хранится отдельно</div></aside></div></main>;
+    return frame(<OriginalServiceScene slug={project.slug} step={sourceStep} mobile />, `original-mobile-capture ${project.slug === "child-schedule" ? "child-mobile-capture" : ""}`);
   }
-  const titles = project.kind === "agent"
-    ? ["Фея открыла нужного агента","Свой Codex подключён","Выбрана моя версия агента","Свободное сообщение принято","Задан один нужный вопрос","Паспорт агента подтверждён","Мастер-инструкция установлена","Полезный результат получен","Агент открыт в Чатиуме","Голосовой ответ понят","Скриншот отправлен Фее","Самопроверка исправлена","Полный разговор пройден","Подтверждение защищено","Личная версия работает в Telegram","Клиентская копия готова","Две версии в портфолио"]
-    : ["Фея открыта в Telegram","Свой Codex подключён","Выбран режим данных","Ответы собраны в разговоре","Анкета проекта заполнена","Паспорт проекта готов","Мастер-задание запущено","Первый результат получен","Проект открыт в конструкторе","Первый экран проверен","Скриншот отправлен Фее","Исправление подготовлено","Главное действие работает","Безопасность проверена","Личная версия готова","Клиентская копия готова","Две версии в портфолио"];
-  return <main id="capture-scene" className="capture-canvas mobile-capture"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>МОБИЛЬНЫЙ КВЕСТ · УРОВЕНЬ {String(step).padStart(2,"0")}</div></header><section className="capture-title"><p>Вот что должно получиться на телефоне</p><h1>{titles[step-1]}</h1><span>{project.title}</span></section><div className="mobile-capture-body"><Phone project={project} step={step}/><aside><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><span>ШАГ {String(step).padStart(2,"0")}</span><h2>{titles[step-1]}</h2><p>Один экран — одно понятное действие. Мелкие отличия в цвете и тексте нормальны.</p><div><b>✓</b> Сделано только с телефона</div><div><b>✓</b> Код вручную не нужен</div></aside></div></main>;
+  return frame(<Phone project={project} step={sourceStep}/>);
 }
