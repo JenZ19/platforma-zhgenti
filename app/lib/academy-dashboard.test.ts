@@ -7,10 +7,12 @@ import {
   loadDashboardSection,
   loadLastActiveProject,
   loadQuestionNotes,
+  loadQuestionNotesResult,
   loadSavedProjects,
   saveDashboardSection,
   saveLastActiveProject,
   saveQuestionNote,
+  saveQuestionNoteResult,
   toggleSavedProject,
 } from "./academy-dashboard";
 
@@ -225,5 +227,29 @@ describe("academy dashboard state", () => {
     expect(saveQuestionNote("planner", "   ", storage, () => "2026-08-15T12:00:00.000Z")).toEqual([
       { id: "2026-08-14T12:00:00.000Z", text: "Как добавить календарь?", createdAt: "2026-08-14T12:00:00.000Z" },
     ]);
+  });
+
+  it("does not crash when browser note storage cannot be read", () => {
+    const storage = {
+      getItem() { throw new DOMException("Blocked", "SecurityError"); },
+      setItem() { throw new Error("setItem must not run after a read failure"); },
+      removeItem() {},
+    };
+
+    expect(() => loadQuestionNotes("planner", storage)).not.toThrow();
+    expect(loadQuestionNotesResult("planner", storage)).toEqual({ notes: [], error: "storage" });
+    expect(() => saveQuestionNote("planner", "Не потерять вопрос", storage)).not.toThrow();
+    expect(saveQuestionNoteResult("planner", "Не потерять вопрос", storage)).toEqual({ notes: [], saved: false, error: "storage" });
+  });
+
+  it("reports an unsaved question when browser storage rejects the write", () => {
+    const storage = {
+      getItem() { return null; },
+      setItem() { throw new DOMException("Quota exceeded", "QuotaExceededError"); },
+      removeItem() {},
+    };
+
+    expect(saveQuestionNoteResult("planner", "Не потерять вопрос", storage)).toEqual({ notes: [], saved: false, error: "storage" });
+    expect(saveQuestionNote("planner", "Не потерять вопрос", storage)).toEqual([]);
   });
 });

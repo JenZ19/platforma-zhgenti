@@ -39,6 +39,17 @@ export type QuestionNote = {
   createdAt: string;
 };
 
+export type QuestionNotesLoadResult = {
+  notes: QuestionNote[];
+  error?: "storage";
+};
+
+export type QuestionNoteSaveResult = {
+  notes: QuestionNote[];
+  saved: boolean;
+  error?: "storage";
+};
+
 function readJson<T>(storage: StorageLike, key: string, fallback: T, validate: (value: unknown) => value is T): T {
   try {
     const value: unknown = JSON.parse(storage.getItem(key) ?? "null");
@@ -89,18 +100,36 @@ export function loadDashboardSection(storage: StorageLike): DashboardSection {
 }
 
 export function loadQuestionNotes(scope: string, storage: StorageLike): QuestionNote[] {
-  return readJson(storage, `${PREFIX}:notes:${scope}`, [], questionNotes);
+  return loadQuestionNotesResult(scope, storage).notes;
 }
 
-export function saveQuestionNote(
+export function loadQuestionNotesResult(scope: string, storage: StorageLike): QuestionNotesLoadResult {
+  let raw: string | null;
+  try {
+    raw = storage.getItem(`${PREFIX}:notes:${scope}`);
+  } catch {
+    return { notes: [], error: "storage" };
+  }
+
+  try {
+    const value: unknown = JSON.parse(raw ?? "null");
+    return { notes: questionNotes(value) ? value : [] };
+  } catch {
+    return { notes: [] };
+  }
+}
+
+export function saveQuestionNoteResult(
   scope: string,
   text: string,
   storage: StorageLike,
   now: () => string = () => new Date().toISOString(),
-): QuestionNote[] {
+): QuestionNoteSaveResult {
   const trimmed = text.trim();
-  const notes = loadQuestionNotes(scope, storage);
-  if (!trimmed) return notes;
+  const loaded = loadQuestionNotesResult(scope, storage);
+  if (loaded.error) return { notes: loaded.notes, saved: false, error: loaded.error };
+  const notes = loaded.notes;
+  if (!trimmed) return { notes, saved: false };
   const createdAt = now();
   const existingIds = new Set(notes.map((note) => note.id));
   let id = createdAt;
@@ -110,8 +139,21 @@ export function saveQuestionNote(
     suffix += 1;
   }
   const next = [...notes, { id, text: trimmed, createdAt }];
-  storage.setItem(`${PREFIX}:notes:${scope}`, JSON.stringify(next));
-  return next;
+  try {
+    storage.setItem(`${PREFIX}:notes:${scope}`, JSON.stringify(next));
+    return { notes: next, saved: true };
+  } catch {
+    return { notes, saved: false, error: "storage" };
+  }
+}
+
+export function saveQuestionNote(
+  scope: string,
+  text: string,
+  storage: StorageLike,
+  now: () => string = () => new Date().toISOString(),
+): QuestionNote[] {
+  return saveQuestionNoteResult(scope, text, storage, now).notes;
 }
 
 function projectWeeks(project: CatalogProject): readonly number[] {

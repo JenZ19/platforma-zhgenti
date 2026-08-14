@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { loadQuestionNotes, saveQuestionNote, type QuestionNote } from "../lib/academy-dashboard";
+import { useEffect, useId, useRef, useState } from "react";
+import {
+  loadQuestionNotesResult,
+  saveQuestionNoteResult,
+  type QuestionNote,
+} from "../lib/academy-dashboard";
+import type { StorageLike } from "../lib/progress";
 import { DashboardIcon } from "./DashboardIcon";
 
 type SpeechResultEvent = {
@@ -40,11 +45,21 @@ export type FairyAssistantProps = {
 
 const savedStatus = "Вопрос сохранён на этом устройстве. Покажите его куратору или вставьте в ChatGPT/Codex.";
 const microphoneFallback = "Микрофон недоступен. Напишите вопрос в поле — текстовый ввод работает без микрофона.";
+const noteLoadFallback = "Не удалось открыть сохранённые вопросы в этом браузере. Новый вопрос лучше скопировать вручную.";
+const noteSaveFallback = "Не удалось сохранить вопрос в этом браузере. Скопируйте текст и передайте его вручную.";
 
 function speechRecognitionConstructor(): SpeechRecognitionConstructor | undefined {
   if (typeof window === "undefined") return undefined;
   const speechWindow = window as SpeechWindow;
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+}
+
+function browserStorage(): StorageLike | undefined {
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
 }
 
 function formatSavedAt(value: string): string {
@@ -59,7 +74,29 @@ function formatSavedAt(value: string): string {
   }).format(date);
 }
 
-export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantProps) {
+function clearRecognitionHandlers(recognition: SpeechRecognitionInstance) {
+  recognition.onstart = null;
+  recognition.onresult = null;
+  recognition.onerror = null;
+  recognition.onend = null;
+}
+
+function stopRecognitionSafely(recognition: SpeechRecognitionInstance) {
+  clearRecognitionHandlers(recognition);
+  try {
+    recognition.stop();
+  } catch {
+    // Some browsers throw when recognition has already stopped.
+  } finally {
+    clearRecognitionHandlers(recognition);
+  }
+}
+
+export function FairyAssistant(props: FairyAssistantProps) {
+  return <FairyAssistantSession key={props.scope} {...props} />;
+}
+
+function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantProps) {
   const headingId = useId();
   const [draft, setDraft] = useState("");
   const [notes, setNotes] = useState<QuestionNote[]>([]);
@@ -68,13 +105,16 @@ export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantP
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const notifyNativeCloseRef = useRef(true);
 
   useEffect(() => {
     // Notes belong to this browser, so read them only after the client has mounted.
+    const storage = browserStorage();
+    const loaded = storage ? loadQuestionNotesResult(scope, storage) : { notes: [], error: "storage" as const };
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNotes(loadQuestionNotes(scope, window.localStorage));
-    setDraft("");
-    setStatus("");
+    setNotes(loaded.notes);
+    setStatus(loaded.error ? noteLoadFallback : "");
   }, [scope]);
 
   useEffect(() => {
@@ -84,33 +124,56 @@ export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantP
   }, []);
 
   useEffect(() => {
-    if (mode === "floating") textareaRef.current?.focus();
-  }, [mode]);
+    if (mode !== "floating") return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    try {
+      notifyNativeCloseRef.current = true;
+      dialog.showModal();
+      textareaRef.current?.focus();
+    } catch {
+      onClose?.();
+      return;
+    }
+    return () => {
+      notifyNativeCloseRef.current = false;
+      try {
+        if (dialog.open) dialog.close();
+      } catch {
+        // The dialog may already be closed by the browser's native cancel flow.
+      }
+    };
+  }, [mode, onClose]);
 
   useEffect(() => () => {
     const recognition = recognitionRef.current;
-    if (!recognition) return;
-    recognition.onstart = null;
-    recognition.onresult = null;
-    recognition.onerror = null;
-    recognition.onend = null;
-    recognition.stop();
     recognitionRef.current = null;
+    if (recognition) stopRecognitionSafely(recognition);
   }, []);
 
   function saveQuestion() {
-    const next = saveQuestionNote(scope, draft, window.localStorage);
     if (!draft.trim()) return;
-    setNotes(next);
+    const storage = browserStorage();
+    const result = storage
+      ? saveQuestionNoteResult(scope, draft, storage)
+      : { notes, saved: false, error: "storage" as const };
+    if (!result.saved) {
+      if (result.error) setStatus(noteSaveFallback);
+      return;
+    }
+    setNotes(result.notes);
     setDraft("");
     setStatus(savedStatus);
   }
 
   function stopSpeech() {
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
     try {
-      recognitionRef.current?.stop();
+      recognition.stop();
     } catch {
       recognitionRef.current = null;
+      clearRecognitionHandlers(recognition);
       setListening(false);
       setStatus(microphoneFallback);
     }
@@ -129,19 +192,21 @@ export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantP
       return;
     }
 
-    let failed = false;
     let receivedTranscript = false;
+    let recognition: SpeechRecognitionInstance | null = null;
     try {
-      const recognition = new Recognition();
+      recognition = new Recognition();
       recognitionRef.current = recognition;
       recognition.lang = "ru-RU";
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.onstart = () => {
+        if (recognitionRef.current !== recognition) return;
         setListening(true);
         setStatus("Говорите — текст появится в поле вопроса. Он не сохранится сам.");
       };
       recognition.onresult = (event) => {
+        if (recognitionRef.current !== recognition) return;
         const transcript = Array.from(event.results)
           .map((result) => result[0]?.transcript?.trim() ?? "")
           .filter(Boolean)
@@ -153,30 +218,40 @@ export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantP
         setStatus("Голос распознан. Проверьте текст и нажмите «Сохранить вопрос».");
       };
       recognition.onerror = () => {
-        failed = true;
+        if (recognitionRef.current !== recognition) return;
+        clearRecognitionHandlers(recognition!);
         recognitionRef.current = null;
         setListening(false);
         setStatus(microphoneFallback);
       };
       recognition.onend = () => {
+        if (recognitionRef.current !== recognition) return;
         recognitionRef.current = null;
         setListening(false);
-        if (failed) return;
         setStatus(receivedTranscript
           ? "Голос распознан. Проверьте текст и нажмите «Сохранить вопрос»."
           : "Запись остановлена. Проверьте текст и сохраните вопрос вручную.");
       };
       recognition.start();
     } catch {
+      if (recognition) stopRecognitionSafely(recognition);
       recognitionRef.current = null;
       setListening(false);
       setStatus(microphoneFallback);
     }
   }
 
-  function closeOnEscape(event: KeyboardEvent<HTMLElement>) {
-    if (mode === "floating" && event.key === "Escape") {
-      event.preventDefault();
+  function closeDialog() {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      onClose?.();
+      return;
+    }
+    try {
+      notifyNativeCloseRef.current = true;
+      if (dialog.open) dialog.close();
+      else onClose?.();
+    } catch {
       onClose?.();
     }
   }
@@ -190,11 +265,11 @@ export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantP
           <h1 id={headingId}>Феечка</h1>
         </div>
         {mode === "floating" && (
-          <button type="button" className="fairy-close" onClick={onClose} aria-label="Закрыть Феечку">×</button>
+          <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть Феечку">×</button>
         )}
       </header>
       <p className="fairy-intro">
-        Опишите, на каком экране остановились, что нажали и что увидели. Вопрос останется только на этом устройстве, пока вы сами его не скопируете.
+        Опишите, на каком экране остановились, что нажали и что увидели. Сохранённые вопросы хранятся в этом браузере на этом устройстве. Голос обрабатывает браузер; в зависимости от его настроек браузер может использовать внешний сервис распознавания речи.
       </p>
       <div className="fairy-compose">
         <label htmlFor={`${headingId}-question`}>Вопрос Феечке</label>
@@ -246,12 +321,17 @@ export function FairyAssistant({ scope, mode, format, onClose }: FairyAssistantP
   if (mode === "floating") {
     return (
       <dialog
-        open
+        ref={dialogRef}
         className="fairy-assistant fairy-assistant-floating"
         data-fairy-scope={scope}
-        aria-modal="true"
         aria-labelledby={headingId}
-        onKeyDown={closeOnEscape}
+        onCancel={(event) => {
+          event.preventDefault();
+          closeDialog();
+        }}
+        onClose={() => {
+          if (notifyNativeCloseRef.current) onClose?.();
+        }}
       >
         {content}
       </dialog>

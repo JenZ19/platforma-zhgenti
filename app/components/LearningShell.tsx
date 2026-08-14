@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { DashboardSection } from "../lib/academy-dashboard";
 import { DashboardIcon, type DashboardIconName } from "./DashboardIcon";
 import { FairyAssistant } from "./FairyAssistant";
@@ -46,10 +46,17 @@ export function LearningShell({
     setSearch(searchQuery);
   }, [searchQuery]);
 
-  function closeFairy() {
+  useEffect(() => {
+    if (activeSection !== "fairy" || !fairyOpen) return;
+    // The full Fairy page replaces the floating assistant completely.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFairyOpen(false);
+  }, [activeSection, fairyOpen]);
+
+  const closeFairy = useCallback(() => {
     setFairyOpen(false);
     fairyTriggerRef.current?.focus();
-  }
+  }, []);
 
   return (
     <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-visual-theme="pink-cloud">
@@ -89,19 +96,23 @@ export function LearningShell({
         </header>
         {children}
       </div>
-      <button
-        ref={fairyTriggerRef}
-        type="button"
-        className="fairy-floating-trigger"
-        aria-label="Открыть Феечку"
-        aria-haspopup="dialog"
-        aria-expanded={fairyOpen}
-        onClick={() => setFairyOpen(true)}
-      >
-        <DashboardIcon name="fairy" />
-        <span>Спросить Феечку</span>
-      </button>
-      {fairyOpen && <FairyAssistant scope={assistantScope} mode="floating" onClose={closeFairy} />}
+      {activeSection !== "fairy" && (
+        <>
+          <button
+            ref={fairyTriggerRef}
+            type="button"
+            className="fairy-floating-trigger"
+            aria-label="Открыть Феечку"
+            aria-haspopup="dialog"
+            aria-expanded={fairyOpen}
+            onClick={() => setFairyOpen(true)}
+          >
+            <DashboardIcon name="fairy" />
+            <span>Спросить Феечку</span>
+          </button>
+          {fairyOpen && <FairyAssistant key={assistantScope} scope={assistantScope} mode="floating" onClose={closeFairy} />}
+        </>
+      )}
       <nav className="learning-bottom-nav" aria-label="Навигация Академии на телефоне">
         {items.map((item) => (
           <button
