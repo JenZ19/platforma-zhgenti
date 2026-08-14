@@ -4,6 +4,7 @@ import { isProjectBundle } from "../content/projects";
 import type { ProjectFormat, ProjectKind } from "../content/types";
 import type { DashboardProjectState } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
+import { questDurationLabel } from "../lib/quest-duration";
 import { ProjectPreview } from "./ProjectPreview";
 
 export type DashboardProjectCardProps = {
@@ -65,7 +66,7 @@ export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscove
         <h3>{project.title}</h3>
         <p>{project.outcome}</p>
         <div className="dashboard-card-facts">
-          <p>Время: 3–5 минут на уровень</p>
+          <p>Время: {questDurationLabel(item.totalLevels, format)}</p>
           <p>Формат: {resultFormat}</p>
           {showDiscoveryDetails ? <p>Тип результата: {isProjectBundle(project) ? project.track : formatLabels[project.kind]}</p> : null}
           {showDiscoveryDetails ? <p>Ключевые слова: {discovery.keywords.join(", ")}</p> : null}

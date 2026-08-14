@@ -22,6 +22,7 @@ import { LessonText } from "./LessonText";
 import { BeginnerTerms } from "./BeginnerTerms";
 import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
 import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
+import { questLevelMinutes } from "../lib/quest-duration";
 
 export function MobileQuest({
   project,
@@ -240,7 +241,7 @@ function MobileQuestBody({
         <section className="mobile-level-wrap">
           <nav className="mobile-level-rail" aria-label="Уровни мобильного квеста">{steps.map((item) => { const unlocked = isStepUnlocked(progress, item.id); const done = progress.completed.includes(item.id); return <button type="button" key={item.id} className={`${item.id === step.id ? "active" : ""} ${done ? "done" : ""}`} disabled={!unlocked} onClick={() => { if (!unlocked) return; const next = { ...progress, activeStep: item.id }; setProgress(next); saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels); }} aria-label={`Уровень ${item.id}: ${item.title}`}>{done ? "✓" : item.id}</button>; })}</nav>
           <article className="mobile-level-card">
-            <header><div><p>{step.eyebrow} · уровень {step.id}</p><h2>{step.title}</h2></div><span>{step.id < 7 ? "3 мин" : "5 мин"}</span></header>
+            <header><div><p>{step.eyebrow} · уровень {step.id}</p><h2>{step.title}</h2></div><span>{questLevelMinutes(step.id, "mobile")} мин</span></header>
             <BeginnerTerms terms={step.beginnerTerms} />
             <section className="mobile-why"><b>Зачем</b><LessonText text={step.why} kind="why" /></section>
             {step.id === 2 && profile && customization && <QuestCustomizer compact profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}

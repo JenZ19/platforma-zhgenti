@@ -268,6 +268,48 @@ describe("academy interface", () => {
     expect(screen.getByRole("searchbox", { name: /поиск по квестам недели/i })).toHaveValue("");
   });
 
+  it("preserves spaces through the real inline search change sequence", async () => {
+    window.history.replaceState({}, "", "/?section=weeks");
+    render(<AppEntry />);
+
+    const inline = await screen.findByRole("searchbox", { name: /поиск по квестам недели/i });
+    const top = screen.getByRole("searchbox", { name: /найти проект/i });
+    for (const value of ["сайт", "сайт ", "сайт п", "сайт псих", "сайт психолога"]) {
+      fireEvent.change(inline, { target: { value } });
+      await waitFor(() => expect(new URLSearchParams(window.location.search).get("q")).toBe(value));
+      expect(inline).toHaveValue(value);
+      expect(top).toHaveValue(value);
+    }
+
+    expect(await screen.findByRole("article", { name: /сайт психолога/i })).toBeInTheDocument();
+  });
+
+  it("auto-opens matching weeks but keeps their accordions manually operable", async () => {
+    window.history.replaceState({}, "", "/?section=weeks&q=%D0%BF%D1%81%D0%B8%D1%85%D0%BE%D0%BB%D0%BE%D0%B3");
+    render(<AppEntry />);
+
+    const week = await screen.findByRole("button", { name: "Неделя 4" });
+    expect(week).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("article", { name: /сайт психолога/i })).toBeInTheDocument();
+
+    fireEvent.click(week);
+    expect(week).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("article", { name: /сайт психолога/i })).not.toBeInTheDocument();
+
+    fireEvent.click(week);
+    expect(week).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("article", { name: /сайт психолога/i })).toBeInTheDocument();
+  });
+
+  it("places a bundle matched only by its agent branch in factual week 2 once", async () => {
+    window.history.replaceState({}, "", "/?section=weeks&q=%D0%98%D0%98-%D0%B0%D0%B3%D0%B5%D0%BD%D1%82+%D0%BF%D0%BB%D0%B0%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F+%D0%B4%D0%BD%D1%8F");
+    render(<AppEntry />);
+
+    expect(await screen.findAllByRole("article", { name: /планирование/i })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Неделя 1" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Неделя 2" })).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("keeps the existing discovery filters in the weekly library", async () => {
     window.history.replaceState({}, "", "/?section=weeks");
     render(<AppEntry />);
@@ -288,10 +330,12 @@ describe("academy interface", () => {
     render(<AppEntry />);
 
     const planning = await screen.findByRole("article", { name: /планирование/i });
-    expect(planning).toHaveTextContent("Время: 3–5 минут на уровень");
+    expect(planning).toHaveTextContent("Время: 5–10 минут на уровень");
     expect(planning).toHaveTextContent("Формат: Сервис или ИИ-агент");
     expect(planning).toHaveTextContent("Тип результата: Сервис или ИИ-агент");
     expect(planning).toHaveTextContent(/Ключевые слова:.+Для себя/i);
+    const server = screen.getByRole("article", { name: /покупаем сервер/i });
+    expect(server).toHaveTextContent("Время: 5–7 минут на уровень");
   });
 
   it("uses the selected bundle format on a started project card", async () => {

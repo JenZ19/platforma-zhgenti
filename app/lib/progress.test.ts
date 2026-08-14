@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { projects } from "../content/projects";
 import { branchStorageSlug, saveOutputChoice } from "./output-format";
 import {
@@ -20,6 +20,7 @@ class MemoryStorage {
 }
 
 describe("academy progress", () => {
+  afterEach(() => vi.unstubAllGlobals());
   it("keeps progress isolated by project slug", () => {
     expect(progressKey("planner")).not.toBe(progressKey("recipe-book"));
     const storage = new MemoryStorage();
@@ -47,11 +48,32 @@ describe("academy progress", () => {
     let finished = createEmptyProgress();
     for (let id = 1; id <= 17; id += 1) finished = completeStep(finished, id, 17);
 
-    saveProgress("finished", finished, storage, () => "2026-08-15T21:45:00.000Z");
+    saveProgress("finished", finished, storage, () => new Date(2026, 7, 15, 21, 45));
     saveProgress("started", completeStep(createEmptyProgress(), 1), storage, () => "2026-08-16T08:00:00.000Z");
 
     expect(loadProgress("finished", storage).completedAt).toBe("2026-08-15");
     expect(loadProgress("started", storage)).not.toHaveProperty("completedAt");
+  });
+
+  it("uses the learner's local calendar date at a UTC boundary", () => {
+    const NativeDate = Date;
+    class BoundaryDate extends NativeDate {
+      constructor(...args: ConstructorParameters<typeof Date>) {
+        super(args.length ? args[0] : "2026-08-14T21:30:00.000Z");
+      }
+      getFullYear() { return 2026; }
+      getMonth() { return 7; }
+      getDate() { return 15; }
+    }
+    vi.stubGlobal("Date", BoundaryDate);
+    const storage = new MemoryStorage();
+    let finished = createEmptyProgress();
+    for (let id = 1; id <= 17; id += 1) finished = completeStep(finished, id, 17);
+
+    saveProgress("local-boundary", finished, storage);
+
+    expect(loadProgress("local-boundary", storage).updatedAt).toBe("2026-08-14T21:30:00.000Z");
+    expect(loadProgress("local-boundary", storage).completedAt).toBe("2026-08-15");
   });
 
   it("does not invent a completion date when legacy completed progress is saved again", () => {

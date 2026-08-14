@@ -67,6 +67,13 @@ export function isIsoCalendarDate(value: string): boolean {
     && date.getUTCDate() === day;
 }
 
+export function localCalendarDate(date: Date): string {
+  const year = String(date.getFullYear()).padStart(4, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST): QuestProgress {
   if (!raw) return createEmptyProgress();
   try {
@@ -108,15 +115,18 @@ export function saveProgress(
   slug: string,
   progress: QuestProgress,
   storage: StorageLike,
-  now: () => string = () => new Date().toISOString(),
+  now: () => string | Date = () => new Date(),
   totalLevels = LEVELS_PER_QUEST,
 ): void {
-  const updatedAt = now();
+  const clockValue = now();
+  const instant = typeof clockValue === "string" ? new Date(clockValue) : clockValue;
+  const updatedAt = typeof clockValue === "string" ? clockValue : instant.toISOString();
+  const today = localCalendarDate(instant);
   const previous = loadProgress(slug, storage, totalLevels);
   const completedAt = progress.completedAt
     ?? previous.completedAt
     ?? (progress.completed.length === totalLevels && previous.completed.length < totalLevels
-      ? updatedAt.slice(0, 10)
+      ? today
       : undefined);
   storage.setItem(progressKey(slug), JSON.stringify({ ...progress, updatedAt, completedAt }));
 }

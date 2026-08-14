@@ -111,29 +111,37 @@ function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibra
 function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQueryChange = () => undefined }: Omit<DashboardLibraryProps, "mode">) {
   const [difficulty, setDifficulty] = useState<DifficultyFilter>(0);
   const [goal, setGoal] = useState<GoalFilter>("Все цели");
-  const [openWeek, setOpenWeek] = useState<number | null>(snapshot.currentWeek);
+  const [openWeeks, setOpenWeeks] = useState<Set<number>>(() => new Set([snapshot.currentWeek]));
 
-  useEffect(() => {
-    // A changed progress snapshot may advance the recommended current week.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOpenWeek(snapshot.currentWeek);
-  }, [snapshot.currentWeek]);
+  const filters = useMemo(() => ({
+    week: 0,
+    difficulty,
+    goal,
+    query: initialQuery,
+  } as const), [difficulty, goal, initialQuery]);
 
   const filtered = useMemo(() => {
     const stateBySlug = new Map(snapshot.items.map((item) => [item.project.slug, item]));
-    return filterAndSortProjects(snapshot.items.map((item) => item.project), {
-      week: 0,
-      difficulty,
-      goal,
-      query: initialQuery,
-    }).map((project) => stateBySlug.get(project.slug)!);
-  }, [difficulty, goal, initialQuery, snapshot.items]);
+    return filterAndSortProjects(snapshot.items.map((item) => item.project), filters)
+      .map((project) => stateBySlug.get(project.slug)!);
+  }, [filters, snapshot.items]);
 
   const hasFilters = Boolean(initialQuery.trim()) || difficulty !== 0 || goal !== "Все цели";
-  const belongsToFilteredWeek = (item: DashboardProjectState, week: number) => isProjectBundle(item.project)
-    ? item.project.weeks[0] === week
-    : item.project.week === week;
-  const matchingWeeks = new Set(weeks.filter((week) => filtered.some((item) => belongsToFilteredWeek(item, week))));
+  const filteredWeekBySlug = useMemo(() => new Map(filtered.map((item) => {
+    if (!isProjectBundle(item.project)) return [item.project.slug, item.project.week] as const;
+    const matchingBranches = Object.values(item.project.formats)
+      .filter((branch) => filterAndSortProjects([branch], filters).length > 0);
+    const week = matchingBranches.length === 1 ? matchingBranches[0].week : item.project.weeks[0];
+    return [item.project.slug, week] as const;
+  })), [filtered, filters]);
+  const matchingWeeks = new Set(filteredWeekBySlug.values());
+  const autoOpenKey = hasFilters && filtered.length > 0 ? [...matchingWeeks].sort().join(",") : String(snapshot.currentWeek);
+
+  useEffect(() => {
+    // A new result set opens its matching weeks once; subsequent clicks remain under learner control.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpenWeeks(new Set(autoOpenKey.split(",").map(Number)));
+  }, [autoOpenKey]);
 
   function resetFilters() {
     onQueryChange("");
@@ -173,8 +181,8 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
       {hasFilters && filtered.length > 0 ? <button type="button" className="dashboard-filter-reset" onClick={resetFilters}>Сбросить фильтры</button> : null}
       <div className="dashboard-week-list">
         {weeks.map((week) => {
-          const expanded = filtered.length === 0 ? openWeek === week : hasFilters ? matchingWeeks.has(week) : openWeek === week;
-          const items = filtered.filter((item) => hasFilters ? belongsToFilteredWeek(item, week) : projectBelongsToWeek(item, week));
+          const expanded = openWeeks.has(week);
+          const items = filtered.filter((item) => hasFilters ? filteredWeekBySlug.get(item.project.slug) === week : projectBelongsToWeek(item, week));
           return (
             <section className="dashboard-week" key={week}>
               <h2>
@@ -183,7 +191,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
                   aria-label={`Неделя ${week}`}
                   aria-expanded={expanded}
                   aria-controls={`dashboard-week-${week}`}
-                  onClick={() => setOpenWeek(expanded ? null : week)}
+                  onClick={() => setOpenWeeks(expanded ? new Set() : new Set([week]))}
                 >
                   <span>Неделя {week}</span><small>{items.length} проектов</small><b aria-hidden="true">⌄</b>
                 </button>

@@ -42,7 +42,7 @@ function dashboardQuery(section: DashboardSection, format: "desktop" | "mobile",
   const query = new URLSearchParams();
   if (format === "mobile") query.set("format", "mobile");
   if (section !== "home") query.set("section", section);
-  if (search.trim()) query.set("q", search.trim());
+  if (search.trim()) query.set("q", search);
   const value = query.toString();
   return value ? `?${value}` : "";
 }
@@ -136,9 +136,8 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
 
   function updateDashboardSearch(search: string) {
     if (route.type !== "home") return;
-    const nextSearch = search.trim();
-    window.history.replaceState({}, "", dashboardUrl(route.section, route.format, nextSearch));
-    setRoute({ ...route, search: nextSearch });
+    window.history.replaceState({}, "", dashboardUrl(route.section, route.format, search));
+    setRoute({ ...route, search });
   }
 
   function changeOutput(output?: ProjectFormat) {

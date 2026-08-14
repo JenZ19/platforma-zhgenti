@@ -37,6 +37,7 @@ import { LessonText } from "./LessonText";
 import { BeginnerTerms } from "./BeginnerTerms";
 import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
 import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
+import { questLevelMinutes } from "../lib/quest-duration";
 
 export function Quest({
   project,
@@ -318,7 +319,7 @@ function QuestBody({
         </aside>
 
         <article className="level-card" aria-live="polite">
-          <header className="level-header"><div><p>Уровень {String(step.id).padStart(2, "0")} <i>✦</i></p><h2>{step.title}</h2></div><span>≈ {step.id < 5 ? 5 : step.id < 13 ? 7 : 10} мин</span></header>
+          <header className="level-header"><div><p>Уровень {String(step.id).padStart(2, "0")} <i>✦</i></p><h2>{step.title}</h2></div><span>≈ {questLevelMinutes(step.id, "desktop")} мин</span></header>
           <BeginnerTerms terms={step.beginnerTerms} />
           <section className="why-card"><b>Зачем это</b><LessonText text={step.why} kind="why" /></section>
 
