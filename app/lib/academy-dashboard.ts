@@ -30,6 +30,12 @@ export type DashboardSnapshot = {
   next: DashboardProjectState;
 };
 
+export type QuestionNote = {
+  id: string;
+  text: string;
+  createdAt: string;
+};
+
 function readJson<T>(storage: StorageLike, key: string, fallback: T, validate: (value: unknown) => value is T): T {
   try {
     const value: unknown = JSON.parse(storage.getItem(key) ?? "null");
@@ -48,6 +54,14 @@ function stringRecord(value: unknown): value is Record<string, string> {
     && typeof value === "object"
     && !Array.isArray(value)
     && Object.values(value as Record<string, unknown>).every((item) => typeof item === "string");
+}
+
+function questionNotes(value: unknown): value is QuestionNote[] {
+  return Array.isArray(value) && value.every((item) => Boolean(item)
+    && typeof item === "object"
+    && typeof (item as QuestionNote).id === "string"
+    && typeof (item as QuestionNote).text === "string"
+    && typeof (item as QuestionNote).createdAt === "string");
 }
 
 export function loadSavedProjects(storage: StorageLike): string[] {
@@ -78,8 +92,26 @@ export function loadDashboardSection(storage: StorageLike): DashboardSection {
   return dashboardSections.includes(value as DashboardSection) ? value as DashboardSection : "home";
 }
 
-function completionMap(storage: StorageLike): Record<string, string> {
-  return readJson(storage, `${PREFIX}:completed-at`, {}, stringRecord);
+export function loadQuestionNotes(scope: string, storage: StorageLike): QuestionNote[] {
+  return readJson(storage, `${PREFIX}:notes:${scope}`, [], questionNotes);
+}
+
+export function saveQuestionNote(
+  scope: string,
+  text: string,
+  storage: StorageLike,
+  now: () => string = () => new Date().toISOString(),
+): QuestionNote[] {
+  const trimmed = text.trim();
+  if (!trimmed) return loadQuestionNotes(scope, storage);
+  const createdAt = now();
+  const next = [...loadQuestionNotes(scope, storage), { id: createdAt, text: trimmed, createdAt }];
+  storage.setItem(`${PREFIX}:notes:${scope}`, JSON.stringify(next));
+  return next;
+}
+
+function completionMap(surface: QuestSurface, storage: StorageLike): Record<string, string> {
+  return readJson(storage, `${PREFIX}:completed-at:${surface}`, {}, stringRecord);
 }
 
 function projectWeeks(project: CatalogProject): readonly number[] {
@@ -93,7 +125,7 @@ export function buildDashboardSnapshot(
   today: () => string = () => new Date().toISOString().slice(0, 10),
 ): DashboardSnapshot {
   const saved = loadSavedProjects(storage);
-  const dates = completionMap(storage);
+  const dates = completionMap(surface, storage);
   const items = projects.map((project): DashboardProjectState => {
     const progress = getCatalogProjectProgress(project, storage, surface);
     const totalLevels = getProjectLevelCount(project);
@@ -116,7 +148,7 @@ export function buildDashboardSnapshot(
     };
   });
 
-  storage.setItem(`${PREFIX}:completed-at`, JSON.stringify(dates));
+  storage.setItem(`${PREFIX}:completed-at:${surface}`, JSON.stringify(dates));
 
   const started = items.filter((item) => item.status === "started");
   const completed = items.filter((item) => item.status === "completed");
