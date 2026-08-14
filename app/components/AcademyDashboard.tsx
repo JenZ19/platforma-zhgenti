@@ -10,6 +10,9 @@ import {
 } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
 import { DashboardHome } from "./DashboardHome";
+import { DashboardIcon } from "./DashboardIcon";
+import { DashboardLibrary } from "./DashboardLibrary";
+import { DashboardPortfolio } from "./DashboardPortfolio";
 
 export type AcademyDashboardProps = {
   section: DashboardSection;
@@ -18,49 +21,6 @@ export type AcademyDashboardProps = {
   onOpenPortfolio?: () => void;
   format: QuestSurface;
 };
-
-const sectionCopy: Record<Exclude<DashboardSection, "home">, { title: string; description: string }> = {
-  projects: {
-    title: "Мои проекты",
-    description: "Здесь будут начатые, готовые и сохранённые на потом проекты.",
-  },
-  weeks: {
-    title: "Квесты по неделям",
-    description: "Здесь будет программа всех шести недель с поиском и фильтрами.",
-  },
-  portfolio: {
-    title: "Портфолио",
-    description: "Здесь будут автоматически появляться завершённые работы.",
-  },
-  fairy: {
-    title: "Феечка",
-    description: "Здесь можно будет собрать вопрос по текущему экрану и сохранить его для помощи.",
-  },
-};
-
-function DashboardSectionStub({ section, searchQuery, format }: {
-  section: Exclude<DashboardSection, "home">;
-  searchQuery: string;
-  format: QuestSurface;
-}) {
-  const copy = sectionCopy[section];
-  return (
-    <main
-      className="dashboard-section dashboard-section-pending"
-      data-dashboard-section={section}
-      data-dashboard-format={format}
-      data-visual-theme="pink-cloud"
-      aria-label={copy.title}
-    >
-      <header><p>Учебный кабинет</p><h1>{copy.title}</h1></header>
-      <section className="dashboard-empty" role="status">
-        <h2>Раздел готовится</h2>
-        <p>{copy.description}</p>
-        {searchQuery ? <p>Поиск «{searchQuery}» сохранён и будет применён в каталоге.</p> : null}
-      </section>
-    </main>
-  );
-}
 
 function renderDashboardSection(
   section: DashboardSection,
@@ -80,10 +40,40 @@ function renderDashboardSection(
         />
       );
     case "projects":
+      return (
+        <DashboardLibrary
+          snapshot={snapshot}
+          mode="projects"
+          initialQuery={props.searchQuery}
+          format={props.format}
+          onOpen={props.onOpen}
+          onSave={onSave}
+        />
+      );
     case "weeks":
+      return (
+        <DashboardLibrary
+          snapshot={snapshot}
+          mode="weeks"
+          initialQuery={props.searchQuery}
+          format={props.format}
+          onOpen={props.onOpen}
+          onSave={onSave}
+        />
+      );
     case "portfolio":
+      return <DashboardPortfolio snapshot={snapshot} format={props.format} onOpen={props.onOpen} />;
     case "fairy":
-      return <DashboardSectionStub section={section} searchQuery={props.searchQuery} format={props.format} />;
+      return (
+        <main className="dashboard-section" data-dashboard-section="fairy" data-dashboard-format={props.format} data-visual-theme="pink-cloud">
+          <header><p>Помощь внутри платформы</p><h1>Феечка</h1></header>
+          <section className="dashboard-empty">
+            <DashboardIcon name="fairy" />
+            <h2>Соберите вопрос по текущему проекту</h2>
+            <p>Сформулируйте, на каком экране вы остановились, что нажали и что увидели. Так вопрос будет проще передать куратору.</p>
+          </section>
+        </main>
+      );
   }
   return assertNever(section);
 }

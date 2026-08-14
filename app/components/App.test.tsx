@@ -196,17 +196,104 @@ describe("academy interface", () => {
     expect(renderToString(<Academy />)).toContain("Загружаем учебный кабинет");
   });
 
-  it.each([
-    ["projects", "Мои проекты"],
-    ["weeks", "Квесты по неделям"],
-    ["portfolio", "Портфолио"],
-    ["fairy", "Феечка"],
-  ] as const)("labels the pending %s section accessibly", async (section, title) => {
-    render(<Academy section={section} />);
+  it("does not duplicate a started project in the saved-for-later group", async () => {
+    localStorage.setItem("feya-dashboard-v1:saved", JSON.stringify(["pressure-diary"]));
+    localStorage.setItem(progressKey("pressure-diary"), JSON.stringify({
+      version: 1,
+      activeStep: 2,
+      completed: [1],
+      score: 10,
+    }));
+    window.history.replaceState({}, "", "/?section=projects");
 
-    expect(await screen.findByRole("main", { name: title })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
-    expect(screen.getByText(/раздел готовится/i)).toBeInTheDocument();
+    render(<AppEntry />);
+
+    expect(await screen.findByRole("heading", { name: "Начатые" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Готовые" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "На потом" })).toBeInTheDocument();
+    expect(screen.getAllByRole("article", { name: /дневник давления/i })).toHaveLength(1);
+  });
+
+  it("shows six openable weeks, applies URL search and resets an empty result", async () => {
+    window.history.replaceState({}, "", "/?section=weeks&q=%D0%BD%D0%B5%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9");
+
+    render(<AppEntry />);
+
+    const weeks = await screen.findAllByRole("button", { name: /^Неделя [1-6]$/i });
+    expect(weeks).toHaveLength(6);
+    expect(screen.getByRole("button", { name: "Неделя 1" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("searchbox", { name: /поиск по квестам недели/i })).toHaveValue("несуществующий");
+    expect(screen.getByText(/ничего не найдено/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /сбросить фильтры/i }));
+    expect(screen.queryByText(/ничего не найдено/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: /поиск по квестам недели/i })).toHaveValue("");
+
+    fireEvent.click(screen.getByRole("button", { name: "Неделя 2" }));
+    expect(screen.getByRole("button", { name: "Неделя 1" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Неделя 2" })).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("keeps the existing discovery filters in the weekly library", async () => {
+    window.history.replaceState({}, "", "/?section=weeks");
+    render(<AppEntry />);
+
+    await screen.findByRole("button", { name: "Неделя 1" });
+    fireEvent.change(screen.getByRole("combobox", { name: /цель проекта/i }), { target: { value: "Здоровье" } });
+
+    expect(screen.getByRole("article", { name: /дневник давления/i })).toBeInTheDocument();
+    expect(screen.queryByRole("article", { name: /планирование/i })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("searchbox", { name: /поиск по квестам недели/i }), { target: { value: "шагов" } });
+    expect(screen.getByRole("article", { name: /привычки и активность/i })).toBeInTheDocument();
+    expect(screen.queryByRole("article", { name: /дневник давления/i })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["desktop", Academy, "?quest=server-152fz", progressKey("server-152fz")],
+    ["mobile", MobileAcademy, "?format=mobile&quest=server-152fz", progressKey("mobile:server-152fz")],
+  ] as const)("automatically shows a completed project in the %s portfolio with a native quest link", async (_format, Component, href, key) => {
+    const total = getProjectLevelCount("server-152fz");
+    localStorage.setItem(key, JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total }, (_, index) => index + 1),
+      score: total * 10,
+    }));
+    localStorage.setItem(`feya-dashboard-v1:completed-at:${_format}`, JSON.stringify({ "server-152fz": "2026-08-14" }));
+    const onOpen = vi.fn();
+
+    render(<Component section="portfolio" onOpen={onOpen} />);
+
+    const card = await screen.findByRole("article", { name: /покупаем сервер/i });
+    expect(within(card).getByRole("img", { name: /покупаем сервер/i })).toBeInTheDocument();
+    expect(within(card).getByText(/для ученицы, которая публикует проект/i)).toBeInTheDocument();
+    expect(within(card).getByText(/старт на компьютере/i)).toBeInTheDocument();
+    expect(within(card).getByText("14.08.2026")).toHaveAttribute("datetime", "2026-08-14");
+
+    const action = within(card).getByRole("link", { name: /открыть проект: покупаем сервер по 152-фз/i });
+    expect(action).toHaveAttribute("href", href);
+    action.setAttribute("href", "#browser-portfolio-card");
+    expect(fireEvent.click(action, { metaKey: true })).toBe(true);
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(fireEvent.click(action)).toBe(false);
+    expect(onOpen).toHaveBeenCalledWith("server-152fz");
+  });
+
+  it("shows honest empty states for projects, portfolio and the unfinished Fairy section", async () => {
+    const { rerender } = render(<Academy section="projects" />);
+
+    expect(await screen.findByText(/нет начатых проектов/i)).toBeInTheDocument();
+    expect(screen.getByText(/нет готовых проектов/i)).toBeInTheDocument();
+    expect(screen.getByText(/нет проектов на потом/i)).toBeInTheDocument();
+
+    rerender(<Academy section="portfolio" />);
+    expect(await screen.findByText(/здесь появится первая готовая работа/i)).toBeInTheDocument();
+
+    rerender(<Academy section="fairy" />);
+    expect(await screen.findByRole("heading", { name: "Феечка" })).toBeInTheDocument();
+    expect(screen.getByText(/сформулируйте, на каком экране вы остановились/i)).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /вопрос феечке/i })).not.toBeInTheDocument();
   });
 
   it("uses the pink dashboard for academy surfaces and preserves tactile quests", async () => {
