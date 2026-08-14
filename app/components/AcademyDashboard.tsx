@@ -11,9 +11,9 @@ import {
 } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
 import { DashboardHome } from "./DashboardHome";
-import { DashboardIcon } from "./DashboardIcon";
 import { DashboardLibrary } from "./DashboardLibrary";
 import { DashboardPortfolio } from "./DashboardPortfolio";
+import { FairyAssistant } from "./FairyAssistant";
 
 export type AcademyDashboardProps = {
   section: DashboardSection;
@@ -68,16 +68,7 @@ function renderDashboardSection(
     case "portfolio":
       return <DashboardPortfolio snapshot={snapshot} format={props.format} onOpen={props.onOpen} />;
     case "fairy":
-      return (
-        <main className="dashboard-section" data-dashboard-section="fairy" data-dashboard-format={props.format} data-visual-theme="pink-cloud">
-          <header><p>Помощь внутри платформы</p><h1>Феечка</h1></header>
-          <section className="dashboard-empty">
-            <DashboardIcon name="fairy" />
-            <h2>Соберите вопрос по текущему проекту</h2>
-            <p>Сформулируйте, на каком экране вы остановились, что нажали и что увидели. Так вопрос будет проще передать куратору.</p>
-          </section>
-        </main>
-      );
+      return <FairyAssistant scope="academy" mode="full" format={props.format} />;
   }
   return assertNever(section);
 }

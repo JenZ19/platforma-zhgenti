@@ -203,6 +203,21 @@ describe("academy dashboard state", () => {
     ]);
   });
 
+  it("keeps note ids unique when two questions share one millisecond", () => {
+    const storage = new MemoryStorage();
+    const now = () => "2026-08-14T12:00:00.000Z";
+
+    saveQuestionNote("planner", "Первый вопрос", storage, now);
+    const notes = saveQuestionNote("planner", "Второй вопрос", storage, now);
+
+    expect(notes).toEqual([
+      { id: "2026-08-14T12:00:00.000Z", text: "Первый вопрос", createdAt: "2026-08-14T12:00:00.000Z" },
+      { id: "2026-08-14T12:00:00.000Z-2", text: "Второй вопрос", createdAt: "2026-08-14T12:00:00.000Z" },
+    ]);
+    expect(new Set(notes.map((note) => note.id)).size).toBe(notes.length);
+    expect(notes.map((note) => note.createdAt)).toEqual([now(), now()]);
+  });
+
   it("ignores an empty question without changing saved notes", () => {
     const storage = new MemoryStorage();
     saveQuestionNote("planner", "Как добавить календарь?", storage, () => "2026-08-14T12:00:00.000Z");

@@ -19,6 +19,7 @@ import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
 import { DashboardHome } from "./DashboardHome";
 import { ExpectedScene } from "./ExpectedScene";
+import { FairyAssistant } from "./FairyAssistant";
 import { MobileAcademy } from "./MobileAcademy";
 import { MobileQuest } from "./MobileQuest";
 import { MobileExpectedScene } from "./MobileExpectedScene";
@@ -30,6 +31,52 @@ Object.assign(navigator, {
   clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
 });
 Object.defineProperty(window, "scrollTo", { value: vi.fn(), writable: true });
+
+type MockSpeechResultEvent = {
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
+};
+
+class MockSpeechRecognition {
+  static latest: MockSpeechRecognition | null = null;
+  static startError: Error | null = null;
+  lang = "";
+  continuous = false;
+  interimResults = false;
+  onstart: (() => void) | null = null;
+  onresult: ((event: MockSpeechResultEvent) => void) | null = null;
+  onerror: ((event: { error: string }) => void) | null = null;
+  onend: (() => void) | null = null;
+
+  constructor() {
+    MockSpeechRecognition.latest = this;
+  }
+
+  start() {
+    if (MockSpeechRecognition.startError) throw MockSpeechRecognition.startError;
+    this.onstart?.();
+  }
+
+  stop() {
+    this.onend?.();
+  }
+
+  emitTranscript(text: string) {
+    this.onresult?.({ results: [[{ transcript: text }]] });
+  }
+
+  emitError(error: string) {
+    this.onerror?.({ error });
+  }
+
+  emitEnd() {
+    this.onend?.();
+  }
+}
+
+function setSpeechRecognition(value?: typeof MockSpeechRecognition, webkit = false) {
+  Object.defineProperty(window, "SpeechRecognition", { configurable: true, writable: true, value: webkit ? undefined : value });
+  Object.defineProperty(window, "webkitSpeechRecognition", { configurable: true, writable: true, value: webkit ? value : undefined });
+}
 
 function routeStepFor(project: NonNullable<ReturnType<typeof getQuestProject>>, sourceStep: number): number {
   const index = buildQuest(project).findIndex((step) => step.sourceStepId === sourceStep);
@@ -48,6 +95,9 @@ describe("academy interface", () => {
     localStorage.clear();
     vi.clearAllMocks();
     window.history.replaceState({}, "", "/");
+    setSpeechRecognition();
+    MockSpeechRecognition.latest = null;
+    MockSpeechRecognition.startError = null;
   });
 
   it("shows the last active quest as the single primary action", async () => {
@@ -475,7 +525,7 @@ describe("academy interface", () => {
     expect(within(card).queryByRole("link", { name: /продолжить/i })).not.toBeInTheDocument();
   });
 
-  it("shows honest empty states for projects, portfolio and the unfinished Fairy section", async () => {
+  it("shows honest empty states for projects and portfolio", async () => {
     const { rerender } = render(<Academy section="projects" />);
 
     expect(await screen.findByText(/нет начатых проектов/i)).toBeInTheDocument();
@@ -484,11 +534,115 @@ describe("academy interface", () => {
 
     rerender(<Academy section="portfolio" />);
     expect(await screen.findByText(/здесь появится первая готовая работа/i)).toBeInTheDocument();
+  });
 
-    rerender(<Academy section="fairy" />);
-    expect(await screen.findByRole("heading", { name: "Феечка" })).toBeInTheDocument();
-    expect(screen.getByText(/сформулируйте, на каком экране вы остановились/i)).toBeInTheDocument();
-    expect(screen.queryByRole("textbox", { name: /вопрос феечке/i })).not.toBeInTheDocument();
+  it("saves a full-page Fairy question in the academy scope without inventing an AI reply", async () => {
+    window.history.replaceState({}, "", "/?section=fairy");
+    const { container } = render(<AppEntry />);
+
+    const question = await screen.findByRole("textbox", { name: /вопрос феечке/i });
+    expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-dashboard-format", "desktop");
+    expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-visual-theme", "pink-cloud");
+    fireEvent.change(question, { target: { value: "<script>не выполнять</script>\nНе понимаю следующий шаг" } });
+    fireEvent.click(screen.getByRole("button", { name: /сохранить вопрос/i }));
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Вопрос сохранён на этом устройстве. Покажите его куратору или вставьте в ChatGPT/Codex.",
+    );
+    expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:notes:academy")!)).toMatchObject([
+      { text: "<script>не выполнять</script>\nНе понимаю следующий шаг" },
+    ]);
+    expect(screen.getByRole("list", { name: /сохранённые вопросы/i })).toHaveTextContent("Не понимаю следующий шаг");
+    expect(container.querySelector(".fairy-notes script")).toBeNull();
+    expect(screen.queryByText(/ответ ИИ/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/отправлен в облако/i)).not.toBeInTheDocument();
+  });
+
+  it("stores a floating Fairy note in the current quest and restores focus after Escape", async () => {
+    window.history.replaceState({}, "", "/?quest=pressure-diary");
+    render(<AppEntry />);
+
+    const trigger = await screen.findByRole("button", { name: /открыть феечку/i });
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("dialog", { name: /феечка/i });
+    const question = within(dialog).getByRole("textbox", { name: /вопрос феечке/i });
+    expect(question).toHaveFocus();
+
+    fireEvent.change(question, { target: { value: "Где я остановилась?" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: /сохранить вопрос/i }));
+    expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:notes:pressure-diary")!)).toMatchObject([
+      { text: "Где я остановилась?" },
+    ]);
+    expect(localStorage.getItem("feya-dashboard-v1:notes:academy")).toBeNull();
+
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: /феечка/i })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it("uses the academy scope for the floating Fairy outside a quest", async () => {
+    render(<AppEntry />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /открыть феечку/i }));
+    const dialog = screen.getByRole("dialog", { name: /феечка/i });
+    fireEvent.change(within(dialog).getByRole("textbox", { name: /вопрос феечке/i }), { target: { value: "Как выбрать проект?" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: /сохранить вопрос/i }));
+
+    expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:notes:academy")!)).toMatchObject([
+      { text: "Как выбрать проект?" },
+    ]);
+  });
+
+  it("shows the microphone only when speech recognition exists and never auto-saves a transcript", async () => {
+    setSpeechRecognition(MockSpeechRecognition, true);
+    render(<FairyAssistant scope="academy" mode="full" />);
+
+    const microphone = await screen.findByRole("button", { name: /начать голосовой ввод/i });
+    fireEvent.click(microphone);
+    expect(screen.getByRole("status")).toHaveTextContent("Говорите — текст появится в поле вопроса. Он не сохранится сам.");
+
+    act(() => MockSpeechRecognition.latest?.emitTranscript("Продиктованный вопрос"));
+    expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toHaveValue("Продиктованный вопрос");
+    expect(screen.getByRole("status")).toHaveTextContent("Голос распознан. Проверьте текст и нажмите «Сохранить вопрос».");
+    expect(localStorage.getItem("feya-dashboard-v1:notes:academy")).toBeNull();
+  });
+
+  it("keeps text input available when microphone permission is denied", async () => {
+    setSpeechRecognition(MockSpeechRecognition);
+    render(<FairyAssistant scope="academy" mode="full" />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /начать голосовой ввод/i }));
+    act(() => MockSpeechRecognition.latest?.emitError("not-allowed"));
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Микрофон недоступен. Напишите вопрос в поле — текстовый ввод работает без микрофона.",
+    );
+    expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toBeEnabled();
+  });
+
+  it("handles speech start and end failures without submitting the question", async () => {
+    setSpeechRecognition(MockSpeechRecognition);
+    MockSpeechRecognition.startError = new Error("permission blocked");
+    const { rerender } = render(<FairyAssistant scope="academy" mode="full" />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /начать голосовой ввод/i }));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Микрофон недоступен. Напишите вопрос в поле — текстовый ввод работает без микрофона.",
+    );
+    expect(localStorage.getItem("feya-dashboard-v1:notes:academy")).toBeNull();
+
+    MockSpeechRecognition.startError = null;
+    rerender(<FairyAssistant scope="academy" mode="full" />);
+    fireEvent.click(screen.getByRole("button", { name: /начать голосовой ввод/i }));
+    act(() => MockSpeechRecognition.latest?.emitEnd());
+    expect(screen.getByRole("status")).toHaveTextContent("Запись остановлена. Проверьте текст и сохраните вопрос вручную.");
+  });
+
+  it("hides the microphone when browser speech recognition is unavailable", async () => {
+    render(<FairyAssistant scope="academy" mode="full" />);
+
+    expect(await screen.findByRole("textbox", { name: /вопрос феечке/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /голосовой ввод/i })).not.toBeInTheDocument();
   });
 
   it("uses the pink dashboard for academy surfaces and preserves tactile quests", async () => {

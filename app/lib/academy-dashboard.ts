@@ -99,9 +99,17 @@ export function saveQuestionNote(
   now: () => string = () => new Date().toISOString(),
 ): QuestionNote[] {
   const trimmed = text.trim();
-  if (!trimmed) return loadQuestionNotes(scope, storage);
+  const notes = loadQuestionNotes(scope, storage);
+  if (!trimmed) return notes;
   const createdAt = now();
-  const next = [...loadQuestionNotes(scope, storage), { id: createdAt, text: trimmed, createdAt }];
+  const existingIds = new Set(notes.map((note) => note.id));
+  let id = createdAt;
+  let suffix = 2;
+  while (existingIds.has(id)) {
+    id = `${createdAt}-${suffix}`;
+    suffix += 1;
+  }
+  const next = [...notes, { id, text: trimmed, createdAt }];
   storage.setItem(`${PREFIX}:notes:${scope}`, JSON.stringify(next));
   return next;
 }

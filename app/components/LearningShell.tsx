@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { DashboardSection } from "../lib/academy-dashboard";
 import { DashboardIcon, type DashboardIconName } from "./DashboardIcon";
+import { FairyAssistant } from "./FairyAssistant";
 
 const items: { id: DashboardSection; label: string; icon: DashboardIconName }[] = [
   { id: "home", label: "Главная", icon: "home" },
@@ -20,11 +21,13 @@ export type LearningShellProps = {
   onSearch: (query: string) => void;
   onFormatChange: () => void;
   searchQuery?: string;
+  assistantScope: string;
   children: ReactNode;
 };
 
 export function LearningShell({
   activeSection,
+  assistantScope,
   children,
   format,
   onFormatChange,
@@ -34,12 +37,19 @@ export function LearningShell({
   searchQuery = "",
 }: LearningShellProps) {
   const [search, setSearch] = useState(searchQuery);
+  const [fairyOpen, setFairyOpen] = useState(false);
+  const fairyTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Route changes can replace the query while the persistent shell stays mounted.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearch(searchQuery);
   }, [searchQuery]);
+
+  function closeFairy() {
+    setFairyOpen(false);
+    fairyTriggerRef.current?.focus();
+  }
 
   return (
     <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-visual-theme="pink-cloud">
@@ -79,6 +89,19 @@ export function LearningShell({
         </header>
         {children}
       </div>
+      <button
+        ref={fairyTriggerRef}
+        type="button"
+        className="fairy-floating-trigger"
+        aria-label="Открыть Феечку"
+        aria-haspopup="dialog"
+        aria-expanded={fairyOpen}
+        onClick={() => setFairyOpen(true)}
+      >
+        <DashboardIcon name="fairy" />
+        <span>Спросить Феечку</span>
+      </button>
+      {fairyOpen && <FairyAssistant scope={assistantScope} mode="floating" onClose={closeFairy} />}
       <nav className="learning-bottom-nav" aria-label="Навигация Академии на телефоне">
         {items.map((item) => (
           <button

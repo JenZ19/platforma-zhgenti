@@ -200,6 +200,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   return (
     <LearningShell
       format={surface}
+      assistantScope={route.type === "quest" ? route.slug : "academy"}
       activeSection={route.type === "home" ? route.section : undefined}
       questTitle={route.type === "quest" ? project?.title : undefined}
       onNavigate={openSection}
