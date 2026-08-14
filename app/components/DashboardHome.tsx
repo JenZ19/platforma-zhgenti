@@ -1,6 +1,6 @@
 import { isProjectBundle } from "../content/projects";
 import type { DashboardSnapshot } from "../lib/academy-dashboard";
-import { DashboardProjectCard, dashboardQuestHref } from "./DashboardProjectCard";
+import { DashboardProjectCard, dashboardQuestHref, shouldHandleSpaNavigation } from "./DashboardProjectCard";
 import { ProjectPreview } from "./ProjectPreview";
 
 export type DashboardHomeProps = {
@@ -40,6 +40,7 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
                 href={dashboardQuestHref(next.project.slug, format)}
                 aria-label={`${primaryAction}: ${next.project.title}`}
                 onClick={(event) => {
+                  if (!shouldHandleSpaNavigation(event)) return;
                   event.preventDefault();
                   onOpen(next.project.slug);
                 }}
@@ -59,7 +60,7 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
               href={portfolioHref(format)}
               aria-label="Открыть портфолио"
               onClick={(event) => {
-                if (!onOpenPortfolio) return;
+                if (!onOpenPortfolio || !shouldHandleSpaNavigation(event)) return;
                 event.preventDefault();
                 onOpenPortfolio();
               }}

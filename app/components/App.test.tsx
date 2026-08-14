@@ -115,6 +115,40 @@ describe("academy interface", () => {
     );
   });
 
+  it("intercepts ordinary left clicks for dashboard SPA navigation", async () => {
+    const onOpen = vi.fn();
+    render(<MobileAcademy onOpen={onOpen} />);
+
+    const primary = await screen.findByRole("link", { name: /начать квест: устанавливаем codex/i });
+    expect(fireEvent.click(primary)).toBe(false);
+    expect(onOpen).toHaveBeenLastCalledWith("install-codex");
+
+    const planning = screen.getByRole("article", { name: /планирование/i });
+    const cardAction = within(planning).getByRole("link", { name: /начать: планирование/i });
+    expect(fireEvent.click(cardAction)).toBe(false);
+    expect(onOpen).toHaveBeenLastCalledWith("planning");
+  });
+
+  it("leaves modified, middle and new-target dashboard clicks to the browser", async () => {
+    const onOpen = vi.fn();
+    render(<MobileAcademy onOpen={onOpen} />);
+
+    const primary = await screen.findByRole("link", { name: /начать квест: устанавливаем codex/i });
+    primary.setAttribute("href", "#browser-primary");
+    expect(fireEvent.click(primary, { metaKey: true })).toBe(true);
+    expect(fireEvent.click(primary, { shiftKey: true })).toBe(true);
+    primary.setAttribute("target", "_blank");
+    expect(fireEvent.click(primary)).toBe(true);
+
+    const planning = screen.getByRole("article", { name: /планирование/i });
+    const cardAction = within(planning).getByRole("link", { name: /начать: планирование/i });
+    cardAction.setAttribute("href", "#browser-card");
+    expect(fireEvent.click(cardAction, { ctrlKey: true })).toBe(true);
+    expect(fireEvent.click(cardAction, { altKey: true })).toBe(true);
+    expect(fireEvent.click(cardAction, { button: 1 })).toBe(true);
+    expect(onOpen).not.toHaveBeenCalled();
+  });
+
   it("excludes completed projects before limiting current-week recommendations", () => {
     const selected = projects.filter((project) => ["install-codex", "server-152fz", "api-keys", "pressure-diary", "personal-organizer"].includes(project.slug));
     for (const project of selected.slice(0, 4)) {
@@ -151,7 +185,10 @@ describe("academy interface", () => {
 
     const action = screen.getByRole("link", { name: /открыть портфолио/i });
     expect(action).toHaveAttribute("href", "?format=mobile&section=portfolio");
-    fireEvent.click(action);
+    action.setAttribute("href", "#browser-portfolio");
+    expect(fireEvent.click(action, { shiftKey: true })).toBe(true);
+    expect(onOpenPortfolio).not.toHaveBeenCalled();
+    expect(fireEvent.click(action)).toBe(false);
     expect(onOpenPortfolio).toHaveBeenCalledOnce();
   });
 

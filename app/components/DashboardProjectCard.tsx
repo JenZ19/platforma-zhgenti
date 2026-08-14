@@ -1,3 +1,4 @@
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { getCatalogDiscoveryProfile } from "../content/discovery";
 import { isProjectBundle } from "../content/projects";
 import type { DashboardProjectState } from "../lib/academy-dashboard";
@@ -15,6 +16,17 @@ export function dashboardQuestHref(slug: string, format: QuestSurface): string {
   return format === "mobile"
     ? `?format=mobile&quest=${encodeURIComponent(slug)}`
     : `?quest=${encodeURIComponent(slug)}`;
+}
+
+export function shouldHandleSpaNavigation(event: ReactMouseEvent<HTMLAnchorElement>): boolean {
+  const target = event.currentTarget.target;
+  return !event.defaultPrevented
+    && event.button === 0
+    && !event.metaKey
+    && !event.ctrlKey
+    && !event.shiftKey
+    && !event.altKey
+    && (target === "" || target === "_self");
 }
 
 export function DashboardProjectCard({ item, onOpen, onSave, format }: DashboardProjectCardProps) {
@@ -56,6 +68,7 @@ export function DashboardProjectCard({ item, onOpen, onSave, format }: Dashboard
             href={dashboardQuestHref(project.slug, format)}
             aria-label={`${action}: ${project.title}`}
             onClick={(event) => {
+              if (!shouldHandleSpaNavigation(event)) return;
               event.preventDefault();
               onOpen(project.slug);
             }}
