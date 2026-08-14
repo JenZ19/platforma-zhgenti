@@ -107,9 +107,14 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     if (route.type === "quest") saveLastActiveProject(route.slug, route.format, window.localStorage);
   }, [route]);
 
-  function openQuest(slug: string, format: "desktop" | "mobile" = route.type === "home" || route.type === "quest" ? route.format : "desktop") {
-    window.history.pushState({}, "", format === "mobile" ? `?format=mobile&quest=${slug}` : `?quest=${slug}`);
-    setRoute({ type: "quest", slug, format });
+  function openQuest(
+    slug: string,
+    format: "desktop" | "mobile" = route.type === "home" || route.type === "quest" ? route.format : "desktop",
+    output?: ProjectFormat,
+  ) {
+    const query = canonicalQuestQuery({ slug, output, legacy: false }, format === "mobile");
+    window.history.pushState({}, "", query);
+    setRoute({ type: "quest", slug, output, format });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -127,6 +132,13 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     saveDashboardSection("weeks", window.localStorage);
     setRoute({ type: "home", section: "weeks", search, format });
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function updateDashboardSearch(search: string) {
+    if (route.type !== "home") return;
+    const nextSearch = search.trim();
+    window.history.replaceState({}, "", dashboardUrl(route.section, route.format, nextSearch));
+    setRoute({ ...route, search: nextSearch });
   }
 
   function changeOutput(output?: ProjectFormat) {
@@ -178,13 +190,13 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     ? surface === "mobile"
       ? project
         ? <MobileQuest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} />
-        : <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} onOpenPortfolio={() => openSection("portfolio")} />
+        : <MobileAcademy onOpen={(slug, output) => openQuest(slug, "mobile", output)} onOpenPortfolio={() => openSection("portfolio")} onSearchQueryChange={updateDashboardSearch} />
       : project
         ? <Quest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} />
-        : <Academy onOpen={(slug) => openQuest(slug, "desktop")} onOpenPortfolio={() => openSection("portfolio")} />
+        : <Academy onOpen={(slug, output) => openQuest(slug, "desktop", output)} onOpenPortfolio={() => openSection("portfolio")} onSearchQueryChange={updateDashboardSearch} />
     : surface === "mobile"
-      ? <MobileAcademy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "mobile")} onOpenPortfolio={() => openSection("portfolio")} />
-      : <Academy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "desktop")} onOpenPortfolio={() => openSection("portfolio")} />;
+      ? <MobileAcademy section={route.section} searchQuery={route.search} onOpen={(slug, output) => openQuest(slug, "mobile", output)} onOpenPortfolio={() => openSection("portfolio")} onSearchQueryChange={updateDashboardSearch} />
+      : <Academy section={route.section} searchQuery={route.search} onOpen={(slug, output) => openQuest(slug, "desktop", output)} onOpenPortfolio={() => openSection("portfolio")} onSearchQueryChange={updateDashboardSearch} />;
 
   return (
     <LearningShell

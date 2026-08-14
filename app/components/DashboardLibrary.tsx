@@ -9,6 +9,7 @@ import {
   type GoalFilter,
 } from "../content/discovery";
 import { isProjectBundle } from "../content/projects";
+import type { ProjectFormat } from "../content/types";
 import type { DashboardProjectState, DashboardSnapshot } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
 import { DashboardProjectCard } from "./DashboardProjectCard";
@@ -20,8 +21,9 @@ export type DashboardLibraryProps = {
   mode: "projects" | "weeks";
   initialQuery: string;
   format: QuestSurface;
-  onOpen: (slug: string) => void;
+  onOpen: (slug: string, output?: ProjectFormat) => void;
   onSave: (slug: string) => void;
+  onQueryChange?: (query: string) => void;
 };
 
 function EmptySearch({ onReset }: { onReset: () => void }) {
@@ -41,7 +43,7 @@ function projectBelongsToWeek(item: DashboardProjectState, week: number): boolea
     : item.project.week === week;
 }
 
-function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibraryProps, "initialQuery" | "mode">) {
+function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibraryProps, "initialQuery" | "mode" | "onQueryChange">) {
   const seen = new Set<string>();
   const groups = [
     {
@@ -106,17 +108,10 @@ function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibra
   );
 }
 
-function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave }: Omit<DashboardLibraryProps, "mode">) {
-  const [query, setQuery] = useState(initialQuery);
+function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQueryChange = () => undefined }: Omit<DashboardLibraryProps, "mode">) {
   const [difficulty, setDifficulty] = useState<DifficultyFilter>(0);
   const [goal, setGoal] = useState<GoalFilter>("Все цели");
   const [openWeek, setOpenWeek] = useState<number | null>(snapshot.currentWeek);
-
-  useEffect(() => {
-    // Query navigation keeps this mounted, so mirror the canonical URL value.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setQuery(initialQuery);
-  }, [initialQuery]);
 
   useEffect(() => {
     // A changed progress snapshot may advance the recommended current week.
@@ -130,12 +125,18 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave }: Omit<
       week: 0,
       difficulty,
       goal,
-      query,
+      query: initialQuery,
     }).map((project) => stateBySlug.get(project.slug)!);
-  }, [difficulty, goal, query, snapshot.items]);
+  }, [difficulty, goal, initialQuery, snapshot.items]);
+
+  const hasFilters = Boolean(initialQuery.trim()) || difficulty !== 0 || goal !== "Все цели";
+  const belongsToFilteredWeek = (item: DashboardProjectState, week: number) => isProjectBundle(item.project)
+    ? item.project.weeks[0] === week
+    : item.project.week === week;
+  const matchingWeeks = new Set(weeks.filter((week) => filtered.some((item) => belongsToFilteredWeek(item, week))));
 
   function resetFilters() {
-    setQuery("");
+    onQueryChange("");
     setDifficulty(0);
     setGoal("Все цели");
   }
@@ -150,8 +151,8 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave }: Omit<
             type="search"
             aria-label="Поиск по квестам недели"
             placeholder="Название, цель или результат"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            value={initialQuery}
+            onChange={(event) => onQueryChange(event.target.value)}
           />
         </label>
         <label>
@@ -169,10 +170,11 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave }: Omit<
           </select>
         </label>
       </section>
+      {hasFilters && filtered.length > 0 ? <button type="button" className="dashboard-filter-reset" onClick={resetFilters}>Сбросить фильтры</button> : null}
       <div className="dashboard-week-list">
         {weeks.map((week) => {
-          const expanded = openWeek === week;
-          const items = filtered.filter((item) => projectBelongsToWeek(item, week));
+          const expanded = filtered.length === 0 ? openWeek === week : hasFilters ? matchingWeeks.has(week) : openWeek === week;
+          const items = filtered.filter((item) => hasFilters ? belongsToFilteredWeek(item, week) : projectBelongsToWeek(item, week));
           return (
             <section className="dashboard-week" key={week}>
               <h2>
@@ -197,16 +199,18 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave }: Omit<
                           format={format}
                           onOpen={onOpen}
                           onSave={onSave}
+                          showDiscoveryDetails
                         />
                       ))}
                     </div>
-                  ) : <EmptySearch onReset={resetFilters} />}
+                  ) : null}
                 </div>
               ) : null}
             </section>
           );
         })}
       </div>
+      {filtered.length === 0 ? <EmptySearch onReset={resetFilters} /> : null}
     </main>
   );
 }
@@ -214,5 +218,5 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave }: Omit<
 export function DashboardLibrary(props: DashboardLibraryProps) {
   return props.mode === "projects"
     ? <ProjectGroups snapshot={props.snapshot} format={props.format} onOpen={props.onOpen} onSave={props.onSave} />
-    : <WeeklyLibrary snapshot={props.snapshot} initialQuery={props.initialQuery} format={props.format} onOpen={props.onOpen} onSave={props.onSave} />;
+    : <WeeklyLibrary snapshot={props.snapshot} initialQuery={props.initialQuery} format={props.format} onOpen={props.onOpen} onSave={props.onSave} onQueryChange={props.onQueryChange} />;
 }

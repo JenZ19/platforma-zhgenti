@@ -197,7 +197,7 @@ function MobileQuestBody({
   function finishStep() {
     const next = completeStep(progress, step.id, totalLevels);
     setProgress(next);
-    saveProgress(storageSlug, next, window.localStorage);
+    saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels);
     setHelpOpen(false);
   }
 
@@ -238,7 +238,7 @@ function MobileQuestBody({
 
       {preparation === null ? <section className="preparation-card preparation-loading">Готовим мобильный квест…</section> : !ready ? <QuestPreparation project={project} preparation={preparation} mobile onChooseDemo={() => storePreparation({ version: 1, mode: "demo", checked: [], ready: true })} onChooseReal={() => storePreparation({ version: 1, mode: "real", checked: [], ready: false })} onToggle={togglePreparation} onStartReal={() => checklist.every((item) => preparation.checked.includes(item.id)) && storePreparation({ ...preparation, ready: true })} onBack={() => { resetPreparation(storageSlug, window.localStorage); setPreparation(createEmptyPreparation()); }} /> : (
         <section className="mobile-level-wrap">
-          <nav className="mobile-level-rail" aria-label="Уровни мобильного квеста">{steps.map((item) => { const unlocked = isStepUnlocked(progress, item.id); const done = progress.completed.includes(item.id); return <button type="button" key={item.id} className={`${item.id === step.id ? "active" : ""} ${done ? "done" : ""}`} disabled={!unlocked} onClick={() => { if (!unlocked) return; const next = { ...progress, activeStep: item.id }; setProgress(next); saveProgress(storageSlug, next, window.localStorage); }} aria-label={`Уровень ${item.id}: ${item.title}`}>{done ? "✓" : item.id}</button>; })}</nav>
+          <nav className="mobile-level-rail" aria-label="Уровни мобильного квеста">{steps.map((item) => { const unlocked = isStepUnlocked(progress, item.id); const done = progress.completed.includes(item.id); return <button type="button" key={item.id} className={`${item.id === step.id ? "active" : ""} ${done ? "done" : ""}`} disabled={!unlocked} onClick={() => { if (!unlocked) return; const next = { ...progress, activeStep: item.id }; setProgress(next); saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels); }} aria-label={`Уровень ${item.id}: ${item.title}`}>{done ? "✓" : item.id}</button>; })}</nav>
           <article className="mobile-level-card">
             <header><div><p>{step.eyebrow} · уровень {step.id}</p><h2>{step.title}</h2></div><span>{step.id < 7 ? "3 мин" : "5 мин"}</span></header>
             <BeginnerTerms terms={step.beginnerTerms} />

@@ -1,4 +1,5 @@
 import { isProjectBundle } from "../content/projects";
+import type { ProjectFormat } from "../content/types";
 import type { DashboardSnapshot } from "../lib/academy-dashboard";
 import { DashboardProjectCard, dashboardQuestHref, shouldHandleSpaNavigation } from "./DashboardProjectCard";
 import { ProjectPreview } from "./ProjectPreview";
@@ -6,7 +7,7 @@ import { ProjectPreview } from "./ProjectPreview";
 export type DashboardHomeProps = {
   snapshot: DashboardSnapshot;
   format: "desktop" | "mobile";
-  onOpen: (slug: string) => void;
+  onOpen: (slug: string, output?: ProjectFormat) => void;
   onSave: (slug: string) => void;
   onOpenPortfolio?: () => void;
 };
@@ -37,12 +38,13 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
               <span>{next.project.outcome}</span>
               <a
                 className="dashboard-primary-action"
-                href={dashboardQuestHref(next.project.slug, format)}
+                href={dashboardQuestHref(next.project.slug, format, next.output)}
                 aria-label={`${primaryAction}: ${next.project.title}`}
                 onClick={(event) => {
                   if (!shouldHandleSpaNavigation(event)) return;
                   event.preventDefault();
-                  onOpen(next.project.slug);
+                  if (next.output) onOpen(next.project.slug, next.output);
+                  else onOpen(next.project.slug);
                 }}
               >
                 {primaryAction} →

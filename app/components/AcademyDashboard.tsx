@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { projects } from "../content/projects";
+import type { ProjectFormat } from "../content/types";
 import {
   buildDashboardSnapshot,
   toggleSavedProject,
@@ -17,15 +18,16 @@ import { DashboardPortfolio } from "./DashboardPortfolio";
 export type AcademyDashboardProps = {
   section: DashboardSection;
   searchQuery: string;
-  onOpen: (slug: string) => void;
+  onOpen: (slug: string, output?: ProjectFormat) => void;
   onOpenPortfolio?: () => void;
+  onSearchQueryChange?: (query: string) => void;
   format: QuestSurface;
 };
 
 function renderDashboardSection(
   section: DashboardSection,
   snapshot: DashboardSnapshot,
-  props: Pick<AcademyDashboardProps, "format" | "onOpen" | "onOpenPortfolio" | "searchQuery">,
+  props: Pick<AcademyDashboardProps, "format" | "onOpen" | "onOpenPortfolio" | "onSearchQueryChange" | "searchQuery">,
   onSave: (slug: string) => void,
 ) {
   switch (section) {
@@ -48,6 +50,7 @@ function renderDashboardSection(
           format={props.format}
           onOpen={props.onOpen}
           onSave={onSave}
+          onQueryChange={props.onSearchQueryChange}
         />
       );
     case "weeks":
@@ -59,6 +62,7 @@ function renderDashboardSection(
           format={props.format}
           onOpen={props.onOpen}
           onSave={onSave}
+          onQueryChange={props.onSearchQueryChange}
         />
       );
     case "portfolio":
@@ -82,7 +86,7 @@ function assertNever(value: never): never {
   throw new Error(`Неподдерживаемый раздел дашборда: ${value}`);
 }
 
-export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio, format }: AcademyDashboardProps) {
+export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio, onSearchQueryChange, format }: AcademyDashboardProps) {
   const [dashboardState, setDashboardState] = useState<{ format: QuestSurface; snapshot: DashboardSnapshot } | null>(null);
   const snapshot = dashboardState?.format === format ? dashboardState.snapshot : null;
 
@@ -110,5 +114,5 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
     );
   }
 
-  return renderDashboardSection(section, snapshot, { format, onOpen, onOpenPortfolio, searchQuery }, onSave);
+  return renderDashboardSection(section, snapshot, { format, onOpen, onOpenPortfolio, onSearchQueryChange, searchQuery }, onSave);
 }

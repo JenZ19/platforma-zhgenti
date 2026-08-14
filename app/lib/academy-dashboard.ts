@@ -1,5 +1,5 @@
 import { isProjectBundle } from "../content/projects";
-import type { CatalogProject } from "../content/types";
+import type { CatalogProject, ProjectFormat } from "../content/types";
 import type { QuestSurface } from "./output-format";
 import { getCatalogProjectProgressState, type StorageLike } from "./progress";
 
@@ -18,6 +18,8 @@ export type DashboardProjectState = {
   saved: boolean;
   updatedAt?: string;
   completedAt?: string;
+  output?: ProjectFormat;
+  completedOutputs: Array<{ format: ProjectFormat; completedAt?: string }>;
 };
 
 export type DashboardSnapshot = {
@@ -48,13 +50,6 @@ function readJson<T>(storage: StorageLike, key: string, fallback: T, validate: (
 
 function stringList(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
-
-function stringRecord(value: unknown): value is Record<string, string> {
-  return Boolean(value)
-    && typeof value === "object"
-    && !Array.isArray(value)
-    && Object.values(value as Record<string, unknown>).every((item) => typeof item === "string");
 }
 
 function questionNotes(value: unknown): value is QuestionNote[] {
@@ -111,10 +106,6 @@ export function saveQuestionNote(
   return next;
 }
 
-function completionMap(surface: QuestSurface, storage: StorageLike): Record<string, string> {
-  return readJson(storage, `${PREFIX}:completed-at:${surface}`, {}, stringRecord);
-}
-
 function projectWeeks(project: CatalogProject): readonly number[] {
   return isProjectBundle(project) ? project.weeks : [project.week];
 }
@@ -123,19 +114,15 @@ export function buildDashboardSnapshot(
   projects: CatalogProject[],
   storage: StorageLike,
   surface: QuestSurface,
-  today: () => string = () => new Date().toISOString().slice(0, 10),
 ): DashboardSnapshot {
   const saved = loadSavedProjects(storage);
-  const dates = completionMap(surface, storage);
   const items = projects.map((project): DashboardProjectState => {
-    const { progress, totalLevels } = getCatalogProjectProgressState(project, storage, surface);
+    const { progress, totalLevels, format, branches = [] } = getCatalogProjectProgressState(project, storage, surface);
     const status = progress.completed.length === totalLevels
       ? "completed"
       : progress.completed.length
         ? "started"
         : "new";
-
-    if (status === "completed" && !dates[project.slug]) dates[project.slug] = today();
 
     return {
       project,
@@ -145,11 +132,13 @@ export function buildDashboardSnapshot(
       status,
       saved: saved.includes(project.slug),
       updatedAt: progress.updatedAt,
-      completedAt: dates[project.slug],
+      completedAt: progress.completedAt,
+      output: format,
+      completedOutputs: branches
+        .filter((branch) => branch.progress.completed.length === branch.totalLevels)
+        .map((branch) => ({ format: branch.format, completedAt: branch.progress.completedAt })),
     };
   });
-
-  storage.setItem(`${PREFIX}:completed-at:${surface}`, JSON.stringify(dates));
 
   const started = items
     .filter((item) => item.status === "started")

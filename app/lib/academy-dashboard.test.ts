@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projects } from "../content/projects";
+import { isProjectBundle, projects } from "../content/projects";
 import { branchStorageSlug, saveOutputChoice } from "./output-format";
 import { completeStep, createEmptyProgress, getProjectLevelCount, progressKey, saveProgress } from "./progress";
 import {
@@ -56,7 +56,7 @@ describe("academy dashboard state", () => {
     expect(loadDashboardSection(storage)).toBe("home");
   });
 
-  it("places a finished project in portfolio and records its completion date", () => {
+  it("keeps a legacy finished project without inventing a completion date", () => {
     const storage = new MemoryStorage();
     const project = projects.find((item) => item.slug === "pressure-diary")!;
     const totalLevels = getProjectLevelCount(project);
@@ -64,10 +64,11 @@ describe("academy dashboard state", () => {
     for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
     storage.setItem(progressKey("pressure-diary"), JSON.stringify(progress));
 
-    const snapshot = buildDashboardSnapshot([project], storage, "desktop", () => "2026-08-14");
+    const snapshot = buildDashboardSnapshot([project], storage, "desktop");
 
     expect(snapshot.completed).toHaveLength(1);
-    expect(snapshot.completed[0].completedAt).toBe("2026-08-14");
+    expect(snapshot.completed[0].completedAt).toBeUndefined();
+    expect(storage.getItem("feya-dashboard-v1:completed-at:desktop")).toBeNull();
   });
 
   it("orders started projects by their latest saved progress", () => {
@@ -128,7 +129,7 @@ describe("academy dashboard state", () => {
     expect(buildDashboardSnapshot([project], storage, "desktop").next).toBeNull();
   });
 
-  it("replaces a malformed completion-date collection before saving", () => {
+  it("ignores old dashboard observation dates instead of treating them as completion", () => {
     const storage = new MemoryStorage();
     const project = projects.find((item) => item.slug === "pressure-diary")!;
     const totalLevels = getProjectLevelCount(project);
@@ -137,26 +138,51 @@ describe("academy dashboard state", () => {
     storage.setItem(progressKey("pressure-diary"), JSON.stringify(progress));
     storage.setItem("feya-dashboard-v1:completed-at:desktop", "[]");
 
-    buildDashboardSnapshot([project], storage, "desktop", () => "2026-08-14");
-    const snapshot = buildDashboardSnapshot([project], storage, "desktop", () => "2026-08-15");
+    const snapshot = buildDashboardSnapshot([project], storage, "desktop");
 
-    expect(snapshot.completed[0].completedAt).toBe("2026-08-14");
+    expect(snapshot.completed[0].completedAt).toBeUndefined();
+    expect(storage.getItem("feya-dashboard-v1:completed-at:desktop")).toBe("[]");
   });
 
-  it("records completion dates independently for desktop and mobile progress", () => {
+  it("reads factual completion dates independently from desktop and mobile progress", () => {
     const storage = new MemoryStorage();
     const project = projects.find((item) => item.slug === "pressure-diary")!;
     const totalLevels = getProjectLevelCount(project);
     let progress = createEmptyProgress();
     for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
-    storage.setItem(progressKey("pressure-diary"), JSON.stringify(progress));
-    storage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify(progress));
+    storage.setItem(progressKey("pressure-diary"), JSON.stringify({ ...progress, completedAt: "2026-08-14" }));
+    storage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify({ ...progress, completedAt: "2026-08-15" }));
 
-    const desktop = buildDashboardSnapshot([project], storage, "desktop", () => "2026-08-14");
-    const mobile = buildDashboardSnapshot([project], storage, "mobile", () => "2026-08-15");
+    const desktop = buildDashboardSnapshot([project], storage, "desktop");
+    const mobile = buildDashboardSnapshot([project], storage, "mobile");
 
     expect(desktop.completed[0].completedAt).toBe("2026-08-14");
     expect(mobile.completed[0].completedAt).toBe("2026-08-15");
+  });
+
+  it("exposes the selected bundle branch and every factually completed output", () => {
+    const storage = new MemoryStorage();
+    const bundle = projects.find((project) => project.slug === "planning");
+    if (!bundle || !isProjectBundle(bundle)) throw new Error("Нет bundle-проекта planning");
+    saveOutputChoice("planning", "desktop", "agent", storage);
+    for (const format of ["service", "agent"] as const) {
+      const branch = bundle.formats[format];
+      const total = getProjectLevelCount(branch);
+      let progress = createEmptyProgress();
+      for (let id = 1; id <= total; id += 1) progress = completeStep(progress, id, total);
+      storage.setItem(progressKey(branchStorageSlug("planning", format, "desktop")), JSON.stringify({
+        ...progress,
+        completedAt: format === "service" ? "2026-08-14" : "2026-08-15",
+      }));
+    }
+
+    expect(buildDashboardSnapshot([bundle], storage, "desktop").items[0]).toMatchObject({
+      output: "agent",
+      completedOutputs: [
+        { format: "service", completedAt: "2026-08-14" },
+        { format: "agent", completedAt: "2026-08-15" },
+      ],
+    });
   });
 
   it("recovers from malformed question-note storage for a scope", () => {

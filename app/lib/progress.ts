@@ -1,5 +1,5 @@
 import { isProjectBundle } from "../content/projects";
-import type { CatalogProject } from "../content/types";
+import type { CatalogProject, ProjectFormat } from "../content/types";
 import { branchStorageSlug, loadOutputChoice, type QuestSurface } from "./output-format";
 import { getJourneyLevelCount } from "../content/journey-plans";
 
@@ -12,6 +12,7 @@ export type QuestProgress = {
   completed: number[];
   score: number;
   updatedAt?: string;
+  completedAt?: string;
 };
 
 export type StorageLike = {
@@ -45,11 +46,25 @@ export function completeStep(progress: QuestProgress, stepId: number, totalLevel
   }
   const completed = [...progress.completed, stepId].sort((a, b) => a - b);
   return {
+    ...progress,
     version: 1,
     activeStep: Math.min(stepId + 1, totalLevels),
     completed,
     score: completed.length * 10,
   };
+}
+
+export function isIsoCalendarDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year
+    && date.getUTCMonth() === month - 1
+    && date.getUTCDate() === day;
 }
 
 export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST): QuestProgress {
@@ -76,6 +91,9 @@ export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST
     if (typeof value.updatedAt === "string" && Number.isFinite(Date.parse(value.updatedAt))) {
       progress.updatedAt = value.updatedAt;
     }
+    if (sequential.length === totalLevels && typeof value.completedAt === "string" && isIsoCalendarDate(value.completedAt)) {
+      progress.completedAt = value.completedAt;
+    }
     return progress;
   } catch {
     return createEmptyProgress();
@@ -91,8 +109,16 @@ export function saveProgress(
   progress: QuestProgress,
   storage: StorageLike,
   now: () => string = () => new Date().toISOString(),
+  totalLevels = LEVELS_PER_QUEST,
 ): void {
-  storage.setItem(progressKey(slug), JSON.stringify({ ...progress, updatedAt: now() }));
+  const updatedAt = now();
+  const previous = loadProgress(slug, storage, totalLevels);
+  const completedAt = progress.completedAt
+    ?? previous.completedAt
+    ?? (progress.completed.length === totalLevels && previous.completed.length < totalLevels
+      ? updatedAt.slice(0, 10)
+      : undefined);
+  storage.setItem(progressKey(slug), JSON.stringify({ ...progress, updatedAt, completedAt }));
 }
 
 export function resetProgress(slug: string, storage: StorageLike): void {
@@ -102,6 +128,12 @@ export function resetProgress(slug: string, storage: StorageLike): void {
 export type CatalogProjectProgressState = {
   progress: QuestProgress;
   totalLevels: number;
+  format?: ProjectFormat;
+  branches?: Array<{
+    format: ProjectFormat;
+    progress: QuestProgress;
+    totalLevels: number;
+  }>;
 };
 
 export function getCatalogProjectProgressState(
@@ -115,22 +147,23 @@ export function getCatalogProjectProgressState(
     return { progress: loadProgress(storageSlug, storage, totalLevels), totalLevels };
   }
 
-  const selected = loadOutputChoice(project.slug, surface, storage);
-  if (selected) {
-    const totalLevels = getProjectLevelCount(project.formats[selected]);
-    return {
-      progress: loadProgress(branchStorageSlug(project.slug, selected, surface), storage, totalLevels),
-      totalLevels,
-    };
-  }
-
   const serviceTotal = getProjectLevelCount(project.formats.service);
   const agentTotal = getProjectLevelCount(project.formats.agent);
   const service = loadProgress(branchStorageSlug(project.slug, "service", surface), storage, serviceTotal);
   const agent = loadProgress(branchStorageSlug(project.slug, "agent", surface), storage, agentTotal);
-  return agent.completed.length > service.completed.length
-    ? { progress: agent, totalLevels: agentTotal }
-    : { progress: service, totalLevels: serviceTotal };
+  const branches = [
+    { format: "service" as const, progress: service, totalLevels: serviceTotal },
+    { format: "agent" as const, progress: agent, totalLevels: agentTotal },
+  ];
+  const selected = loadOutputChoice(project.slug, surface, storage);
+  const chosen = selected
+    ? branches.find((branch) => branch.format === selected)!
+    : agent.completed.length > service.completed.length ? branches[1] : branches[0];
+  return {
+    ...chosen,
+    format: selected ?? (chosen.progress.completed.length > 0 ? chosen.format : undefined),
+    branches,
+  };
 }
 
 export function getCatalogProjectProgress(

@@ -42,6 +42,61 @@ describe("academy progress", () => {
     expect(parseProgress(JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }))).not.toHaveProperty("updatedAt");
   });
 
+  it("records completedAt only when the final level is actually saved", () => {
+    const storage = new MemoryStorage();
+    let finished = createEmptyProgress();
+    for (let id = 1; id <= 17; id += 1) finished = completeStep(finished, id, 17);
+
+    saveProgress("finished", finished, storage, () => "2026-08-15T21:45:00.000Z");
+    saveProgress("started", completeStep(createEmptyProgress(), 1), storage, () => "2026-08-16T08:00:00.000Z");
+
+    expect(loadProgress("finished", storage).completedAt).toBe("2026-08-15");
+    expect(loadProgress("started", storage)).not.toHaveProperty("completedAt");
+  });
+
+  it("does not invent a completion date when legacy completed progress is saved again", () => {
+    const storage = new MemoryStorage();
+    const legacy = {
+      version: 1 as const,
+      activeStep: 17,
+      completed: Array.from({ length: 17 }, (_, index) => index + 1),
+      score: 170,
+    };
+    storage.setItem(progressKey("legacy-finished"), JSON.stringify(legacy));
+
+    saveProgress("legacy-finished", legacy, storage, () => "2026-08-15T21:45:00.000Z");
+
+    expect(loadProgress("legacy-finished", storage)).not.toHaveProperty("completedAt");
+  });
+
+  it("keeps only real ISO calendar completion dates from stored progress", () => {
+    const valid = parseProgress(JSON.stringify({
+      version: 1,
+      activeStep: 17,
+      completed: Array.from({ length: 17 }, (_, index) => index + 1),
+      score: 170,
+      completedAt: "2024-02-29",
+    }));
+    const impossible = parseProgress(JSON.stringify({
+      version: 1,
+      activeStep: 17,
+      completed: Array.from({ length: 17 }, (_, index) => index + 1),
+      score: 170,
+      completedAt: "2026-02-31",
+    }));
+    const incomplete = parseProgress(JSON.stringify({
+      version: 1,
+      activeStep: 2,
+      completed: [1],
+      score: 10,
+      completedAt: "2026-08-15",
+    }));
+
+    expect(valid.completedAt).toBe("2024-02-29");
+    expect(impossible).not.toHaveProperty("completedAt");
+    expect(incomplete).not.toHaveProperty("completedAt");
+  });
+
   it("unlocks sequentially and never awards a level twice", () => {
     const empty = createEmptyProgress();
     expect(isStepUnlocked(empty, 1)).toBe(true);

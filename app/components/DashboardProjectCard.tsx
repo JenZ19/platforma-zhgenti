@@ -1,21 +1,25 @@
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { getCatalogDiscoveryProfile } from "../content/discovery";
 import { isProjectBundle } from "../content/projects";
+import type { ProjectFormat, ProjectKind } from "../content/types";
 import type { DashboardProjectState } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
 import { ProjectPreview } from "./ProjectPreview";
 
 export type DashboardProjectCardProps = {
   item: DashboardProjectState;
-  onOpen: (slug: string) => void;
+  onOpen: (slug: string, output?: ProjectFormat) => void;
   onSave: (slug: string) => void;
   format: QuestSurface;
+  showDiscoveryDetails?: boolean;
 };
 
-export function dashboardQuestHref(slug: string, format: QuestSurface): string {
-  return format === "mobile"
-    ? `?format=mobile&quest=${encodeURIComponent(slug)}`
-    : `?quest=${encodeURIComponent(slug)}`;
+export function dashboardQuestHref(slug: string, format: QuestSurface, output?: ProjectFormat): string {
+  const query = new URLSearchParams();
+  if (format === "mobile") query.set("format", "mobile");
+  query.set("quest", slug);
+  if (output) query.set("output", output);
+  return `?${query.toString()}`;
 }
 
 export function shouldHandleSpaNavigation(event: ReactMouseEvent<HTMLAnchorElement>): boolean {
@@ -29,14 +33,25 @@ export function shouldHandleSpaNavigation(event: ReactMouseEvent<HTMLAnchorEleme
     && (target === "" || target === "_self");
 }
 
-export function DashboardProjectCard({ item, onOpen, onSave, format }: DashboardProjectCardProps) {
+const formatLabels: Record<ProjectKind, string> = {
+  service: "Сервис",
+  agent: "ИИ-агент",
+  "simple-site": "Сайт",
+  "advanced-site": "Сайт",
+  portfolio: "Портфолио",
+};
+
+export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscoveryDetails = false }: DashboardProjectCardProps) {
   const { project } = item;
   const discovery = getCatalogDiscoveryProfile(project);
   const week = isProjectBundle(project) ? "Недели 1–2" : `Неделя ${project.week}`;
   const saveLabel = item.saved
     ? `Убрать ${project.title} из сохранённых`
     : `Сохранить на потом: ${project.title}`;
-  const action = item.status === "new" ? "Начать" : "Продолжить";
+  const action = item.status === "completed" ? "Открыть проект" : item.status === "new" ? "Начать" : "Продолжить";
+  const resultFormat = isProjectBundle(project)
+    ? item.output ? item.output === "service" ? "Сервис" : "ИИ-агент" : project.track
+    : formatLabels[project.kind];
 
   return (
     <article className="dashboard-project-card" aria-label={project.title}>
@@ -49,6 +64,13 @@ export function DashboardProjectCard({ item, onOpen, onSave, format }: Dashboard
         </div>
         <h3>{project.title}</h3>
         <p>{project.outcome}</p>
+        <div className="dashboard-card-facts">
+          <p>Время: 3–5 минут на уровень</p>
+          <p>Формат: {resultFormat}</p>
+          {showDiscoveryDetails ? <p>Тип результата: {isProjectBundle(project) ? project.track : formatLabels[project.kind]}</p> : null}
+          {showDiscoveryDetails ? <p>Ключевые слова: {discovery.keywords.join(", ")}</p> : null}
+          {showDiscoveryDetails && isProjectBundle(project) ? <p>Выбор: Сервис или ИИ-агент</p> : null}
+        </div>
         <div className="dashboard-progress" aria-label={`Пройдено ${item.completedLevels} из ${item.totalLevels}`}>
           <i aria-hidden="true"><b style={{ width: `${item.percent}%` }} /></i>
           <span>{item.completedLevels}/{item.totalLevels}</span>
@@ -65,12 +87,13 @@ export function DashboardProjectCard({ item, onOpen, onSave, format }: Dashboard
           </button>
           <a
             className="dashboard-card-action"
-            href={dashboardQuestHref(project.slug, format)}
+            href={dashboardQuestHref(project.slug, format, item.output)}
             aria-label={`${action}: ${project.title}`}
             onClick={(event) => {
               if (!shouldHandleSpaNavigation(event)) return;
               event.preventDefault();
-              onOpen(project.slug);
+              if (item.output) onOpen(project.slug, item.output);
+              else onOpen(project.slug);
             }}
           >
             {action} →

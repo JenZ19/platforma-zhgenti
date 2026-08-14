@@ -232,7 +232,7 @@ function QuestBody({
     if (!isStepUnlocked(progress, id)) return;
     const next = { ...progress, activeStep: id };
     setProgress(next);
-    saveProgress(storageSlug, next, window.localStorage);
+    saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels);
     setHelpOpen(false);
   }
 
@@ -240,7 +240,7 @@ function QuestBody({
     const wasDone = progress.completed.includes(step.id);
     const next = completeStep(progress, step.id, totalLevels);
     setProgress(next);
-    saveProgress(storageSlug, next, window.localStorage);
+    saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels);
     setHelpOpen(false);
     if (!wasDone && step.reward) setReward(step.reward);
   }

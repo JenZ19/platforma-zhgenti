@@ -7,12 +7,13 @@ import { getAgentContract } from "../content/agent-contracts";
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
-import { getQuestProject, projects, questProjects } from "../content/projects";
+import { getQuestProject, isProjectBundle, projects, questProjects } from "../content/projects";
 import { buildQuest } from "../content/quests";
 import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
 import { buildDashboardSnapshot } from "../lib/academy-dashboard";
 import { preparationKey } from "../lib/preparation";
 import { getProjectLevelCount, progressKey } from "../lib/progress";
+import { branchStorageSlug, saveOutputChoice } from "../lib/output-format";
 import { customizationKey } from "../lib/customization";
 import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
@@ -34,6 +35,12 @@ function routeStepFor(project: NonNullable<ReturnType<typeof getQuestProject>>, 
   const index = buildQuest(project).findIndex((step) => step.sourceStepId === sourceStep);
   if (index < 0) throw new Error(`Нет исходного уровня ${sourceStep} у ${project.slug}`);
   return index + 1;
+}
+
+function getBundle(slug: string) {
+  const project = projects.find((item) => item.slug === slug);
+  if (!project || !isProjectBundle(project)) throw new Error(`Нет bundle-проекта ${slug}`);
+  return project;
 }
 
 describe("academy interface", () => {
@@ -234,6 +241,33 @@ describe("academy interface", () => {
     expect(screen.getByRole("button", { name: "Неделя 2" })).toHaveAttribute("aria-expanded", "true");
   });
 
+  it("opens matching weeks instead of showing an empty current week", async () => {
+    window.history.replaceState({}, "", "/?section=weeks&q=%D0%BF%D1%81%D0%B8%D1%85%D0%BE%D0%BB%D0%BE%D0%B3");
+    render(<AppEntry />);
+
+    expect(await screen.findByRole("article", { name: /сайт психолога/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Неделя 1" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Неделя 4" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.queryByText(/ничего не найдено/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps inline search, canonical URL and top search in one state", async () => {
+    window.history.replaceState({}, "", "/?format=mobile&section=weeks");
+    render(<AppEntry />);
+
+    const inline = await screen.findByRole("searchbox", { name: /поиск по квестам недели/i });
+    fireEvent.change(inline, { target: { value: "психолог" } });
+
+    await waitFor(() => expect(window.location.search).toBe("?format=mobile&section=weeks&q=%D0%BF%D1%81%D0%B8%D1%85%D0%BE%D0%BB%D0%BE%D0%B3"));
+    expect(screen.getByRole("searchbox", { name: /найти проект/i })).toHaveValue("психолог");
+    expect(await screen.findByRole("article", { name: /сайт психолога/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /сбросить фильтры/i }));
+    await waitFor(() => expect(window.location.search).toBe("?format=mobile&section=weeks"));
+    expect(screen.getByRole("searchbox", { name: /найти проект/i })).toHaveValue("");
+    expect(screen.getByRole("searchbox", { name: /поиск по квестам недели/i })).toHaveValue("");
+  });
+
   it("keeps the existing discovery filters in the weekly library", async () => {
     window.history.replaceState({}, "", "/?section=weeks");
     render(<AppEntry />);
@@ -249,6 +283,36 @@ describe("academy interface", () => {
     expect(screen.queryByRole("article", { name: /дневник давления/i })).not.toBeInTheDocument();
   });
 
+  it("shows factual time, format and discovery metadata on project cards", async () => {
+    window.history.replaceState({}, "", "/?section=weeks");
+    render(<AppEntry />);
+
+    const planning = await screen.findByRole("article", { name: /планирование/i });
+    expect(planning).toHaveTextContent("Время: 3–5 минут на уровень");
+    expect(planning).toHaveTextContent("Формат: Сервис или ИИ-агент");
+    expect(planning).toHaveTextContent("Тип результата: Сервис или ИИ-агент");
+    expect(planning).toHaveTextContent(/Ключевые слова:.+Для себя/i);
+  });
+
+  it("uses the selected bundle format on a started project card", async () => {
+    saveOutputChoice("planning", "desktop", "service", localStorage);
+    localStorage.setItem(progressKey(branchStorageSlug("planning", "service", "desktop")), JSON.stringify({
+      version: 1,
+      activeStep: 2,
+      completed: [1],
+      score: 10,
+    }));
+
+    render(<Academy section="projects" />);
+
+    const planning = await screen.findByRole("article", { name: /планирование/i });
+    expect(planning).toHaveTextContent("Формат: Сервис");
+    expect(within(planning).getByRole("link", { name: /продолжить: планирование/i })).toHaveAttribute(
+      "href",
+      "?quest=planning&output=service",
+    );
+  });
+
   it.each([
     ["desktop", Academy, "?quest=server-152fz", progressKey("server-152fz")],
     ["mobile", MobileAcademy, "?format=mobile&quest=server-152fz", progressKey("mobile:server-152fz")],
@@ -259,8 +323,8 @@ describe("academy interface", () => {
       activeStep: total,
       completed: Array.from({ length: total }, (_, index) => index + 1),
       score: total * 10,
+      completedAt: "2026-08-14",
     }));
-    localStorage.setItem(`feya-dashboard-v1:completed-at:${_format}`, JSON.stringify({ "server-152fz": "2026-08-14" }));
     const onOpen = vi.fn();
 
     render(<Component section="portfolio" onOpen={onOpen} />);
@@ -278,6 +342,93 @@ describe("academy interface", () => {
     expect(onOpen).not.toHaveBeenCalled();
     expect(fireEvent.click(action)).toBe(false);
     expect(onOpen).toHaveBeenCalledWith("server-152fz");
+  });
+
+  it.each([
+    ["desktop", Academy, "service", "?quest=planning&output=service", branchStorageSlug("planning", "service", "desktop")],
+    ["mobile", MobileAcademy, "agent", "?format=mobile&quest=planning&output=agent", branchStorageSlug("planning", "agent", "mobile")],
+  ] as const)("shows only the completed %s bundle branch facts in portfolio", async (_surface, Component, output, href, storageSlug) => {
+    const bundle = getBundle("planning");
+    const branch = bundle.formats[output];
+    const total = getProjectLevelCount(branch);
+    localStorage.setItem(progressKey(storageSlug), JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total }, (_, index) => index + 1),
+      score: total * 10,
+      completedAt: "2026-08-14",
+    }));
+    saveOutputChoice("planning", _surface, output, localStorage);
+    const onOpen = vi.fn();
+
+    render(<Component section="portfolio" onOpen={onOpen} />);
+
+    const card = await screen.findByRole("article", { name: /планирование/i });
+    expect(card).toHaveTextContent(`Формат: ${output === "service" ? "Сервис" : "ИИ-агент"}`);
+    expect(card).toHaveTextContent(branch.audience);
+    expect(card).not.toHaveTextContent(bundle.formats[output === "service" ? "agent" : "service"].audience);
+    const action = within(card).getByRole("link", { name: new RegExp(`открыть ${output === "service" ? "сервис" : "ии-агента"}: планирование`, "i") });
+    expect(action).toHaveAttribute("href", href);
+    action.setAttribute("href", "#browser-bundle-portfolio");
+    expect(fireEvent.click(action, { ctrlKey: true })).toBe(true);
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(fireEvent.click(action)).toBe(false);
+    expect(onOpen).toHaveBeenCalledWith("planning", output);
+  });
+
+  it("shows both completed bundle outputs without merging their facts", async () => {
+    const bundle = getBundle("planning");
+    for (const output of ["service", "agent"] as const) {
+      const total = getProjectLevelCount(bundle.formats[output]);
+      localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({
+        version: 1,
+        activeStep: total,
+        completed: Array.from({ length: total }, (_, index) => index + 1),
+        score: total * 10,
+        completedAt: output === "service" ? "2026-08-14" : "2026-08-15",
+      }));
+    }
+
+    render(<Academy section="portfolio" />);
+
+    const card = await screen.findByRole("article", { name: /планирование/i });
+    expect(card).toHaveTextContent("Готовы оба формата");
+    expect(within(card).getByRole("link", { name: /открыть сервис: планирование/i })).toHaveAttribute("href", "?quest=planning&output=service");
+    expect(within(card).getByRole("link", { name: /открыть ии-агента: планирование/i })).toHaveAttribute("href", "?quest=planning&output=agent");
+    expect(card).toHaveTextContent("14.08.2026");
+    expect(card).toHaveTextContent("15.08.2026");
+  });
+
+  it("omits a completion date for legacy finished progress", async () => {
+    const total = getProjectLevelCount("server-152fz");
+    localStorage.setItem(progressKey("server-152fz"), JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total }, (_, index) => index + 1),
+      score: total * 10,
+    }));
+
+    render(<Academy section="portfolio" />);
+
+    const card = await screen.findByRole("article", { name: /покупаем сервер/i });
+    expect(card).not.toHaveTextContent(/Готово \d{2}\.\d{2}\.\d{4}/i);
+  });
+
+  it("labels a completed project card action as opening, not continuing", async () => {
+    const total = getProjectLevelCount("server-152fz");
+    localStorage.setItem(progressKey("server-152fz"), JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total }, (_, index) => index + 1),
+      score: total * 10,
+      completedAt: "2026-08-14",
+    }));
+
+    render(<Academy section="projects" />);
+
+    const card = await screen.findByRole("article", { name: /покупаем сервер/i });
+    expect(within(card).getByRole("link", { name: /открыть проект: покупаем сервер/i })).toBeInTheDocument();
+    expect(within(card).queryByRole("link", { name: /продолжить/i })).not.toBeInTheDocument();
   });
 
   it("shows honest empty states for projects, portfolio and the unfinished Fairy section", async () => {
