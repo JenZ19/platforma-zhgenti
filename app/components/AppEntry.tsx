@@ -178,13 +178,13 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     ? surface === "mobile"
       ? project
         ? <MobileQuest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} />
-        : <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} />
+        : <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} onOpenPortfolio={() => openSection("portfolio")} />
       : project
         ? <Quest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} />
-        : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />
+        : <Academy onOpen={(slug) => openQuest(slug, "desktop")} onOpenPortfolio={() => openSection("portfolio")} />
     : surface === "mobile"
-      ? <MobileAcademy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "mobile")} />
-      : <Academy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "desktop")} />;
+      ? <MobileAcademy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "mobile")} onOpenPortfolio={() => openSection("portfolio")} />
+      : <Academy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "desktop")} onOpenPortfolio={() => openSection("portfolio")} />;
 
   return (
     <LearningShell

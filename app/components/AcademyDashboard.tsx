@@ -15,6 +15,7 @@ export type AcademyDashboardProps = {
   section: DashboardSection;
   searchQuery: string;
   onOpen: (slug: string) => void;
+  onOpenPortfolio?: () => void;
   format: QuestSurface;
 };
 
@@ -64,12 +65,20 @@ function DashboardSectionStub({ section, searchQuery, format }: {
 function renderDashboardSection(
   section: DashboardSection,
   snapshot: DashboardSnapshot,
-  props: Pick<AcademyDashboardProps, "format" | "onOpen" | "searchQuery">,
+  props: Pick<AcademyDashboardProps, "format" | "onOpen" | "onOpenPortfolio" | "searchQuery">,
   onSave: (slug: string) => void,
 ) {
   switch (section) {
     case "home":
-      return <DashboardHome snapshot={snapshot} format={props.format} onOpen={props.onOpen} onSave={onSave} />;
+      return (
+        <DashboardHome
+          snapshot={snapshot}
+          format={props.format}
+          onOpen={props.onOpen}
+          onSave={onSave}
+          onOpenPortfolio={props.onOpenPortfolio}
+        />
+      );
     case "projects":
     case "weeks":
     case "portfolio":
@@ -83,7 +92,7 @@ function assertNever(value: never): never {
   throw new Error(`Неподдерживаемый раздел дашборда: ${value}`);
 }
 
-export function AcademyDashboard({ section, searchQuery, onOpen, format }: AcademyDashboardProps) {
+export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio, format }: AcademyDashboardProps) {
   const [dashboardState, setDashboardState] = useState<{ format: QuestSurface; snapshot: DashboardSnapshot } | null>(null);
   const snapshot = dashboardState?.format === format ? dashboardState.snapshot : null;
 
@@ -111,5 +120,5 @@ export function AcademyDashboard({ section, searchQuery, onOpen, format }: Acade
     );
   }
 
-  return renderDashboardSection(section, snapshot, { format, onOpen, searchQuery }, onSave);
+  return renderDashboardSection(section, snapshot, { format, onOpen, onOpenPortfolio, searchQuery }, onSave);
 }

@@ -28,6 +28,20 @@ describe("academy progress", () => {
     expect(loadProgress("recipe-book", storage).completed).toEqual([]);
   });
 
+  it("records a stable updatedAt timestamp when progress is saved", () => {
+    const storage = new MemoryStorage();
+
+    saveProgress(
+      "planner",
+      completeStep(createEmptyProgress(), 1),
+      storage,
+      () => "2026-08-15T10:30:00.000Z",
+    );
+
+    expect(loadProgress("planner", storage).updatedAt).toBe("2026-08-15T10:30:00.000Z");
+    expect(parseProgress(JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }))).not.toHaveProperty("updatedAt");
+  });
+
   it("unlocks sequentially and never awards a level twice", () => {
     const empty = createEmptyProgress();
     expect(isStepUnlocked(empty, 1)).toBe(true);
@@ -77,7 +91,7 @@ describe("academy progress", () => {
       startedProjects: 2,
       completedProjects: 1,
       completedSteps: 18,
-      totalSteps: 758,
+      totalSteps: 763,
       score: 180,
     });
   });

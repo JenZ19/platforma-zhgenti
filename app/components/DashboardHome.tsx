@@ -1,6 +1,6 @@
 import { isProjectBundle } from "../content/projects";
 import type { DashboardSnapshot } from "../lib/academy-dashboard";
-import { DashboardProjectCard } from "./DashboardProjectCard";
+import { DashboardProjectCard, dashboardQuestHref } from "./DashboardProjectCard";
 import { ProjectPreview } from "./ProjectPreview";
 
 export type DashboardHomeProps = {
@@ -8,37 +8,66 @@ export type DashboardHomeProps = {
   format: "desktop" | "mobile";
   onOpen: (slug: string) => void;
   onSave: (slug: string) => void;
+  onOpenPortfolio?: () => void;
 };
 
-export function DashboardHome({ snapshot, format, onOpen, onSave }: DashboardHomeProps) {
+function portfolioHref(format: "desktop" | "mobile"): string {
+  return format === "mobile" ? "?format=mobile&section=portfolio" : "?section=portfolio";
+}
+
+export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfolio }: DashboardHomeProps) {
   const { next } = snapshot;
   const weekItems = snapshot.items
     .filter((item) => isProjectBundle(item.project)
       ? item.project.weeks.includes(snapshot.currentWeek as 1 | 2)
       : item.project.week === snapshot.currentWeek)
+    .filter((item) => item.status !== "completed")
     .slice(0, 4);
-  const started = snapshot.started.slice(-3).reverse();
+  const started = snapshot.started.slice(0, 3);
+  const primaryAction = next?.status === "new" ? "Начать квест" : "Продолжить";
 
   return (
     <main className="dashboard-home" data-visual-theme="pink-cloud" data-dashboard-section="home" data-dashboard-format={format}>
       <section className="next-quest-banner" aria-labelledby="dashboard-next-title">
-        <div>
-          <p>Ваш следующий шаг</p>
-          <h1 id="dashboard-next-title">{next.project.title}</h1>
-          <span>{next.project.outcome}</span>
-          <a
-            className="dashboard-primary-action"
-            href={`?quest=${next.project.slug}`}
-            aria-label={`Продолжить ${next.project.title}`}
-            onClick={(event) => {
-              event.preventDefault();
-              onOpen(next.project.slug);
-            }}
-          >
-            {next.status === "new" ? "Начать квест" : "Продолжить"} →
-          </a>
-        </div>
-        <ProjectPreview project={next.project} />
+        {next ? (
+          <>
+            <div>
+              <p>Ваш следующий шаг</p>
+              <h1 id="dashboard-next-title">{next.project.title}</h1>
+              <span>{next.project.outcome}</span>
+              <a
+                className="dashboard-primary-action"
+                href={dashboardQuestHref(next.project.slug, format)}
+                aria-label={`${primaryAction}: ${next.project.title}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onOpen(next.project.slug);
+                }}
+              >
+                {primaryAction} →
+              </a>
+            </div>
+            <ProjectPreview project={next.project} />
+          </>
+        ) : (
+          <div>
+            <p>Все квесты пройдены</p>
+            <h1 id="dashboard-next-title">Все проекты готовы</h1>
+            <span>Работы уже собраны — можно проверить их и подготовить к показу.</span>
+            <a
+              className="dashboard-primary-action"
+              href={portfolioHref(format)}
+              aria-label="Открыть портфолио"
+              onClick={(event) => {
+                if (!onOpenPortfolio) return;
+                event.preventDefault();
+                onOpenPortfolio();
+              }}
+            >
+              Открыть портфолио →
+            </a>
+          </div>
+        )}
       </section>
 
       <section className="dashboard-stat-grid" aria-label="Ваш прогресс">
@@ -54,7 +83,7 @@ export function DashboardHome({ snapshot, format, onOpen, onSave }: DashboardHom
           </header>
           <div className="dashboard-card-grid">
             {started.map((item) => (
-              <DashboardProjectCard key={item.project.slug} item={item} onOpen={onOpen} onSave={onSave} />
+              <DashboardProjectCard key={item.project.slug} item={item} onOpen={onOpen} onSave={onSave} format={format} />
             ))}
           </div>
         </section>
@@ -68,7 +97,7 @@ export function DashboardHome({ snapshot, format, onOpen, onSave }: DashboardHom
         {weekItems.length > 0 ? (
           <div className="dashboard-card-grid">
             {weekItems.map((item) => (
-              <DashboardProjectCard key={item.project.slug} item={item} onOpen={onOpen} onSave={onSave} />
+              <DashboardProjectCard key={item.project.slug} item={item} onOpen={onOpen} onSave={onSave} format={format} />
             ))}
           </div>
         ) : (

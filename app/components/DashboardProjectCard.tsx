@@ -1,21 +1,30 @@
 import { getCatalogDiscoveryProfile } from "../content/discovery";
 import { isProjectBundle } from "../content/projects";
 import type { DashboardProjectState } from "../lib/academy-dashboard";
+import type { QuestSurface } from "../lib/output-format";
 import { ProjectPreview } from "./ProjectPreview";
 
 export type DashboardProjectCardProps = {
   item: DashboardProjectState;
   onOpen: (slug: string) => void;
   onSave: (slug: string) => void;
+  format: QuestSurface;
 };
 
-export function DashboardProjectCard({ item, onOpen, onSave }: DashboardProjectCardProps) {
+export function dashboardQuestHref(slug: string, format: QuestSurface): string {
+  return format === "mobile"
+    ? `?format=mobile&quest=${encodeURIComponent(slug)}`
+    : `?quest=${encodeURIComponent(slug)}`;
+}
+
+export function DashboardProjectCard({ item, onOpen, onSave, format }: DashboardProjectCardProps) {
   const { project } = item;
   const discovery = getCatalogDiscoveryProfile(project);
   const week = isProjectBundle(project) ? "Недели 1–2" : `Неделя ${project.week}`;
   const saveLabel = item.saved
     ? `Убрать ${project.title} из сохранённых`
     : `Сохранить на потом: ${project.title}`;
+  const action = item.status === "new" ? "Начать" : "Продолжить";
 
   return (
     <article className="dashboard-project-card" aria-label={project.title}>
@@ -44,13 +53,14 @@ export function DashboardProjectCard({ item, onOpen, onSave }: DashboardProjectC
           </button>
           <a
             className="dashboard-card-action"
-            href={`?quest=${project.slug}`}
+            href={dashboardQuestHref(project.slug, format)}
+            aria-label={`${action}: ${project.title}`}
             onClick={(event) => {
               event.preventDefault();
               onOpen(project.slug);
             }}
           >
-            {item.status === "new" ? "Начать" : "Продолжить"} →
+            {action} →
           </a>
         </footer>
       </div>

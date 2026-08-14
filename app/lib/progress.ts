@@ -11,6 +11,7 @@ export type QuestProgress = {
   activeStep: number;
   completed: number[];
   score: number;
+  updatedAt?: string;
 };
 
 export type StorageLike = {
@@ -66,12 +67,16 @@ export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST
     }
     const maxActive = Math.min(sequential.length + 1, totalLevels);
     const requestedActive = typeof value.activeStep === "number" ? value.activeStep : maxActive;
-    return {
+    const progress: QuestProgress = {
       version: 1,
       activeStep: Math.max(1, Math.min(requestedActive, maxActive)),
       completed: sequential,
       score: sequential.length * 10,
     };
+    if (typeof value.updatedAt === "string" && Number.isFinite(Date.parse(value.updatedAt))) {
+      progress.updatedAt = value.updatedAt;
+    }
+    return progress;
   } catch {
     return createEmptyProgress();
   }
@@ -81,12 +86,51 @@ export function loadProgress(slug: string, storage: StorageLike, totalLevels = L
   return parseProgress(storage.getItem(progressKey(slug)), totalLevels);
 }
 
-export function saveProgress(slug: string, progress: QuestProgress, storage: StorageLike): void {
-  storage.setItem(progressKey(slug), JSON.stringify(progress));
+export function saveProgress(
+  slug: string,
+  progress: QuestProgress,
+  storage: StorageLike,
+  now: () => string = () => new Date().toISOString(),
+): void {
+  storage.setItem(progressKey(slug), JSON.stringify({ ...progress, updatedAt: now() }));
 }
 
 export function resetProgress(slug: string, storage: StorageLike): void {
   storage.removeItem(progressKey(slug));
+}
+
+export type CatalogProjectProgressState = {
+  progress: QuestProgress;
+  totalLevels: number;
+};
+
+export function getCatalogProjectProgressState(
+  project: CatalogProject,
+  storage: StorageLike,
+  surface: QuestSurface = "desktop",
+): CatalogProjectProgressState {
+  if (!isProjectBundle(project)) {
+    const storageSlug = `${surface === "mobile" ? "mobile:" : ""}${project.slug}`;
+    const totalLevels = getProjectLevelCount(project);
+    return { progress: loadProgress(storageSlug, storage, totalLevels), totalLevels };
+  }
+
+  const selected = loadOutputChoice(project.slug, surface, storage);
+  if (selected) {
+    const totalLevels = getProjectLevelCount(project.formats[selected]);
+    return {
+      progress: loadProgress(branchStorageSlug(project.slug, selected, surface), storage, totalLevels),
+      totalLevels,
+    };
+  }
+
+  const serviceTotal = getProjectLevelCount(project.formats.service);
+  const agentTotal = getProjectLevelCount(project.formats.agent);
+  const service = loadProgress(branchStorageSlug(project.slug, "service", surface), storage, serviceTotal);
+  const agent = loadProgress(branchStorageSlug(project.slug, "agent", surface), storage, agentTotal);
+  return agent.completed.length > service.completed.length
+    ? { progress: agent, totalLevels: agentTotal }
+    : { progress: service, totalLevels: serviceTotal };
 }
 
 export function getCatalogProjectProgress(
@@ -94,19 +138,7 @@ export function getCatalogProjectProgress(
   storage: StorageLike,
   surface: QuestSurface = "desktop",
 ): QuestProgress {
-  if (!isProjectBundle(project)) {
-    const storageSlug = `${surface === "mobile" ? "mobile:" : ""}${project.slug}`;
-    return loadProgress(storageSlug, storage, getProjectLevelCount(project));
-  }
-
-  const selected = loadOutputChoice(project.slug, surface, storage);
-  if (selected) {
-    return loadProgress(branchStorageSlug(project.slug, selected, surface), storage);
-  }
-
-  const service = loadProgress(branchStorageSlug(project.slug, "service", surface), storage);
-  const agent = loadProgress(branchStorageSlug(project.slug, "agent", surface), storage);
-  return agent.completed.length > service.completed.length ? agent : service;
+  return getCatalogProjectProgressState(project, storage, surface).progress;
 }
 
 export function getAcademyStats(
@@ -114,10 +146,7 @@ export function getAcademyStats(
   storage: StorageLike,
   surface: QuestSurface = "desktop",
 ) {
-  const values = projects.map((project) => ({
-    progress: getCatalogProjectProgress(project, storage, surface),
-    totalLevels: getProjectLevelCount(project),
-  }));
+  const values = projects.map((project) => getCatalogProjectProgressState(project, storage, surface));
   return {
     totalProjects: projects.length,
     startedProjects: values.filter(({ progress }) => progress.completed.length > 0).length,

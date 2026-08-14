@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { projects } from "../content/projects";
-import { completeStep, createEmptyProgress, getProjectLevelCount, progressKey } from "./progress";
+import { branchStorageSlug, saveOutputChoice } from "./output-format";
+import { completeStep, createEmptyProgress, getProjectLevelCount, progressKey, saveProgress } from "./progress";
 import {
   buildDashboardSnapshot,
   loadDashboardSection,
@@ -67,6 +68,64 @@ describe("academy dashboard state", () => {
 
     expect(snapshot.completed).toHaveLength(1);
     expect(snapshot.completed[0].completedAt).toBe("2026-08-14");
+  });
+
+  it("orders started projects by their latest saved progress", () => {
+    const storage = new MemoryStorage();
+    const selected = projects.filter((project) => ["pressure-diary", "personal-organizer", "content-agent"].includes(project.slug));
+    const times = new Map([
+      ["pressure-diary", "2026-08-15T10:00:00.000Z"],
+      ["personal-organizer", "2026-08-15T12:00:00.000Z"],
+      ["content-agent", "2026-08-15T11:00:00.000Z"],
+    ]);
+    for (const project of selected) {
+      saveProgress(project.slug, completeStep(createEmptyProgress(), 1), storage, () => times.get(project.slug)!);
+    }
+
+    expect(buildDashboardSnapshot(selected, storage, "desktop").started.map((item) => item.project.slug)).toEqual([
+      "personal-organizer",
+      "content-agent",
+      "pressure-diary",
+    ]);
+  });
+
+  it("keeps legacy started projects in stable catalogue order without timestamps", () => {
+    const storage = new MemoryStorage();
+    const selected = projects.filter((project) => ["pressure-diary", "personal-organizer", "content-agent"].includes(project.slug));
+    for (const project of selected) {
+      storage.setItem(progressKey(project.slug), JSON.stringify(completeStep(createEmptyProgress(), 1)));
+    }
+
+    expect(buildDashboardSnapshot(selected, storage, "desktop").started.map((item) => item.project.slug)).toEqual(
+      selected.map((project) => project.slug),
+    );
+  });
+
+  it("uses the selected bundle branch factual level total", () => {
+    const storage = new MemoryStorage();
+    const bundle = projects.find((project) => project.slug === "family-budget")!;
+    saveOutputChoice("family-budget", "desktop", "agent", storage);
+    let progress = createEmptyProgress();
+    for (let id = 1; id <= 18; id += 1) progress = completeStep(progress, id, 19);
+    saveProgress(branchStorageSlug("family-budget", "agent", "desktop"), progress, storage);
+
+    expect(buildDashboardSnapshot([bundle], storage, "desktop").items[0]).toMatchObject({
+      completedLevels: 18,
+      totalLevels: 19,
+      percent: 95,
+      status: "started",
+    });
+  });
+
+  it("has no next quest when every catalogue project is complete", () => {
+    const storage = new MemoryStorage();
+    const project = projects.find((item) => item.slug === "pressure-diary")!;
+    const totalLevels = getProjectLevelCount(project);
+    let progress = createEmptyProgress();
+    for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
+    storage.setItem(progressKey(project.slug), JSON.stringify(progress));
+
+    expect(buildDashboardSnapshot([project], storage, "desktop").next).toBeNull();
   });
 
   it("replaces a malformed completion-date collection before saving", () => {

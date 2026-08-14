@@ -7,14 +7,16 @@ import { getAgentContract } from "../content/agent-contracts";
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
-import { getQuestProject, questProjects } from "../content/projects";
+import { getQuestProject, projects, questProjects } from "../content/projects";
 import { buildQuest } from "../content/quests";
 import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
+import { buildDashboardSnapshot } from "../lib/academy-dashboard";
 import { preparationKey } from "../lib/preparation";
 import { getProjectLevelCount, progressKey } from "../lib/progress";
 import { customizationKey } from "../lib/customization";
 import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
+import { DashboardHome } from "./DashboardHome";
 import { ExpectedScene } from "./ExpectedScene";
 import { MobileAcademy } from "./MobileAcademy";
 import { MobileQuest } from "./MobileQuest";
@@ -43,11 +45,13 @@ describe("academy interface", () => {
 
   it("shows the last active quest as the single primary action", async () => {
     localStorage.setItem("feya-dashboard-v1:last:desktop", "pressure-diary");
+    localStorage.setItem(progressKey("pressure-diary"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
 
     const { container } = render(<Academy />);
 
-    expect(await screen.findByRole("heading", { name: /дневник давления/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /продолжить дневник давления/i })).toHaveAttribute("href", "?quest=pressure-diary");
+    expect(await screen.findByRole("heading", { level: 1, name: /дневник давления/i })).toBeInTheDocument();
+    expect(container.querySelector(".dashboard-primary-action")).toHaveAccessibleName(/продолжить: дневник давления/i);
+    expect(container.querySelector(".dashboard-primary-action")).toHaveAttribute("href", "?quest=pressure-diary");
     expect(container.querySelectorAll(".dashboard-primary-action")).toHaveLength(1);
   });
 
@@ -75,9 +79,9 @@ describe("academy interface", () => {
     const started = await screen.findByRole("region", { name: /начатые проекты/i });
     expect(within(started).getAllByRole("article")).toHaveLength(3);
     expect(screen.getByRole("region", { name: /ваш прогресс/i })).toHaveTextContent("Пройдено уровней4");
-    expect(within(started).queryByRole("article", { name: /дневник давления/i })).not.toBeInTheDocument();
-    const contentAgent = within(started).getByRole("article", { name: /ии-агент для контента/i });
-    expect(within(contentAgent).getByLabelText(`Пройдено 1 из ${getProjectLevelCount("content-agent")}`)).toBeInTheDocument();
+    expect(within(started).queryByRole("article", { name: /ии-агент для контента/i })).not.toBeInTheDocument();
+    const pressure = within(started).getByRole("article", { name: /дневник давления/i });
+    expect(within(pressure).getByLabelText(`Пройдено 1 из ${getProjectLevelCount("pressure-diary")}`)).toBeInTheDocument();
   });
 
   it("recommends only the first four projects of the current week", async () => {
@@ -95,6 +99,60 @@ describe("academy interface", () => {
 
     expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
+  });
+
+  it("preserves the mobile format in primary and card hrefs", async () => {
+    render(<MobileAcademy onOpen={vi.fn()} />);
+
+    expect(await screen.findByRole("link", { name: /начать квест: устанавливаем codex/i })).toHaveAttribute(
+      "href",
+      "?format=mobile&quest=install-codex",
+    );
+    const planning = screen.getByRole("article", { name: /планирование/i });
+    expect(within(planning).getByRole("link", { name: /начать: планирование/i })).toHaveAttribute(
+      "href",
+      "?format=mobile&quest=planning",
+    );
+  });
+
+  it("excludes completed projects before limiting current-week recommendations", () => {
+    const selected = projects.filter((project) => ["install-codex", "server-152fz", "api-keys", "pressure-diary", "personal-organizer"].includes(project.slug));
+    for (const project of selected.slice(0, 4)) {
+      const total = getProjectLevelCount(project);
+      localStorage.setItem(progressKey(project.slug), JSON.stringify({
+        version: 1,
+        activeStep: total,
+        completed: Array.from({ length: total }, (_, index) => index + 1),
+        score: total * 10,
+      }));
+    }
+    const snapshot = buildDashboardSnapshot(selected, localStorage, "desktop");
+
+    render(<DashboardHome snapshot={snapshot} format="desktop" onOpen={vi.fn()} onSave={vi.fn()} />);
+
+    const recommendations = screen.getByRole("region", { name: /рекомендуемый порядок/i });
+    expect(within(recommendations).getAllByRole("article")).toHaveLength(1);
+    expect(within(recommendations).getByRole("heading", { name: /личный органайзер/i })).toBeInTheDocument();
+  });
+
+  it("routes an all-complete mobile dashboard to portfolio", () => {
+    const project = projects.find((item) => item.slug === "pressure-diary")!;
+    const total = getProjectLevelCount(project);
+    localStorage.setItem(progressKey(`mobile:${project.slug}`), JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total }, (_, index) => index + 1),
+      score: total * 10,
+    }));
+    const snapshot = buildDashboardSnapshot([project], localStorage, "mobile");
+    const onOpenPortfolio = vi.fn();
+
+    render(<DashboardHome snapshot={snapshot} format="mobile" onOpen={vi.fn()} onSave={vi.fn()} onOpenPortfolio={onOpenPortfolio} />);
+
+    const action = screen.getByRole("link", { name: /открыть портфолио/i });
+    expect(action).toHaveAttribute("href", "?format=mobile&section=portfolio");
+    fireEvent.click(action);
+    expect(onOpenPortfolio).toHaveBeenCalledOnce();
   });
 
   it("renders an honest loading state before browser progress is available", () => {

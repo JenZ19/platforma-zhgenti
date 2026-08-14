@@ -1,7 +1,7 @@
 import { isProjectBundle } from "../content/projects";
 import type { CatalogProject } from "../content/types";
 import type { QuestSurface } from "./output-format";
-import { getCatalogProjectProgress, getProjectLevelCount, type StorageLike } from "./progress";
+import { getCatalogProjectProgressState, type StorageLike } from "./progress";
 
 const PREFIX = "feya-dashboard-v1";
 
@@ -16,6 +16,7 @@ export type DashboardProjectState = {
   percent: number;
   status: "new" | "started" | "completed";
   saved: boolean;
+  updatedAt?: string;
   completedAt?: string;
 };
 
@@ -27,7 +28,7 @@ export type DashboardSnapshot = {
   currentWeek: number;
   completedLevels: number;
   totalLevels: number;
-  next: DashboardProjectState;
+  next: DashboardProjectState | null;
 };
 
 export type QuestionNote = {
@@ -127,8 +128,7 @@ export function buildDashboardSnapshot(
   const saved = loadSavedProjects(storage);
   const dates = completionMap(surface, storage);
   const items = projects.map((project): DashboardProjectState => {
-    const progress = getCatalogProjectProgress(project, storage, surface);
-    const totalLevels = getProjectLevelCount(project);
+    const { progress, totalLevels } = getCatalogProjectProgressState(project, storage, surface);
     const status = progress.completed.length === totalLevels
       ? "completed"
       : progress.completed.length
@@ -144,22 +144,32 @@ export function buildDashboardSnapshot(
       percent: Math.round((progress.completed.length / totalLevels) * 100),
       status,
       saved: saved.includes(project.slug),
+      updatedAt: progress.updatedAt,
       completedAt: dates[project.slug],
     };
   });
 
   storage.setItem(`${PREFIX}:completed-at:${surface}`, JSON.stringify(dates));
 
-  const started = items.filter((item) => item.status === "started");
+  const started = items
+    .filter((item) => item.status === "started")
+    .sort((left, right) => {
+      if (left.updatedAt && right.updatedAt) return right.updatedAt.localeCompare(left.updatedAt);
+      if (left.updatedAt) return -1;
+      if (right.updatedAt) return 1;
+      return 0;
+    });
   const completed = items.filter((item) => item.status === "completed");
   const currentWeek = [1, 2, 3, 4, 5, 6].find((week) => items.some((item) =>
     projectWeeks(item.project).includes(week) && item.status !== "completed",
   )) ?? 6;
   const lastSlug = loadLastActiveProject(surface, storage);
-  const next = items.find((item) => item.project.slug === lastSlug && item.status !== "completed")
-    ?? started.at(-1)
-    ?? items.find((item) => projectWeeks(item.project).includes(currentWeek) && item.status !== "completed")
-    ?? items[0]!;
+  const next = completed.length === items.length
+    ? null
+    : items.find((item) => item.project.slug === lastSlug && item.status !== "completed")
+      ?? started[0]
+      ?? items.find((item) => projectWeeks(item.project).includes(currentWeek) && item.status !== "completed")
+      ?? null;
 
   return {
     items,
