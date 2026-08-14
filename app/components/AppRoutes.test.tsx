@@ -90,6 +90,31 @@ describe("bundle format routing", () => {
     expect(await screen.findByRole("button", { name: "Главная", current: "page" })).toBeInTheDocument();
   });
 
+  it("does not restore a saved section when popstate returns to the canonical home URL", async () => {
+    saveDashboardSection("portfolio", localStorage);
+    window.history.replaceState({}, "", "/?section=weeks");
+    render(<AppEntry />);
+    expect(await screen.findByRole("button", { name: "Квесты по неделям", current: "page" })).toBeInTheDocument();
+
+    window.history.replaceState({}, "", "/");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+
+    expect(await screen.findByRole("button", { name: "Главная", current: "page" })).toBeInTheDocument();
+  });
+
+  it.each([
+    ["/?section=unknown", ""],
+    ["/?section=home", ""],
+    ["/?format=mobile&section=unknown&q=%D0%B4%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5", "?format=mobile&q=%D0%B4%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5"],
+    ["/?format=mobile&section=home&q=%D0%B4%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5", "?format=mobile&q=%D0%B4%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5"],
+  ])("canonicalizes dashboard route %s without losing meaningful query values", async (url, canonicalSearch) => {
+    window.history.replaceState({}, "", url);
+    render(<AppEntry />);
+
+    expect(await screen.findByRole("button", { name: "Главная", current: "page" })).toBeInTheDocument();
+    await waitFor(() => expect(window.location.search).toBe(canonicalSearch));
+  });
+
   it("changes only the dashboard format and preserves section and search", async () => {
     window.history.replaceState({}, "", "/?section=weeks&q=%D0%B4%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5");
     render(<AppEntry />);
@@ -109,7 +134,17 @@ describe("bundle format routing", () => {
     await waitFor(() => expect(loadLastActiveProject("mobile", localStorage)).toBe("planning"));
   });
 
-  it("renders an SSR-safe initial learning shell", () => {
+  it.each([
+    ["?capture=planner--step-01", 'id="capture-scene"'],
+    ["?capture-mobile=planner--step-01", 'id="capture-scene"'],
+    ["?capture-guide=planner--demo--step-01--frame-01", 'id="capture-guide-scene"'],
+  ])("renders the capture route %s without the learning shell in initial server HTML", (initialSearch, marker) => {
+    const html = renderToString(<AppEntry initialSearch={initialSearch} />);
+    expect(html).toContain(marker);
+    expect(html).not.toContain("data-learning-shell");
+  });
+
+  it("renders a normal home shell in initial server HTML", () => {
     expect(() => renderToString(<AppEntry />)).not.toThrow();
     expect(renderToString(<AppEntry />)).toContain("data-learning-shell");
   });

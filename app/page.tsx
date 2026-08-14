@@ -6,6 +6,18 @@ export const metadata: Metadata = {
   description: "42 разных проекта курса SUBMARINE: готовые команды, короткие уровни и понятный результат на каждом шаге.",
 };
 
-export default function Home() {
-  return <AppEntry />;
+type PageSearchParams = Record<string, string | string[] | undefined>;
+
+function serializeSearchParams(values: PageSearchParams): string {
+  const query = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => {
+    if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
+    else if (value !== undefined) query.set(key, value);
+  });
+  const search = query.toString();
+  return search ? `?${search}` : "";
+}
+
+export default async function Home({ searchParams }: { searchParams: Promise<PageSearchParams> }) {
+  return <AppEntry initialSearch={serializeSearchParams(await searchParams)} />;
 }

@@ -33,47 +33,72 @@ type Route =
 
 const dashboardSections: readonly DashboardSection[] = ["home", "projects", "weeks", "portfolio", "fairy"];
 
-function readRoute(): Route {
-  const query = new URLSearchParams(window.location.search);
-  const guideCapture = query.get("capture-guide")?.match(/^(.+)--(real|demo)--step-(\d{2})--frame-(\d{2})$/);
-  if (guideCapture) return { type: "capture-guide", slug: guideCapture[1], mode: guideCapture[2] as "real" | "demo", step: Number(guideCapture[3]), frame: Number(guideCapture[4]) };
-  const mobileCapture = query.get("capture-mobile")?.match(/^(.+)--step-(\d{2})$/);
-  if (mobileCapture) return { type: "capture-mobile", slug: mobileCapture[1], step: Number(mobileCapture[2]) };
-  const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
-  if (capture) return { type: "capture", slug: capture[1], step: Number(capture[2]) };
-  const quest = query.get("quest");
-  const format = query.get("format") === "mobile" ? "mobile" : "desktop";
-  const rawSection = query.get("section");
-  const section = rawSection === null
-    ? loadDashboardSection(window.localStorage)
-    : dashboardSections.includes(rawSection as DashboardSection)
-      ? rawSection as DashboardSection
-      : "home";
-  if (!quest) return { type: "home", format, section, search: query.get("q") ?? "" };
-  const resolved = resolvePublicProjectRoute(quest, query.get("output") ?? undefined);
-  if (!resolved) return { type: "home", format, section, search: query.get("q") ?? "" };
-  const canonical = canonicalQuestQuery(resolved, format === "mobile");
-  if (window.location.search !== canonical) window.history.replaceState({}, "", canonical);
-  return { type: "quest", slug: resolved.slug, output: resolved.output, format };
-}
+type ParsedRoute = {
+  route: Route;
+  canonicalSearch?: string;
+};
 
-function dashboardUrl(section: DashboardSection, format: "desktop" | "mobile", search = ""): string {
+function dashboardQuery(section: DashboardSection, format: "desktop" | "mobile", search = ""): string {
   const query = new URLSearchParams();
   if (format === "mobile") query.set("format", "mobile");
   if (section !== "home") query.set("section", section);
   if (search.trim()) query.set("q", search.trim());
   const value = query.toString();
-  return value ? `?${value}` : window.location.pathname;
+  return value ? `?${value}` : "";
 }
 
-export function AppEntry() {
-  const [route, setRoute] = useState<Route>({ type: "home", format: "desktop", section: "home", search: "" });
+function parseRoute(search: string, savedSection: DashboardSection = "home"): ParsedRoute {
+  const query = new URLSearchParams(search);
+  const guideCapture = query.get("capture-guide")?.match(/^(.+)--(real|demo)--step-(\d{2})--frame-(\d{2})$/);
+  if (guideCapture) return { route: { type: "capture-guide", slug: guideCapture[1], mode: guideCapture[2] as "real" | "demo", step: Number(guideCapture[3]), frame: Number(guideCapture[4]) } };
+  const mobileCapture = query.get("capture-mobile")?.match(/^(.+)--step-(\d{2})$/);
+  if (mobileCapture) return { route: { type: "capture-mobile", slug: mobileCapture[1], step: Number(mobileCapture[2]) } };
+  const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
+  if (capture) return { route: { type: "capture", slug: capture[1], step: Number(capture[2]) } };
+  const quest = query.get("quest");
+  const format = query.get("format") === "mobile" ? "mobile" : "desktop";
+  const rawSection = query.get("section");
+  const section = rawSection === null
+    ? savedSection
+    : dashboardSections.includes(rawSection as DashboardSection)
+      ? rawSection as DashboardSection
+      : "home";
+  if (!quest) {
+    const dashboardSearch = query.get("q") ?? "";
+    const canonicalSearch = rawSection !== null && (rawSection === "home" || section === "home")
+      ? dashboardQuery("home", format, dashboardSearch)
+      : undefined;
+    return { route: { type: "home", format, section, search: dashboardSearch }, canonicalSearch };
+  }
+  const resolved = resolvePublicProjectRoute(quest, query.get("output") ?? undefined);
+  if (!resolved) return { route: { type: "home", format, section, search: query.get("q") ?? "" } };
+  const canonical = canonicalQuestQuery(resolved, format === "mobile");
+  return {
+    route: { type: "quest", slug: resolved.slug, output: resolved.output, format },
+    canonicalSearch: canonical,
+  };
+}
+
+function dashboardUrl(section: DashboardSection, format: "desktop" | "mobile", search = ""): string {
+  return dashboardQuery(section, format, search) || window.location.pathname;
+}
+
+export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
+  const [route, setRoute] = useState<Route>(() => parseRoute(initialSearch).route);
 
   useEffect(() => {
-    // Query routing is intentionally browser-only for this single-page academy.
+    const readBrowserRoute = (restoreSavedSection: boolean) => {
+      const savedSection = restoreSavedSection ? loadDashboardSection(window.localStorage) : "home";
+      const parsed = parseRoute(window.location.search, savedSection);
+      if (parsed.canonicalSearch !== undefined && window.location.search !== parsed.canonicalSearch) {
+        window.history.replaceState({}, "", `${window.location.pathname}${parsed.canonicalSearch}${window.location.hash}`);
+      }
+      return parsed.route;
+    };
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setRoute(readRoute());
-    const onPopState = () => setRoute(readRoute());
+    setRoute(readBrowserRoute(true));
+    const onPopState = () => setRoute(readBrowserRoute(false));
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
