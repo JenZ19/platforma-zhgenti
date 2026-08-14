@@ -182,11 +182,9 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
       : project
         ? <Quest project={project} initialOutput={route.output} onOutputChange={changeOutput} onHome={home} />
         : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />
-    : route.section === "home"
-      ? surface === "mobile"
-        ? <MobileAcademy onOpen={(slug) => openQuest(slug, "mobile")} />
-        : <Academy onOpen={(slug) => openQuest(slug, "desktop")} />
-      : <main className="academy-shell" data-dashboard-section={route.section} />;
+    : surface === "mobile"
+      ? <MobileAcademy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "mobile")} />
+      : <Academy section={route.section} searchQuery={route.search} onOpen={(slug) => openQuest(slug, "desktop")} />;
 
   return (
     <LearningShell

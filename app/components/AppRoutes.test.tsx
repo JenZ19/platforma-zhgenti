@@ -43,7 +43,7 @@ describe("bundle format routing", () => {
     expect(screen.getByRole("heading", { name: /на каких данных/i })).toBeInTheDocument();
   });
 
-  it("normalizes old links and safely returns unknown links to the catalogue", async () => {
+  it("normalizes old links and safely returns unknown links to the dashboard", async () => {
     window.history.replaceState({}, "", "/?quest=planner-bot");
     const { unmount } = render(<AppEntry />);
     expect(await screen.findByRole("heading", { name: "Планирование" })).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("bundle format routing", () => {
 
     window.history.replaceState({}, "", "/?quest=missing-project");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /выбери проект/i })).toBeInTheDocument();
+    expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
   });
 
   it("navigates dashboard sections without breaking quest links", async () => {

@@ -11,7 +11,7 @@ import { getQuestProject, questProjects } from "../content/projects";
 import { buildQuest } from "../content/quests";
 import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
 import { preparationKey } from "../lib/preparation";
-import { progressKey } from "../lib/progress";
+import { getProjectLevelCount, progressKey } from "../lib/progress";
 import { customizationKey } from "../lib/customization";
 import { Academy } from "./Academy";
 import { AppEntry } from "./AppEntry";
@@ -41,34 +41,89 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/");
   });
 
-  it("shows one unified client agent card and no repeated client-stage cards", () => {
-    render(<Academy />);
-    expect(screen.getAllByText("ИИ-агент для работы с клиентами")).toHaveLength(1);
-    for (const repeatedTitle of ["ИИ-агент для заявок", "ИИ-агент-подборщик", "ИИ-агент для записи", "Менеджер по продажам"]) {
-      expect(screen.queryByText(repeatedTitle)).not.toBeInTheDocument();
-    }
-    expect(screen.getByText("ИИ-администратор")).toBeInTheDocument();
-  });
+  it("shows the last active quest as the single primary action", async () => {
+    localStorage.setItem("feya-dashboard-v1:last:desktop", "pressure-diary");
 
-  it("shows all 42 course projects", () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll('a[aria-label^="Открыть квест:"]')).toHaveLength(42);
-    expect(screen.getByText("42 проекта")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /версия только с телефона/i })).toHaveAttribute("href", "?format=mobile");
+
+    expect(await screen.findByRole("heading", { name: /дневник давления/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /продолжить дневник давления/i })).toHaveAttribute("href", "?quest=pressure-diary");
+    expect(container.querySelectorAll(".dashboard-primary-action")).toHaveLength(1);
   });
 
-  it("uses the selected tactile-album design across the full desktop and mobile platform", () => {
+  it("saves and unsaves a recommended project without reloading", async () => {
+    render(<Academy />);
+    const card = await screen.findByRole("article", { name: /планирование/i });
+
+    fireEvent.click(within(card).getByRole("button", { name: /сохранить на потом/i }));
+
+    expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:saved")!)).toContain("planning");
+    expect(within(card).getByRole("button", { name: /убрать планирование из сохранённых/i })).toHaveTextContent("Сохранено");
+
+    fireEvent.click(within(card).getByRole("button", { name: /убрать планирование из сохранённых/i }));
+    expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:saved")!)).not.toContain("planning");
+  });
+
+  it("shows factual progress and no more than three started projects", async () => {
+    for (const slug of ["pressure-diary", "personal-organizer", "family-health-hub", "content-agent"]) {
+      localStorage.setItem(progressKey(slug), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    }
+    localStorage.setItem("feya-dashboard-v1:last:desktop", "pressure-diary");
+
+    render(<Academy />);
+
+    const started = await screen.findByRole("region", { name: /начатые проекты/i });
+    expect(within(started).getAllByRole("article")).toHaveLength(3);
+    expect(screen.getByRole("region", { name: /ваш прогресс/i })).toHaveTextContent("Пройдено уровней4");
+    expect(within(started).queryByRole("article", { name: /дневник давления/i })).not.toBeInTheDocument();
+    const contentAgent = within(started).getByRole("article", { name: /ии-агент для контента/i });
+    expect(within(contentAgent).getByLabelText(`Пройдено 1 из ${getProjectLevelCount("content-agent")}`)).toBeInTheDocument();
+  });
+
+  it("recommends only the first four projects of the current week", async () => {
+    render(<Academy />);
+
+    const recommendations = await screen.findByRole("region", { name: /рекомендуемый порядок/i });
+    expect(within(recommendations).getAllByRole("article")).toHaveLength(4);
+    expect(within(recommendations).getByRole("heading", { name: /планирование/i })).toBeInTheDocument();
+    expect(within(recommendations).queryByRole("heading", { name: /дневник давления/i })).not.toBeInTheDocument();
+  });
+
+  it("uses the same dashboard logic in the mobile academy", async () => {
+    window.history.replaceState({}, "", "/?format=mobile");
+    render(<AppEntry />);
+
+    expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
+  });
+
+  it("renders an honest loading state before browser progress is available", () => {
+    expect(renderToString(<Academy />)).toContain("Загружаем учебный кабинет");
+  });
+
+  it.each([
+    ["projects", "Мои проекты"],
+    ["weeks", "Квесты по неделям"],
+    ["portfolio", "Портфолио"],
+    ["fairy", "Феечка"],
+  ] as const)("labels the pending %s section accessibly", async (section, title) => {
+    render(<Academy section={section} />);
+
+    expect(await screen.findByRole("main", { name: title })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
+    expect(screen.getByText(/раздел готовится/i)).toBeInTheDocument();
+  });
+
+  it("uses the pink dashboard for academy surfaces and preserves tactile quests", async () => {
     const { container, rerender } = render(<Academy />);
 
-    expect(container.querySelector('main[data-visual-theme="tactile-album"]')).not.toBeNull();
-    expect(screen.getByRole("group", { name: /живой альбом готовых проектов/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("img", { name: /готовый проект:/i })).toHaveLength(3);
+    expect(await screen.findByRole("main")).toHaveAttribute("data-visual-theme", "pink-cloud");
 
     rerender(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     expect(container.querySelector('main.quest-shell[data-visual-theme="tactile-album"]')).not.toBeNull();
 
     rerender(<MobileAcademy onOpen={vi.fn()} />);
-    expect(container.querySelector('main.mobile-academy-shell[data-visual-theme="tactile-album"]')).not.toBeNull();
+    expect(await screen.findByRole("main")).toHaveAttribute("data-dashboard-format", "mobile");
 
     rerender(<MobileQuest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     expect(container.querySelector('main.mobile-quest-shell[data-visual-theme="tactile-album"]')).not.toBeNull();
@@ -191,13 +246,13 @@ describe("academy interface", () => {
     expect(within(mobileAction!).getByText(/что сделать/i, { selector: "strong" })).toBeInTheDocument();
   });
 
-  it("shows the finished prototype on every desktop project card", () => {
+  it("keeps content-specific finished prototypes on dashboard cards", async () => {
     const { container } = render(<Academy />);
-    expect(container.querySelectorAll(".project-preview img")).toHaveLength(49);
-    expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
+    expect(await screen.findByRole("img", { name: /сервис проекта «планирование»/i })).toHaveAttribute(
       "src",
-      "/screens/family-expenses/step-14.png",
+      "/screens/planner/step-14.png",
     );
+    expect(container.querySelectorAll(".project-preview img").length).toBeGreaterThan(4);
   });
 
   it("shows three different reference roles and the resulting original design", () => {
@@ -358,43 +413,6 @@ describe("academy interface", () => {
       expect(prototype).toHaveTextContent(spec.headline);
       expect(prototype).toHaveTextContent(spec.metric);
     }
-  });
-
-  it("filters the catalogue by week and search", () => {
-    render(<Academy />);
-    fireEvent.click(screen.getByRole("button", { name: /неделя 2/i }));
-    const catalogue = screen.getByRole("region", { name: /каталог проектов/i });
-    expect(within(catalogue).getAllByRole("link", { name: /открыть квест/i })).toHaveLength(8);
-    fireEvent.change(screen.getByRole("searchbox", { name: /найти проект/i }), { target: { value: "психолог" } });
-    expect(within(catalogue).getByText(/ничего не найдено/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /все проекты/i }));
-    expect(within(catalogue).getAllByRole("link", { name: /открыть квест/i })).toHaveLength(1);
-  });
-
-  it("helps a beginner choose a desktop quest by difficulty, goal and familiar words", () => {
-    render(<Academy />);
-    const catalogue = screen.getByRole("region", { name: /каталог проектов/i });
-
-    expect(within(catalogue).getByText(/показано: 42 из 42/i)).toBeInTheDocument();
-    expect(within(catalogue).getAllByText(/уровень: стартовый/i).length).toBeGreaterThan(0);
-
-    fireEvent.change(screen.getByRole("combobox", { name: /что хочется сделать/i }), { target: { value: "Здоровье" } });
-    fireEvent.click(screen.getByRole("button", { name: /сложность: стартовый/i }));
-    expect(within(catalogue).getByRole("heading", { name: /дневник давления/i })).toBeInTheDocument();
-    expect(within(catalogue).queryByRole("heading", { name: /семейный бюджет/i })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /сбросить все фильтры/i }));
-    fireEvent.change(screen.getByRole("searchbox", { name: /найти проект/i }), { target: { value: "мама" } });
-    expect(within(catalogue).getByRole("heading", { name: /семейное расписание/i })).toBeInTheDocument();
-  });
-
-  it("uses the same helpful quest filters in the phone-only academy", () => {
-    render(<MobileAcademy onOpen={vi.fn()} />);
-    const catalogue = screen.getByRole("region", { name: /мобильный каталог проектов/i });
-
-    fireEvent.change(screen.getByRole("combobox", { name: /что хочется сделать с телефона/i }), { target: { value: "Контент" } });
-    expect(within(catalogue).getAllByText(/контент/i).length).toBeGreaterThan(0);
-    expect(within(catalogue).getByText(/показано:/i)).toBeInTheDocument();
   });
 
   it("unlocks quest levels sequentially and saves project-specific progress", () => {
@@ -586,15 +604,15 @@ describe("academy interface", () => {
     expect(screen.queryByText(/мои-измерения\.csv|поля-дневника\.txt/i)).not.toBeInTheDocument();
   });
 
-  it("opens a separate phone-only academy from the mobile format route", async () => {
+  it("opens the shared learning dashboard from the mobile format route", async () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /академия с телефона/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /открыть мобильный квест/i })).toHaveLength(42);
-    expect(document.querySelectorAll(".project-preview img")).toHaveLength(49);
-    expect(screen.getByRole("img", { name: /сервис проекта «семейный бюджет»/i })).toHaveAttribute(
+    expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveAttribute("data-dashboard-format", "mobile");
+    expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /сервис проекта «планирование»/i })).toHaveAttribute(
       "src",
-      "/screens/family-expenses/step-14.png",
+      "/screens/planner/step-14.png",
     );
   });
 
@@ -753,7 +771,7 @@ describe("academy interface", () => {
   it("does not expose the obsolete manual preparation capture route", async () => {
     window.history.replaceState({}, "", "/?capture-prep=home-helper--prep-02");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /выбери проект/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: /устанавливаем codex/i })).toBeInTheDocument();
     expect(document.querySelector("#capture-guide-scene")).not.toBeInTheDocument();
   });
 });
