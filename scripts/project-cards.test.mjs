@@ -33,3 +33,16 @@ test("every result preview renders its thematic sticker from the shared identity
   assert.match(preview, /--project-sticker-accent/);
   assert.match(preview, /aria-hidden="true"/);
 });
+
+test("Pink Cloud stickers stay readable, varied and clear of card actions", () => {
+  assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}z-index:\s*3/);
+  assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}max-width:\s*min\(70%,\s*230px\)/);
+  assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}font-size:\s*12px/);
+  for (const shape of ["receipt", "label", "seal", "ticket", "bookmark", "cloud"]) {
+    assert.match(css, new RegExp(`\\.project-preview-sticker\\.sticker-${shape}`));
+  }
+  assert.match(css, /\.project-preview-sticker\.sticker-left/);
+  assert.match(css, /\.project-preview-sticker\.sticker-right/);
+  assert.match(css, /@media \(max-width:\s*767px\)[\s\S]*\.project-preview-sticker[\s\S]{0,420}font-size:\s*11px/);
+  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.project-preview-sticker/);
+});
