@@ -970,6 +970,153 @@ describe("academy interface", () => {
     expect(screen.getByRole("button", { name: /квест пройден/i })).toBeDisabled();
   });
 
+  it("keeps the ready mobile step full width and opens its level map only on demand", async () => {
+    const { container } = render(<MobileQuest project={getQuestProject("recipe-book")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+
+    const workspace = container.querySelector<HTMLElement>('[data-quest-workspace="mobile"]');
+    expect(workspace).not.toBeNull();
+    expect(workspace!.tagName).toBe("MAIN");
+    expect(workspace!.querySelector(".mobile-quest-step-card")).not.toBeNull();
+    expect(workspace!.querySelector(".mobile-level-rail")).toBeNull();
+    expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
+
+    const trigger = screen.getByRole("button", { name: /открыть карту уровней/i });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("navigation", { name: /карта уровней/i })).toBeInTheDocument();
+    const close = screen.getByRole("button", { name: /закрыть карту уровней/i });
+    expect(close).toHaveTextContent(/закрыть/i);
+    close.focus();
+    fireEvent.click(close);
+    expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it("preserves the desktop information order and mobile-only lesson tools", () => {
+    localStorage.setItem(progressKey("mobile:api-keys"), JSON.stringify({
+      version: 1,
+      activeStep: 9,
+      completed: Array.from({ length: 8 }, (_, index) => index + 1),
+      score: 80,
+    }));
+    const { container } = render(<MobileQuest project={getQuestProject("api-keys")!} onHome={vi.fn()} />);
+    const workspace = container.querySelector<HTMLElement>('[data-quest-workspace="mobile"]')!;
+
+    expect(workspace.querySelector(".mobile-capability")).toHaveTextContent(/действия на компьютере/i);
+    expect(workspace.querySelector(".mobile-action")).not.toBeNull();
+    expect(within(workspace).getByRole("region", { name: /делайте по картинкам/i })).toBeInTheDocument();
+    expect(within(workspace).getByRole("heading", { name: /готовая команда для Codex/i })).toBeInTheDocument();
+    expect(within(workspace).getByRole("button", { name: /увеличить мобильный пример/i })).toBeInTheDocument();
+
+    fireEvent.click(within(workspace).getByRole("button", { name: /^нужна помощь$/i }));
+    const ordered = [
+      workspace.querySelector(".mobile-why"),
+      workspace.querySelector(".beginner-terms"),
+      workspace.querySelector(".mobile-do"),
+      workspace.querySelector(".mobile-prompt"),
+      workspace.querySelector(".quest-guide"),
+      workspace.querySelector(".mobile-result"),
+      workspace.querySelector(".mobile-quest-help"),
+      workspace.querySelector(".mobile-quest-step-actions"),
+    ].filter((node): node is Element => Boolean(node));
+    expect(ordered).toHaveLength(7);
+    for (let index = 0; index < ordered.length - 1; index += 1) {
+      expect(ordered[index]!.compareDocumentPosition(ordered[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+  });
+
+  it("marks mobile levels current, locked and done, then closes the map after selection", async () => {
+    const project = getQuestProject("pressure-diary")!;
+    const { container } = render(<MobileQuest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const trigger = screen.getByRole("button", { name: /открыть карту уровней/i });
+    fireEvent.click(trigger);
+
+    let map = screen.getByRole("navigation", { name: /карта уровней/i });
+    const first = within(map).getByRole("button", { name: /уровень 1:/i });
+    const second = within(map).getByRole("button", { name: /уровень 2:/i });
+    expect(first).toHaveAttribute("aria-current", "step");
+    expect(second).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
+    map = screen.getByRole("navigation", { name: /карта уровней/i });
+    expect(within(map).getByRole("button", { name: /уровень 1:.*пройден/i })).toBeEnabled();
+    expect(within(map).getByRole("button", { name: /уровень 2:/i })).toHaveAttribute("aria-current", "step");
+
+    vi.mocked(window.scrollTo).mockClear();
+    fireEvent.click(within(map).getByRole("button", { name: /уровень 1:.*пройден/i }));
+    expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
+    expect(container.querySelector(".mobile-quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    await waitFor(() => expect(screen.getByRole("button", { name: /открыть карту уровней/i })).toHaveFocus());
+  });
+
+  it("uses one mobile step opener for a completed revisit, continuation and back", () => {
+    const project = getQuestProject("pressure-diary")!;
+    localStorage.setItem(preparationKey("mobile:pressure-diary"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify({ version: 1, activeStep: 2, completed: [1, 2], score: 20 }));
+    render(<MobileQuest project={project} onHome={vi.fn()} />);
+    vi.mocked(window.scrollTo).mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
+    fireEvent.click(screen.getByRole("button", { name: /уровень 1:.*пройден/i }));
+    expect(screen.getByRole("button", { name: /^← назад$/i })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /^продолжить/i }));
+    expect(document.querySelector(".mobile-quest-step-heading")).toHaveTextContent(/уровень 2 из/i);
+    fireEvent.click(screen.getByRole("button", { name: /^← назад$/i }));
+    expect(document.querySelector(".mobile-quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
+    expect(window.scrollTo).toHaveBeenCalledTimes(3);
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+  });
+
+  it("finishes the mobile quest in its own progress namespace with a completion date", () => {
+    const project = getQuestProject("pressure-diary")!;
+    const total = getProjectLevelCount(project);
+    localStorage.setItem(preparationKey("mobile:pressure-diary"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total - 1 }, (_, index) => index + 1),
+      score: (total - 1) * 10,
+    }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 1, completed: [], score: 0 }));
+    render(<MobileQuest project={project} onHome={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /завершить квест/i }));
+    const mobileSaved = JSON.parse(localStorage.getItem(progressKey("mobile:pressure-diary"))!);
+    expect(mobileSaved.completed).toHaveLength(total);
+    expect(mobileSaved.completedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(localStorage.getItem(progressKey(project.slug))).toBe(JSON.stringify({ version: 1, activeStep: 1, completed: [], score: 0 }));
+    expect(screen.getByRole("button", { name: /квест пройден/i })).toBeDisabled();
+  });
+
+  it("uses native accessible screenshot and guide dialogs in the mobile workspace", () => {
+    render(<MobileQuest project={getQuestProject("api-keys")!} onHome={vi.fn()} />);
+    const screenshotOpener = screen.getByRole("button", { name: /увеличить мобильный пример/i });
+    screenshotOpener.focus();
+    fireEvent.click(screenshotOpener);
+
+    const screenshotDialog = screen.getByRole("dialog", { name: /увеличенный мобильный пример/i });
+    expect(screenshotDialog.tagName).toBe("DIALOG");
+    expect(screenshotDialog).not.toHaveAttribute("aria-modal");
+    expect(screen.getByRole("button", { name: /закрыть увеличенный мобильный пример/i })).toHaveFocus();
+    fireEvent.keyDown(screenshotDialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: /увеличенный мобильный пример/i })).not.toBeInTheDocument();
+    expect(screenshotOpener).toHaveFocus();
+
+    const guideOpener = screen.getByRole("button", { name: /увеличить кадр 2:/i });
+    guideOpener.focus();
+    fireEvent.click(guideOpener);
+    expect(screen.getByRole("dialog", { name: /увеличенный кадр 2/i }).tagName).toBe("DIALOG");
+    fireEvent.click(screen.getByRole("button", { name: /закрыть увеличенный кадр 2/i }));
+    expect(guideOpener).toHaveFocus();
+  });
+
   it("keeps preparation and setup choices outside the workspace, then opens server and install quests inside it", async () => {
     const preparation = render(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     expect(preparation.container.querySelector('[data-quest-workspace="desktop"]')).toBeNull();
@@ -1317,10 +1464,11 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — дальше/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
-    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" }));
-    expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" }));
+    fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
+    expect(screen.getByRole("button", { name: /уровень 2:/i })).toBeEnabled();
   });
 
   it("opens contextual help inside a quest", () => {
@@ -1353,8 +1501,8 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     const mobileTerms = screen.getByRole("region", { name: /новые слова перед началом/i });
     const mobileWhy = mobile.container.querySelector(".mobile-why")!;
-    expect(mobileTerms.compareDocumentPosition(mobileWhy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByRole("button", { name: /дальше: заполнен паспорт проекта/i })).toBeInTheDocument();
+    expect(mobileWhy.compareDocumentPosition(mobileTerms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole("button", { name: /я сделала — продолжить/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
     fireEvent.click(screen.getByRole("button", { name: /скопировать команду помощи/i }));
