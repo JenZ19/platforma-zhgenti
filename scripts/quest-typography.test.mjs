@@ -29,6 +29,12 @@ test("preparation and customizer prose cannot fall back to legacy miniature type
   assert.match(css, /\.learning-main \.preparation-list label:focus-within\s*\{[^}]*outline:\s*3px solid var\(--cloud-focus\)/s);
 });
 
+test("mobile quest week label cannot fall back to legacy 8px type", () => {
+  const block = typographyBlock(".learning-main .mobile-quest-hero > p {");
+  assert.match(block, /font-size:\s*14px/);
+  assert.match(block, /line-height:\s*1\.4/);
+});
+
 test("text-bearing Pink Cloud actions use an AA-safe solid color", () => {
   const action = "#802153";
   const toRgb = (hex) => [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16));

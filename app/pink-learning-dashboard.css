@@ -2034,6 +2034,11 @@ select {
   text-align: left;
 }
 
+.learning-main .mobile-quest-hero > p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .learning-main .mobile-quest-hero > .mobile-capability {
   margin: 0 0 8px;
 }
