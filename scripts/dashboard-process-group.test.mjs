@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { test } from "node:test";
-import { groupAlive, ownProcessGroup, stopOwnedProcessGroup } from "./dashboard-server-lifecycle.mjs";
+import * as lifecycle from "./dashboard-server-lifecycle.mjs";
+
+const { groupAlive, ownProcessGroup, stopOwnedProcessGroup } = lifecycle;
 
 function processAlive(pid) {
   try {
@@ -35,6 +37,18 @@ function forceKillProcess(pid) {
     if (error?.code !== "ESRCH") throw error;
   }
 }
+
+test("cleanup polling tolerates transient EPERM while a signaled group is being reaped", async () => {
+  assert.equal(typeof lifecycle.waitForGroupGone, "function", "cleanup polling helper is unavailable");
+  let probes = 0;
+  const gone = await lifecycle.waitForGroupGone(123, 20, 1, () => {
+    probes += 1;
+    if (probes === 1) throw Object.assign(new Error("permission denied while reaping"), { code: "EPERM" });
+    return false;
+  });
+  assert.equal(gone, true);
+  assert.equal(probes, 2);
+});
 
 test("cleanup removes a detached group after its npm-like leader exits", { timeout: 15_000 }, async (context) => {
   if (process.platform === "win32") {

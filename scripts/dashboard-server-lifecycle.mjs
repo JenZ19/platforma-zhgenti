@@ -43,13 +43,20 @@ export function groupAlive(pid) {
   }
 }
 
-async function waitForGroupGone(pid, timeoutMs, pollMs) {
+export async function waitForGroupGone(pid, timeoutMs, pollMs, probe = groupAlive) {
   const deadline = Date.now() + timeoutMs;
-  while (groupAlive(pid)) {
+  while (true) {
+    let alive;
+    try {
+      alive = probe(pid);
+    } catch (error) {
+      if (error?.code !== "EPERM") throw error;
+      alive = true;
+    }
+    if (!alive) return true;
     if (Date.now() >= deadline) return false;
     await delay(Math.min(pollMs, Math.max(1, deadline - Date.now())));
   }
-  return true;
 }
 
 export async function stopOwnedProcessGroup(ownership, {
