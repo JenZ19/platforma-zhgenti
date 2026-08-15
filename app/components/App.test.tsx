@@ -799,6 +799,112 @@ describe("academy interface", () => {
     expect(screen.queryByRole("button", { name: /голосовой ввод/i })).not.toBeInTheDocument();
   });
 
+  it("renders the ready desktop quest as one ordered step workspace with a level map", () => {
+    const { container } = render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+
+    const workspace = container.querySelector<HTMLElement>('[data-quest-workspace="desktop"]');
+    expect(workspace).not.toBeNull();
+    expect(within(workspace!).getByRole("navigation", { name: /карта уровней/i })).toBeInTheDocument();
+    expect(within(workspace!).getByRole("heading", { name: "Зачем" })).toBeInTheDocument();
+    expect(within(workspace!).getByRole("heading", { name: "Что сделать" })).toBeInTheDocument();
+    expect(within(workspace!).getByRole("heading", { name: /готовая команда для Codex/i })).toBeInTheDocument();
+    expect(within(workspace!).getByRole("heading", { name: "Готово, если" })).toBeInTheDocument();
+
+    fireEvent.click(within(workspace!).getByRole("button", { name: /^нужна помощь$/i }));
+    const ordered = [
+      workspace!.querySelector(".quest-purpose"),
+      workspace!.querySelector(".beginner-terms"),
+      workspace!.querySelector(".quest-action"),
+      workspace!.querySelector(".quest-prompt"),
+      workspace!.querySelector(".quest-guide"),
+      workspace!.querySelector(".quest-result"),
+      workspace!.querySelector(".quest-help"),
+      workspace!.querySelector(".quest-step-actions"),
+    ];
+    expect(ordered.every(Boolean)).toBe(true);
+    for (let index = 0; index < ordered.length - 1; index += 1) {
+      expect(ordered[index]!.compareDocumentPosition(ordered[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+  });
+
+  it("keeps the desktop level map locked, current and synchronized with the opened step", () => {
+    const project = getQuestProject("planner")!;
+    const { container } = render(<Quest project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+
+    const map = screen.getByRole("navigation", { name: /карта уровней/i });
+    const first = within(map).getByRole("button", { name: /уровень 1:/i });
+    const second = within(map).getByRole("button", { name: /уровень 2:/i });
+    expect(first).toHaveAttribute("aria-current", "step");
+    expect(second).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    expect(second).toBeEnabled();
+    expect(second).toHaveAttribute("aria-current", "step");
+    expect(container.querySelector(".quest-step-heading")).toHaveTextContent(/уровень 2 из/i);
+  });
+
+  it("uses the same desktop step opener for map, back and a completed-step continuation", () => {
+    const project = getQuestProject("pressure-diary")!;
+    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 2, completed: [1, 2], score: 20 }));
+    render(<Quest project={project} onHome={vi.fn()} />);
+    vi.mocked(window.scrollTo).mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: /уровень 1:/i }));
+    expect(screen.getByRole("button", { name: /^← назад$/i })).toBeDisabled();
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^продолжить/i }));
+    expect(screen.getByRole("button", { name: /уровень 2:/i })).toHaveAttribute("aria-current", "step");
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^← назад$/i }));
+    expect(screen.getByRole("button", { name: /уровень 1:/i })).toHaveAttribute("aria-current", "step");
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+  });
+
+  it("finishes the last desktop level with a factual completion date", () => {
+    const project = getQuestProject("pressure-diary")!;
+    const total = getProjectLevelCount(project);
+    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({
+      version: 1,
+      activeStep: total,
+      completed: Array.from({ length: total - 1 }, (_, index) => index + 1),
+      score: (total - 1) * 10,
+    }));
+    render(<Quest project={project} onHome={vi.fn()} />);
+
+    expect(screen.getByRole("button", { name: /^← назад$/i })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: /завершить квест/i }));
+
+    const saved = JSON.parse(localStorage.getItem(progressKey(project.slug))!);
+    expect(saved.completed).toHaveLength(total);
+    expect(saved.completedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(screen.getByRole("button", { name: /квест пройден/i })).toBeDisabled();
+  });
+
+  it("keeps preparation and setup choices outside the workspace, then opens server and install quests inside it", async () => {
+    const preparation = render(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
+    expect(preparation.container.querySelector('[data-quest-workspace="desktop"]')).toBeNull();
+    expect(screen.getByRole("heading", { name: /на каких данных будем работать/i })).toBeInTheDocument();
+    preparation.unmount();
+
+    const server = render(<Quest project={getQuestProject("server-152fz")!} onHome={vi.fn()} />);
+    expect(server.container.querySelector('[data-quest-workspace="desktop"]')).not.toBeNull();
+    expect(screen.getByRole("heading", { name: /скидка 60% на сервер/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /скачать полную инструкцию в PDF/i })).toBeInTheDocument();
+    server.unmount();
+
+    const install = render(<Quest project={getQuestProject("install-codex")!} onHome={vi.fn()} />);
+    expect(install.container.querySelector('[data-quest-workspace="desktop"]')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /выбрать Mac/i }));
+    expect(await screen.findByText("Компьютер: Mac")).toBeInTheDocument();
+    expect(install.container.querySelector('[data-quest-workspace="desktop"]')).not.toBeNull();
+  });
+
   it("uses the pink dashboard for academy surfaces and preserves tactile quests", async () => {
     const { container, rerender } = render(<Academy />);
 
@@ -842,7 +948,7 @@ describe("academy interface", () => {
     expect(screen.queryByRole("region", { name: /делайте по картинкам/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /увеличить пример результата/i })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
     expect(screen.getByRole("button", { name: /увеличить пример результата/i })).toBeInTheDocument();
 
     rerender(<MobileQuest project={project} onHome={vi.fn()} />);
@@ -1116,9 +1222,9 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
-    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" }));
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" }));
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
   });
 
@@ -1147,11 +1253,11 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
 
     const desktopTerms = screen.getByRole("region", { name: /новые слова перед началом/i });
-    const desktopWhy = desktop.container.querySelector(".why-card")!;
+    const desktopWhy = desktop.container.querySelector(".quest-purpose")!;
     expect(desktopTerms).toHaveTextContent(/Codex.+создаёт, проверяет и исправляет/is);
-    expect(desktopTerms.compareDocumentPosition(desktopWhy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(desktopWhy.compareDocumentPosition(desktopTerms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByText("прототип")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /следующий шаг: заполнен паспорт проекта/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /я сделала — продолжить/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
     const desktopHelp = desktop.container.querySelector(".help-card")!;
@@ -1317,7 +1423,7 @@ describe("academy interface", () => {
     const project = getQuestProject("family-expenses")!;
     const { unmount } = render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
     expect(screen.getByRole("heading", { name: /соберите свой семейный бюджет/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: "Семья с детьми" }));
@@ -1344,7 +1450,7 @@ describe("academy interface", () => {
   it("lets a learner assemble her own color palette without leaving the quest", () => {
     render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
     fireEvent.click(screen.getByRole("button", { name: /собрать свою гамму/i }));
     fireEvent.change(screen.getByLabelText("Фон проекта"), { target: { value: "#fef1f6" } });
@@ -1387,8 +1493,8 @@ describe("academy interface", () => {
     expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(4);
     expect(within(guide).getByRole("heading", { name: /откройте Codex/i })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
-    fireEvent.click(screen.getByRole("button", { name: /я сделала — следующий шаг/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
     guide = screen.getByRole("region", { name: /делайте по картинкам/i });
     expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(5);
     expect(within(guide).getByRole("heading", { name: /скопируйте команду опроса/i })).toBeInTheDocument();
