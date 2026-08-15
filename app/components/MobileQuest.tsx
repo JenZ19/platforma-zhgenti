@@ -147,6 +147,7 @@ function MobileQuestBody({
   const [mapOpen, setMapOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const mapTriggerRef = useRef<HTMLButtonElement>(null);
+  const mapCloseRef = useRef<HTMLButtonElement>(null);
   const imageDialogRef = useRef<HTMLDialogElement>(null);
   const imageCloseRef = useRef<HTMLButtonElement>(null);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
@@ -165,6 +166,10 @@ function MobileQuestBody({
     setPreparation(loadPreparation(storageSlug, window.localStorage));
     setCustomization(loadCustomization(storageSlug, profileSlug, window.localStorage));
   }, [profileSlug, steps.length, storageSlug]);
+
+  useEffect(() => {
+    if (mapOpen && mapCloseRef.current?.isConnected) mapCloseRef.current.focus();
+  }, [mapOpen]);
 
   useEffect(() => {
     const dialog = imageDialogRef.current;
@@ -402,7 +407,7 @@ function MobileQuestBody({
 
         {mapOpen && (
           <aside id="mobile-level-sheet" className="mobile-level-sheet" aria-labelledby="mobile-level-sheet-title">
-            <header><h2 id="mobile-level-sheet-title">Карта уровней</h2><button type="button" onClick={closeMap} aria-label="Закрыть карту уровней"><span aria-hidden="true">×</span><span>Закрыть</span></button></header>
+            <header><h2 id="mobile-level-sheet-title">Карта уровней</h2><button ref={mapCloseRef} type="button" onClick={closeMap} aria-label="Закрыть карту уровней"><span aria-hidden="true">×</span><span>Закрыть</span></button></header>
             <nav aria-label="Карта уровней">
               {steps.map((item) => {
                 const unlocked = isStepUnlocked(progress, item.id);

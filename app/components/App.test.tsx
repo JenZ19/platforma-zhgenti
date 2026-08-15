@@ -988,7 +988,7 @@ describe("academy interface", () => {
     expect(screen.getByRole("navigation", { name: /карта уровней/i })).toBeInTheDocument();
     const close = screen.getByRole("button", { name: /закрыть карту уровней/i });
     expect(close).toHaveTextContent(/закрыть/i);
-    close.focus();
+    expect(close).toHaveFocus();
     fireEvent.click(close);
     expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
     await waitFor(() => expect(trigger).toHaveFocus());

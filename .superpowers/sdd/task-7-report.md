@@ -151,3 +151,38 @@ Lint: exit 0
 Build: complete, exit 0
 git diff --check: exit 0
 ```
+
+## Final map-focus follow-up
+
+### RED
+
+```text
+npm run test:unit -- app/components/App.test.tsx -t "keeps the ready mobile step"
+Test Files  1 failed (1)
+Tests  1 failed | 109 skipped (110)
+```
+
+The regression proved that opening the level sheet left focus on `body`, forcing keyboard users to traverse the lesson before reaching the sheet controls.
+
+### Fix and GREEN
+
+- The map close button has a dedicated ref and receives focus as soon as the open sheet is committed.
+- The focus effect checks that the current button is still connected, so a route remount cannot target a stale node.
+- Closing the map and choosing a level retain their existing deferred focus restoration to the connected map trigger.
+
+```text
+npm run test:unit -- app/components/App.test.tsx -t "keeps the ready mobile step|marks mobile levels|resets transient mobile"
+Test Files  1 passed (1)
+Tests  3 passed | 107 skipped (110)
+```
+
+Final verification after the map-focus fix:
+
+```text
+Focused mobile/routes/content: 3 files passed, 139 tests passed
+Full unit: 23 files passed, 278 tests passed
+Scripts: 7 passed, 0 failed
+Lint: exit 0
+Build: complete, exit 0
+git diff --check: exit 0
+```
