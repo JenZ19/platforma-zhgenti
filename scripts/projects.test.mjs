@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { projectSlugs, projectStepCount } from "./projects.mjs";
+import * as projectTools from "./projects.mjs";
 
 const expected = [
   "install-codex", "server-152fz", "api-keys",
@@ -29,4 +30,16 @@ test("capture counts follow each full project path instead of one shared number"
   assert.equal(projectStepCount("client-care-agent"), 20);
   assert.equal(projectStepCount("catalog-pro-site"), 22);
   assert.ok(new Set(projectSlugs().map(projectStepCount)).size >= 8);
+});
+
+test("project covers use a factual existing result step and stable WebP path", () => {
+  assert.equal(typeof projectTools.projectCoverStep, "function");
+  assert.equal(typeof projectTools.coverPath, "function");
+  if (typeof projectTools.projectCoverStep !== "function" || typeof projectTools.coverPath !== "function") return;
+
+  assert.equal(projectTools.projectCoverStep("install-codex"), 6);
+  assert.equal(projectTools.projectCoverStep("server-152fz"), 9);
+  assert.equal(projectTools.projectCoverStep("api-keys"), 14);
+  assert.equal(projectTools.projectCoverStep("catalog-pro-site"), 14);
+  assert.match(projectTools.coverPath("family-expenses"), /public\/covers\/family-expenses\.webp$/);
 });

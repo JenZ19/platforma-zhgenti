@@ -471,6 +471,30 @@ select {
   border-radius: 0;
 }
 
+.dashboard-project-card .project-preview img,
+.portfolio-grid .project-preview img {
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: none;
+  transition: transform 180ms ease;
+}
+
+.dashboard-project-card .project-preview-bundle > div img,
+.portfolio-grid .project-preview-bundle > div img {
+  position: static;
+  inset: auto;
+}
+
+.dashboard-project-card:hover .project-preview img,
+.portfolio-grid > article:hover .project-preview img {
+  width: 100%;
+  transform: scale(1.015);
+}
+
 .dashboard-card-body,
 .portfolio-card-body {
   min-width: 0;
@@ -488,7 +512,17 @@ select {
 .portfolio-grid h3 {
   margin: 14px 0 8px;
   overflow-wrap: anywhere;
-  line-height: 1.16;
+  color: var(--cloud-text);
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.dashboard-card-body h3 {
+  min-height: 2.24em;
 }
 
 .dashboard-card-body > p,
@@ -499,10 +533,16 @@ select {
   line-height: 1.55;
 }
 
+.dashboard-card-body > p {
+  min-height: 4.65em;
+}
+
 .dashboard-card-labels {
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 6px;
+  min-height: 70px;
 }
 
 .dashboard-card-labels span {
@@ -2814,6 +2854,18 @@ select {
 
   .dashboard-card-body footer {
     flex-direction: column;
+  }
+
+  .dashboard-card-labels,
+  .dashboard-card-body h3,
+  .dashboard-card-body > p {
+    min-height: 0;
+  }
+
+  .dashboard-card-body h3,
+  .portfolio-grid h2,
+  .portfolio-grid h3 {
+    font-size: 23px;
   }
 
   .dashboard-card-body footer button,

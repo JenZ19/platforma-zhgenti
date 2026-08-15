@@ -38,6 +38,14 @@ export function mobileScreenPath(slug, step) {
   return path.join(root, "public", "screens-mobile", slug, `step-${String(step).padStart(2, "0")}.png`);
 }
 
+export function projectCoverStep(slug) {
+  return Math.min(14, projectStepCount(slug));
+}
+
+export function coverPath(slug) {
+  return path.join(root, "public", "covers", `${slug}.webp`);
+}
+
 export const homeHelperGuideFrameCounts = [4, 3, 5, 4, 4, 3, 4, 3, 3, 3, 4, 3, 3, 3, 3, 4, 4];
 
 export function homeHelperGuideScreenPath(mode, step, frame) {

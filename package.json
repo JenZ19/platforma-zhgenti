@@ -17,6 +17,8 @@
     "capture:home-helper-guide": "node scripts/capture-home-helper-guide.mjs",
     "capture:original-guides": "node scripts/capture-original-guides.mjs",
     "capture:site": "node scripts/capture-site.mjs",
+    "capture:covers": "node scripts/capture-covers.mjs",
+    "verify:covers": "node scripts/verify-covers.mjs",
     "verify:screens": "node scripts/verify-screens.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"

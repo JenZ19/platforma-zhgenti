@@ -5,7 +5,7 @@ import { getProject, getQuestProject } from "../content/projects";
 import { canonicalQuestQuery, resolvePublicProjectRoute } from "../content/project-routes";
 import type { ProjectFormat } from "../content/types";
 import { Academy } from "./Academy";
-import { ExpectedScene } from "./ExpectedScene";
+import { ExpectedScene, ProjectCoverScene } from "./ExpectedScene";
 import { MobileAcademy } from "./MobileAcademy";
 import { MobileExpectedScene } from "./MobileExpectedScene";
 import { MobileQuest } from "./MobileQuest";
@@ -28,6 +28,7 @@ type Route =
   | { type: "home"; format: "desktop" | "mobile"; formatExplicit: boolean; section: DashboardSection; search: string }
   | { type: "quest"; slug: string; output?: ProjectFormat; format: "desktop" | "mobile"; formatExplicit: boolean }
   | { type: "capture"; slug: string; step: number }
+  | { type: "capture-cover"; slug: string }
   | { type: "capture-mobile"; slug: string; step: number }
   | { type: "capture-guide"; slug: string; mode: "real" | "demo"; step: number; frame: number };
 
@@ -56,6 +57,8 @@ function questQuery(resolved: { slug: string; output?: ProjectFormat; legacy: bo
 
 function parseRoute(search: string, savedSection: DashboardSection = "home", clientDefaultFormat: "desktop" | "mobile" = "desktop", formatParamImplicit = false): ParsedRoute {
   const query = new URLSearchParams(search);
+  const coverCapture = query.get("capture-cover");
+  if (coverCapture) return { route: { type: "capture-cover", slug: coverCapture } };
   const guideCapture = query.get("capture-guide")?.match(/^(.+)--(real|demo)--step-(\d{2})--frame-(\d{2})$/);
   if (guideCapture) return { route: { type: "capture-guide", slug: guideCapture[1], mode: guideCapture[2] as "real" | "demo", step: Number(guideCapture[3]), frame: Number(guideCapture[4]) } };
   const mobileCapture = query.get("capture-mobile")?.match(/^(.+)--step-(\d{2})$/);
@@ -223,6 +226,10 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   if (route.type === "capture") {
     const project = getQuestProject(route.slug);
     return project ? <ExpectedScene project={project} step={route.step} /> : <div>Проект не найден</div>;
+  }
+  if (route.type === "capture-cover") {
+    const project = getQuestProject(route.slug);
+    return project ? <ProjectCoverScene project={project} /> : <div>Проект не найден</div>;
   }
   if (route.type === "capture-guide") {
     const project = getQuestProject(route.slug);

@@ -3,7 +3,6 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getAgentContract } from "../content/agent-contracts";
 import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content/first-cover-prototypes";
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
@@ -1566,8 +1565,13 @@ describe("academy interface", () => {
     const { container } = render(<Academy />);
     expect(await screen.findByRole("img", { name: /сервис проекта «планирование»/i })).toHaveAttribute(
       "src",
-      "/screens/planner/step-14.png",
+      "/covers/planner.webp",
     );
+    expect(screen.getByRole("img", { name: /ИИ-агент проекта «планирование»/i })).toHaveAttribute(
+      "src",
+      "/covers/day-planner-agent.webp",
+    );
+    expect(container.querySelector('.project-preview img[src*="/screens/"]')).toBeNull();
     expect(container.querySelectorAll(".project-preview img").length).toBeGreaterThan(4);
   });
 
@@ -1660,21 +1664,39 @@ describe("academy interface", () => {
     expect(screen.getByRole("img", { name: /прототип уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.png");
   });
 
-  it("renders a unique conversational prototype for every AI agent", () => {
-    const sourceAgents = new Set(["carousel-agent", "threads-agent", "webinar-moderator-agent"]);
-    const agents = questProjects.filter((project) => project.kind === "agent" && !sourceAgents.has(project.slug));
+  it("renders a different functional result screen for every AI agent", () => {
+    const standardMarkers = new Map([
+      ["day-planner-agent", "day-plan-timeline"],
+      ["home-organizer-agent", "home-week-plan"],
+      ["meal-planning-agent", "three-day-family-menu"],
+      ["study-agent", "learning-explanation-test"],
+      ["idea-analysis-agent", "idea-clusters-score"],
+      ["expense-agent", "expense-categories-summary"],
+      ["family-schedule-agent", "family-week-calendar"],
+      ["habit-agent", "gentle-habit-streak"],
+      ["brief-agent", "project-brief-completeness"],
+      ["content-agent", "expert-material-drafts"],
+      ["expert-assistant-agent", "expert-base-meeting-answer"],
+      ["administrator-agent", "admin-rules-handoff"],
+      ["consultant-agent", "knowledge-answer-escalation"],
+    ]);
+    const specialMarkers = new Map([
+      ["online-school-agent", "school-student-route"],
+      ["event-organizer-agent", "event-control-board"],
+      ["client-care-agent", "client-care-workspace"],
+      ["fairy-team-agent", "fairy-team-flow"],
+    ]);
+    const agents = questProjects.filter((project) => project.kind === "agent" && !["carousel-agent", "threads-agent", "webinar-moderator-agent"].includes(project.slug));
     const { container } = render(<>{agents.map((project) => <ExpectedScene key={project.slug} project={project} step={routeStepFor(project, 14)} />)}</>);
 
     expect(agents).toHaveLength(17);
-    for (const project of agents) {
-      const contract = getAgentContract(project.slug);
-      const prototype = container.querySelector(`[data-agent-prototype="${project.slug}"]`);
-      expect(prototype, project.slug).not.toBeNull();
-      expect(prototype, project.slug).toHaveTextContent(contract.inputExample);
-      expect(prototype, project.slug).toHaveTextContent(contract.firstQuestion);
-      expect(prototype, project.slug).toHaveTextContent(contract.resultTitle);
+    for (const [slug, marker] of standardMarkers) {
+      expect(container.querySelector(`[data-agent-cover-marker="${marker}"]`), slug).not.toBeNull();
     }
-    expect(new Set(questProjects.filter((project) => project.kind === "agent").map((project) => getAgentContract(project.slug).theme)).size).toBe(20);
+    for (const [slug, marker] of specialMarkers) {
+      expect(container.querySelector(`[data-third-cover-marker="${marker}"]`), slug).not.toBeNull();
+    }
+    expect(container.querySelectorAll(".agent-prototype")).toHaveLength(0);
   });
 
   it("renders exact final-product prototypes for the four source-backed projects on desktop and mobile", () => {
@@ -1929,7 +1951,7 @@ describe("academy interface", () => {
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /сервис проекта «планирование»/i })).toHaveAttribute(
       "src",
-      "/screens/planner/step-14.png",
+      "/covers/planner.webp",
     );
   });
 

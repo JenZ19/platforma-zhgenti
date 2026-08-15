@@ -7,7 +7,8 @@ import { hasThirdCoverPrototype } from "../content/third-cover-prototypes";
 import { hasFinalCoverPrototype } from "../content/final-cover-prototypes";
 import { defaultCustomization } from "../content/customization";
 import { FirstCoverPrototypeScene } from "./FirstCoverPrototypeScene";
-import { AgentPrototypeScene } from "./AgentPrototypeScene";
+import { AgentCoverPrototypeScene } from "./AgentCoverPrototypeScene";
+import { hasAgentCoverPrototype } from "../content/agent-cover-prototypes";
 import { ThirdCoverPrototypeScene } from "./ThirdCoverPrototypeScene";
 import { FinalCoverPrototypeScene } from "./FinalCoverPrototypeScene";
 import { OriginalServiceScene } from "./OriginalServiceScene";
@@ -57,7 +58,7 @@ function Visual({ project, step, questStep }: { project: ProjectDefinition; step
   if (["family-expenses", "planner", "idea-vault", "child-schedule"].includes(project.slug)) return <OriginalServiceScene slug={project.slug} step={step} />;
   if (step <= 4) return <SetupScene project={project} step={step} />;
   if (step >= 15) return <FinalScene project={project} step={step} />;
-  if (project.kind === "agent") return <AgentPrototypeScene project={project} step={step} />;
+  if (hasAgentCoverPrototype(project.slug)) return <AgentCoverPrototypeScene project={project} step={step} />;
   if (hasFirstCoverPrototype(project.slug)) return <FirstCoverPrototypeScene project={project} step={step} />;
   if (hasThirdCoverPrototype(project.slug)) return <ThirdCoverPrototypeScene project={project} step={step} />;
   if (hasFinalCoverPrototype(project.slug)) return <FinalCoverPrototypeScene project={project} step={step} />;
@@ -76,4 +77,16 @@ export function ExpectedScene({ project, step }: { project: ProjectDefinition; s
   const sourceTitle = project.slug === "unique-design" ? uniqueDesignStepTitles[sourceStep - 1] : getSourcePrototypeTitle(project.slug, sourceStep);
   const setupTitle = getSetupQuestStepTitle(project.slug, sourceStep);
   return <main id="capture-scene" className="capture-canvas"><header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>УРОВЕНЬ {String(step).padStart(2, "0")} · НЕДЕЛЯ {project.week}</div></header><section className="capture-title"><p>Вот что должно получиться</p><h1>{questStep.title ?? setupTitle ?? sourceTitle ?? titles[sourceStep - 1]}</h1><span>{project.title}</span></section><div className="capture-visual"><Visual project={project} step={sourceStep} questStep={questStep} /></div><aside className="capture-tip"><b>✦</b><p><strong>Сверь свой экран с прототипом.</strong><br />Мелкие отличия в тексте и цвете — это нормально.</p></aside></main>;
+}
+
+export function ProjectCoverScene({ project }: { project: ProjectDefinition }) {
+  const steps = buildQuest(project);
+  const preferred = project.journey === "setup"
+    ? steps.at(-1)
+    : steps.find((step) => step.sourceStepId === 14)
+      ?? [...steps].reverse().find((step) => (step.sourceStepId ?? step.id) > 4 && (step.sourceStepId ?? step.id) < 15)
+      ?? steps.at(-1);
+  if (!preferred) return null;
+  const sourceStep = preferred.sourceStepId || preferred.id;
+  return <main id="capture-cover" className="capture-canvas project-cover-canvas"><div className="capture-visual"><Visual project={project} step={sourceStep} questStep={preferred} /></div></main>;
 }

@@ -8,18 +8,20 @@ export function ProjectPreview({ project }: { project: CatalogProject }) {
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/screens/${project.formats.service.slug}/step-14.png`}
+            src={`/covers/${project.formats.service.slug}.webp`}
             alt={`Сервис проекта «${project.title}»`}
             loading="lazy"
+            decoding="async"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/screens/${project.formats.agent.slug}/step-14.png`}
+            src={`/covers/${project.formats.agent.slug}.webp`}
             alt={`ИИ-агент проекта «${project.title}»`}
             loading="lazy"
+            decoding="async"
           />
         </div>
-        <figcaption><span>✦</span> 2 формата внутри</figcaption>
+        <figcaption><span>✦</span> Сервис + ИИ-агент</figcaption>
       </figure>
     );
   }
@@ -28,11 +30,12 @@ export function ProjectPreview({ project }: { project: CatalogProject }) {
       {/* Static course screenshots are already compressed and must preserve their exact crop. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`/screens/${project.slug}/step-14.png`}
-        alt={`Прототип результата проекта «${project.title}»`}
+        src={`/covers/${project.slug}.webp`}
+        alt={`Готовый результат проекта «${project.title}»`}
         loading="lazy"
+        decoding="async"
       />
-      <figcaption><span>✦</span> {project.journey === "setup" ? "Что будет готово" : "Прототип результата"}</figcaption>
+      <figcaption><span>✦</span> {project.journey === "setup" ? "Что будет готово" : "Вот что получится"}</figcaption>
     </figure>
   );
 }

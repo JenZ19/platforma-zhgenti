@@ -72,12 +72,20 @@ describe("bundle format routing", () => {
 
   it.each([
     "?capture=planner--step-01",
+    "?capture-cover=planner",
     "?capture-mobile=planner--step-01",
     "?capture-guide=planner--demo--step-01--frame-01",
   ])("keeps the capture route %s outside the learning shell", async (search) => {
     window.history.replaceState({}, "", `/${search}`);
     const { container } = render(<AppEntry />);
     await waitFor(() => expect(container.querySelector("[data-learning-shell]")).toBeNull());
+  });
+
+  it("renders the project-specific finished result on the cover route", async () => {
+    window.history.replaceState({}, "", "/?capture-cover=pressure-diary");
+    const { container } = render(<AppEntry />);
+    await waitFor(() => expect(container.querySelector('[data-cover-marker="pressure-history-log"]')).not.toBeNull());
+    expect(container.querySelector(".publish-scene")).toBeNull();
   });
 
   it("restores a saved section only when section is absent and ignores unknown section values", async () => {

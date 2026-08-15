@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./agent-prototypes.css";
 @import "./first-cover-prototypes.css";
+@import "./agent-cover-prototypes.css";
 @import "./third-cover-prototypes.css";
 @import "./final-cover-prototypes.css";
 @import "./source-project-prototypes.css";
@@ -3230,6 +3231,11 @@ button {
   width: 840px;
   height: 475px;
   margin: auto;
+}
+.project-cover-canvas {
+  padding: 0;
+  display: grid;
+  place-items: center;
 }
 .capture-tip {
   position: absolute;
