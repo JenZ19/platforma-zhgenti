@@ -5,12 +5,12 @@ import type { DashboardSection } from "../lib/academy-dashboard";
 import { DashboardIcon, type DashboardIconName } from "./DashboardIcon";
 import { FairyAssistant } from "./FairyAssistant";
 
-const items: { id: DashboardSection; label: string; icon: DashboardIconName }[] = [
-  { id: "home", label: "Главная", icon: "home" },
-  { id: "projects", label: "Мои проекты", icon: "projects" },
-  { id: "weeks", label: "Квесты по неделям", icon: "weeks" },
-  { id: "portfolio", label: "Портфолио", icon: "portfolio" },
-  { id: "fairy", label: "Феечка", icon: "fairy" },
+const items: { id: DashboardSection; label: string; mobileLabel: string; icon: DashboardIconName }[] = [
+  { id: "home", label: "Главная", mobileLabel: "Главная", icon: "home" },
+  { id: "projects", label: "Мои проекты", mobileLabel: "Проекты", icon: "projects" },
+  { id: "weeks", label: "Квесты по неделям", mobileLabel: "Недели", icon: "weeks" },
+  { id: "portfolio", label: "Портфолио", mobileLabel: "Портфолио", icon: "portfolio" },
+  { id: "fairy", label: "Феечка", mobileLabel: "Феечка", icon: "fairy" },
 ];
 
 export type LearningShellProps = {
@@ -123,7 +123,7 @@ export function LearningShell({
             onClick={() => onNavigate(item.id)}
           >
             <DashboardIcon name={item.icon} />
-            <small>{item.label}</small>
+            <small>{item.mobileLabel}</small>
           </button>
         ))}
       </nav>

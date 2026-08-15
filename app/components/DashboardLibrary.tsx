@@ -12,6 +12,7 @@ import { isProjectBundle } from "../content/projects";
 import type { ProjectFormat } from "../content/types";
 import type { DashboardProjectState, DashboardSnapshot } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
+import { DashboardIcon } from "./DashboardIcon";
 import { DashboardProjectCard } from "./DashboardProjectCard";
 
 const weeks = [1, 2, 3, 4, 5, 6] as const;
@@ -193,7 +194,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
                   aria-controls={`dashboard-week-${week}`}
                   onClick={() => setOpenWeeks(expanded ? new Set() : new Set([week]))}
                 >
-                  <span>Неделя {week}</span><small>{items.length} проектов</small><b aria-hidden="true">⌄</b>
+                  <span>Неделя {week}</span><small>{items.length} проектов</small><b aria-hidden="true"><DashboardIcon name="chevron" /></b>
                 </button>
               </h2>
               {expanded ? (

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./tactile-album.css";
+import "./pink-learning-dashboard.css";
 
 export const metadata: Metadata = {
   title: "Академия квестов SUBMARINE",

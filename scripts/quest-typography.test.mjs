@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+const css = await readFile(new URL("../app/pink-learning-dashboard.css", import.meta.url), "utf8").catch(() => "");
 
 function typographyBlock(selector) {
   const start = css.indexOf(selector);
@@ -11,33 +11,28 @@ function typographyBlock(selector) {
   return css.slice(start, end + 1);
 }
 
-test("desktop quests use one readable typography scale", () => {
-  const tokens = typographyBlock(".quest-shell {");
-  assert.match(tokens, /--quest-body-size:\s*18px/);
-  assert.match(tokens, /--quest-support-size:\s*18px/);
-  assert.match(tokens, /--quest-control-size:\s*16px/);
-  assert.match(tokens, /--quest-label-size:\s*13px/);
-
-  assert.match(typographyBlock(".quest-shell .lesson-text-action {"), /font-size:\s*var\(--quest-body-size\)/);
-  assert.match(typographyBlock(".quest-shell .why-card .lesson-text p,"), /font-size:\s*var\(--quest-support-size\)/);
-  assert.match(typographyBlock(".quest-shell .expected-section li {"), /font-size:\s*var\(--quest-control-size\)/);
-  assert.match(typographyBlock(".quest-shell .level-actions button {"), /font-size:\s*var\(--quest-control-size\)/);
-  assert.match(typographyBlock(".quest-shell .server-offer-lead {"), /font-size:\s*var\(--quest-support-size\)/);
-  assert.match(typographyBlock(".quest-shell .customizer-options label span {"), /font-size:\s*14px/);
-  assert.match(typographyBlock(".quest-shell .quest-customizer > header small {"), /font-size:\s*15px/);
+test("Pink Cloud uses the approved adult font stack", () => {
+  assert.match(typographyBlock("body {"), /font-family:\s*Manrope,\s*Inter,\s*ui-sans-serif,\s*system-ui,\s*sans-serif/);
+  assert.doesNotMatch(css, /Baloo|Comic Neue/i);
 });
 
-test("mobile quests keep instructions and controls readable", () => {
-  const tokens = typographyBlock(".mobile-quest-shell {");
-  assert.match(tokens, /--quest-body-size:\s*17px/);
-  assert.match(tokens, /--quest-support-size:\s*17px/);
-  assert.match(tokens, /--quest-control-size:\s*16px/);
-  assert.match(tokens, /--quest-label-size:\s*13px/);
+test("desktop quest card uses an exact 18px readable body", () => {
+  const block = typographyBlock(".quest-step-card {");
+  assert.match(block, /font-size:\s*18px/);
+  assert.match(block, /line-height:\s*1\.65/);
+  assert.match(block, /min-width:\s*0/);
+});
 
-  assert.match(typographyBlock(".mobile-quest-shell .mobile-do .lesson-text-action {"), /font-size:\s*var\(--quest-body-size\)/);
-  assert.match(typographyBlock(".mobile-quest-shell .mobile-why .lesson-text p,"), /font-size:\s*var\(--quest-support-size\)/);
-  assert.match(typographyBlock(".mobile-quest-shell .mobile-result li {"), /font-size:\s*var\(--quest-control-size\)/);
-  assert.match(typographyBlock(".mobile-quest-shell .mobile-level-actions button {"), /font-size:\s*var\(--quest-control-size\)/);
-  assert.match(typographyBlock(".mobile-quest-shell .mobile-action p,"), /font-size:\s*15px/);
-  assert.match(typographyBlock(".mobile-quest-shell .quest-customizer.compact .customizer-options label span {"), /font-size:\s*14px/);
+test("mobile quest card uses an exact 17px readable body", () => {
+  const block = typographyBlock(".mobile-quest-step-card {");
+  assert.match(block, /font-size:\s*17px/);
+  assert.match(block, /line-height:\s*1\.65/);
+  assert.match(block, /min-width:\s*0/);
+});
+
+test("quest prose keeps a readable line length instead of becoming a text wall", () => {
+  const desktop = typographyBlock(".quest-step-card > section > .lesson-text {");
+  const mobile = typographyBlock(".mobile-quest-step-card > section > .lesson-text {");
+  assert.match(desktop, /max-width:\s*72ch/);
+  assert.match(mobile, /max-width:\s*68ch/);
 });

@@ -265,7 +265,7 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
           <h1 id={headingId}>Феечка</h1>
         </div>
         {mode === "floating" && (
-          <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть Феечку">×</button>
+          <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть Феечку"><DashboardIcon name="close" /></button>
         )}
       </header>
       <p className="fairy-intro">

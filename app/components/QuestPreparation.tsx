@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- generated lesson screens are fixed-size local teaching assets */
 
 import type { ProjectDefinition } from "../content/types";
+import { DashboardIcon } from "./DashboardIcon";
 import {
   buildRealDataChecklist,
   type QuestPreparation as PreparationState,
@@ -81,10 +82,10 @@ export function QuestPreparation({
       <p className="preparation-lead">Выбор сохранится только для квеста «{project.title}». В другом проекте мы спросим снова.</p>
       <div className="mode-options">
         <button type="button" onClick={onChooseDemo} aria-label="Работать на вымышленных данных">
-          <span>✦</span><small>Легче для первого раза</small><h3>На вымышленных</h3><p>Все примеры уже готовы. Можно сразу пройти весь путь проекта и ни о чём не переживать.</p><b>Начать тренировку →</b>
+          <span aria-hidden="true"><DashboardIcon name="fairy" /></span><small>Легче для первого раза</small><h3>На вымышленных</h3><p>Все примеры уже готовы. Можно сразу пройти весь путь проекта и ни о чём не переживать.</p><b>Начать тренировку →</b>
         </button>
         <button type="button" onClick={onChooseReal} aria-label="Работать на реальных данных">
-          <span>◇</span><small>Для себя или клиента</small><h3>На реальных</h3><p>Сначала вспомним нужные ответы, затем Codex задаст вопросы и сам создаст всё остальное.</p><b>Открыть чек-лист →</b>
+          <span aria-hidden="true"><DashboardIcon name="projects" /></span><small>Для себя или клиента</small><h3>На реальных</h3><p>Сначала вспомним нужные ответы, затем Codex задаст вопросы и сам создаст всё остальное.</p><b>Открыть чек-лист →</b>
         </button>
       </div>
       <p className="choice-note">Не уверены? Выбирайте вымышленные данные — проект всё равно получится полноценным.</p>
