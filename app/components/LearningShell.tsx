@@ -15,6 +15,7 @@ const items: { id: DashboardSection; label: string; mobileLabel: string; icon: D
 
 export type LearningShellProps = {
   format: "desktop" | "mobile";
+  clientReady?: boolean;
   activeSection?: DashboardSection;
   questTitle?: string;
   onNavigate: (section: DashboardSection) => void;
@@ -28,6 +29,7 @@ export type LearningShellProps = {
 export function LearningShell({
   activeSection,
   assistantScope,
+  clientReady = true,
   children,
   format,
   onFormatChange,
@@ -64,7 +66,7 @@ export function LearningShell({
   }
 
   return (
-    <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-visual-theme="pink-cloud">
+    <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-client-ready={clientReady ? "true" : "false"} data-visual-theme="pink-cloud">
       <aside className="learning-sidebar" aria-label="Навигация Академии">
         <button className="learning-brand" type="button" onClick={() => onNavigate("home")} aria-label="На главную Академии">
           <DashboardIcon name="fairy" />
@@ -88,6 +90,16 @@ export function LearningShell({
           {format === "mobile" ? "Открыть версию для компьютера" : "Открыть версию для телефона"}
         </button>
       </aside>
+      {format === "desktop" && (
+        <button
+          type="button"
+          className="mobile-format-switch"
+          aria-label="Переключиться на версию для телефона"
+          onClick={onFormatChange}
+        >
+          Открыть версию для телефона
+        </button>
+      )}
       <div className="learning-main">
         <header className="learning-topbar">
           <form role="search" onSubmit={(event) => { event.preventDefault(); onSearch(search); }}>

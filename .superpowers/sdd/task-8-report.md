@@ -23,6 +23,8 @@ typography / contrast contracts:       3 failed, 3 passed
 
 The failures proved the unparameterized phone route stayed desktop, explicit desktop was removed from its canonical URL, mobile Fairy navigated out of the quest, the reward was a `div`, the system font contract was absent, legacy miniature type could leak through, and text-bearing gradients had no computed AA contract.
 
+The final review pass added four failing App regressions before implementation: implicit orientation did not update, explicit desktop had no reachable phone switch, preparation/format buttons still used unsafe content structure, and the final disabled reward opener lost focus. Browser RED contracts additionally covered preparation geometry, Telegram/curator contrast, Pink Cloud customizer surfaces, viewport ownership, and owned-server readiness.
+
 ## GREEN
 
 Focused review contracts:
@@ -30,7 +32,8 @@ Focused review contracts:
 ```text
 AppEntry / Fairy / native reward: 116/116 passed
 quest-typography and contrast:    6/6 passed
-dashboard-layout:                 3/3 passed
+final focused App regression:     120/120 passed
+dashboard-layout:                 4/4 passed
 ```
 
 The layout regression opens `/`, projects, weeks, portfolio, full Fairy, the default pressure-diary route, and an explicit mobile pressure-diary route at 375, 768, 1024, and 1440 px. It checks horizontal overflow; visible buttons, links, inputs, selects, textareas, and switches at 44 px on phone; shell separation and hidden bottom navigation from 768 px; preparation typography; Fairy placement; and the gap between sticky quest actions and mobile bottom navigation. A deep browser flow also checks the real-data preparation focus ring, first-phone mobile canonicalization, mobile map/actions, contextual Fairy, image and reward dialogs, reset confirmation, focus restoration, and computed banner/CTA contrast.
@@ -38,8 +41,8 @@ The layout regression opens `/`, projects, weeks, portfolio, full Fairy, the def
 Final clean run:
 
 ```text
-npm run test:scripts  -> 14/14 passed
-npm run test:unit     -> 23 files, 284/284 passed
+npm run test:scripts  -> 15/15 passed
+npm run test:unit     -> 23 files, 288/288 passed
 npm run lint          -> exit 0
 npm run build         -> exit 0
 git diff --check      -> exit 0
@@ -61,6 +64,12 @@ The unit run prints six known jsdom `Not implemented: navigation to another Docu
 - The reward is a native modal dialog with `showModal`, cancel/Escape handling, initial focus, opener restoration, and an `open`-attribute fallback.
 - Text-bearing Pink Cloud actions use solid `#802153` with white text (9.29:1 computed contrast); the approved gradient token remains exact and is reserved for non-text progress decoration.
 - Preparation and customizer prose override legacy type at 18 px desktop / 17 px mobile; true metadata stays 14 px, and hidden checklist/radio controls expose visible `focus-within` rings.
+- Preparation and format/platform choice buttons now contain only an SVG icon span plus one phrasing-content wrapper. Browser geometry verifies the copy does not inherit the legacy 48 × 48 px icon circle or create overflow.
+- The full customizer shell, fieldsets, labels, palette controls and summary use Pink Cloud surfaces and AA text colors; live project palette colors remain user-controlled.
+- Implicit routes follow the 767 px media boundary during resize/orientation and remove the generated mobile parameter when returning to desktop. Explicit formats remain user-owned; explicit desktop exposes a visible 48 px phone switch outside the hidden sidebar.
+- Telegram and curator mobile actions use computed AA-safe solid colors. Mobile reset has 17 px actionable copy and 14 px explanatory copy; stable pressed states do not change layout.
+- Final-level rewards move focus to the completed step article when the original action becomes disabled; intermediate rewards still restore their exact opener.
+- Layout-server readiness requires the owned child to advertise the configured process-specific port and never adopts a listener after that child exits; cleanup retains and terminates the owned process group.
 - Focus-visible, non-color status labels, reduced motion, stable hover geometry, honest empty states, search/filter surfaces, portfolio, preparation, quest, dialog, reward, and Fairy states are styled.
 - Legacy `globals.css` remains for prototype scenes; `tactile-album.css` is no longer imported and Pink Cloud overrides legacy quest shell widths, duplicate headers/footers, old typography, and unsafe fixed positioning.
 

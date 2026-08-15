@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type DashboardIconName = "home" | "projects" | "weeks" | "portfolio" | "fairy" | "search" | "chevron" | "close" | "reset" | "plus";
+export type DashboardIconName = "home" | "projects" | "weeks" | "portfolio" | "fairy" | "search" | "chevron" | "close" | "reset" | "plus" | "service" | "agent" | "laptop" | "windows";
 
 const paths: Record<DashboardIconName, ReactNode> = {
   home: <><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10.5V20h13v-9.5" /><path d="M9.5 20v-6h5v6" /></>,
@@ -13,6 +13,10 @@ const paths: Record<DashboardIconName, ReactNode> = {
   close: <path d="m6 6 12 12M18 6 6 18" />,
   reset: <><path d="M4 9V4h5" /><path d="M5.6 17.2A8 8 0 1 0 6 6" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
+  service: <><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M4 9h16M9 9v11" /></>,
+  agent: <><path d="M5 5h14v11H9l-4 3z" /><path d="m12 7 .7 2.3L15 10l-2.3.7L12 13l-.7-2.3L9 10l2.3-.7z" /></>,
+  laptop: <><rect x="5" y="5" width="14" height="11" rx="2" /><path d="M3 19h18" /></>,
+  windows: <><path d="M4 5.5 11 4v7H4zM13 3.7l7-1.2V11h-7zM4 13h7v7l-7-1.3zM13 13h7v8.5L13 20z" /></>,
 };
 
 export function DashboardIcon({ name }: { name: DashboardIconName }) {

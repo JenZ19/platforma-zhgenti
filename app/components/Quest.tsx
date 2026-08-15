@@ -164,6 +164,7 @@ function QuestBody({
   const rewardCloseRef = useRef<HTMLButtonElement>(null);
   const rewardOpenerRef = useRef<HTMLButtonElement | null>(null);
   const rewardMountedRef = useRef(true);
+  const questStepCardRef = useRef<HTMLElement>(null);
   const [imageOpen, setImageOpen] = useState(false);
   const imageDialogRef = useRef<HTMLDialogElement>(null);
   const imageCloseRef = useRef<HTMLButtonElement>(null);
@@ -361,7 +362,8 @@ function QuestBody({
     const opener = rewardOpenerRef.current;
     rewardOpenerRef.current = null;
     setReward(null);
-    if (opener?.isConnected) opener.focus();
+    if (opener?.isConnected && !opener.disabled) opener.focus();
+    else if (questStepCardRef.current?.isConnected) questStepCardRef.current.focus();
   }
 
   function closeRewardDialog() {
@@ -452,7 +454,7 @@ function QuestBody({
   return (
     <>
       <main className="quest-workspace" data-quest-workspace="desktop" data-visual-theme="pink-cloud">
-        <article className="quest-step-card" aria-live="polite">
+        <article ref={questStepCardRef} className="quest-step-card" aria-live="polite" tabIndex={-1}>
           <header className="quest-step-heading">
             <div className="quest-step-project-bar">
               <button type="button" className="back-link" onClick={onHome}>← Все проекты</button>

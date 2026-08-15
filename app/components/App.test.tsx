@@ -26,6 +26,9 @@ import { MobileExpectedScene } from "./MobileExpectedScene";
 import { ProjectCard } from "./ProjectCard";
 import { Quest } from "./Quest";
 import { QuestLinks } from "./QuestLinks";
+import { QuestPreparation } from "./QuestPreparation";
+import { QuestFormatChoice } from "./QuestFormatChoice";
+import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
 
 Object.assign(navigator, {
   clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -207,6 +210,67 @@ describe("academy interface", () => {
     const mobile = render(<AppEntry />);
     await waitFor(() => expect(mobile.container.querySelector(".mobile-quest-shell")).not.toBeNull());
     expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
+  });
+
+  it("tracks phone orientation only while format remains implicit and cleans up resize", async () => {
+    const removeListener = vi.spyOn(window, "removeEventListener");
+    window.history.replaceState({}, "", "/?quest=pressure-diary");
+    const view = render(<AppEntry />);
+    await waitFor(() => expect(view.container.querySelector(".quest-shell")).not.toBeNull());
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    window.dispatchEvent(new Event("resize"));
+    await waitFor(() => expect(view.container.querySelector(".mobile-quest-shell")).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
+    window.dispatchEvent(new Event("resize"));
+    await waitFor(() => expect(view.container.querySelector(".quest-shell")).not.toBeNull());
+    expect(view.container.querySelector(".mobile-quest-shell")).toBeNull();
+    expect(window.location.search).toBe("?quest=pressure-diary");
+
+    view.unmount();
+    expect(removeListener).toHaveBeenCalledWith("resize", expect.any(Function));
+    removeListener.mockRestore();
+  });
+
+  it("keeps explicit format user-owned and exposes a phone escape from explicit desktop", async () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    window.history.replaceState({}, "", "/?format=desktop&quest=pressure-diary");
+    const view = render(<AppEntry />);
+    await waitFor(() => expect(view.container.querySelector(".quest-shell")).not.toBeNull());
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
+    window.dispatchEvent(new Event("resize"));
+    expect(view.container.querySelector(".mobile-quest-shell")).toBeNull();
+    expect(window.location.search).toBe("?format=desktop&quest=pressure-diary");
+
+    const escape = view.container.querySelector<HTMLButtonElement>(".mobile-format-switch");
+    expect(escape).not.toBeNull();
+    fireEvent.click(escape!);
+    await waitFor(() => expect(view.container.querySelector(".mobile-quest-shell")).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
+  });
+
+  it("uses phrasing-only wrappers for preparation and platform choice buttons", () => {
+    const preparation = render(<QuestPreparation project={getQuestProject("pressure-diary")!} preparation={{ version: 1, mode: null, checked: [], ready: false }} onChooseDemo={vi.fn()} onChooseReal={vi.fn()} onToggle={vi.fn()} onStartReal={vi.fn()} onBack={vi.fn()} />);
+    for (const button of preparation.container.querySelectorAll(".mode-options > button")) {
+      expect(button.children).toHaveLength(2);
+      expect(button.querySelector(":scope > .mode-option-icon")).not.toBeNull();
+      expect(button.querySelector(":scope > .mode-option-content")).not.toBeNull();
+      expect(button.querySelector("h1,h2,h3,p,div,b,small")).toBeNull();
+    }
+    preparation.unmount();
+
+    const bundle = getBundle("planning");
+    const format = render(<QuestFormatChoice project={bundle} onChoose={vi.fn()} onHome={vi.fn()} onReset={vi.fn()} />);
+    expect(format.container.querySelectorAll(".format-option-content")).toHaveLength(2);
+    expect(format.container.querySelector(".format-option h3,.format-option p,.format-option b,.format-option small")).toBeNull();
+    format.unmount();
+
+    const install = render(<InstallCodexPlatformChoice project={getQuestProject("install-codex")!} onChoose={vi.fn()} onHome={vi.fn()} />);
+    expect(install.container.querySelectorAll(".format-option-content")).toHaveLength(2);
+    expect(install.container.querySelector(".format-option h3,.format-option p,.format-option b,.format-option small")).toBeNull();
   });
 
   it("preserves the mobile format in primary and card hrefs", async () => {
@@ -971,6 +1035,23 @@ describe("academy interface", () => {
     } finally {
       Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: originalShowModal });
     }
+  });
+
+  it("moves final reward focus to the completed step when its opener becomes disabled", () => {
+    const project = getQuestProject("family-expenses")!;
+    const total = getProjectLevelCount(project);
+    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total - 1 }, (_, index) => index + 1), score: (total - 1) * 10 }));
+    const { container } = render(<Quest project={project} onHome={vi.fn()} />);
+    const opener = screen.getByRole("button", { name: /завершить квест/i });
+
+    fireEvent.click(opener);
+    expect(opener).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: /забрать награду/i }));
+
+    const step = container.querySelector<HTMLElement>(".quest-step-card");
+    expect(step).toHaveAttribute("tabindex", "-1");
+    expect(step).toHaveFocus();
   });
 
   it("opens a guide screenshot as a native modal and restores the selected frame opener", () => {

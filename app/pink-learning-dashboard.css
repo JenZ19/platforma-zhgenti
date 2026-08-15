@@ -252,6 +252,10 @@ select {
   display: none;
 }
 
+.mobile-format-switch {
+  display: none;
+}
+
 .dashboard-loading {
   min-height: 280px;
   display: grid;
@@ -1536,6 +1540,21 @@ select {
   height: 24px;
 }
 
+.learning-main .mode-option-content {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  display: block;
+  margin-top: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
 .learning-main .mode-option-meta,
 .learning-main .mode-option-copy,
 .learning-main .mode-option-action {
@@ -1564,6 +1583,11 @@ select {
 .learning-main .preparation-start {
   min-width: 44px;
   min-height: 48px;
+}
+
+.learning-main .preparation-back {
+  font-size: 17px;
+  line-height: 1.4;
 }
 
 .learning-main .preparation-start {
@@ -1619,9 +1643,85 @@ select {
 }
 
 .learning-main .quest-customizer {
+  border-color: var(--cloud-border);
+  background: var(--cloud-surface-solid);
+  background-image: none;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 18px;
   line-height: 1.6;
+}
+
+.learning-main .quest-customizer > header > span {
+  background: var(--cloud-action);
+  color: #fff;
+}
+
+.learning-main .quest-customizer > header p {
+  color: var(--cloud-focus);
+}
+
+.learning-main .quest-customizer > header h3 {
+  color: var(--cloud-text);
+  font-weight: 800;
+}
+
+.learning-main .quest-customizer > header small,
+.learning-main .customizer-axes legend small,
+.learning-main .customizer-palette > header p,
+.learning-main .customizer-input > span {
+  color: var(--cloud-muted);
+}
+
+.learning-main .customizer-axes fieldset,
+.learning-main .customizer-palette {
+  border-color: var(--cloud-border);
+  background: var(--cloud-bg-rose);
+}
+
+.learning-main .customizer-axes legend i,
+.learning-main .customizer-palette > header > i {
+  background: var(--cloud-pink-soft);
+  color: var(--cloud-focus);
+}
+
+.learning-main .customizer-options label span,
+.learning-main .palette-options button,
+.learning-main .palette-color-pickers label,
+.learning-main .customizer-input input {
+  border-color: var(--cloud-border);
+  background: var(--cloud-surface-solid);
+  color: var(--cloud-text);
+}
+
+.learning-main .customizer-options label.selected span {
+  border-color: var(--cloud-action);
+  background: var(--cloud-action);
+  color: #fff;
+}
+
+.learning-main .palette-options button.selected {
+  border-color: var(--cloud-focus);
+  box-shadow: inset 0 0 0 1px var(--cloud-focus);
+}
+
+.learning-main .palette-color-pickers {
+  background: var(--cloud-pink-soft);
+}
+
+.learning-main .customizer-summary {
+  background: var(--cloud-text);
+  color: #fff;
+}
+
+.learning-main .customizer-summary small,
+.learning-main .customizer-summary p,
+.learning-main .customizer-summary b {
+  color: #fff;
+}
+
+.learning-main .customizer-save {
+  background: var(--cloud-action);
+  color: #fff;
 }
 
 .learning-main .quest-customizer > header p,
@@ -1675,6 +1775,64 @@ select {
 .learning-main .palette-custom-button svg {
   width: 24px;
   height: 24px;
+}
+
+.learning-main .format-option {
+  grid-template-columns: 54px minmax(0, 1fr);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.learning-main .format-option-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.learning-main .format-option-content,
+.learning-main .format-option-meta,
+.learning-main .format-option-title,
+.learning-main .format-option-copy,
+.learning-main .format-option-action {
+  min-width: 0;
+  display: block;
+}
+
+.learning-main .format-option-content {
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.learning-main .format-option-meta {
+  color: var(--cloud-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.learning-main .format-option-title {
+  margin-top: 5px;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.learning-main .format-option-copy {
+  max-width: 44ch;
+  margin-top: 9px;
+  color: var(--cloud-muted);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.learning-main .format-option-action {
+  margin-top: 14px;
+  color: var(--cloud-focus);
+  font-size: 16px;
+  font-weight: 800;
 }
 
 /* Mobile quest workspace */
@@ -1996,6 +2154,25 @@ select {
   cursor: not-allowed;
 }
 
+.learning-main .mobile-action-telegram > a,
+.learning-main .mobile-action-telegram > button,
+.learning-main .mobile-action-screenshot > a {
+  background: #245f86;
+  color: #fff;
+}
+
+.learning-main .mobile-action-curator > a,
+.learning-main .mobile-action-curator > button {
+  background: var(--cloud-action);
+  color: #fff;
+}
+
+.learning-main .mobile-action.unavailable > button {
+  background: #465661;
+  color: #fff;
+  opacity: 1;
+}
+
 /* Shared quest subcomponents and modal states */
 .learning-shell .quest-reset-control {
   min-width: 44px;
@@ -2014,6 +2191,16 @@ select {
 .learning-shell .quest-reset-control > span:first-child svg {
   width: 21px;
   height: 21px;
+}
+
+.learning-shell .quest-reset-control b {
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.learning-shell .quest-reset-control small {
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .learning-shell .quest-links {
@@ -2149,6 +2336,12 @@ select {
   transform: none;
 }
 
+.learning-shell button:active:not(:disabled),
+.learning-shell a:active {
+  filter: brightness(0.96);
+  box-shadow: inset 0 0 0 2px rgba(128, 33, 83, 0.32);
+}
+
 @media (max-width: 1180px) {
   .learning-main {
     padding-right: 20px;
@@ -2251,6 +2444,22 @@ select {
   .learning-sidebar,
   .learning-topbar {
     display: none;
+  }
+
+  .mobile-format-switch {
+    width: calc(100% - 28px);
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 12px 14px 0;
+    padding: 8px 16px;
+    border: 1px solid var(--cloud-focus);
+    border-radius: 14px;
+    background: var(--cloud-surface-solid);
+    color: var(--cloud-focus);
+    font-size: 17px;
+    font-weight: 800;
   }
 
   .learning-main {

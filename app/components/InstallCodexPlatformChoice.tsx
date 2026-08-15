@@ -2,6 +2,7 @@
 
 import type { ProjectDefinition } from "../content/types";
 import type { SetupPlatform } from "../lib/setup-platform";
+import { DashboardIcon } from "./DashboardIcon";
 
 export function InstallCodexPlatformChoice({
   project,
@@ -40,18 +41,12 @@ export function InstallCodexPlatformChoice({
         </div>
         <div className="format-choice-grid">
           <button type="button" className="format-option mac" aria-label="Выбрать Mac" onClick={() => onChoose("mac")}>
-            <span className="format-option-icon">⌘</span>
-            <small>macOS 14 или новее</small>
-            <h3>Mac</h3>
-            <p>Покажем установку через файл .dmg и папку «Программы».</p>
-            <b>Продолжить на Mac →</b>
+            <span className="format-option-icon" aria-hidden="true"><DashboardIcon name="laptop" /></span>
+            <span className="format-option-content"><span className="format-option-meta">macOS 14 или новее</span><span className="format-option-title">Mac</span><span className="format-option-copy">Покажем установку через файл .dmg и папку «Программы».</span><span className="format-option-action">Продолжить на Mac →</span></span>
           </button>
           <button type="button" className="format-option windows" aria-label="Выбрать Windows" onClick={() => onChoose("windows")}>
-            <span className="format-option-icon">⊞</span>
-            <small>Установка для Windows</small>
-            <h3>Windows</h3>
-            <p>Покажем установщик и запуск приложения через меню «Пуск».</p>
-            <b>Продолжить на Windows →</b>
+            <span className="format-option-icon" aria-hidden="true"><DashboardIcon name="windows" /></span>
+            <span className="format-option-content"><span className="format-option-meta">Установка для Windows</span><span className="format-option-title">Windows</span><span className="format-option-copy">Покажем установщик и запуск приложения через меню «Пуск».</span><span className="format-option-action">Продолжить на Windows →</span></span>
           </button>
         </div>
       </section>

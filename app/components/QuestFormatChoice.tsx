@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ProjectBundleDefinition, ProjectFormat } from "../content/types";
 import { QuestResetButton } from "./QuestResetButton";
+import { DashboardIcon } from "./DashboardIcon";
 
 export function QuestFormatChoice({
   project,
@@ -43,18 +44,12 @@ export function QuestFormatChoice({
         </div>
         <div className="format-choice-grid">
           <button type="button" className="format-option service" aria-label="Выбрать сервис" onClick={() => onChoose("service")}>
-            <span className="format-option-icon">▦</span>
-            <small>Экран с кнопками</small>
-            <h3>Сервис</h3>
-            <p>Вы сами добавляете и меняете данные в красивом приложении.</p>
-            <b>Выбрать сервис →</b>
+            <span className="format-option-icon" aria-hidden="true"><DashboardIcon name="service" /></span>
+            <span className="format-option-content"><span className="format-option-meta">Экран с кнопками</span><span className="format-option-title">Сервис</span><span className="format-option-copy">Вы сами добавляете и меняете данные в красивом приложении.</span><span className="format-option-action">Выбрать сервис →</span></span>
           </button>
           <button type="button" className="format-option agent" aria-label="Выбрать ИИ-агента" onClick={() => onChoose("agent")}>
-            <span className="format-option-icon">✦</span>
-            <small>Разговор текстом или голосом</small>
-            <h3>ИИ-агент</h3>
-            <p>Вы рассказываете своими словами, а агент уточняет и готовит результат.</p>
-            <b>Выбрать ИИ-агента →</b>
+            <span className="format-option-icon" aria-hidden="true"><DashboardIcon name="agent" /></span>
+            <span className="format-option-content"><span className="format-option-meta">Разговор текстом или голосом</span><span className="format-option-title">ИИ-агент</span><span className="format-option-copy">Вы рассказываете своими словами, а агент уточняет и готовит результат.</span><span className="format-option-action">Выбрать ИИ-агента →</span></span>
           </button>
         </div>
         <button type="button" className="format-help-toggle" aria-expanded={explanationOpen} onClick={() => setExplanationOpen((value) => !value)}>

@@ -54,7 +54,7 @@ function questQuery(resolved: { slug: string; output?: ProjectFormat; legacy: bo
   return canonical.replace(/^\?/, "?format=desktop&");
 }
 
-function parseRoute(search: string, savedSection: DashboardSection = "home", clientDefaultFormat: "desktop" | "mobile" = "desktop"): ParsedRoute {
+function parseRoute(search: string, savedSection: DashboardSection = "home", clientDefaultFormat: "desktop" | "mobile" = "desktop", formatParamImplicit = false): ParsedRoute {
   const query = new URLSearchParams(search);
   const guideCapture = query.get("capture-guide")?.match(/^(.+)--(real|demo)--step-(\d{2})--frame-(\d{2})$/);
   if (guideCapture) return { route: { type: "capture-guide", slug: guideCapture[1], mode: guideCapture[2] as "real" | "demo", step: Number(guideCapture[3]), frame: Number(guideCapture[4]) } };
@@ -63,7 +63,7 @@ function parseRoute(search: string, savedSection: DashboardSection = "home", cli
   const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
   if (capture) return { route: { type: "capture", slug: capture[1], step: Number(capture[2]) } };
   const quest = query.get("quest");
-  const rawFormat = query.get("format");
+  const rawFormat = formatParamImplicit ? null : query.get("format");
   const formatExplicit = rawFormat === "mobile" || rawFormat === "desktop";
   const format = rawFormat === "mobile" ? "mobile" : rawFormat === "desktop" ? "desktop" : clientDefaultFormat;
   const rawSection = query.get("section");
@@ -98,24 +98,50 @@ function dashboardUrl(section: DashboardSection, format: "desktop" | "mobile", s
 
 export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   const [route, setRoute] = useState<Route>(() => parseRoute(initialSearch).route);
+  const [clientReady, setClientReady] = useState(false);
 
   useEffect(() => {
     const readBrowserRoute = (restoreSavedSection: boolean) => {
       const savedSection = restoreSavedSection ? loadDashboardSection(window.localStorage) : "home";
       const clientDefaultFormat = window.innerWidth <= 767 ? "mobile" : "desktop";
-      const parsed = parseRoute(window.location.search, savedSection, clientDefaultFormat);
+      const formatParamImplicit = window.history.state?.submarineImplicitFormat === true;
+      const parsed = parseRoute(window.location.search, savedSection, clientDefaultFormat, formatParamImplicit);
       if (parsed.canonicalSearch !== undefined && window.location.search !== parsed.canonicalSearch) {
-        window.history.replaceState({}, "", `${window.location.pathname}${parsed.canonicalSearch}${window.location.hash}`);
+        const historyState = !parsed.route.type.startsWith("capture") && "formatExplicit" in parsed.route && !parsed.route.formatExplicit
+          ? { submarineImplicitFormat: true }
+          : {};
+        window.history.replaceState(historyState, "", `${window.location.pathname}${parsed.canonicalSearch}${window.location.hash}`);
       }
       return parsed.route;
     };
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRoute(readBrowserRoute(true));
+    setClientReady(true);
     const onPopState = () => setRoute(readBrowserRoute(false));
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  useEffect(() => {
+    if ((route.type !== "home" && route.type !== "quest") || route.formatExplicit) return;
+    const media = typeof window.matchMedia === "function" ? window.matchMedia("(max-width: 767px)") : null;
+    const syncImplicitFormat = () => {
+      const format = (media?.matches ?? window.innerWidth <= 767) ? "mobile" : "desktop";
+      if (format === route.format) return;
+      const search = route.type === "quest"
+        ? questQuery({ slug: route.slug, output: route.output, legacy: false }, format)
+        : dashboardQuery(route.section, format, route.search);
+      window.history.replaceState({ submarineImplicitFormat: true }, "", `${window.location.pathname}${search}${window.location.hash}`);
+      setRoute({ ...route, format });
+    };
+    media?.addEventListener?.("change", syncImplicitFormat);
+    window.addEventListener("resize", syncImplicitFormat);
+    return () => {
+      media?.removeEventListener?.("change", syncImplicitFormat);
+      window.removeEventListener("resize", syncImplicitFormat);
+    };
+  }, [route]);
 
   useEffect(() => {
     if (route.type === "quest") saveLastActiveProject(route.slug, route.format, window.localStorage);
@@ -128,7 +154,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   ) {
     const formatExplicit = format === "mobile" || ((route.type === "home" || route.type === "quest") && route.formatExplicit);
     const query = questQuery({ slug, output, legacy: false }, format, format === "desktop" && formatExplicit);
-    window.history.pushState({}, "", query);
+    window.history.pushState(formatExplicit ? {} : { submarineImplicitFormat: true }, "", query);
     setRoute({ type: "quest", slug, output, format, formatExplicit });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -136,7 +162,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   function openSection(section: DashboardSection) {
     const format = route.type === "home" || route.type === "quest" ? route.format : "desktop";
     const formatExplicit = (route.type === "home" || route.type === "quest") && route.formatExplicit;
-    window.history.pushState({}, "", dashboardUrl(section, format, "", formatExplicit && format === "desktop"));
+    window.history.pushState(formatExplicit ? {} : { submarineImplicitFormat: true }, "", dashboardUrl(section, format, "", formatExplicit && format === "desktop"));
     saveDashboardSection(section, window.localStorage);
     setRoute({ type: "home", section, search: "", format, formatExplicit });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -145,7 +171,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   function openSearch(search: string) {
     const format = route.type === "home" || route.type === "quest" ? route.format : "desktop";
     const formatExplicit = (route.type === "home" || route.type === "quest") && route.formatExplicit;
-    window.history.pushState({}, "", dashboardUrl("weeks", format, search, formatExplicit && format === "desktop"));
+    window.history.pushState(formatExplicit ? {} : { submarineImplicitFormat: true }, "", dashboardUrl("weeks", format, search, formatExplicit && format === "desktop"));
     saveDashboardSection("weeks", window.localStorage);
     setRoute({ type: "home", section: "weeks", search, format, formatExplicit });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -153,7 +179,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
 
   function updateDashboardSearch(search: string) {
     if (route.type !== "home") return;
-    window.history.replaceState({}, "", dashboardUrl(route.section, route.format, search, route.formatExplicit && route.format === "desktop"));
+    window.history.replaceState(route.formatExplicit ? {} : { submarineImplicitFormat: true }, "", dashboardUrl(route.section, route.format, search, route.formatExplicit && route.format === "desktop"));
     setRoute({ ...route, search });
   }
 
@@ -161,7 +187,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     if (route.type !== "quest") return;
     const next = { ...route, output };
     const query = questQuery({ slug: route.slug, output, legacy: false }, route.format, route.formatExplicit && route.format === "desktop");
-    window.history.replaceState({}, "", query);
+    window.history.replaceState(route.formatExplicit ? {} : { submarineImplicitFormat: true }, "", query);
     setRoute(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -217,6 +243,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   return (
     <LearningShell
       format={surface}
+      clientReady={clientReady}
       assistantScope={route.type === "quest" ? route.slug : "academy"}
       activeSection={route.type === "home" ? route.section : undefined}
       questTitle={route.type === "quest" ? project?.title : undefined}

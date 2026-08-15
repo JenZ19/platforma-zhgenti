@@ -10,31 +10,23 @@ const externalOrigin = process.env.DASHBOARD_LAYOUT_ORIGIN?.replace(/\/$/, "");
 const requestedPort = Number(process.env.DASHBOARD_LAYOUT_PORT);
 const port = Number.isInteger(requestedPort) && requestedPort > 0
   ? requestedPort
-  : 4300 + (process.pid % 1000);
+  : 32000 + (process.pid % 20000);
 // vinext binds its dev listener to localhost/IPv6 on macOS even when passed an
 // IPv4 host, so the probe and browser must use the same advertised host.
 let origin = externalOrigin || `http://localhost:${port}`;
 const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 let server;
+let ownedServerPid;
 let serverOutput = "";
 
 async function waitForServer() {
   for (let attempt = 0; attempt < 120; attempt += 1) {
     if (server?.exitCode !== null) {
-      const existing = serverOutput.match(/Local:\s+(https?:\/\/[^\s]+)/)?.[1];
-      if (existing) {
-        try {
-          const response = await fetch(existing);
-          if (response.ok) {
-            origin = existing;
-            server = undefined;
-            return;
-          }
-        } catch {
-          // Fall through to the original startup error with the captured log.
-        }
-      }
       throw new Error(`Dashboard test server exited early.\n${serverOutput}`);
+    }
+    if (!serverOutput.includes(`http://localhost:${port}`)) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      continue;
     }
     try {
       const response = await fetch(origin);
@@ -48,24 +40,26 @@ async function waitForServer() {
 }
 
 async function stopServer() {
-  if (!server || server.exitCode !== null) return;
-  const exited = new Promise((resolve) => server.once("exit", resolve));
+  if (!ownedServerPid) return;
+  const running = Boolean(server && server.exitCode === null);
+  const exited = running ? new Promise((resolve) => server.once("exit", resolve)) : Promise.resolve();
   try {
-    if (process.platform === "win32") server.kill("SIGTERM");
-    else process.kill(-server.pid, "SIGTERM");
+    if (process.platform === "win32") server?.kill("SIGTERM");
+    else process.kill(-ownedServerPid, "SIGTERM");
   } catch {
-    server.kill("SIGTERM");
+    if (running) server?.kill("SIGTERM");
   }
+  if (!running) return;
   const stopped = await Promise.race([
     exited.then(() => true),
     new Promise((resolve) => setTimeout(() => resolve(false), 2500)),
   ]);
-  if (stopped || server.exitCode !== null) return;
+  if (stopped || server?.exitCode !== null) return;
   try {
-    if (process.platform === "win32") server.kill("SIGKILL");
-    else process.kill(-server.pid, "SIGKILL");
+    if (process.platform === "win32") server?.kill("SIGKILL");
+    else process.kill(-ownedServerPid, "SIGKILL");
   } catch {
-    server.kill("SIGKILL");
+    server?.kill("SIGKILL");
   }
   await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 1000))]);
 }
@@ -78,6 +72,7 @@ before(async () => {
     stdio: ["ignore", "pipe", "pipe"],
     detached: process.platform !== "win32",
   });
+  ownedServerPid = server.pid;
   server.stdout?.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-12000); });
   server.stderr?.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-12000); });
   await waitForServer();
@@ -106,6 +101,13 @@ test("Pink Cloud CSS declares exact approved tokens and responsive safeguards", 
   assert.match(css, /@media\s*\(min-width:\s*768px\)\s*and\s*\(max-width:\s*1023px\)/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
+});
+
+test("layout server readiness stays tied to the owned process", () => {
+  const source = fs.readFileSync(new URL(import.meta.url), "utf8");
+  assert.doesNotMatch(source, /serverOutput\.match\(\/Local:/, "must not adopt a listener advertised by an exited process");
+  assert.match(source, /serverOutput\.includes\(`http:\/\/localhost:\$\{port\}`\)/, "owned child must advertise the configured port before readiness succeeds");
+  assert.match(source, /ownedServerPid/, "cleanup must retain the owned process-group id");
 });
 
 test("dashboard and quests do not overlap or overflow", { timeout: 120_000 }, async () => {
@@ -221,6 +223,16 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     await mobile.goto(`${origin}/?quest=pressure-diary`, { waitUntil: "domcontentloaded" });
     await mobile.locator(".learning-shell-mobile .mobile-quest-shell").waitFor();
     assert.equal(new URL(mobile.url()).searchParams.get("format"), "mobile");
+    const modeButton = mobile.getByRole("button", { name: /работать на вымышленных данных/i });
+    const modeContent = modeButton.locator(":scope > .mode-option-content");
+    const modeBox = await modeContent.boundingBox();
+    assert.ok(modeBox && modeBox.width > 120 && modeBox.height > 48, "preparation copy collapsed into the old 48px icon circle");
+    const modeGeometry = await modeContent.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return { borderRadius: style.borderRadius, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    assert.equal(modeGeometry.borderRadius, "0px");
+    assert.ok(modeGeometry.overflow <= 1);
     await mobile.getByRole("button", { name: /работать на реальных данных/i }).click();
     const firstChecklist = mobile.locator(".preparation-list input[type=checkbox]").first();
     await firstChecklist.focus();
@@ -235,6 +247,11 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
       return [style.color, style.backgroundColor];
     });
     assert.ok(contrast(...actionColors) >= 4.5, `Mobile CTA contrast is ${contrast(...actionColors).toFixed(2)}:1`);
+    const telegramColors = await mobile.locator(".mobile-action-telegram > button, .mobile-action-telegram > a").first().evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.color, style.backgroundColor];
+    });
+    assert.ok(contrast(...telegramColors) >= 4.5, `Telegram action contrast is ${contrast(...telegramColors).toFixed(2)}:1`);
 
     await mobile.getByRole("button", { name: /феечка, нижняя навигация/i }).click();
     const fairy = mobile.locator('dialog[data-fairy-scope="pressure-diary"]');
@@ -260,11 +277,63 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     assert.match(resetMessage, /сбросить проект/i);
     await mobile.close();
 
+    const explicitDesktop = await browser.newPage({ viewport: { width: 375, height: 900 } });
+    await explicitDesktop.goto(`${origin}/?format=desktop&quest=pressure-diary`, { waitUntil: "domcontentloaded" });
+    await explicitDesktop.locator('[data-client-ready="true"] .quest-shell').waitFor();
+    const mobileSwitch = explicitDesktop.locator(".mobile-format-switch");
+    await mobileSwitch.waitFor();
+    assert.ok(await mobileSwitch.isVisible());
+    await mobileSwitch.click();
+    await explicitDesktop.waitForTimeout(100);
+    assert.equal(new URL(explicitDesktop.url()).searchParams.get("format"), "mobile", `mobile escape did not change route from ${explicitDesktop.url()}`);
+    await explicitDesktop.locator(".learning-shell-mobile").waitFor();
+    assert.equal(new URL(explicitDesktop.url()).searchParams.get("format"), "mobile");
+    await explicitDesktop.close();
+
+    const orientation = await browser.newPage({ viewport: { width: 1024, height: 900 } });
+    await orientation.goto(`${origin}/?quest=pressure-diary`, { waitUntil: "domcontentloaded" });
+    await orientation.locator('[data-client-ready="true"].learning-shell-desktop .quest-shell').waitFor();
+    await orientation.setViewportSize({ width: 375, height: 900 });
+    await orientation.locator(".learning-shell-mobile").waitFor();
+    assert.equal(new URL(orientation.url()).searchParams.get("format"), "mobile");
+    await orientation.setViewportSize({ width: 1024, height: 900 });
+    await orientation.locator(".learning-shell-desktop").waitFor();
+    assert.equal(new URL(orientation.url()).searchParams.has("format"), false);
+    await orientation.close();
+
+    const curator = await browser.newPage({ viewport: { width: 375, height: 900 } });
+    await curator.goto(`${origin}/?format=mobile&quest=server-152fz`, { waitUntil: "domcontentloaded" });
+    const curatorAction = curator.locator(".mobile-action-curator > button, .mobile-action-curator > a").first();
+    await curatorAction.waitFor();
+    const curatorColors = await curatorAction.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return [style.color, style.backgroundColor];
+    });
+    assert.ok(contrast(...curatorColors) >= 4.5, `Curator action contrast is ${contrast(...curatorColors).toFixed(2)}:1`);
+    await curator.close();
+
     const desktop = await browser.newPage({ viewport: { width: 1024, height: 900 } });
     await desktop.goto(`${origin}/?format=desktop&quest=family-budget&output=service`, { waitUntil: "domcontentloaded" });
     await desktop.evaluate(() => {
       localStorage.setItem("feya-academy-output-v1:family-budget", JSON.stringify("service"));
       localStorage.setItem("feya-academy-preparation-v1:family-budget:service", JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+      localStorage.setItem("feya-academy-progress-v1:family-budget:service", JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    });
+    await desktop.reload({ waitUntil: "domcontentloaded" });
+    const customizer = desktop.locator(".quest-customizer");
+    await customizer.waitFor();
+    const customizerStyle = await customizer.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const label = getComputedStyle(node.querySelector(":scope > header p"));
+      const hint = getComputedStyle(node.querySelector(".customizer-axes legend small"));
+      return { background: style.backgroundColor, image: style.backgroundImage, family: style.fontFamily, label: label.color, hint: hint.color };
+    });
+    assert.equal(customizerStyle.image, "none");
+    assert.ok(!/255, 250, 246|247, 239, 233/.test(customizerStyle.background), "customizer kept the beige legacy surface");
+    assert.match(customizerStyle.family, /system-ui|Segoe UI/i);
+    assert.ok(contrast(customizerStyle.label, customizerStyle.background) >= 4.5);
+    assert.ok(contrast(customizerStyle.hint, customizerStyle.background) >= 4.5);
+    await desktop.evaluate(() => {
       localStorage.setItem("feya-academy-progress-v1:family-budget:service", JSON.stringify({ version: 1, activeStep: 4, completed: [1, 2, 3], score: 30 }));
     });
     await desktop.reload({ waitUntil: "domcontentloaded" });

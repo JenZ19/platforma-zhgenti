@@ -82,10 +82,12 @@ export function QuestPreparation({
       <p className="preparation-lead">Выбор сохранится только для квеста «{project.title}». В другом проекте мы спросим снова.</p>
       <div className="mode-options">
         <button type="button" onClick={onChooseDemo} aria-label="Работать на вымышленных данных">
-          <span className="mode-option-icon" aria-hidden="true"><DashboardIcon name="fairy" /></span><span className="mode-option-meta">Легче для первого раза</span><span className="mode-option-title">На вымышленных</span><span className="mode-option-copy">Все примеры уже готовы. Можно сразу пройти весь путь проекта и ни о чём не переживать.</span><span className="mode-option-action">Начать тренировку →</span>
+          <span className="mode-option-icon" aria-hidden="true"><DashboardIcon name="fairy" /></span>
+          <span className="mode-option-content"><span className="mode-option-meta">Легче для первого раза</span><span className="mode-option-title">На вымышленных</span><span className="mode-option-copy">Все примеры уже готовы. Можно сразу пройти весь путь проекта и ни о чём не переживать.</span><span className="mode-option-action">Начать тренировку →</span></span>
         </button>
         <button type="button" onClick={onChooseReal} aria-label="Работать на реальных данных">
-          <span className="mode-option-icon" aria-hidden="true"><DashboardIcon name="projects" /></span><span className="mode-option-meta">Для себя или клиента</span><span className="mode-option-title">На реальных</span><span className="mode-option-copy">Сначала вспомним нужные ответы, затем Codex задаст вопросы и сам создаст всё остальное.</span><span className="mode-option-action">Открыть чек-лист →</span>
+          <span className="mode-option-icon" aria-hidden="true"><DashboardIcon name="projects" /></span>
+          <span className="mode-option-content"><span className="mode-option-meta">Для себя или клиента</span><span className="mode-option-title">На реальных</span><span className="mode-option-copy">Сначала вспомним нужные ответы, затем Codex задаст вопросы и сам создаст всё остальное.</span><span className="mode-option-action">Открыть чек-лист →</span></span>
         </button>
       </div>
       <p className="choice-note">Не уверены? Выбирайте вымышленные данные — проект всё равно получится полноценным.</p>
