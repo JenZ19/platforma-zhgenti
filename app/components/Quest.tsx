@@ -511,7 +511,7 @@ function QuestBody({
             </nav>
           </details>}
 
-          {project.slug === "server-152fz" && <ServerDiscountOffer />}
+          {project.slug === "server-152fz" && step.id === 1 && <ServerDiscountOffer />}
 
           <section className="quest-purpose">
             <h2>Зачем</h2>

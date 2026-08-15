@@ -1535,6 +1535,22 @@ describe("academy interface", () => {
     }
   });
 
+  it("shows the AdminVPS discount only on the first server page", () => {
+    const project = getQuestProject("server-152fz")!;
+    const desktop = render(<Quest project={project} onHome={vi.fn()} />);
+
+    expect(screen.getByRole("heading", { name: /скидка 60% на сервер/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    expect(screen.queryByRole("heading", { name: /скидка 60% на сервер/i })).not.toBeInTheDocument();
+
+    desktop.unmount();
+    localStorage.clear();
+    render(<MobileQuest project={project} onHome={vi.fn()} />);
+    expect(screen.getByRole("heading", { name: /скидка 60% на сервер/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    expect(screen.queryByRole("heading", { name: /скидка 60% на сервер/i })).not.toBeInTheDocument();
+  });
+
   it("shows the server lesson as nine fast levels without the repeated guide gallery", () => {
     const project = getQuestProject("server-152fz")!;
     const { rerender } = render(<Quest project={project} onHome={vi.fn()} />);

@@ -371,7 +371,7 @@ function MobileQuestBody({
         <article className="mobile-quest-step-card" aria-live="polite">
           <header className="mobile-quest-step-heading"><p>{step.eyebrow} · уровень {step.id} из {totalLevels} · ≈ {questLevelMinutes(step.id, "mobile")} мин</p><h1>{step.title}</h1></header>
 
-          {project.slug === "server-152fz" && <ServerDiscountOffer mobile />}
+          {project.slug === "server-152fz" && step.id === 1 && <ServerDiscountOffer mobile />}
 
           <section className="mobile-why"><h2>Зачем</h2><LessonText text={step.why} kind="why" /></section>
 
