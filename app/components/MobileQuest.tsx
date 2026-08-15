@@ -374,7 +374,6 @@ function MobileQuestBody({
           {project.slug === "server-152fz" && <ServerDiscountOffer mobile />}
 
           <section className="mobile-why"><h2>Зачем</h2><LessonText text={step.why} kind="why" /></section>
-          <BeginnerTerms terms={step.beginnerTerms} />
 
           <section className="mobile-do">
             <h2>Что сделать</h2>
@@ -382,6 +381,8 @@ function MobileQuestBody({
             {step.id === 2 && profile && customization && <QuestCustomizer compact profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
             <MobileActionButton action={step.mobileAction} projectSlug={project.slug} step={step.id} />
           </section>
+
+          <BeginnerTerms terms={step.beginnerTerms} />
 
           {step.prompt && <section className="mobile-prompt"><header><h2>Готовая команда для Codex</h2><span>Скопируйте целиком</span></header><p>{step.prompt}</p><button type="button" onClick={() => copyPrompt(step.prompt!, "main")}>{copied === "main" ? "Скопировано ✓" : "Скопировать команду"}</button></section>}
 

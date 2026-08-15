@@ -384,6 +384,26 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     const explicitDesktop = await browser.newPage({ viewport: { width: 375, height: 900 } });
     await explicitDesktop.goto(`${origin}/?format=desktop&quest=pressure-diary`, { waitUntil: "domcontentloaded" });
     await explicitDesktop.locator('[data-client-ready="true"] .quest-shell').waitFor();
+    await explicitDesktop.evaluate(() => {
+      localStorage.setItem("feya-academy-preparation-v1:pressure-diary", JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+      localStorage.setItem("feya-academy-progress-v1:pressure-diary", JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    });
+    await explicitDesktop.reload({ waitUntil: "domcontentloaded" });
+    const compactMap = explicitDesktop.locator(".narrow-desktop-level-map");
+    await compactMap.waitFor();
+    assert.ok(await compactMap.isVisible(), "explicit desktop lost its level map at 375px");
+    await compactMap.locator("summary").click();
+    const compactNavigation = compactMap.getByRole("navigation", { name: /выбор уровня на узком экране/i });
+    assert.ok(await compactNavigation.getByRole("button", { name: /уровень 1:.*пройден/i }).isEnabled());
+    assert.ok(await compactNavigation.getByRole("button", { name: /уровень 2:.*текущий/i }).isEnabled());
+    assert.ok(await compactNavigation.getByRole("button", { name: /уровень 3:.*закрыт/i }).isDisabled());
+    await explicitDesktop.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await compactNavigation.getByRole("button", { name: /уровень 1:.*пройден/i }).click();
+    await explicitDesktop.waitForFunction(() => window.scrollY === 0);
+    assert.equal(await compactMap.getAttribute("open"), null);
+    assert.match(await explicitDesktop.locator(".quest-step-heading").innerText(), /уровень 1 из/i);
+    assert.equal(await explicitDesktop.evaluate(() => JSON.parse(localStorage.getItem("feya-academy-progress-v1:pressure-diary")).activeStep), 1);
+    assert.equal(new URL(explicitDesktop.url()).searchParams.get("format"), "desktop");
     const mobileSwitch = explicitDesktop.locator(".mobile-format-switch");
     await mobileSwitch.waitFor();
     assert.ok(await mobileSwitch.isVisible());

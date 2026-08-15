@@ -1010,6 +1010,10 @@ select {
   border-radius: var(--cloud-radius-lg);
 }
 
+.narrow-desktop-level-map {
+  display: none;
+}
+
 .quest-step-card {
   min-width: 0;
   padding: clamp(22px, 4vw, 48px);
@@ -2844,6 +2848,96 @@ select {
 
   .quest-level-panel {
     display: none;
+  }
+
+  .narrow-desktop-level-map {
+    display: block;
+    margin: 20px 0 6px;
+    border: 1px solid var(--cloud-border);
+    border-radius: 18px;
+    background: var(--cloud-bg-rose);
+  }
+
+  .narrow-desktop-level-map > summary {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--cloud-pink-dark);
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .narrow-desktop-level-map > summary::marker {
+    color: var(--cloud-pink-dark);
+  }
+
+  .narrow-desktop-level-map > summary span {
+    color: var(--cloud-muted);
+    font-size: 14px;
+  }
+
+  .narrow-desktop-level-map nav {
+    max-height: min(52svh, 440px);
+    display: grid;
+    gap: 8px;
+    overflow: auto;
+    padding: 4px 10px 12px;
+  }
+
+  .narrow-desktop-level-map nav button {
+    width: 100%;
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: #fff;
+    color: var(--cloud-text);
+    text-align: left;
+  }
+
+  .narrow-desktop-level-map nav button[aria-current="step"] {
+    border-color: var(--cloud-pink-dark);
+    background: var(--cloud-pink-soft);
+  }
+
+  .narrow-desktop-level-map nav button:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+
+  .narrow-desktop-level-map nav button > span {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--cloud-bg-rose);
+    color: var(--cloud-pink-dark);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .narrow-desktop-level-map nav button > b {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+    overflow-wrap: anywhere;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .narrow-desktop-level-map nav button small {
+    color: var(--cloud-muted);
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .quest-step-card {

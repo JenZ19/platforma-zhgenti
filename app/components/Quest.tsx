@@ -165,7 +165,9 @@ function QuestBody({
   const rewardOpenerRef = useRef<HTMLButtonElement | null>(null);
   const rewardMountedRef = useRef(true);
   const questStepCardRef = useRef<HTMLElement>(null);
+  const narrowLevelMapRef = useRef<HTMLDetailsElement>(null);
   const [imageOpen, setImageOpen] = useState(false);
+  const [narrowViewport, setNarrowViewport] = useState(false);
   const imageDialogRef = useRef<HTMLDialogElement>(null);
   const imageCloseRef = useRef<HTMLButtonElement>(null);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
@@ -175,6 +177,13 @@ function QuestBody({
   const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization, setupPlatform), [project, preparation?.mode, customization, setupPlatform]);
   const checklist = useMemo(() => buildRealDataChecklist(project), [project]);
   const setupQuest = project.journey === "setup";
+
+  useEffect(() => {
+    const syncNarrowViewport = () => setNarrowViewport(window.innerWidth <= 767);
+    syncNarrowViewport();
+    window.addEventListener("resize", syncNarrowViewport);
+    return () => window.removeEventListener("resize", syncNarrowViewport);
+  }, []);
 
   useEffect(() => {
     // Quest progress is stored in this browser and restored after mount.
@@ -472,6 +481,35 @@ function QuestBody({
             <h1>{step.title}</h1>
           </header>
 
+          {narrowViewport && <details ref={narrowLevelMapRef} className="narrow-desktop-level-map">
+            <summary><span>Уровень {step.id} из {totalLevels}</span><b>Карта уровней</b></summary>
+            <nav aria-label="Выбор уровня на узком экране">
+              {steps.map((item) => {
+                const unlocked = isStepUnlocked(progress, item.id);
+                const done = progress.completed.includes(item.id);
+                const current = item.id === step.id;
+                const status = current && done ? "Сейчас · пройден" : current ? "Сейчас" : done ? "Пройден" : unlocked ? "Доступен" : "Закрыт";
+                const stateLabel = current && done ? ", текущий, пройден" : current ? ", текущий" : done ? ", пройден" : unlocked ? ", доступен" : ", закрыт";
+                return (
+                  <button
+                    type="button"
+                    key={item.id}
+                    disabled={!unlocked}
+                    aria-current={current ? "step" : undefined}
+                    aria-label={`Уровень ${item.id}: ${item.title}${stateLabel}`}
+                    onClick={() => {
+                      if (narrowLevelMapRef.current) narrowLevelMapRef.current.open = false;
+                      openStep(item.id);
+                    }}
+                  >
+                    <span aria-hidden="true">{done ? "✓" : item.id}</span>
+                    <b>{item.title}<small>{status}</small></b>
+                  </button>
+                );
+              })}
+            </nav>
+          </details>}
+
           {project.slug === "server-152fz" && <ServerDiscountOffer />}
 
           <section className="quest-purpose">
@@ -479,13 +517,13 @@ function QuestBody({
             <LessonText text={step.why} kind="why" />
           </section>
 
-          <BeginnerTerms terms={step.beginnerTerms} />
-
           <section className="quest-action">
             <h2>Что сделать</h2>
             <LessonText text={step.action} variant="action" kind="action" />
             {step.id === 2 && profile && customization && <QuestCustomizer profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
           </section>
+
+          <BeginnerTerms terms={step.beginnerTerms} />
 
           {step.prompt && (
             <section className="quest-prompt">

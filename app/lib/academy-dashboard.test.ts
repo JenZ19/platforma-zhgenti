@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isProjectBundle, projects } from "../content/projects";
 import { branchStorageSlug, saveOutputChoice } from "./output-format";
-import { completeStep, createEmptyProgress, getProjectLevelCount, progressKey, saveProgress } from "./progress";
+import { completeStep, createEmptyProgress, getProjectLevelCount, progressKey, resetProgress, saveProgress } from "./progress";
 import {
   buildDashboardSnapshot,
   loadDashboardSection,
@@ -90,6 +90,33 @@ describe("academy dashboard state", () => {
       "content-agent",
       "pressure-diary",
     ]);
+  });
+
+  it("ignores an untouched last-active quest when a project is actually started", () => {
+    const storage = new MemoryStorage();
+    const selected = projects.filter((project) => ["install-codex", "pressure-diary"].includes(project.slug));
+    saveLastActiveProject("install-codex", "desktop", storage);
+    saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage, () => "2026-08-15T12:00:00.000Z");
+
+    expect(buildDashboardSnapshot(selected, storage, "desktop").next?.project.slug).toBe("pressure-diary");
+  });
+
+  it("ignores an untouched last-active quest when choosing the current-week recommendation", () => {
+    const storage = new MemoryStorage();
+    const selected = projects.filter((project) => ["install-codex", "pressure-diary"].includes(project.slug));
+    saveLastActiveProject("pressure-diary", "desktop", storage);
+
+    expect(buildDashboardSnapshot(selected, storage, "desktop").next?.project.slug).toBe("install-codex");
+  });
+
+  it("does not let a reset last-active quest replace the current-week recommendation", () => {
+    const storage = new MemoryStorage();
+    const selected = projects.filter((project) => ["install-codex", "pressure-diary"].includes(project.slug));
+    saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage);
+    saveLastActiveProject("pressure-diary", "desktop", storage);
+    resetProgress("pressure-diary", storage);
+
+    expect(buildDashboardSnapshot(selected, storage, "desktop").next?.project.slug).toBe("install-codex");
   });
 
   it("keeps legacy started projects in stable catalogue order without timestamps", () => {

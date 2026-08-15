@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getProject, getQuestProject } from "../content/projects";
-import { loadLastActiveProject, saveDashboardSection } from "../lib/academy-dashboard";
+import { loadDashboardSection, loadLastActiveProject, saveDashboardSection } from "../lib/academy-dashboard";
 import { outputChoiceKey } from "../lib/output-format";
 import { AppEntry } from "./AppEntry";
 import { MobileQuest } from "./MobileQuest";
@@ -14,6 +14,7 @@ describe("bundle format routing", () => {
   beforeEach(() => {
     localStorage.clear();
     window.history.replaceState({}, "", "/");
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
   });
 
   it("asks for the result format before asking about data", () => {
@@ -113,6 +114,37 @@ describe("bundle format routing", () => {
 
     expect(await screen.findByRole("button", { name: "Главная", current: "page" })).toBeInTheDocument();
     await waitFor(() => expect(window.location.search).toBe(canonicalSearch));
+  });
+
+  it("saves explicit home before canonicalizing its URL", async () => {
+    saveDashboardSection("portfolio", localStorage);
+    window.history.replaceState({}, "", "/?section=home");
+    const view = render(<AppEntry />);
+
+    await waitFor(() => expect(window.location.search).toBe(""));
+    expect(loadDashboardSection(localStorage)).toBe("home");
+    view.unmount();
+
+    render(<AppEntry />);
+    expect(await screen.findByRole("button", { name: "Главная", current: "page" })).toBeInTheDocument();
+  });
+
+  it.each([
+    [{ submarineImplicitFormat: true }, "/?format=mobile&section=weeks", 1024, "?section=weeks", "desktop"],
+    [{ submarineImplicitFormat: true }, "/?section=weeks", 375, "?format=mobile&section=weeks", "mobile"],
+  ] as const)("canonicalizes an implicit history entry on popstate without taking format ownership", async (state, url, width, expectedSearch, expectedFormat) => {
+    render(<AppEntry />);
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: width });
+    window.history.replaceState(state, "", url);
+    window.dispatchEvent(new PopStateEvent("popstate", { state }));
+
+    await waitFor(() => expect(window.location.search).toBe(expectedSearch));
+    expect(document.querySelector(`[data-learning-shell].learning-shell-${expectedFormat}`)).not.toBeNull();
+
+    const nextWidth = width === 375 ? 1024 : 375;
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: nextWidth });
+    window.dispatchEvent(new Event("resize"));
+    await waitFor(() => expect(document.querySelector(`[data-learning-shell].learning-shell-${expectedFormat === "mobile" ? "desktop" : "mobile"}`)).not.toBeNull());
   });
 
   it("changes only the dashboard format and preserves section and search", async () => {

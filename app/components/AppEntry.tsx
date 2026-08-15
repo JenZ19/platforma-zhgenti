@@ -78,9 +78,14 @@ function parseRoute(search: string, savedSection: DashboardSection = "home", cli
       ? dashboardQuery("home", format, dashboardSearch, formatExplicit && format === "desktop")
       : undefined;
     const missingClientFormat = !formatExplicit && clientDefaultFormat === "mobile";
+    const implicitFormatSearch = formatParamImplicit
+      ? dashboardQuery(section, format, dashboardSearch)
+      : undefined;
     return {
       route: { type: "home", format, formatExplicit, section, search: dashboardSearch },
-      canonicalSearch: canonicalSearch ?? (missingClientFormat ? dashboardQuery(section, format, dashboardSearch) : undefined),
+      canonicalSearch: canonicalSearch
+        ?? implicitFormatSearch
+        ?? (missingClientFormat ? dashboardQuery(section, format, dashboardSearch) : undefined),
     };
   }
   const resolved = resolvePublicProjectRoute(quest, query.get("output") ?? undefined);
@@ -105,6 +110,9 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
       const savedSection = restoreSavedSection ? loadDashboardSection(window.localStorage) : "home";
       const clientDefaultFormat = window.innerWidth <= 767 ? "mobile" : "desktop";
       const formatParamImplicit = window.history.state?.submarineImplicitFormat === true;
+      if (new URLSearchParams(window.location.search).get("section") === "home") {
+        saveDashboardSection("home", window.localStorage);
+      }
       const parsed = parseRoute(window.location.search, savedSection, clientDefaultFormat, formatParamImplicit);
       if (parsed.canonicalSearch !== undefined && window.location.search !== parsed.canonicalSearch) {
         const historyState = !parsed.route.type.startsWith("capture") && "formatExplicit" in parsed.route && !parsed.route.formatExplicit

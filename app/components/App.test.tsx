@@ -969,8 +969,8 @@ describe("academy interface", () => {
     fireEvent.click(within(workspace!).getByRole("button", { name: /^нужна помощь$/i }));
     const ordered = [
       workspace!.querySelector(".quest-purpose"),
-      workspace!.querySelector(".beginner-terms"),
       workspace!.querySelector(".quest-action"),
+      workspace!.querySelector(".beginner-terms"),
       workspace!.querySelector(".quest-prompt"),
       workspace!.querySelector(".quest-guide"),
       workspace!.querySelector(".quest-result"),
@@ -1140,6 +1140,31 @@ describe("academy interface", () => {
     expect(container.querySelector(".quest-step-heading")).toHaveTextContent(/уровень 2 из/i);
   });
 
+  it("offers an accessible compact level map for a narrow desktop quest", () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    const project = getQuestProject("pressure-diary")!;
+    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    const { container } = render(<Quest project={project} onHome={vi.fn()} />);
+    const compactMap = container.querySelector<HTMLDetailsElement>(".narrow-desktop-level-map");
+
+    expect(compactMap).not.toBeNull();
+    expect(within(compactMap!).getByText(/уровень 2 из/i)).toBeInTheDocument();
+    const navigation = within(compactMap!).getByRole("navigation", { name: /выбор уровня на узком экране/i });
+    expect(within(navigation).getByRole("button", { name: /уровень 1:.*пройден/i })).toBeEnabled();
+    expect(within(navigation).getByRole("button", { name: /уровень 2:.*текущий/i })).toHaveAttribute("aria-current", "step");
+    expect(within(navigation).getByRole("button", { name: /уровень 3:.*закрыт/i })).toBeDisabled();
+
+    compactMap!.open = true;
+    vi.mocked(window.scrollTo).mockClear();
+    fireEvent.click(within(navigation).getByRole("button", { name: /уровень 1:.*пройден/i }));
+
+    expect(compactMap).not.toHaveAttribute("open");
+    expect(container.querySelector(".quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
+    expect(JSON.parse(localStorage.getItem(progressKey(project.slug))!)).toMatchObject({ activeStep: 1, completed: [1] });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+  });
+
   it("uses the same desktop step opener for map, back and a completed-step continuation", () => {
     const project = getQuestProject("pressure-diary")!;
     localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
@@ -1247,8 +1272,8 @@ describe("academy interface", () => {
     const ordered = [
       mandatory[0],
       mandatory[1],
-      workspace.querySelector(".beginner-terms"),
       mandatory[2],
+      workspace.querySelector(".beginner-terms"),
       mandatory[3],
       mandatory[4],
       workspace.querySelector(".quest-links"),

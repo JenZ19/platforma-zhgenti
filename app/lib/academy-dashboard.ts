@@ -205,7 +205,7 @@ export function buildDashboardSnapshot(
   const lastSlug = loadLastActiveProject(surface, storage);
   const next = completed.length === items.length
     ? null
-    : items.find((item) => item.project.slug === lastSlug && item.status !== "completed")
+    : items.find((item) => item.project.slug === lastSlug && item.status === "started")
       ?? started[0]
       ?? items.find((item) => projectWeeks(item.project).includes(currentWeek) && item.status !== "completed")
       ?? null;
