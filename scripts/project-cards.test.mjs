@@ -25,3 +25,11 @@ test("result covers fill their frame without the legacy screenshot crop", () => 
   assert.match(css, /\.dashboard-project-card \.project-preview img[\s\S]{0,420}transform:\s*none/);
   assert.match(css, /\.dashboard-project-card \.project-preview-bundle > div img[\s\S]{0,180}position:\s*static/);
 });
+
+test("every result preview renders its thematic sticker from the shared identity registry", () => {
+  assert.match(preview, /getProjectCardIdentity\(project\)/);
+  assert.match(preview, /className=\{`project-preview-sticker/);
+  assert.match(preview, /data-project-sticker=\{project\.slug\}/);
+  assert.match(preview, /--project-sticker-accent/);
+  assert.match(preview, /aria-hidden="true"/);
+});

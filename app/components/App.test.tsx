@@ -23,6 +23,7 @@ import { MobileAcademy } from "./MobileAcademy";
 import { MobileQuest } from "./MobileQuest";
 import { MobileExpectedScene } from "./MobileExpectedScene";
 import { ProjectCard } from "./ProjectCard";
+import { ProjectPreview } from "./ProjectPreview";
 import { Quest } from "./Quest";
 import { QuestLinks } from "./QuestLinks";
 import { QuestPreparation } from "./QuestPreparation";
@@ -415,6 +416,22 @@ describe("academy interface", () => {
     expect(screen.getByRole("heading", { name: "Готовые" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "На потом" })).toBeInTheDocument();
     expect(screen.getAllByRole("article", { name: /дневник давления/i })).toHaveLength(1);
+  });
+
+  it("shows a thematic sticker on each result preview", () => {
+    const familyExpenses = getQuestProject("family-expenses");
+    const webinarModerator = getQuestProject("webinar-moderator-agent");
+    expect(familyExpenses).toBeDefined();
+    expect(webinarModerator).toBeDefined();
+
+    const view = render(<ProjectPreview project={familyExpenses!} />);
+    const firstSticker = screen.getByText("Учёт расходов").closest(".project-preview-sticker");
+    expect(firstSticker).toHaveAttribute("data-project-sticker", "family-expenses");
+    expect(firstSticker).toHaveStyle({ "--project-sticker-accent": "#8f512d" });
+
+    view.rerender(<ProjectPreview project={webinarModerator!} />);
+    expect(screen.getByText("Модератор вебинара").closest(".project-preview-sticker"))
+      .toHaveAttribute("data-project-sticker", "webinar-moderator-agent");
   });
 
   it("shows six openable weeks, applies URL search and resets an empty result", async () => {
