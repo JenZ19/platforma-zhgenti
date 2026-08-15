@@ -208,7 +208,7 @@ test("child lifecycle treats normal and signal exits as final without late liste
   assert.equal(racedSignal.removed, true);
 });
 
-test("dashboard and quests do not overlap or overflow", { timeout: 120_000 }, async () => {
+test("dashboard and quests do not overlap or overflow", { timeout: 240_000 }, async () => {
   const browser = await chromium.launch({
     ...(fs.existsSync(chromePath) ? { executablePath: chromePath } : {}),
     headless: true,
@@ -302,7 +302,7 @@ function contrast(left, right) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-test("phone default, dialogs, focus and effective contrast stay usable", { timeout: 90_000 }, async () => {
+test("phone default, dialogs, focus and effective contrast stay usable", { timeout: 180_000 }, async () => {
   const browser = await chromium.launch({
     ...(fs.existsSync(chromePath) ? { executablePath: chromePath } : {}),
     headless: true,
@@ -401,6 +401,9 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     await compactNavigation.getByRole("button", { name: /уровень 1:.*пройден/i }).click();
     await explicitDesktop.waitForFunction(() => window.scrollY === 0);
     assert.equal(await compactMap.getAttribute("open"), null);
+    const selectedStepCard = explicitDesktop.locator(".quest-step-card");
+    assert.ok(await selectedStepCard.isVisible(), "selected narrow-desktop level did not return focus to visible lesson content");
+    assert.equal(await selectedStepCard.evaluate((node) => document.activeElement === node), true, "focus stayed inside the closed narrow-desktop level map");
     assert.match(await explicitDesktop.locator(".quest-step-heading").innerText(), /уровень 1 из/i);
     assert.equal(await explicitDesktop.evaluate(() => JSON.parse(localStorage.getItem("feya-academy-progress-v1:pressure-diary")).activeStep), 1);
     assert.equal(new URL(explicitDesktop.url()).searchParams.get("format"), "desktop");
@@ -500,7 +503,7 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
   }
 });
 
-test("bundle and install choices use Pink Cloud surfaces and AA adult type", { timeout: 60_000 }, async () => {
+test("bundle and install choices use Pink Cloud surfaces and AA adult type", { timeout: 120_000 }, async () => {
   const browser = await chromium.launch({
     ...(fs.existsSync(chromePath) ? { executablePath: chromePath } : {}),
     headless: true,

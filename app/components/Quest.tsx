@@ -500,6 +500,7 @@ function QuestBody({
                     onClick={() => {
                       if (narrowLevelMapRef.current) narrowLevelMapRef.current.open = false;
                       openStep(item.id);
+                      if (questStepCardRef.current?.isConnected) questStepCardRef.current.focus({ preventScroll: true });
                     }}
                   >
                     <span aria-hidden="true">{done ? "✓" : item.id}</span>

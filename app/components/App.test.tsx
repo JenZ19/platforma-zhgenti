@@ -1160,6 +1160,8 @@ describe("academy interface", () => {
     fireEvent.click(within(navigation).getByRole("button", { name: /уровень 1:.*пройден/i }));
 
     expect(compactMap).not.toHaveAttribute("open");
+    const stepCard = container.querySelector<HTMLElement>(".quest-step-card");
+    expect(stepCard).toHaveFocus();
     expect(container.querySelector(".quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
     expect(JSON.parse(localStorage.getItem(progressKey(project.slug))!)).toMatchObject({ activeStep: 1, completed: [1] });
     expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
