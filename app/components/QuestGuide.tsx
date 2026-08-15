@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { QuestGuideFrame } from "../content/types";
+import { DashboardIcon } from "./DashboardIcon";
 
 function copyLabel(frame: QuestGuideFrame) {
   if (/анкет/i.test(frame.title)) return "Скопировать анкету";
@@ -155,7 +156,7 @@ export function QuestGuide({ frames }: { frames: QuestGuideFrame[] }) {
       >
         {openFrame && (
           <>
-            <button ref={closeRef} type="button" aria-label={`Закрыть увеличенный кадр ${openFrame.id}`} onClick={closeDialog}><span aria-hidden="true">×</span><span>Закрыть</span></button>
+            <button ref={closeRef} type="button" aria-label={`Закрыть увеличенный кадр ${openFrame.id}`} onClick={closeDialog}><DashboardIcon name="close" /><span>Закрыть</span></button>
             <img src={openFrame.screenshot} alt={`Увеличенный кадр ${openFrame.id}: ${openFrame.title}`} />
           </>
         )}

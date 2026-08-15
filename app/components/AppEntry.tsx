@@ -25,8 +25,8 @@ import {
 import { LearningShell } from "./LearningShell";
 
 type Route =
-  | { type: "home"; format: "desktop" | "mobile"; section: DashboardSection; search: string }
-  | { type: "quest"; slug: string; output?: ProjectFormat; format: "desktop" | "mobile" }
+  | { type: "home"; format: "desktop" | "mobile"; formatExplicit: boolean; section: DashboardSection; search: string }
+  | { type: "quest"; slug: string; output?: ProjectFormat; format: "desktop" | "mobile"; formatExplicit: boolean }
   | { type: "capture"; slug: string; step: number }
   | { type: "capture-mobile"; slug: string; step: number }
   | { type: "capture-guide"; slug: string; mode: "real" | "demo"; step: number; frame: number };
@@ -38,16 +38,23 @@ type ParsedRoute = {
   canonicalSearch?: string;
 };
 
-function dashboardQuery(section: DashboardSection, format: "desktop" | "mobile", search = ""): string {
+function dashboardQuery(section: DashboardSection, format: "desktop" | "mobile", search = "", explicitDesktop = false): string {
   const query = new URLSearchParams();
   if (format === "mobile") query.set("format", "mobile");
+  else if (explicitDesktop) query.set("format", "desktop");
   if (section !== "home") query.set("section", section);
   if (search.trim()) query.set("q", search);
   const value = query.toString();
   return value ? `?${value}` : "";
 }
 
-function parseRoute(search: string, savedSection: DashboardSection = "home"): ParsedRoute {
+function questQuery(resolved: { slug: string; output?: ProjectFormat; legacy: boolean }, format: "desktop" | "mobile", explicitDesktop = false): string {
+  const canonical = canonicalQuestQuery(resolved, format === "mobile");
+  if (format !== "desktop" || !explicitDesktop) return canonical;
+  return canonical.replace(/^\?/, "?format=desktop&");
+}
+
+function parseRoute(search: string, savedSection: DashboardSection = "home", clientDefaultFormat: "desktop" | "mobile" = "desktop"): ParsedRoute {
   const query = new URLSearchParams(search);
   const guideCapture = query.get("capture-guide")?.match(/^(.+)--(real|demo)--step-(\d{2})--frame-(\d{2})$/);
   if (guideCapture) return { route: { type: "capture-guide", slug: guideCapture[1], mode: guideCapture[2] as "real" | "demo", step: Number(guideCapture[3]), frame: Number(guideCapture[4]) } };
@@ -56,7 +63,9 @@ function parseRoute(search: string, savedSection: DashboardSection = "home"): Pa
   const capture = query.get("capture")?.match(/^(.+)--step-(\d{2})$/);
   if (capture) return { route: { type: "capture", slug: capture[1], step: Number(capture[2]) } };
   const quest = query.get("quest");
-  const format = query.get("format") === "mobile" ? "mobile" : "desktop";
+  const rawFormat = query.get("format");
+  const formatExplicit = rawFormat === "mobile" || rawFormat === "desktop";
+  const format = rawFormat === "mobile" ? "mobile" : rawFormat === "desktop" ? "desktop" : clientDefaultFormat;
   const rawSection = query.get("section");
   const section = rawSection === null
     ? savedSection
@@ -66,21 +75,25 @@ function parseRoute(search: string, savedSection: DashboardSection = "home"): Pa
   if (!quest) {
     const dashboardSearch = query.get("q") ?? "";
     const canonicalSearch = rawSection !== null && (rawSection === "home" || section === "home")
-      ? dashboardQuery("home", format, dashboardSearch)
+      ? dashboardQuery("home", format, dashboardSearch, formatExplicit && format === "desktop")
       : undefined;
-    return { route: { type: "home", format, section, search: dashboardSearch }, canonicalSearch };
+    const missingClientFormat = !formatExplicit && clientDefaultFormat === "mobile";
+    return {
+      route: { type: "home", format, formatExplicit, section, search: dashboardSearch },
+      canonicalSearch: canonicalSearch ?? (missingClientFormat ? dashboardQuery(section, format, dashboardSearch) : undefined),
+    };
   }
   const resolved = resolvePublicProjectRoute(quest, query.get("output") ?? undefined);
-  if (!resolved) return { route: { type: "home", format, section, search: query.get("q") ?? "" } };
-  const canonical = canonicalQuestQuery(resolved, format === "mobile");
+  if (!resolved) return { route: { type: "home", format, formatExplicit, section, search: query.get("q") ?? "" } };
+  const canonical = questQuery(resolved, format, formatExplicit && format === "desktop");
   return {
-    route: { type: "quest", slug: resolved.slug, output: resolved.output, format },
+    route: { type: "quest", slug: resolved.slug, output: resolved.output, format, formatExplicit },
     canonicalSearch: canonical,
   };
 }
 
-function dashboardUrl(section: DashboardSection, format: "desktop" | "mobile", search = ""): string {
-  return dashboardQuery(section, format, search) || window.location.pathname;
+function dashboardUrl(section: DashboardSection, format: "desktop" | "mobile", search = "", explicitDesktop = false): string {
+  return dashboardQuery(section, format, search, explicitDesktop) || window.location.pathname;
 }
 
 export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
@@ -89,7 +102,8 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   useEffect(() => {
     const readBrowserRoute = (restoreSavedSection: boolean) => {
       const savedSection = restoreSavedSection ? loadDashboardSection(window.localStorage) : "home";
-      const parsed = parseRoute(window.location.search, savedSection);
+      const clientDefaultFormat = window.innerWidth <= 767 ? "mobile" : "desktop";
+      const parsed = parseRoute(window.location.search, savedSection, clientDefaultFormat);
       if (parsed.canonicalSearch !== undefined && window.location.search !== parsed.canonicalSearch) {
         window.history.replaceState({}, "", `${window.location.pathname}${parsed.canonicalSearch}${window.location.hash}`);
       }
@@ -112,38 +126,41 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     format: "desktop" | "mobile" = route.type === "home" || route.type === "quest" ? route.format : "desktop",
     output?: ProjectFormat,
   ) {
-    const query = canonicalQuestQuery({ slug, output, legacy: false }, format === "mobile");
+    const formatExplicit = format === "mobile" || ((route.type === "home" || route.type === "quest") && route.formatExplicit);
+    const query = questQuery({ slug, output, legacy: false }, format, format === "desktop" && formatExplicit);
     window.history.pushState({}, "", query);
-    setRoute({ type: "quest", slug, output, format });
+    setRoute({ type: "quest", slug, output, format, formatExplicit });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function openSection(section: DashboardSection) {
     const format = route.type === "home" || route.type === "quest" ? route.format : "desktop";
-    window.history.pushState({}, "", dashboardUrl(section, format));
+    const formatExplicit = (route.type === "home" || route.type === "quest") && route.formatExplicit;
+    window.history.pushState({}, "", dashboardUrl(section, format, "", formatExplicit && format === "desktop"));
     saveDashboardSection(section, window.localStorage);
-    setRoute({ type: "home", section, search: "", format });
+    setRoute({ type: "home", section, search: "", format, formatExplicit });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function openSearch(search: string) {
     const format = route.type === "home" || route.type === "quest" ? route.format : "desktop";
-    window.history.pushState({}, "", dashboardUrl("weeks", format, search));
+    const formatExplicit = (route.type === "home" || route.type === "quest") && route.formatExplicit;
+    window.history.pushState({}, "", dashboardUrl("weeks", format, search, formatExplicit && format === "desktop"));
     saveDashboardSection("weeks", window.localStorage);
-    setRoute({ type: "home", section: "weeks", search, format });
+    setRoute({ type: "home", section: "weeks", search, format, formatExplicit });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function updateDashboardSearch(search: string) {
     if (route.type !== "home") return;
-    window.history.replaceState({}, "", dashboardUrl(route.section, route.format, search));
+    window.history.replaceState({}, "", dashboardUrl(route.section, route.format, search, route.formatExplicit && route.format === "desktop"));
     setRoute({ ...route, search });
   }
 
   function changeOutput(output?: ProjectFormat) {
     if (route.type !== "quest") return;
     const next = { ...route, output };
-    const query = canonicalQuestQuery({ slug: route.slug, output, legacy: false }, route.format === "mobile");
+    const query = questQuery({ slug: route.slug, output, legacy: false }, route.format, route.formatExplicit && route.format === "desktop");
     window.history.replaceState({}, "", query);
     setRoute(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -156,16 +173,16 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   function changeFormat() {
     if (route.type === "quest") {
       const format = route.format === "mobile" ? "desktop" : "mobile";
-      const query = canonicalQuestQuery({ slug: route.slug, output: route.output, legacy: false }, format === "mobile");
+      const query = questQuery({ slug: route.slug, output: route.output, legacy: false }, format, format === "desktop");
       window.history.replaceState({}, "", query);
-      setRoute({ ...route, format });
+      setRoute({ ...route, format, formatExplicit: true });
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     if (route.type !== "home") return;
     const format = route.format === "mobile" ? "desktop" : "mobile";
-    window.history.replaceState({}, "", dashboardUrl(route.section, format, route.search));
-    setRoute({ ...route, format });
+    window.history.replaceState({}, "", dashboardUrl(route.section, format, route.search, format === "desktop"));
+    setRoute({ ...route, format, formatExplicit: true });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

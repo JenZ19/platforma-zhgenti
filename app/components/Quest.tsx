@@ -38,6 +38,7 @@ import { BeginnerTerms } from "./BeginnerTerms";
 import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
 import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
 import { questLevelMinutes } from "../lib/quest-duration";
+import { DashboardIcon } from "./DashboardIcon";
 
 export function Quest({
   project,
@@ -159,6 +160,10 @@ function QuestBody({
   const [helpOpen, setHelpOpen] = useState(false);
   const [copied, setCopied] = useState<"main" | "help" | null>(null);
   const [reward, setReward] = useState<string | null>(null);
+  const rewardDialogRef = useRef<HTMLDialogElement>(null);
+  const rewardCloseRef = useRef<HTMLButtonElement>(null);
+  const rewardOpenerRef = useRef<HTMLButtonElement | null>(null);
+  const rewardMountedRef = useRef(true);
   const [imageOpen, setImageOpen] = useState(false);
   const imageDialogRef = useRef<HTMLDialogElement>(null);
   const imageCloseRef = useRef<HTMLButtonElement>(null);
@@ -205,11 +210,42 @@ function QuestBody({
   }, [imageOpen]);
 
   useEffect(() => {
+    const dialog = rewardDialogRef.current;
+    if (!reward || !dialog) return;
+    try {
+      if (typeof dialog.showModal === "function") {
+        if (!dialog.open) dialog.showModal();
+      } else {
+        dialog.setAttribute("open", "");
+      }
+    } catch {
+      dialog.setAttribute("open", "");
+    }
+    rewardCloseRef.current?.focus();
+  }, [reward]);
+
+  useEffect(() => {
     const dialog = imageDialogRef.current;
     imageMountedRef.current = true;
     return () => {
       imageMountedRef.current = false;
       imageOpenerRef.current = null;
+      if (!dialog?.open) return;
+      try {
+        if (typeof dialog.close === "function") dialog.close();
+        else dialog.removeAttribute("open");
+      } catch {
+        dialog.removeAttribute("open");
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const dialog = rewardDialogRef.current;
+    rewardMountedRef.current = true;
+    return () => {
+      rewardMountedRef.current = false;
+      rewardOpenerRef.current = null;
       if (!dialog?.open) return;
       try {
         if (typeof dialog.close === "function") dialog.close();
@@ -274,7 +310,7 @@ function QuestBody({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function finishStep() {
+  function finishStep(opener?: HTMLButtonElement) {
     const wasDone = progress.completed.includes(step.id);
     if (wasDone) {
       if (step.id < lastLevel) openStep(step.id + 1);
@@ -282,7 +318,10 @@ function QuestBody({
     }
     const completed = completeStep(progress, step.id, totalLevels);
     openStep(completed.activeStep, completed);
-    if (!wasDone && step.reward) setReward(step.reward);
+    if (!wasDone && step.reward) {
+      rewardOpenerRef.current = opener ?? null;
+      setReward(step.reward);
+    }
   }
 
   async function copy(text: string, kind: "main" | "help") {
@@ -314,6 +353,32 @@ function QuestBody({
     } catch {
       dialog.removeAttribute("open");
       finishImageDialog();
+    }
+  }
+
+  function finishRewardDialog() {
+    if (!rewardMountedRef.current) return;
+    const opener = rewardOpenerRef.current;
+    rewardOpenerRef.current = null;
+    setReward(null);
+    if (opener?.isConnected) opener.focus();
+  }
+
+  function closeRewardDialog() {
+    const dialog = rewardDialogRef.current;
+    if (!dialog) {
+      finishRewardDialog();
+      return;
+    }
+    try {
+      if (typeof dialog.close === "function" && dialog.open) dialog.close();
+      else {
+        dialog.removeAttribute("open");
+        finishRewardDialog();
+      }
+    } catch {
+      dialog.removeAttribute("open");
+      finishRewardDialog();
     }
   }
 
@@ -445,7 +510,7 @@ function QuestBody({
 
           <footer className="quest-step-actions">
             <button type="button" onClick={() => openStep(step.id - 1)} disabled={step.id === 1}>← Назад</button>
-            <button type="button" disabled={finished && step.id === lastLevel} onClick={finishStep}>{stepDone ? (step.id === lastLevel ? "Квест пройден ✦" : "Продолжить →") : step.id === lastLevel ? "Завершить квест ✦" : "Я сделала — продолжить →"}</button>
+            <button type="button" disabled={finished && step.id === lastLevel} onClick={(event) => finishStep(event.currentTarget)}>{stepDone ? (step.id === lastLevel ? "Квест пройден ✦" : "Продолжить →") : step.id === lastLevel ? "Завершить квест ✦" : "Я сделала — продолжить →"}</button>
           </footer>
         </article>
 
@@ -490,11 +555,22 @@ function QuestBody({
           onCancel={(event) => { event.preventDefault(); closeImageDialog(); }}
           onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeImageDialog(); } }}
         >
-          <button ref={imageCloseRef} type="button" aria-label="Закрыть увеличенный пример" onClick={closeImageDialog}><span aria-hidden="true">×</span><span>Закрыть</span></button>
+          <button ref={imageCloseRef} type="button" aria-label="Закрыть увеличенный пример" onClick={closeImageDialog}><DashboardIcon name="close" /><span>Закрыть</span></button>
           <img src={step.screenshot} alt={screenshotAlt} />
         </dialog>
       )}
-      {reward && <div className="reward-modal" role="dialog" aria-modal="true" aria-label="Новая награда"><div><p>✦ · ✧ · ✦</p><span>Новая награда</span><h3>{reward}</h3><b>+10 искр в твою коллекцию</b><button type="button" className="primary-button" onClick={() => setReward(null)}>Забрать награду</button></div></div>}
+      {reward && (
+        <dialog
+          ref={rewardDialogRef}
+          className="reward-modal"
+          aria-label="Новая награда"
+          onClose={finishRewardDialog}
+          onCancel={(event) => { event.preventDefault(); closeRewardDialog(); }}
+          onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeRewardDialog(); } }}
+        >
+          <div><p>✦ · ✧ · ✦</p><span>Новая награда</span><h3>{reward}</h3><b>+10 искр в твою коллекцию</b><button ref={rewardCloseRef} type="button" className="primary-button" onClick={closeRewardDialog}>Забрать награду</button></div>
+        </dialog>
+      )}
     </>
   );
 }

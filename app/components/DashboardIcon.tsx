@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type DashboardIconName = "home" | "projects" | "weeks" | "portfolio" | "fairy" | "search" | "chevron" | "close" | "reset";
+export type DashboardIconName = "home" | "projects" | "weeks" | "portfolio" | "fairy" | "search" | "chevron" | "close" | "reset" | "plus";
 
 const paths: Record<DashboardIconName, ReactNode> = {
   home: <><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10.5V20h13v-9.5" /><path d="M9.5 20v-6h5v6" /></>,
@@ -12,6 +12,7 @@ const paths: Record<DashboardIconName, ReactNode> = {
   chevron: <path d="m7 9 5 5 5-5" />,
   close: <path d="m6 6 12 12M18 6 6 18" />,
   reset: <><path d="M4 9V4h5" /><path d="M5.6 17.2A8 8 0 1 0 6 6" /></>,
+  plus: <path d="M12 5v14M5 12h14" />,
 };
 
 export function DashboardIcon({ name }: { name: DashboardIconName }) {

@@ -11,6 +11,7 @@ import type {
   QuestCustomizationAxis,
   QuestCustomizationProfile,
 } from "../content/types";
+import { DashboardIcon } from "./DashboardIcon";
 
 const axes: QuestCustomizationAxis[] = [
   "audience",
@@ -201,7 +202,7 @@ export function QuestCustomizer({
             className={`palette-custom-button ${customPalette ? "selected" : ""}`}
             onClick={chooseCustomPalette}
           >
-            <span aria-hidden="true">＋</span>
+            <span aria-hidden="true"><DashboardIcon name="plus" /></span>
             <b>Собрать свою гамму</b>
           </button>
         </div>

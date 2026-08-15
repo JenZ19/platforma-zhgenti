@@ -111,6 +111,7 @@ describe("academy interface", () => {
     localStorage.clear();
     vi.clearAllMocks();
     window.history.replaceState({}, "", "/");
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
     setSpeechRecognition();
     MockSpeechRecognition.latest = null;
     MockSpeechRecognition.instances = [];
@@ -174,6 +175,38 @@ describe("academy interface", () => {
 
     expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
+  });
+
+  it("chooses the mobile quest on a first phone visit without overriding SSR", async () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    const serverHtml = renderToString(<AppEntry initialSearch="?quest=pressure-diary" />);
+    expect(serverHtml).toContain("learning-shell-desktop");
+
+    window.history.replaceState({}, "", "/?quest=pressure-diary");
+    const { container } = render(<AppEntry initialSearch="?quest=pressure-diary" />);
+
+    await waitFor(() => expect(container.querySelector(".mobile-quest-shell")).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    expect(container.querySelector('[data-quest-workspace="mobile"]')).not.toBeNull();
+    expect(screen.getByRole("button", { name: /открыть карту уровней/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /я сделала — продолжить/i })).toBeInTheDocument();
+  });
+
+  it("preserves explicit desktop and mobile formats regardless of phone width", async () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    window.history.replaceState({}, "", "/?format=desktop&quest=pressure-diary");
+    const view = render(<AppEntry />);
+
+    await waitFor(() => expect(view.container.querySelector(".quest-shell")).not.toBeNull());
+    expect(view.container.querySelector(".mobile-quest-shell")).toBeNull();
+    expect(window.location.search).toBe("?format=desktop&quest=pressure-diary");
+
+    view.unmount();
+    window.history.replaceState({}, "", "/?format=mobile&quest=pressure-diary");
+    const mobile = render(<AppEntry />);
+    await waitFor(() => expect(mobile.container.querySelector(".mobile-quest-shell")).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
   });
 
   it("preserves the mobile format in primary and card hrefs", async () => {
@@ -630,6 +663,32 @@ describe("academy interface", () => {
     ]);
   });
 
+  it("opens one contextual Fairy from the mobile quest bottom navigation", async () => {
+    window.history.replaceState({}, "", "/?format=mobile&quest=pressure-diary");
+    render(<AppEntry />);
+
+    const trigger = await screen.findByRole("button", { name: /феечка, нижняя навигация/i });
+    fireEvent.click(trigger);
+
+    const dialog = screen.getByRole("dialog", { name: /феечка/i });
+    expect(dialog).toHaveAttribute("data-fairy-scope", "pressure-diary");
+    expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
+    expect(screen.getAllByRole("textbox", { name: /вопрос феечке/i })).toHaveLength(1);
+    expect(document.querySelector('main[data-dashboard-section="fairy"]')).toBeNull();
+  });
+
+  it("keeps bottom-navigation Fairy as a full academy section outside a quest", async () => {
+    window.history.replaceState({}, "", "/?format=mobile");
+    render(<AppEntry />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /феечка, нижняя навигация/i }));
+
+    await waitFor(() => expect(document.querySelector('main[data-dashboard-section="fairy"]')).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&section=fairy");
+    expect(screen.queryByRole("dialog", { name: /феечка/i })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("textbox", { name: /вопрос феечке/i })).toHaveLength(1);
+  });
+
   it("shows the microphone only when speech recognition exists and never auto-saves a transcript", async () => {
     setSpeechRecognition(MockSpeechRecognition, true);
     render(<FairyAssistant scope="academy" mode="full" />);
@@ -869,6 +928,45 @@ describe("academy interface", () => {
       expect(dialog).toHaveAttribute("open");
       fireEvent.click(screen.getByRole("button", { name: /закрыть увеличенный пример/i }));
       expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+      expect(opener).toHaveFocus();
+    } finally {
+      Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: originalShowModal });
+    }
+  });
+
+  it("opens rewards as a native modal, supports Escape and restores the exact action opener", () => {
+    const project = getQuestProject("family-expenses")!;
+    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 4, completed: [1, 2, 3], score: 30 }));
+    render(<Quest project={project} onHome={vi.fn()} />);
+    const opener = screen.getByRole("button", { name: /я сделала — продолжить/i });
+    opener.focus();
+
+    fireEvent.click(opener);
+
+    const dialog = screen.getByRole("dialog", { name: "Новая награда" });
+    expect(dialog.tagName).toBe("DIALOG");
+    expect(dialog).not.toHaveAttribute("aria-modal");
+    expect(screen.getByRole("button", { name: /забрать награду/i })).toHaveFocus();
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Новая награда" })).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+  });
+
+  it("keeps the native reward usable when showModal is unavailable", () => {
+    const originalShowModal = HTMLDialogElement.prototype.showModal;
+    Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: undefined });
+    const project = getQuestProject("family-expenses")!;
+    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 4, completed: [1, 2, 3], score: 30 }));
+
+    try {
+      render(<Quest project={project} onHome={vi.fn()} />);
+      const opener = screen.getByRole("button", { name: /я сделала — продолжить/i });
+      fireEvent.click(opener);
+      expect(screen.getByRole("dialog", { name: "Новая награда" })).toHaveAttribute("open");
+      fireEvent.click(screen.getByRole("button", { name: /забрать награду/i }));
+      expect(screen.queryByRole("dialog", { name: "Новая награда" })).not.toBeInTheDocument();
       expect(opener).toHaveFocus();
     } finally {
       Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: originalShowModal });

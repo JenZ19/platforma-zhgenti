@@ -38,7 +38,7 @@ export function LearningShell({
 }: LearningShellProps) {
   const [search, setSearch] = useState(searchQuery);
   const [fairyOpen, setFairyOpen] = useState(false);
-  const fairyTriggerRef = useRef<HTMLButtonElement>(null);
+  const fairyOpenerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Route changes can replace the query while the persistent shell stays mounted.
@@ -55,8 +55,13 @@ export function LearningShell({
 
   const closeFairy = useCallback(() => {
     setFairyOpen(false);
-    fairyTriggerRef.current?.focus();
+    fairyOpenerRef.current?.focus();
   }, []);
+
+  function openContextualFairy(opener: HTMLButtonElement) {
+    fairyOpenerRef.current = opener;
+    setFairyOpen(true);
+  }
 
   return (
     <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-visual-theme="pink-cloud">
@@ -99,13 +104,12 @@ export function LearningShell({
       {activeSection !== "fairy" && (
         <>
           <button
-            ref={fairyTriggerRef}
             type="button"
             className="fairy-floating-trigger"
             aria-label="Открыть Феечку"
             aria-haspopup="dialog"
             aria-expanded={fairyOpen}
-            onClick={() => setFairyOpen(true)}
+            onClick={(event) => openContextualFairy(event.currentTarget)}
           >
             <DashboardIcon name="fairy" />
             <span>Спросить Феечку</span>
@@ -120,7 +124,12 @@ export function LearningShell({
             key={item.id}
             aria-label={`${item.label}, нижняя навигация`}
             aria-current={activeSection === item.id ? "page" : undefined}
-            onClick={() => onNavigate(item.id)}
+            aria-haspopup={item.id === "fairy" && assistantScope !== "academy" ? "dialog" : undefined}
+            aria-expanded={item.id === "fairy" && assistantScope !== "academy" ? fairyOpen : undefined}
+            onClick={(event) => {
+              if (item.id === "fairy" && assistantScope !== "academy") openContextualFairy(event.currentTarget);
+              else onNavigate(item.id);
+            }}
           >
             <DashboardIcon name={item.icon} />
             <small>{item.mobileLabel}</small>

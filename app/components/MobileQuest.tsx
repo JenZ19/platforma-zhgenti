@@ -24,6 +24,7 @@ import { BeginnerTerms } from "./BeginnerTerms";
 import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
 import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
 import { questLevelMinutes } from "../lib/quest-duration";
+import { DashboardIcon } from "./DashboardIcon";
 
 export function MobileQuest({
   project,
@@ -407,7 +408,7 @@ function MobileQuestBody({
 
         {mapOpen && (
           <aside id="mobile-level-sheet" className="mobile-level-sheet" aria-labelledby="mobile-level-sheet-title">
-            <header><h2 id="mobile-level-sheet-title">Карта уровней</h2><button ref={mapCloseRef} type="button" onClick={closeMap} aria-label="Закрыть карту уровней"><span aria-hidden="true">×</span><span>Закрыть</span></button></header>
+            <header><h2 id="mobile-level-sheet-title">Карта уровней</h2><button ref={mapCloseRef} type="button" onClick={closeMap} aria-label="Закрыть карту уровней"><DashboardIcon name="close" /><span>Закрыть</span></button></header>
             <nav aria-label="Карта уровней">
               {steps.map((item) => {
                 const unlocked = isStepUnlocked(progress, item.id);
@@ -430,7 +431,7 @@ function MobileQuestBody({
 
       {step.showScreenshot !== false && (
         <dialog ref={imageDialogRef} className="image-modal" style={imageOpen ? undefined : { display: "none" }} aria-label="Увеличенный мобильный пример" onClose={finishImageDialog} onCancel={(event) => { event.preventDefault(); closeImageDialog(); }} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeImageDialog(); } }}>
-          <button ref={imageCloseRef} type="button" aria-label="Закрыть увеличенный мобильный пример" onClick={closeImageDialog}><span aria-hidden="true">×</span><span>Закрыть</span></button>
+          <button ref={imageCloseRef} type="button" aria-label="Закрыть увеличенный мобильный пример" onClick={closeImageDialog}><DashboardIcon name="close" /><span>Закрыть</span></button>
           <img src={step.screenshot} alt={screenshotAlt} />
         </dialog>
       )}

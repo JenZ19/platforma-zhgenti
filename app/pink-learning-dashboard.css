@@ -12,6 +12,7 @@
   --cloud-focus: #9b2868;
   --cloud-success: #337a5b;
   --cloud-error: #b9364e;
+  --cloud-action: #802153;
   --cloud-gradient: linear-gradient(135deg, #f05a9f 0%, #d83f8c 48%, #bb3f93 100%);
   --cloud-shadow: 0 18px 60px rgba(75, 42, 68, 0.10);
   --cloud-radius-lg: 28px;
@@ -32,7 +33,7 @@ html {
 body {
   min-width: 0;
   margin: 0;
-  font-family: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:
     radial-gradient(circle at 80% 0%, #ffe1ee 0, transparent 34%),
     radial-gradient(circle at 4% 48%, rgba(229, 211, 242, 0.68) 0, transparent 28%),
@@ -76,7 +77,7 @@ select {
   --rose-pale: var(--cloud-pink-soft);
   --line: var(--cloud-border);
   --gold: var(--cloud-pink-dark);
-  --sans: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100vh;
   min-height: 100svh;
   display: grid;
@@ -282,7 +283,7 @@ select {
   padding: clamp(28px, 4vw, 52px);
   border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: var(--cloud-radius-lg);
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
   box-shadow: var(--cloud-shadow);
   color: #fff;
 }
@@ -786,7 +787,7 @@ select {
   padding: 0 17px;
   border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 18px;
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
   box-shadow: 0 16px 38px rgba(130, 35, 89, 0.24);
   color: #fff;
   font-weight: 800;
@@ -936,7 +937,7 @@ select {
 
 .fairy-save {
   border: 0;
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
   color: #fff;
 }
 
@@ -1163,7 +1164,7 @@ select {
   margin: 18px 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font: 16px/1.65 Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .quest-prompt button {
@@ -1311,7 +1312,7 @@ select {
 
 .quest-step-actions button:last-child {
   border: 0;
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
   color: #fff;
 }
 
@@ -1457,7 +1458,7 @@ select {
   max-width: 24ch;
   margin: 0;
   overflow-wrap: anywhere;
-  font: 800 clamp(34px, 5vw, 54px)/1.07 Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font: 800 clamp(34px, 5vw, 54px)/1.07 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: -0.035em;
 }
 
@@ -1482,12 +1483,14 @@ select {
   border-radius: var(--cloud-radius-lg);
   background: var(--cloud-surface);
   box-shadow: var(--cloud-shadow);
+  font-size: 18px;
+  line-height: 1.65;
 }
 
 .learning-main .preparation-card > h2 {
   margin: 8px 0 14px;
   overflow-wrap: anywhere;
-  font: 800 clamp(30px, 4vw, 46px)/1.1 Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font: 800 clamp(30px, 4vw, 46px)/1.1 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .learning-main .preparation-lead {
@@ -1519,14 +1522,42 @@ select {
   transform: none;
 }
 
-.learning-main .mode-options > button h3 {
+.learning-main .mode-option-title {
+  display: block;
+  margin: 8px 0;
   overflow-wrap: anywhere;
-  font-family: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
-.learning-main .mode-options > button > span svg {
+.learning-main .mode-option-icon svg {
   width: 24px;
   height: 24px;
+}
+
+.learning-main .mode-option-meta,
+.learning-main .mode-option-copy,
+.learning-main .mode-option-action {
+  display: block;
+}
+
+.learning-main .mode-option-meta {
+  color: var(--cloud-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.learning-main .mode-option-copy {
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.learning-main .mode-option-action {
+  margin-top: 16px;
+  color: var(--cloud-focus);
+  font-size: 16px;
+  font-weight: 800;
 }
 
 .learning-main .preparation-back,
@@ -1537,13 +1568,19 @@ select {
 
 .learning-main .preparation-start {
   border: 0;
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
+  color: #fff;
 }
 
 .learning-main .preparation-list label,
 .learning-main .preparation-guide-item {
   border-color: var(--cloud-border);
   background: #fff;
+}
+
+.learning-main .preparation-list label:focus-within {
+  outline: 3px solid var(--cloud-focus);
+  outline-offset: 3px;
 }
 
 .learning-main .preparation-list input {
@@ -1556,6 +1593,88 @@ select {
 .learning-main .preparation-done {
   border-color: rgba(51, 122, 91, 0.2);
   background: rgba(51, 122, 91, 0.08);
+}
+
+.learning-main .section-kicker,
+.learning-main .checklist-progress,
+.learning-main .preparation-list label small,
+.learning-main .preparation-guide-copy > b,
+.learning-main .preparation-example > b {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.learning-main .preparation-list label b,
+.learning-main .preparation-guide-copy li,
+.learning-main .preparation-example pre,
+.learning-main .preparation-done,
+.learning-main .privacy-note p,
+.learning-main .choice-note {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.learning-main .preparation-list label {
+  min-height: 56px;
+}
+
+.learning-main .quest-customizer {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.learning-main .quest-customizer > header p,
+.learning-main .quest-customizer > header h3,
+.learning-main .customizer-axes legend b,
+.learning-main .customizer-palette h4,
+.learning-main .customizer-summary p {
+  font-family: inherit;
+}
+
+.learning-main .quest-customizer > header p,
+.learning-main .quest-customizer > header small,
+.learning-main .customizer-axes legend small,
+.learning-main .customizer-input > span,
+.learning-main .palette-color-pickers small,
+.learning-main .palette-live-preview small,
+.learning-main .customizer-summary > small {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.learning-main .customizer-axes legend b,
+.learning-main .customizer-options label span,
+.learning-main .customizer-palette > header p,
+.learning-main .palette-options button b,
+.learning-main .palette-color-pickers b,
+.learning-main .customizer-summary p {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.learning-main .customizer-options label,
+.learning-main .palette-color-pickers label {
+  min-height: 44px;
+}
+
+.learning-main .customizer-options label:focus-within,
+.learning-main .palette-color-pickers label:focus-within {
+  outline: 3px solid var(--cloud-focus);
+  outline-offset: 3px;
+}
+
+.learning-main .customizer-input input,
+.learning-main .palette-options button,
+.learning-main .palette-color-pickers input,
+.learning-main .customizer-save {
+  min-height: 48px;
+  font: inherit;
+}
+
+.learning-main .palette-custom-button svg {
+  width: 24px;
+  height: 24px;
 }
 
 /* Mobile quest workspace */
@@ -1824,7 +1943,7 @@ select {
 }
 
 .mobile-help h3 {
-  font-family: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .mobile-help .lesson-text p,
@@ -1868,7 +1987,7 @@ select {
 
 .mobile-quest-step-actions button:last-child {
   border: 0;
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
   color: #fff;
 }
 
@@ -1922,7 +2041,7 @@ select {
 
 .learning-shell .finish-card h3 {
   overflow-wrap: anywhere;
-  font-family: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .image-modal,
@@ -1930,6 +2049,19 @@ select {
   z-index: 100;
   background: rgba(45, 36, 48, 0.82);
   backdrop-filter: blur(6px);
+}
+
+.reward-modal {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+}
+
+.reward-modal::backdrop {
+  background: transparent;
 }
 
 .image-modal > button {
@@ -1953,14 +2085,63 @@ select {
 
 .reward-modal h3 {
   overflow-wrap: anywhere;
-  font-family: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.reward-modal span,
+.reward-modal b {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.reward-modal p {
+  font-size: 22px;
 }
 
 .reward-modal .primary-button {
   min-width: 44px;
   min-height: 48px;
   border: 0;
-  background: var(--cloud-gradient);
+  background: var(--cloud-action);
+  color: #fff;
+}
+
+.learning-shell-mobile .preparation-card {
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.learning-shell-mobile .quest-customizer {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.learning-shell-mobile .mode-option-copy,
+.learning-shell-mobile .preparation-list label b,
+.learning-shell-mobile .preparation-guide-copy li,
+.learning-shell-mobile .preparation-example pre,
+.learning-shell-mobile .preparation-done,
+.learning-shell-mobile .privacy-note p,
+.learning-shell-mobile .choice-note,
+.learning-shell-mobile .customizer-axes legend b,
+.learning-shell-mobile .customizer-options label span,
+.learning-shell-mobile .customizer-palette > header p,
+.learning-shell-mobile .palette-options button b,
+.learning-shell-mobile .customizer-summary p {
+  font-size: 17px;
+}
+
+.learning-shell-mobile .mode-option-meta,
+.learning-shell-mobile .section-kicker,
+.learning-shell-mobile .checklist-progress,
+.learning-shell-mobile .preparation-list label small,
+.learning-shell-mobile .quest-customizer > header small,
+.learning-shell-mobile .customizer-axes legend small,
+.learning-shell-mobile .customizer-input > span,
+.learning-shell-mobile .palette-color-pickers small,
+.learning-shell-mobile .palette-live-preview small,
+.learning-shell-mobile .customizer-summary > small {
+  font-size: 14px;
 }
 
 .learning-shell button:hover,
