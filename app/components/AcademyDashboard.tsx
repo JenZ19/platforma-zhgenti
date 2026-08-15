@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { projects } from "../content/projects";
+import { isAvailableInMobileTrack } from "../content/mobile-availability";
 import type { ProjectFormat } from "../content/types";
 import {
   buildDashboardSnapshot,
@@ -83,13 +84,15 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
 
   useEffect(() => {
     // Progress belongs to this browser and learning surface, so read it only after mount.
+    const availableProjects = format === "mobile" ? projects.filter(isAvailableInMobileTrack) : projects;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDashboardState({ format, snapshot: buildDashboardSnapshot(projects, window.localStorage, format) });
+    setDashboardState({ format, snapshot: buildDashboardSnapshot(availableProjects, window.localStorage, format) });
   }, [format]);
 
   function onSave(slug: string) {
     toggleSavedProject(slug, window.localStorage);
-    setDashboardState({ format, snapshot: buildDashboardSnapshot(projects, window.localStorage, format) });
+    const availableProjects = format === "mobile" ? projects.filter(isAvailableInMobileTrack) : projects;
+    setDashboardState({ format, snapshot: buildDashboardSnapshot(availableProjects, window.localStorage, format) });
   }
 
   if (!snapshot) {

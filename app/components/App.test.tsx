@@ -180,6 +180,20 @@ describe("academy interface", () => {
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
   });
 
+  it("starts the phone track with a real mobile project and hides computer setup quests", async () => {
+    const view = render(<MobileAcademy onOpen={vi.fn()} />);
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Планирование" })).toBeInTheDocument();
+    expect(screen.queryByText("Устанавливаем Codex")).not.toBeInTheDocument();
+    expect(screen.queryByText("Покупаем сервер по 152-ФЗ")).not.toBeInTheDocument();
+    expect(screen.queryByText("Добавляем API-ключи")).not.toBeInTheDocument();
+
+    view.unmount();
+    render(<MobileAcademy section="weeks" onOpen={vi.fn()} />);
+    expect(await screen.findByRole("heading", { level: 1, name: "Квесты по неделям" })).toBeInTheDocument();
+    expect(screen.queryByText("Устанавливаем Codex")).not.toBeInTheDocument();
+  });
+
   it("chooses the mobile quest on a first phone visit without overriding SSR", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
     const serverHtml = renderToString(<AppEntry initialSearch="?quest=pressure-diary" />);
@@ -308,14 +322,14 @@ describe("academy interface", () => {
   it("preserves the mobile format in primary and card hrefs", async () => {
     render(<MobileAcademy onOpen={vi.fn()} />);
 
-    expect(await screen.findByRole("link", { name: /начать квест: устанавливаем codex/i })).toHaveAttribute(
-      "href",
-      "?format=mobile&quest=install-codex",
-    );
-    const planning = screen.getByRole("article", { name: /планирование/i });
-    expect(within(planning).getByRole("link", { name: /начать: планирование/i })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: /начать квест: планирование/i })).toHaveAttribute(
       "href",
       "?format=mobile&quest=planning",
+    );
+    const ideas = screen.getByRole("article", { name: /идеи/i });
+    expect(within(ideas).getByRole("link", { name: /начать: идеи/i })).toHaveAttribute(
+      "href",
+      "?format=mobile&quest=ideas",
     );
   });
 
@@ -323,29 +337,29 @@ describe("academy interface", () => {
     const onOpen = vi.fn();
     render(<MobileAcademy onOpen={onOpen} />);
 
-    const primary = await screen.findByRole("link", { name: /начать квест: устанавливаем codex/i });
+    const primary = await screen.findByRole("link", { name: /начать квест: планирование/i });
     expect(fireEvent.click(primary)).toBe(false);
-    expect(onOpen).toHaveBeenLastCalledWith("install-codex");
-
-    const planning = screen.getByRole("article", { name: /планирование/i });
-    const cardAction = within(planning).getByRole("link", { name: /начать: планирование/i });
-    expect(fireEvent.click(cardAction)).toBe(false);
     expect(onOpen).toHaveBeenLastCalledWith("planning");
+
+    const ideas = screen.getByRole("article", { name: /идеи/i });
+    const cardAction = within(ideas).getByRole("link", { name: /начать: идеи/i });
+    expect(fireEvent.click(cardAction)).toBe(false);
+    expect(onOpen).toHaveBeenLastCalledWith("ideas");
   });
 
   it("leaves modified, middle and new-target dashboard clicks to the browser", async () => {
     const onOpen = vi.fn();
     render(<MobileAcademy onOpen={onOpen} />);
 
-    const primary = await screen.findByRole("link", { name: /начать квест: устанавливаем codex/i });
+    const primary = await screen.findByRole("link", { name: /начать квест: планирование/i });
     primary.setAttribute("href", "#browser-primary");
     expect(fireEvent.click(primary, { metaKey: true })).toBe(true);
     expect(fireEvent.click(primary, { shiftKey: true })).toBe(true);
     primary.setAttribute("target", "_blank");
     expect(fireEvent.click(primary)).toBe(true);
 
-    const planning = screen.getByRole("article", { name: /планирование/i });
-    const cardAction = within(planning).getByRole("link", { name: /начать: планирование/i });
+    const ideas = screen.getByRole("article", { name: /идеи/i });
+    const cardAction = within(ideas).getByRole("link", { name: /начать: идеи/i });
     cardAction.setAttribute("href", "#browser-card");
     expect(fireEvent.click(cardAction, { ctrlKey: true })).toBe(true);
     expect(fireEvent.click(cardAction, { altKey: true })).toBe(true);
@@ -614,10 +628,10 @@ describe("academy interface", () => {
   });
 
   it.each([
-    ["desktop", Academy, "?quest=server-152fz", progressKey("server-152fz")],
-    ["mobile", MobileAcademy, "?format=mobile&quest=server-152fz", progressKey("mobile:server-152fz")],
-  ] as const)("automatically shows a completed project in the %s portfolio with a native quest link", async (_format, Component, href, key) => {
-    const total = getProjectLevelCount("server-152fz");
+    ["desktop", Academy, "server-152fz", "?quest=server-152fz", progressKey("server-152fz"), /покупаем сервер/i],
+    ["mobile", MobileAcademy, "pressure-diary", "?format=mobile&quest=pressure-diary", progressKey("mobile:pressure-diary"), /дневник давления/i],
+  ] as const)("automatically shows a completed project in the %s portfolio with a native quest link", async (_format, Component, slug, href, key, name) => {
+    const total = getProjectLevelCount(slug);
     localStorage.setItem(key, JSON.stringify({
       version: 1,
       activeStep: total,
@@ -629,19 +643,17 @@ describe("academy interface", () => {
 
     render(<Component section="portfolio" onOpen={onOpen} />);
 
-    const card = await screen.findByRole("article", { name: /покупаем сервер/i });
-    expect(within(card).getByRole("img", { name: /покупаем сервер/i })).toBeInTheDocument();
-    expect(within(card).getByText(/для ученицы, которая публикует проект/i)).toBeInTheDocument();
-    expect(within(card).getByText(/старт на компьютере/i)).toBeInTheDocument();
+    const card = await screen.findByRole("article", { name });
+    expect(within(card).getByRole("img", { name })).toBeInTheDocument();
     expect(within(card).getByText("14.08.2026")).toHaveAttribute("datetime", "2026-08-14");
 
-    const action = within(card).getByRole("link", { name: /открыть проект: покупаем сервер по 152-фз/i });
+    const action = within(card).getByRole("link", { name: new RegExp(`открыть проект: ${slug === "server-152fz" ? "покупаем сервер по 152-фз" : "дневник давления"}`, "i") });
     expect(action).toHaveAttribute("href", href);
     action.setAttribute("href", "#browser-portfolio-card");
     expect(fireEvent.click(action, { metaKey: true })).toBe(true);
     expect(onOpen).not.toHaveBeenCalled();
     expect(fireEvent.click(action)).toBe(false);
-    expect(onOpen).toHaveBeenCalledWith("server-152fz");
+    expect(onOpen).toHaveBeenCalledWith(slug);
   });
 
   it.each([
@@ -2011,10 +2023,10 @@ describe("academy interface", () => {
     expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveAttribute("data-dashboard-format", "mobile");
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /сервис проекта «планирование»/i })).toHaveAttribute(
-      "src",
-      "/covers/planner.webp",
-    );
+    expect(screen.getAllByRole("img", { name: /сервис проекта «планирование»/i })).not.toHaveLength(0);
+    screen.getAllByRole("img", { name: /сервис проекта «планирование»/i }).forEach((image) => {
+      expect(image).toHaveAttribute("src", "/covers/planner.webp");
+    });
   });
 
   it("stores phone progress separately and shows a safe Telegram fallback", () => {

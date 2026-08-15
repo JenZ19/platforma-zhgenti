@@ -16,6 +16,7 @@ import { isOriginalQuestSlug } from "../content/customization";
 import { buildQuest } from "../content/quests";
 import { isSourcePrototypeSlug } from "./SourceProjectPrototypeScene";
 import { isSetupQuestSlug } from "../content/setup-quests";
+import { isAvailableInMobileTrack } from "../content/mobile-availability";
 import {
   loadDashboardSection,
   saveDashboardSection,
@@ -93,6 +94,13 @@ function parseRoute(search: string, savedSection: DashboardSection = "home", cli
   }
   const resolved = resolvePublicProjectRoute(quest, query.get("output") ?? undefined);
   if (!resolved) return { route: { type: "home", format, formatExplicit, section, search: query.get("q") ?? "" } };
+  const resolvedProject = getProject(resolved.slug);
+  if (format === "mobile" && resolvedProject && !isAvailableInMobileTrack(resolvedProject)) {
+    return {
+      route: { type: "home", format, formatExplicit, section: "home", search: "" },
+      canonicalSearch: dashboardQuery("home", format, "", formatExplicit && format === "desktop"),
+    };
+  }
   const canonical = questQuery(resolved, format, formatExplicit && format === "desktop");
   return {
     route: { type: "quest", slug: resolved.slug, output: resolved.output, format, formatExplicit },
