@@ -19,9 +19,23 @@ test("the academy uses the NEYROPROFI brand everywhere while preserving the part
 
   const shell = fs.readFileSync(path.join(root, "app/components/LearningShell.tsx"), "utf8");
   const layout = fs.readFileSync(path.join(root, "app/layout.tsx"), "utf8");
+  const page = fs.readFileSync(path.join(root, "app/page.tsx"), "utf8");
+  const guide = fs.readFileSync(path.join(root, "app/components/OriginalQuestGuideScene.tsx"), "utf8");
+  const helperGuide = fs.readFileSync(path.join(root, "app/components/HomeHelperGuideScene.tsx"), "utf8");
+  const faviconPath = ["public/favicon-neiroprofi.svg", "public/favicon.svg"]
+    .map((file) => path.join(root, file))
+    .find((file) => fs.existsSync(file));
+  const favicon = fs.readFileSync(faviconPath, "utf8");
   const offer = fs.readFileSync(path.join(root, "app/components/ServerDiscountOffer.tsx"), "utf8");
   assert.match(shell, /НЕЙРОПРОФИ/);
   assert.match(layout, /Академия квестов НЕЙРОПРОФИ/);
+  assert.match(page, /НЕЙРОПРОФИ — ИИ-агенты и ИИ-сайты/);
+  assert.doesNotMatch(guide, /<span>S<\/span>/);
+  assert.doesNotMatch(helperGuide, /<span>S<\/span>/);
+  assert.match(favicon, />Н<\/text>/);
+  assert.match(favicon, /#D92D87/i);
+  assert.doesNotMatch(favicon, /#0C79D8|#2E9EFF|#68C4FF/i);
   assert.match(layout, /\/og-neiroprofi\.png/);
+  assert.match(layout, /\/favicon-neiroprofi\.svg/);
   assert.match(offer, /SUBMARINE123/);
 });

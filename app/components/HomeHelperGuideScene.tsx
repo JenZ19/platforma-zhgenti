@@ -81,7 +81,7 @@ function AcademyMock({ frame }: { frame: QuestGuideFrame }) {
   return (
     <Window title="Академия квестов · Помощник для домашних дел" scene="academy">
       <div className="guide-academy">
-        <aside><span>S</span><b>Уровень 03</b><small>Паспорт проекта</small><i>3 из 6 кадров</i></aside>
+        <aside><span>Н</span><b>Уровень 03</b><small>Паспорт проекта</small><i>3 из 6 кадров</i></aside>
         <main><small>ТЕКСТ УЖЕ ГОТОВ</small><h3>{frame.title}</h3><p>{frame.exactText || "Готовая команда находится в тёмном блоке. Придумывать текст не нужно."}</p><button>Скопировать анкету</button><Target frame={frame} /></main>
       </div>
     </Window>

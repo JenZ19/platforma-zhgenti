@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pink-cloud" x1="8" y1="6" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F56BB0"/>
+      <stop offset="1" stop-color="#D92D87"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="url(#pink-cloud)"/>
+  <path d="M49 9L50.8 13.2L55 15L50.8 16.8L49 21L47.2 16.8L43 15L47.2 13.2L49 9Z" fill="white"/>
+  <path d="M14 43L15.2 45.8L18 47L15.2 48.2L14 51L12.8 48.2L10 47L12.8 45.8L14 43Z" fill="#FFE0F0"/>
+  <text x="32" y="43" fill="white" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-size="34" font-weight="800">Н</text>
+</svg>

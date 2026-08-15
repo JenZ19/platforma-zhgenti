@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "42 проекта курса — шаг за шагом.",
     images: ["/og-neiroprofi.png"],
   },
-  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+  icons: { icon: "/favicon-neiroprofi.svg", shortcut: "/favicon-neiroprofi.svg" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
