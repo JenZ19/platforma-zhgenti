@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { chromium } from "@playwright/test";
+import { ownProcessGroup, stopOwnedProcessGroup } from "./dashboard-server-lifecycle.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const externalOrigin = process.env.DASHBOARD_LAYOUT_ORIGIN?.replace(/\/$/, "");
@@ -17,6 +18,7 @@ let origin = externalOrigin || `http://localhost:${port}`;
 const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 let server;
 let ownedServerPid;
+let ownedServerGroup;
 let serverOutput = "";
 
 function childHasExited(child) {
@@ -98,28 +100,22 @@ async function waitForServer({
 }
 
 async function stopServer() {
-  if (!ownedServerPid) return;
-  const running = Boolean(server && !childHasExited(server));
-  if (!running) return;
-  const exited = waitForExit(server);
-  try {
-    if (process.platform === "win32") server?.kill("SIGTERM");
-    else process.kill(-ownedServerPid, "SIGTERM");
-  } catch {
-    if (running) server?.kill("SIGTERM");
+  if (!Number.isSafeInteger(ownedServerPid) || ownedServerPid <= 0) return;
+  if (process.platform !== "win32") {
+    await stopOwnedProcessGroup(ownedServerGroup);
+    return;
   }
+  if (!server || childHasExited(server)) return;
+  const exited = waitForExit(server);
+  server.kill("SIGTERM");
   const stopped = await Promise.race([
     exited.then(() => true),
     new Promise((resolve) => setTimeout(() => resolve(false), 2500)),
   ]);
   if (stopped || childHasExited(server)) return;
-  try {
-    if (process.platform === "win32") server?.kill("SIGKILL");
-    else process.kill(-ownedServerPid, "SIGKILL");
-  } catch {
-    server?.kill("SIGKILL");
-  }
+  server.kill("SIGKILL");
   await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 1000))]);
+  if (!childHasExited(server)) throw new Error("Owned dashboard server survived SIGKILL");
 }
 
 before(async () => {
@@ -131,6 +127,7 @@ before(async () => {
     detached: process.platform !== "win32",
   });
   ownedServerPid = server.pid;
+  ownedServerGroup = process.platform === "win32" ? null : ownProcessGroup(ownedServerPid);
   server.stdout?.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-12000); });
   server.stderr?.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-12000); });
   await waitForServer();

@@ -27,6 +27,8 @@ The final review pass added four failing App regressions before implementation: 
 
 The closing review added executable RED for ownership across dashboard-to-quest navigation, child normal/signal exits and the late-listener race, first-phone server markup, and both format-choice entrances. The implicit mobile quest stayed locked after resizing, the lifecycle helper was absent and then exposed a listener race, the pre-hydration desktop escape was visible at 375 px, the bundle card retained a green gradient, and desktop choice prose remained 17 px.
 
+The final process cleanup review reproduced the remaining leader/descendant bug with a real detached POSIX group. The npm-like leader exited normally while a descendant in the same group stayed alive and ignored `SIGTERM`; the old `stopServer` returned immediately because it trusted the leader state. The new test was observed RED before group cleanup and ownership protection were implemented.
+
 ## GREEN
 
 Focused review contracts:
@@ -43,7 +45,7 @@ The layout regression opens `/`, projects, weeks, portfolio, full Fairy, the def
 Final clean run:
 
 ```text
-npm run test:scripts  -> 17/17 passed
+npm run test:scripts  -> 18/18 passed
 npm run test:unit     -> 23 files, 290/290 passed
 npm run lint          -> exit 0
 npm run build         -> exit 0
@@ -76,6 +78,7 @@ The unit run prints six known jsdom `Not implemented: navigation to another Docu
 - Child lifecycle checks treat either `exitCode` or `signalCode` as final, fail readiness before accepting a stale response, and settle immediately without retaining an exit listener even when exit races listener registration.
 - Planning format and Codex platform choices use only Pink Cloud backgrounds, white/rose surfaces, cloud borders, adult sans typography, AA text colors and stable focus/pressed states. Substantive copy is 18 px desktop and 17 px mobile.
 - The narrow explicit-desktop escape is hidden while `data-client-ready="false"`; it becomes visible after hydration only when the desktop format is still explicitly owned.
+- Test-server cleanup now owns an opaque positive-PID group handle instead of trusting the npm leader. It probes the group with signal `0`, handles `ESRCH`, sends `SIGTERM` even after the leader exits, polls for bounded disappearance, escalates surviving descendants to `SIGKILL`, polls again, and throws if the group still survives. The executable macOS/Linux regression proves a TERM-resistant descendant and its process group are gone; Windows alone skips the POSIX-group fixture.
 - Focus-visible, non-color status labels, reduced motion, stable hover geometry, honest empty states, search/filter surfaces, portfolio, preparation, quest, dialog, reward, and Fairy states are styled.
 - Legacy `globals.css` remains for prototype scenes; `tactile-album.css` is no longer imported and Pink Cloud overrides legacy quest shell widths, duplicate headers/footers, old typography, and unsafe fixed positioning.
 
