@@ -18,7 +18,7 @@ export function InstallCodexPlatformChoice({
   const shell = mobile ? "mobile-quest-shell format-choice-shell mobile" : "quest-shell format-choice-shell";
 
   return (
-    <main className={shell} data-visual-theme="tactile-album">
+    <main className={shell} data-visual-theme="pink-cloud">
       <header className={mobile ? "mobile-topbar" : "site-header quest-site-header"}>
         <button type="button" className="brand brand-button" onClick={onHome}>
           <span>S</span><b>SUBMARINE<small>{mobile ? "Квесты с телефона" : "Все квесты"}</small></b>

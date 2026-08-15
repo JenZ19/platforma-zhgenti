@@ -25,6 +25,8 @@ The failures proved the unparameterized phone route stayed desktop, explicit des
 
 The final review pass added four failing App regressions before implementation: implicit orientation did not update, explicit desktop had no reachable phone switch, preparation/format buttons still used unsafe content structure, and the final disabled reward opener lost focus. Browser RED contracts additionally covered preparation geometry, Telegram/curator contrast, Pink Cloud customizer surfaces, viewport ownership, and owned-server readiness.
 
+The closing review added executable RED for ownership across dashboard-to-quest navigation, child normal/signal exits and the late-listener race, first-phone server markup, and both format-choice entrances. The implicit mobile quest stayed locked after resizing, the lifecycle helper was absent and then exposed a listener race, the pre-hydration desktop escape was visible at 375 px, the bundle card retained a green gradient, and desktop choice prose remained 17 px.
+
 ## GREEN
 
 Focused review contracts:
@@ -32,17 +34,17 @@ Focused review contracts:
 ```text
 AppEntry / Fairy / native reward: 116/116 passed
 quest-typography and contrast:    6/6 passed
-final focused App regression:     120/120 passed
-dashboard-layout:                 4/4 passed
+final focused App regression:     122/122 passed
+dashboard-layout:                 6/6 passed
 ```
 
-The layout regression opens `/`, projects, weeks, portfolio, full Fairy, the default pressure-diary route, and an explicit mobile pressure-diary route at 375, 768, 1024, and 1440 px. It checks horizontal overflow; visible buttons, links, inputs, selects, textareas, and switches at 44 px on phone; shell separation and hidden bottom navigation from 768 px; preparation typography; Fairy placement; and the gap between sticky quest actions and mobile bottom navigation. A deep browser flow also checks the real-data preparation focus ring, first-phone mobile canonicalization, mobile map/actions, contextual Fairy, image and reward dialogs, reset confirmation, focus restoration, and computed banner/CTA contrast.
+The layout regression opens `/`, projects, weeks, portfolio, full Fairy, the default pressure-diary route, and an explicit mobile pressure-diary route at 375, 768, 1024, and 1440 px. It checks horizontal overflow; visible buttons, links, inputs, selects, textareas, and switches at 44 px on phone; shell separation and hidden bottom navigation from 768 px; preparation typography; Fairy placement; and the gap between sticky quest actions and mobile bottom navigation. A deep browser flow also checks the real-data preparation focus ring, first-phone mobile canonicalization, mobile map/actions, contextual Fairy, image and reward dialogs, reset confirmation, focus restoration, computed banner/CTA contrast, dashboard-to-quest orientation changes, explicit ownership, SSR no-flash, and planning/install choice surfaces.
 
 Final clean run:
 
 ```text
-npm run test:scripts  -> 15/15 passed
-npm run test:unit     -> 23 files, 288/288 passed
+npm run test:scripts  -> 17/17 passed
+npm run test:unit     -> 23 files, 290/290 passed
 npm run lint          -> exit 0
 npm run build         -> exit 0
 git diff --check      -> exit 0
@@ -70,9 +72,13 @@ The unit run prints six known jsdom `Not implemented: navigation to another Docu
 - Telegram and curator mobile actions use computed AA-safe solid colors. Mobile reset has 17 px actionable copy and 14 px explanatory copy; stable pressed states do not change layout.
 - Final-level rewards move focus to the completed step article when the original action becomes disabled; intermediate rewards still restore their exact opener.
 - Layout-server readiness requires the owned child to advertise the configured process-specific port and never adopts a listener after that child exits; cleanup retains and terminates the owned process group.
+- Implicit dashboard ownership now survives opening a mobile quest, so resize/orientation returns to desktop and removes the generated format parameter. Explicit URL or toggle ownership remains fixed across the same navigation.
+- Child lifecycle checks treat either `exitCode` or `signalCode` as final, fail readiness before accepting a stale response, and settle immediately without retaining an exit listener even when exit races listener registration.
+- Planning format and Codex platform choices use only Pink Cloud backgrounds, white/rose surfaces, cloud borders, adult sans typography, AA text colors and stable focus/pressed states. Substantive copy is 18 px desktop and 17 px mobile.
+- The narrow explicit-desktop escape is hidden while `data-client-ready="false"`; it becomes visible after hydration only when the desktop format is still explicitly owned.
 - Focus-visible, non-color status labels, reduced motion, stable hover geometry, honest empty states, search/filter surfaces, portfolio, preparation, quest, dialog, reward, and Fairy states are styled.
 - Legacy `globals.css` remains for prototype scenes; `tactile-album.css` is no longer imported and Pink Cloud overrides legacy quest shell widths, duplicate headers/footers, old typography, and unsafe fixed positioning.
 
 ## Visual review
 
-In-browser review covered home, projects, weeks, portfolio, full Fairy, default pressure-diary, and explicit mobile pressure-diary at 375 × 900, 768 × 900, 1024 × 900, and 1440 × 900. The deep pass additionally covered real-data preparation, mobile quest workspace/map/actions, contextual Fairy dialog, image dialog, reset confirmation, and a desktop reward dialog. The generated `design-system/submarine-quest-academy/MASTER.md` remains removed because its childish fonts and indigo/green palette contradicted the approved system.
+In-browser review covered home, projects, weeks, portfolio, full Fairy, default pressure-diary, and explicit mobile pressure-diary at 375 × 900, 768 × 900, 1024 × 900, and 1440 × 900. The deep pass additionally covered real-data preparation, mobile quest workspace/map/actions, contextual Fairy dialog, image dialog, reset confirmation, a desktop reward dialog, implicit and explicit dashboard-to-planning rotation, no-JavaScript first-phone SSR, and the planning/install choice screens at 375 × 900 and 1024 × 900. The generated `design-system/submarine-quest-academy/MASTER.md` remains removed because its childish fonts and indigo/green palette contradicted the approved system.

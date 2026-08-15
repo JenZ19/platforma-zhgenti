@@ -152,7 +152,7 @@ export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
     format: "desktop" | "mobile" = route.type === "home" || route.type === "quest" ? route.format : "desktop",
     output?: ProjectFormat,
   ) {
-    const formatExplicit = format === "mobile" || ((route.type === "home" || route.type === "quest") && route.formatExplicit);
+    const formatExplicit = (route.type === "home" || route.type === "quest") && route.formatExplicit;
     const query = questQuery({ slug, output, legacy: false }, format, format === "desktop" && formatExplicit);
     window.history.pushState(formatExplicit ? {} : { submarineImplicitFormat: true }, "", query);
     setRoute({ type: "quest", slug, output, format, formatExplicit });

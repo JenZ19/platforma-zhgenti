@@ -256,6 +256,10 @@ select {
   display: none;
 }
 
+.learning-shell[data-client-ready="false"] > .mobile-format-switch {
+  display: none;
+}
+
 .dashboard-loading {
   min-height: 280px;
   display: grid;
@@ -1782,6 +1786,154 @@ select {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.learning-main .format-choice-shell {
+  width: min(1120px, 100%);
+  min-height: 0;
+  margin: 0 auto;
+  background: transparent;
+  color: var(--cloud-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.learning-main .format-choice-hero,
+.learning-main .format-choice-card {
+  width: 100%;
+  max-width: none;
+  border: 1px solid var(--cloud-border);
+  background: var(--cloud-surface-solid);
+  color: var(--cloud-text);
+  box-shadow: var(--cloud-shadow);
+}
+
+.learning-main .format-choice-hero {
+  margin: 0 0 20px;
+  padding: clamp(24px, 4vw, 42px);
+  border-radius: var(--cloud-radius-lg);
+}
+
+.learning-main .format-choice-card {
+  margin: 0 0 48px;
+  padding: clamp(24px, 4vw, 42px);
+  border-radius: var(--cloud-radius-lg);
+}
+
+.learning-main .format-choice-hero .back-link {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 20px;
+  color: var(--cloud-focus);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: left;
+}
+
+.learning-main .format-choice-hero .kicker,
+.learning-main .format-choice-heading small,
+.learning-main .format-choice-progress {
+  color: var(--cloud-muted);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.learning-main .format-choice-hero .kicker > span {
+  background: var(--cloud-pink-dark);
+}
+
+.learning-main .format-choice-hero h1 {
+  max-width: 24ch;
+  margin: 18px 0 12px;
+  color: var(--cloud-text);
+  font-family: inherit;
+  font-size: clamp(36px, 5vw, 54px);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.learning-main .format-choice-hero > p:not(.kicker),
+.learning-main .format-choice-heading p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--cloud-muted);
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.learning-main .format-choice-heading {
+  max-width: 740px;
+  margin-bottom: 24px;
+}
+
+.learning-main .format-choice-heading small {
+  display: block;
+  color: var(--cloud-focus);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.learning-main .format-choice-heading h2 {
+  margin: 8px 0 10px;
+  color: var(--cloud-text);
+  font-family: inherit;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.learning-main .format-choice-grid {
+  gap: 16px;
+}
+
+.learning-main .format-option,
+.learning-main .format-option.service,
+.learning-main .format-option.agent,
+.learning-main .format-option.mac,
+.learning-main .format-option.windows {
+  min-height: 220px;
+  padding: 26px;
+  border: 1px solid var(--cloud-border);
+  border-radius: 22px;
+  background: var(--cloud-bg-rose);
+  color: var(--cloud-text);
+  box-shadow: 0 12px 36px rgba(75, 42, 68, 0.08);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.learning-main .format-option:hover,
+.learning-main .format-option:focus-visible {
+  border-color: var(--cloud-focus);
+  background: var(--cloud-surface-solid);
+  box-shadow: 0 14px 40px rgba(75, 42, 68, 0.12);
+  transform: none;
+}
+
+.learning-main .format-option:focus-visible {
+  outline: 3px solid var(--cloud-focus);
+  outline-offset: 3px;
+}
+
+.learning-main .format-option:active {
+  background: var(--cloud-pink-soft);
+  box-shadow: inset 0 0 0 2px rgba(128, 33, 83, 0.3);
+  transform: none;
+}
+
+.learning-main .format-option-icon,
+.learning-main .format-option.agent .format-option-icon,
+.learning-main .format-option.mac .format-option-icon,
+.learning-main .format-option.windows .format-option-icon {
+  background: var(--cloud-action);
+  color: #fff;
+}
+
 .learning-main .format-option-icon svg {
   width: 26px;
   height: 26px;
@@ -1824,7 +1976,7 @@ select {
   max-width: 44ch;
   margin-top: 9px;
   color: var(--cloud-muted);
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.55;
 }
 
@@ -1833,6 +1985,26 @@ select {
   color: var(--cloud-focus);
   font-size: 16px;
   font-weight: 800;
+}
+
+.learning-main .format-help-toggle {
+  min-height: 48px;
+  border-color: var(--cloud-focus);
+  color: var(--cloud-focus);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.learning-main .format-help p {
+  border: 1px solid var(--cloud-border);
+  background: var(--cloud-bg-rose);
+  color: var(--cloud-muted);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.learning-main .format-help span {
+  color: var(--cloud-text);
 }
 
 /* Mobile quest workspace */
@@ -2439,6 +2611,39 @@ select {
 @media (max-width: 767px) {
   .learning-shell {
     display: block;
+  }
+
+  .learning-main .format-choice-shell,
+  .learning-main .format-choice-hero > p:not(.kicker),
+  .learning-main .format-choice-heading p,
+  .learning-main .format-option-copy,
+  .learning-main .format-help p {
+    font-size: 17px;
+  }
+
+  .learning-main .format-choice-hero,
+  .learning-main .format-choice-card {
+    padding: 20px 17px;
+    border-radius: 22px;
+  }
+
+  .learning-main .format-choice-hero h1 {
+    font-size: clamp(32px, 10vw, 42px);
+  }
+
+  .learning-main .format-choice-heading h2 {
+    font-size: clamp(28px, 8vw, 36px);
+  }
+
+  .learning-main .format-option,
+  .learning-main .format-option.service,
+  .learning-main .format-option.agent,
+  .learning-main .format-option.mac,
+  .learning-main .format-option.windows {
+    min-height: 0;
+    grid-template-columns: 48px minmax(0, 1fr);
+    padding: 20px 17px;
+    border-radius: 18px;
   }
 
   .learning-sidebar,

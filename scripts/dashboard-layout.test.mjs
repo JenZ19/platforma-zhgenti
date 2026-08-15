@@ -19,42 +19,100 @@ let server;
 let ownedServerPid;
 let serverOutput = "";
 
-async function waitForServer() {
-  for (let attempt = 0; attempt < 120; attempt += 1) {
-    if (server?.exitCode !== null) {
-      throw new Error(`Dashboard test server exited early.\n${serverOutput}`);
+function childHasExited(child) {
+  return !child || child.exitCode !== null || child.signalCode !== null;
+}
+
+function childExitError(output = serverOutput) {
+  return new Error(`Dashboard test server exited early.\n${output}`);
+}
+
+function waitForExit(child) {
+  if (childHasExited(child)) return Promise.resolve();
+  return new Promise((resolve) => {
+    let settled = false;
+    const onExit = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    child.once("exit", onExit);
+    if (childHasExited(child)) {
+      child.removeListener?.("exit", onExit);
+      onExit();
     }
-    if (!serverOutput.includes(`http://localhost:${port}`)) {
-      await new Promise((resolve) => setTimeout(resolve, 250));
+  });
+}
+
+function waitWhileRunning(child, milliseconds) {
+  if (childHasExited(child)) return Promise.reject(childExitError());
+  return new Promise((resolve, reject) => {
+    let timer;
+    let settled = false;
+    const onExit = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      reject(childExitError());
+    };
+    child.once("exit", onExit);
+    if (childHasExited(child)) {
+      child.removeListener?.("exit", onExit);
+      onExit();
+      return;
+    }
+    timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.removeListener?.("exit", onExit);
+      if (childHasExited(child)) reject(childExitError());
+      else resolve();
+    }, milliseconds);
+  });
+}
+
+async function waitForServer({
+  child = server,
+  advertised = () => serverOutput.includes(`http://localhost:${port}`),
+  fetcher = fetch,
+  pause = waitWhileRunning,
+} = {}) {
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    if (childHasExited(child)) throw childExitError();
+    if (!advertised()) {
+      await pause(child, 250);
       continue;
     }
     try {
-      const response = await fetch(origin);
+      const response = await fetcher(origin);
+      if (childHasExited(child)) throw childExitError();
       if (response.ok) return;
-    } catch {
+    } catch (error) {
+      if (childHasExited(child)) throw childExitError();
+      if (error instanceof Error && error.message.startsWith("Dashboard test server exited early.")) throw error;
       // The listener is expected to refuse connections until vinext is ready.
     }
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    await pause(child, 250);
   }
   throw new Error(`Dashboard test server did not start at ${origin}.\n${serverOutput}`);
 }
 
 async function stopServer() {
   if (!ownedServerPid) return;
-  const running = Boolean(server && server.exitCode === null);
-  const exited = running ? new Promise((resolve) => server.once("exit", resolve)) : Promise.resolve();
+  const running = Boolean(server && !childHasExited(server));
+  if (!running) return;
+  const exited = waitForExit(server);
   try {
     if (process.platform === "win32") server?.kill("SIGTERM");
     else process.kill(-ownedServerPid, "SIGTERM");
   } catch {
     if (running) server?.kill("SIGTERM");
   }
-  if (!running) return;
   const stopped = await Promise.race([
     exited.then(() => true),
     new Promise((resolve) => setTimeout(() => resolve(false), 2500)),
   ]);
-  if (stopped || server?.exitCode !== null) return;
+  if (stopped || childHasExited(server)) return;
   try {
     if (process.platform === "win32") server?.kill("SIGKILL");
     else process.kill(-ownedServerPid, "SIGKILL");
@@ -108,6 +166,49 @@ test("layout server readiness stays tied to the owned process", () => {
   assert.doesNotMatch(source, /serverOutput\.match\(\/Local:/, "must not adopt a listener advertised by an exited process");
   assert.match(source, /serverOutput\.includes\(`http:\/\/localhost:\$\{port\}`\)/, "owned child must advertise the configured port before readiness succeeds");
   assert.match(source, /ownedServerPid/, "cleanup must retain the owned process-group id");
+});
+
+test("child lifecycle treats normal and signal exits as final without late listeners", async () => {
+  for (const child of [
+    { exitCode: 0, signalCode: null, once: () => { throw new Error("late normal-exit listener"); } },
+    { exitCode: null, signalCode: "SIGTERM", once: () => { throw new Error("late signal-exit listener"); } },
+  ]) {
+    assert.equal(childHasExited(child), true);
+    await waitForExit(child);
+    await assert.rejects(
+      waitForServer({ child, advertised: () => true, fetcher: async () => ({ ok: true }), pause: async () => undefined }),
+      /exited early/,
+    );
+  }
+
+  const racedExit = {
+    exitCode: null,
+    signalCode: null,
+    removed: false,
+    once() { this.exitCode = 0; },
+    removeListener() { this.removed = true; },
+  };
+  assert.equal(await Promise.race([
+    waitForExit(racedExit).then(() => "exited"),
+    new Promise((resolve) => setTimeout(() => resolve("late-listener"), 40)),
+  ]), "exited");
+  assert.equal(racedExit.removed, true);
+
+  const racedSignal = {
+    exitCode: null,
+    signalCode: null,
+    removed: false,
+    once() { this.signalCode = "SIGTERM"; },
+    removeListener() { this.removed = true; },
+  };
+  await assert.rejects(
+    Promise.race([
+      waitWhileRunning(racedSignal, 1000),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("late-listener")), 40)),
+    ]),
+    /exited early/,
+  );
+  assert.equal(racedSignal.removed, true);
 });
 
 test("dashboard and quests do not overlap or overflow", { timeout: 120_000 }, async () => {
@@ -277,6 +378,12 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     assert.match(resetMessage, /сбросить проект/i);
     await mobile.close();
 
+    const noScript = await browser.newContext({ viewport: { width: 375, height: 900 }, javaScriptEnabled: false });
+    const serverDesktop = await noScript.newPage();
+    await serverDesktop.goto(`${origin}/?format=desktop&quest=pressure-diary`, { waitUntil: "domcontentloaded" });
+    assert.equal(await serverDesktop.locator('[data-client-ready="false"] .mobile-format-switch').evaluate((node) => getComputedStyle(node).display), "none");
+    await noScript.close();
+
     const explicitDesktop = await browser.newPage({ viewport: { width: 375, height: 900 } });
     await explicitDesktop.goto(`${origin}/?format=desktop&quest=pressure-diary`, { waitUntil: "domcontentloaded" });
     await explicitDesktop.locator('[data-client-ready="true"] .quest-shell').waitFor();
@@ -300,6 +407,29 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     await orientation.locator(".learning-shell-desktop").waitFor();
     assert.equal(new URL(orientation.url()).searchParams.has("format"), false);
     await orientation.close();
+
+    const dashboardOrientation = await browser.newPage({ viewport: { width: 375, height: 900 } });
+    await dashboardOrientation.goto(origin, { waitUntil: "domcontentloaded" });
+    await dashboardOrientation.locator('[data-client-ready="true"].learning-shell-mobile').waitFor();
+    const planningCard = dashboardOrientation.getByRole("article", { name: /планирование/i });
+    await planningCard.getByRole("link", { name: /начать: планирование/i }).click();
+    await dashboardOrientation.locator(".learning-shell-mobile .format-choice-shell").waitFor();
+    assert.equal(new URL(dashboardOrientation.url()).searchParams.get("format"), "mobile");
+    await dashboardOrientation.setViewportSize({ width: 1024, height: 900 });
+    await dashboardOrientation.locator(".learning-shell-desktop .format-choice-shell").waitFor();
+    assert.equal(new URL(dashboardOrientation.url()).searchParams.has("format"), false);
+    await dashboardOrientation.close();
+
+    const explicitOrientation = await browser.newPage({ viewport: { width: 375, height: 900 } });
+    await explicitOrientation.goto(`${origin}/?format=mobile`, { waitUntil: "domcontentloaded" });
+    const explicitPlanning = explicitOrientation.getByRole("article", { name: /планирование/i });
+    await explicitPlanning.getByRole("link", { name: /начать: планирование/i }).click();
+    await explicitOrientation.locator(".learning-shell-mobile .format-choice-shell").waitFor();
+    await explicitOrientation.setViewportSize({ width: 1024, height: 900 });
+    await explicitOrientation.waitForTimeout(100);
+    assert.ok(await explicitOrientation.locator(".learning-shell-mobile .format-choice-shell").isVisible());
+    assert.equal(new URL(explicitOrientation.url()).searchParams.get("format"), "mobile");
+    await explicitOrientation.close();
 
     const curator = await browser.newPage({ viewport: { width: 375, height: 900 } });
     await curator.goto(`${origin}/?format=mobile&quest=server-152fz`, { waitUntil: "domcontentloaded" });
@@ -348,6 +478,75 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     await reward.waitFor({ state: "detached" });
     assert.ok(await rewardOpener.evaluate((node) => document.activeElement === node));
     await desktop.close();
+  } finally {
+    await browser.close();
+  }
+});
+
+test("bundle and install choices use Pink Cloud surfaces and AA adult type", { timeout: 60_000 }, async () => {
+  const browser = await chromium.launch({
+    ...(fs.existsSync(chromePath) ? { executablePath: chromePath } : {}),
+    headless: true,
+  });
+  try {
+    for (const { route, width, bodySize } of [
+      { route: "/?format=mobile&quest=planning", width: 375, bodySize: "17px" },
+      { route: "/?format=mobile&quest=install-codex", width: 375, bodySize: "17px" },
+      { route: "/?format=desktop&quest=planning", width: 1024, bodySize: "18px" },
+      { route: "/?format=desktop&quest=install-codex", width: 1024, bodySize: "18px" },
+    ]) {
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
+      const choice = page.locator(".format-choice-shell");
+      await choice.waitFor();
+      assert.equal(await choice.getAttribute("data-visual-theme"), "pink-cloud");
+      const styles = await choice.evaluate((node) => {
+        const shell = getComputedStyle(node);
+        const card = getComputedStyle(node.querySelector(".format-choice-card"));
+        const heading = getComputedStyle(node.querySelector(".format-choice-heading h2"));
+        const body = getComputedStyle(node.querySelector(".format-choice-heading p"));
+        const option = getComputedStyle(node.querySelector(".format-option"));
+        const optionCopy = getComputedStyle(node.querySelector(".format-option-copy"));
+        return {
+          shellBackground: shell.backgroundColor,
+          shellImage: shell.backgroundImage,
+          shellFamily: shell.fontFamily,
+          cardBackground: card.backgroundColor,
+          cardBorder: card.borderColor,
+          headingColor: heading.color,
+          headingFamily: heading.fontFamily,
+          bodyColor: body.color,
+          bodySize: body.fontSize,
+          optionBackground: option.backgroundColor,
+          optionImage: option.backgroundImage,
+          optionBorder: option.borderColor,
+          optionColor: option.color,
+          optionCopyColor: optionCopy.color,
+          optionCopySize: optionCopy.fontSize,
+        };
+      });
+      assert.equal(styles.shellImage, "none", `${route} kept a legacy shell image`);
+      assert.ok(!/247, 241, 235|247, 239, 233/.test(styles.shellBackground), `${route} kept a beige shell`);
+      assert.match(styles.shellFamily, /system-ui|Segoe UI/i);
+      assert.equal(styles.cardBackground, "rgb(255, 255, 255)");
+      assert.match(styles.cardBorder, /rgba?\(91, 55, 80/);
+      assert.equal(styles.optionImage, "none", `${route} kept a multicolor legacy card`);
+      assert.equal(styles.optionBackground, "rgb(255, 242, 247)");
+      assert.match(styles.optionBorder, /rgba?\(91, 55, 80/);
+      assert.match(styles.headingFamily, /system-ui|Segoe UI/i);
+      assert.equal(styles.bodySize, bodySize);
+      assert.equal(styles.optionCopySize, bodySize);
+      assert.ok(contrast(styles.headingColor, styles.cardBackground) >= 4.5, `${route} heading contrast failed`);
+      assert.ok(contrast(styles.bodyColor, styles.cardBackground) >= 4.5, `${route} body contrast failed`);
+      assert.ok(contrast(styles.optionColor, styles.optionBackground) >= 4.5, `${route} option contrast failed`);
+      assert.ok(contrast(styles.optionCopyColor, styles.optionBackground) >= 4.5, `${route} option copy contrast failed`);
+      const option = page.locator(".format-option").first();
+      await option.focus();
+      assert.equal(await option.evaluate((node) => getComputedStyle(node).outlineWidth), "3px");
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      assert.ok(overflow <= 1, `${route} at ${width}px has ${overflow}px horizontal overflow`);
+      await page.close();
+    }
   } finally {
     await browser.close();
   }

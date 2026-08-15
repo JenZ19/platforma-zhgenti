@@ -234,6 +234,38 @@ describe("academy interface", () => {
     removeListener.mockRestore();
   });
 
+  it("keeps dashboard-owned mobile navigation implicit when a quest opens", async () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    const view = render(<AppEntry />);
+    await waitFor(() => expect(view.container.querySelector(".learning-shell-mobile")).not.toBeNull());
+
+    const planning = await screen.findByRole("article", { name: /планирование/i });
+    fireEvent.click(within(planning).getByRole("link", { name: /начать: планирование/i }));
+    await waitFor(() => expect(view.container.querySelector(".format-choice-shell.mobile")).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&quest=planning");
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
+    window.dispatchEvent(new Event("resize"));
+    await waitFor(() => expect(view.container.querySelector(".learning-shell-desktop .format-choice-shell")).not.toBeNull());
+    expect(window.location.search).toBe("?quest=planning");
+  });
+
+  it("keeps an explicitly selected mobile dashboard user-owned after opening a quest", async () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    window.history.replaceState({}, "", "/?format=mobile");
+    const view = render(<AppEntry />);
+    await waitFor(() => expect(view.container.querySelector(".learning-shell-mobile")).not.toBeNull());
+
+    const planning = await screen.findByRole("article", { name: /планирование/i });
+    fireEvent.click(within(planning).getByRole("link", { name: /начать: планирование/i }));
+    await waitFor(() => expect(view.container.querySelector(".format-choice-shell.mobile")).not.toBeNull());
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
+    window.dispatchEvent(new Event("resize"));
+    expect(view.container.querySelector(".learning-shell-mobile")).not.toBeNull();
+    expect(window.location.search).toBe("?format=mobile&quest=planning");
+  });
+
   it("keeps explicit format user-owned and exposes a phone escape from explicit desktop", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
     window.history.replaceState({}, "", "/?format=desktop&quest=pressure-diary");
