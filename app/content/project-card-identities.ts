@@ -83,13 +83,13 @@ const projectCardIdentities: Record<string, ProjectCardIdentity> = {
   "catalog-pro-site": identity("Каталог с корзиной", "▦", "#3f5e80", "label", -3, "left"),
   "graduate-portfolio": identity("Портфолио выпускницы", "✦", "#69498b", "seal", 4, "right"),
 
-  planning: identity("Планер или агент", "✓", "#8d4a32", "bookmark", -4, "left"),
-  ideas: identity("Идеи или агент", "✦", "#3e6c59", "receipt", 3, "right"),
-  "family-budget": identity("Бюджет или агент", "₽", "#7f3c60", "cloud", -3, "left"),
-  recipes: identity("Рецепты или агент", "⌂", "#3e5e83", "ticket", 4, "right"),
-  "family-schedule": identity("Расписание или агент", "◷", "#6d4a8d", "label", -4, "left"),
-  habits: identity("Трекер или агент", "○", "#914c31", "seal", 3, "right"),
-  household: identity("Дом или агент", "⌁", "#3d6a58", "bookmark", -3, "left"),
+  planning: identity("Планирование", "✓", "#8d4a32", "bookmark", -4, "left"),
+  ideas: identity("Идеи", "✦", "#3e6c59", "receipt", 3, "right"),
+  "family-budget": identity("Семейный бюджет", "₽", "#7f3c60", "cloud", -3, "left"),
+  recipes: identity("Рецепты и питание", "⌂", "#3e5e83", "ticket", 4, "right"),
+  "family-schedule": identity("Семейное расписание", "◷", "#6d4a8d", "label", -4, "left"),
+  habits: identity("Привычки", "○", "#914c31", "seal", 3, "right"),
+  household: identity("Домашние дела", "⌁", "#3d6a58", "bookmark", -3, "left"),
 };
 
 const fallbackIdentity: ProjectCardIdentity = identity(

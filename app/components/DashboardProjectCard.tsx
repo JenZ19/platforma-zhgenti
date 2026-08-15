@@ -44,14 +44,18 @@ const formatLabels: Record<ProjectKind, string> = {
 
 export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscoveryDetails = false }: DashboardProjectCardProps) {
   const { project } = item;
+  const bundled = isProjectBundle(project);
   const discovery = getCatalogDiscoveryProfile(project);
-  const week = isProjectBundle(project) ? "Недели 1–2" : `Неделя ${project.week}`;
+  const week = bundled ? "Недели 1–2" : `Неделя ${project.week}`;
   const saveLabel = item.saved
     ? `Убрать ${project.title} из сохранённых`
     : `Сохранить на потом: ${project.title}`;
   const action = item.status === "completed" ? "Открыть проект" : item.status === "new" ? "Начать" : "Продолжить";
-  const resultFormat = isProjectBundle(project)
-    ? item.output ? item.output === "service" ? "Сервис" : "ИИ-агент" : project.track
+  const resultFormat = bundled
+    ? item.output ? item.output === "service" ? "Сервис" : "ИИ-агент" : "2 варианта на выбор"
+    : formatLabels[project.kind];
+  const resultType = bundled
+    ? item.output ? item.output === "service" ? "Сервис" : "ИИ-агент" : "экранный сервис / разговорный ИИ-агент"
     : formatLabels[project.kind];
 
   return (
@@ -68,9 +72,9 @@ export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscove
         <div className="dashboard-card-facts">
           <p>Время: {questDurationLabel(item.totalLevels, format)}</p>
           <p>Формат: {resultFormat}</p>
-          {showDiscoveryDetails ? <p>Тип результата: {isProjectBundle(project) ? project.track : formatLabels[project.kind]}</p> : null}
+          {showDiscoveryDetails ? <p>Тип результата: {resultType}</p> : null}
           {showDiscoveryDetails ? <p>Ключевые слова: {discovery.keywords.join(", ")}</p> : null}
-          {showDiscoveryDetails && isProjectBundle(project) ? <p>Выбор: Сервис или ИИ-агент</p> : null}
+          {showDiscoveryDetails && bundled && !item.output ? <p>Чем отличаются: сервис открывают и нажимают кнопки; с ИИ-агентом переписываются как с помощником</p> : null}
         </div>
         <div className="dashboard-progress" aria-label={`Пройдено ${item.completedLevels} из ${item.totalLevels}`}>
           <i aria-hidden="true"><b style={{ width: `${item.percent}%` }} /></i>

@@ -40,4 +40,14 @@ describe("project card identities", () => {
     expect(getProjectCardIdentityBySlug("webinar-moderator-agent")).toMatchObject({ label: "Модератор вебинара", glyph: "●" });
     expect(getProjectCardIdentityBySlug("expert-site")).toMatchObject({ label: "Сайт эксперта", glyph: "⌘" });
   });
+
+  it("names combined cards by their topic instead of the vague agent alternative", () => {
+    for (const bundle of projectBundleSeeds) {
+      expect(getProjectCardIdentityBySlug(bundle.slug).label).not.toMatch(/или агент/i);
+    }
+
+    expect(getProjectCardIdentityBySlug("planning")).toMatchObject({ label: "Планирование" });
+    expect(getProjectCardIdentityBySlug("planner")).toMatchObject({ label: "Планер недели" });
+    expect(getProjectCardIdentityBySlug("day-planner-agent")).toMatchObject({ label: "План дня" });
+  });
 });

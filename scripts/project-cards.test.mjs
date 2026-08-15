@@ -20,10 +20,16 @@ test("project card headings stay bold and aligned on desktop, then relax on phon
   assert.match(css, /@media \(max-width:\s*767px\)[\s\S]*\.dashboard-card-body h3[\s\S]{0,240}min-height:\s*0/);
 });
 
-test("result covers fill their frame without the legacy screenshot crop", () => {
+test("result covers fill their frame and bundles layer two whole results", () => {
   assert.match(css, /\.dashboard-project-card \.project-preview img[\s\S]{0,420}object-fit:\s*cover/);
   assert.match(css, /\.dashboard-project-card \.project-preview img[\s\S]{0,420}transform:\s*none/);
-  assert.match(css, /\.dashboard-project-card \.project-preview-bundle > div img[\s\S]{0,180}position:\s*static/);
+  assert.match(css, /\.bundle-preview-carousel\s*\{[\s\S]{0,420}position:\s*relative/);
+  assert.match(css, /\.bundle-preview-slide\s*\{[\s\S]{0,520}position:\s*absolute[\s\S]{0,220}width:\s*100%/);
+  assert.match(css, /\.bundle-preview-slide\.is-active[\s\S]{0,160}opacity:\s*1/);
+  assert.match(css, /\.bundle-preview-format[\s\S]{0,520}z-index:\s*4/);
+  assert.match(css, /\.bundle-preview-dots[\s\S]{0,520}z-index:\s*4/);
+  assert.doesNotMatch(css, /\.project-preview-bundle > div\s*\{[\s\S]{0,180}grid-template-columns:\s*1fr 1fr/);
+  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*\.bundle-preview-slide/);
 });
 
 test("every result preview renders its thematic sticker from the shared identity registry", () => {
@@ -35,7 +41,7 @@ test("every result preview renders its thematic sticker from the shared identity
 });
 
 test("Pink Cloud stickers stay readable, varied and clear of card actions", () => {
-  assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}z-index:\s*3/);
+  assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}z-index:\s*5/);
   assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}max-width:\s*min\(70%,\s*230px\)/);
   assert.match(css, /\.project-preview-sticker\s*\{[\s\S]{0,900}font-size:\s*12px/);
   for (const shape of ["receipt", "label", "seal", "ticket", "bookmark", "cloud"]) {

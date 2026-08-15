@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { getProjectCardIdentity } from "../content/project-card-identities";
 import { isProjectBundle } from "../content/projects";
 import type { CatalogProject } from "../content/types";
+import { BundlePreviewCarousel } from "./BundlePreviewCarousel";
 
 type ProjectStickerStyle = CSSProperties & {
   "--project-sticker-accent": string;
@@ -31,24 +32,9 @@ export function ProjectPreview({ project }: { project: CatalogProject }) {
   if (isProjectBundle(project)) {
     return (
       <figure className="project-preview project-preview-bundle">
-        <div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/covers/${project.formats.service.slug}.webp`}
-            alt={`Сервис проекта «${project.title}»`}
-            loading="lazy"
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/covers/${project.formats.agent.slug}.webp`}
-            alt={`ИИ-агент проекта «${project.title}»`}
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
+        <BundlePreviewCarousel project={project} />
         <ProjectSticker project={project} />
-        <figcaption><span>✦</span> Сервис + ИИ-агент</figcaption>
+        <figcaption><span>✦</span> Два варианта одного проекта</figcaption>
       </figure>
     );
   }

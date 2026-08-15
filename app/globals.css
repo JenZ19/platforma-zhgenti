@@ -8687,21 +8687,6 @@ button {
 .child-mobile-capture .mobile-capture-body>aside h2 { font-size:38px; line-height:.98; }
 
 /* Service or AI-agent choice */
-.project-preview-bundle > div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3px;
-  height: 100%;
-  background: #eee4da;
-}
-.project-preview-bundle > div img {
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  object-fit: cover;
-}
-.project-preview-bundle > div img:first-child { object-position: 20% center; }
-.project-preview-bundle > div img:last-child { object-position: 80% center; }
 .format-choice-shell { min-height: 100vh; background: #f7f1eb; }
 .format-choice-progress {
   border: 1px solid rgba(44, 62, 54, .14);
@@ -8780,7 +8765,6 @@ button {
   .format-option { min-height: 170px; border-radius: 22px; padding: 21px; }
   .format-option-icon { width: 46px; height: 46px; border-radius: 15px; }
   .format-option h3 { font-size: 30px; }
-  .project-preview-bundle > div { gap: 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

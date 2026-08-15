@@ -434,6 +434,47 @@ describe("academy interface", () => {
       .toHaveAttribute("data-project-sticker", "webinar-moderator-agent");
   });
 
+  it("shows bundled service and agent as two full, specifically labelled results", () => {
+    const planning = getBundle("planning");
+    const { container } = render(<ProjectPreview project={planning} />);
+    const carousel = container.querySelector(".bundle-preview-carousel");
+
+    expect(carousel).toHaveAttribute("data-active-format", "service");
+    expect(container.querySelectorAll(".bundle-preview-slide")).toHaveLength(2);
+    expect(container.querySelector(".bundle-preview-format")).toHaveTextContent("Сервис · Планер недели");
+    expect(screen.getByRole("button", { name: "Показать сервис" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Показать ИИ-агента" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByText("Два варианта одного проекта")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Показать ИИ-агента" }));
+
+    expect(carousel).toHaveAttribute("data-active-format", "agent");
+    expect(container.querySelector(".bundle-preview-format")).toHaveTextContent("ИИ-агент · План дня");
+    expect(screen.getByRole("button", { name: "Показать ИИ-агента" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("changes bundled results automatically and pauses while the preview is hovered", () => {
+    vi.useFakeTimers();
+    try {
+      const planning = getBundle("planning");
+      const { container } = render(<ProjectPreview project={planning} />);
+      const carousel = container.querySelector(".bundle-preview-carousel")!;
+
+      act(() => vi.advanceTimersByTime(4200));
+      expect(carousel).toHaveAttribute("data-active-format", "agent");
+
+      fireEvent.mouseEnter(carousel);
+      act(() => vi.advanceTimersByTime(8400));
+      expect(carousel).toHaveAttribute("data-active-format", "agent");
+
+      fireEvent.mouseLeave(carousel);
+      act(() => vi.advanceTimersByTime(4200));
+      expect(carousel).toHaveAttribute("data-active-format", "service");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("shows six openable weeks, applies URL search and resets an empty result", async () => {
     window.history.replaceState({}, "", "/?section=weeks&q=%D0%BD%D0%B5%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9");
 
@@ -544,8 +585,10 @@ describe("academy interface", () => {
 
     const planning = await screen.findByRole("article", { name: /планирование/i });
     expect(planning).toHaveTextContent("Время: 5–10 минут на уровень");
-    expect(planning).toHaveTextContent("Формат: Сервис или ИИ-агент");
-    expect(planning).toHaveTextContent("Тип результата: Сервис или ИИ-агент");
+    expect(planning).toHaveTextContent("Формат: 2 варианта на выбор");
+    expect(planning).toHaveTextContent("Тип результата: экранный сервис / разговорный ИИ-агент");
+    expect(planning).toHaveTextContent("Чем отличаются: сервис открывают и нажимают кнопки; с ИИ-агентом переписываются как с помощником");
+    expect(planning).not.toHaveTextContent("или агент");
     expect(planning).toHaveTextContent(/Ключевые слова:.+Для себя/i);
     const server = screen.getByRole("article", { name: /покупаем сервер/i });
     expect(server).toHaveTextContent("Время: 5–7 минут на уровень");
@@ -1584,7 +1627,9 @@ describe("academy interface", () => {
       "src",
       "/covers/planner.webp",
     );
-    expect(screen.getByRole("img", { name: /ИИ-агент проекта «планирование»/i })).toHaveAttribute(
+    const agentSlide = container.querySelector('.bundle-preview-slide[data-format="agent"]');
+    expect(agentSlide).toHaveAttribute("aria-hidden", "true");
+    expect(agentSlide?.querySelector("img")).toHaveAttribute(
       "src",
       "/covers/day-planner-agent.webp",
     );
