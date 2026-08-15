@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- generated lesson screens are fixed-size local teaching assets */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildQuest } from "../content/quests";
 import { defaultCustomization, getCustomizationProfile } from "../content/customization";
 import { isProjectBundle, resolveProjectVariant } from "../content/projects";
@@ -160,6 +160,10 @@ function QuestBody({
   const [copied, setCopied] = useState<"main" | "help" | null>(null);
   const [reward, setReward] = useState<string | null>(null);
   const [imageOpen, setImageOpen] = useState(false);
+  const imageDialogRef = useRef<HTMLDialogElement>(null);
+  const imageCloseRef = useRef<HTMLButtonElement>(null);
+  const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
+  const imageMountedRef = useRef(true);
   const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(profileSlug));
   const profile = useMemo(() => getCustomizationProfile(profileSlug), [profileSlug]);
   const steps = useMemo(() => buildQuest(project, preparation?.mode ?? "demo", customization, setupPlatform), [project, preparation?.mode, customization, setupPlatform]);
@@ -173,6 +177,48 @@ function QuestBody({
     setPreparation(loadPreparation(storageSlug, window.localStorage));
     setCustomization(loadCustomization(storageSlug, profileSlug, window.localStorage));
   }, [profileSlug, steps.length, storageSlug]);
+
+  useEffect(() => {
+    const dialog = imageDialogRef.current;
+    if (!dialog) return;
+    if (!imageOpen) {
+      if (dialog.open) {
+        try {
+          if (typeof dialog.close === "function") dialog.close();
+          else dialog.removeAttribute("open");
+        } catch {
+          dialog.removeAttribute("open");
+        }
+      }
+      return;
+    }
+    try {
+      if (typeof dialog.showModal === "function") {
+        if (!dialog.open) dialog.showModal();
+      } else {
+        dialog.setAttribute("open", "");
+      }
+    } catch {
+      dialog.setAttribute("open", "");
+    }
+    imageCloseRef.current?.focus();
+  }, [imageOpen]);
+
+  useEffect(() => {
+    const dialog = imageDialogRef.current;
+    imageMountedRef.current = true;
+    return () => {
+      imageMountedRef.current = false;
+      imageOpenerRef.current = null;
+      if (!dialog?.open) return;
+      try {
+        if (typeof dialog.close === "function") dialog.close();
+        else dialog.removeAttribute("open");
+      } catch {
+        dialog.removeAttribute("open");
+      }
+    };
+  }, []);
 
   const step = steps[progress.activeStep - 1] ?? steps[0];
   const totalLevels = steps.length;
@@ -245,6 +291,32 @@ function QuestBody({
     window.setTimeout(() => setCopied(null), 1600);
   }
 
+  function finishImageDialog() {
+    if (!imageMountedRef.current) return;
+    const opener = imageOpenerRef.current;
+    imageOpenerRef.current = null;
+    setImageOpen(false);
+    if (opener?.isConnected) opener.focus();
+  }
+
+  function closeImageDialog() {
+    const dialog = imageDialogRef.current;
+    if (!dialog) {
+      finishImageDialog();
+      return;
+    }
+    try {
+      if (typeof dialog.close === "function" && dialog.open) dialog.close();
+      else {
+        dialog.removeAttribute("open");
+        finishImageDialog();
+      }
+    } catch {
+      dialog.removeAttribute("open");
+      finishImageDialog();
+    }
+  }
+
   function reset() {
     const title = bundle?.title ?? project.title;
     const warning = bundle
@@ -314,8 +386,6 @@ function QuestBody({
 
   return (
     <>
-      {project.slug === "server-152fz" && <ServerDiscountOffer />}
-
       <main className="quest-workspace" data-quest-workspace="desktop" data-visual-theme="pink-cloud">
         <article className="quest-step-card" aria-live="polite">
           <header className="quest-step-heading">
@@ -334,6 +404,8 @@ function QuestBody({
             <p>{step.eyebrow} · уровень {step.id} из {totalLevels} · ≈ {questLevelMinutes(step.id, "desktop")} мин</p>
             <h1>{step.title}</h1>
           </header>
+
+          {project.slug === "server-152fz" && <ServerDiscountOffer />}
 
           <section className="quest-purpose">
             <h2>Зачем</h2>
@@ -361,7 +433,7 @@ function QuestBody({
 
           <section className="quest-result">
             <div className="quest-result-heading"><div><h2>Готово, если</h2><p>{resultHint}</p></div>{step.showScreenshot !== false && <span>{screenshotBadge}</span>}</div>
-            {step.showScreenshot !== false && <button type="button" className={`reference-shot screenshot-${step.screenshotKind ?? "prototype"}`} onClick={() => setImageOpen(true)} aria-label="Увеличить пример результата"><img src={step.screenshot} alt={screenshotAlt} /><span>Увеличить</span></button>}
+            {step.showScreenshot !== false && <button type="button" className={`reference-shot screenshot-${step.screenshotKind ?? "prototype"}`} onClick={(event) => { imageOpenerRef.current = event.currentTarget; setImageOpen(true); }} aria-label="Увеличить пример результата"><img src={step.screenshot} alt={screenshotAlt} /><span>Увеличить</span></button>}
             <ul>{step.expected.map((item) => <li key={item}><span aria-hidden="true">✓</span>{item}</li>)}</ul>
             {finished && step.id === lastLevel && <section className="finish-card"><i aria-hidden="true">✦</i><p>Квест завершён</p><h3>{setupQuest ? "Рабочее место готово к следующим проектам" : "Теперь этот проект — часть твоего портфолио"}</h3><span>{setupQuest ? "Все обязательные проверки пройдены — сохраните итоговый чек-лист." : "Ссылка, описание и безопасные экраны готовы к показу."}</span></section>}
           </section>
@@ -408,7 +480,20 @@ function QuestBody({
         </aside>
       </main>
 
-      {imageOpen && step.showScreenshot !== false && <div className="image-modal" role="dialog" aria-modal="true" aria-label="Увеличенный пример"><button type="button" aria-label="Закрыть увеличенный пример" onClick={() => setImageOpen(false)}>×</button><img src={step.screenshot} alt={screenshotAlt} /></div>}
+      {step.showScreenshot !== false && (
+        <dialog
+          ref={imageDialogRef}
+          className="image-modal"
+          style={imageOpen ? undefined : { display: "none" }}
+          aria-label="Увеличенный пример"
+          onClose={finishImageDialog}
+          onCancel={(event) => { event.preventDefault(); closeImageDialog(); }}
+          onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeImageDialog(); } }}
+        >
+          <button ref={imageCloseRef} type="button" aria-label="Закрыть увеличенный пример" onClick={closeImageDialog}><span aria-hidden="true">×</span><span>Закрыть</span></button>
+          <img src={step.screenshot} alt={screenshotAlt} />
+        </dialog>
+      )}
       {reward && <div className="reward-modal" role="dialog" aria-modal="true" aria-label="Новая награда"><div><p>✦ · ✧ · ✦</p><span>Новая награда</span><h3>{reward}</h3><b>+10 искр в твою коллекцию</b><button type="button" className="primary-button" onClick={() => setReward(null)}>Забрать награду</button></div></div>}
     </>
   );

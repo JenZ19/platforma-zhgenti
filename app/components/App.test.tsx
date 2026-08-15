@@ -828,6 +828,90 @@ describe("academy interface", () => {
     }
   });
 
+  it("opens the result screenshot in a native modal and restores its exact opener", () => {
+    const { container } = render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const opener = screen.getByRole("button", { name: /увеличить пример результата/i });
+    opener.focus();
+
+    fireEvent.click(opener);
+
+    const dialog = screen.getByRole("dialog", { name: "Увеличенный пример" });
+    expect(dialog.tagName).toBe("DIALOG");
+    expect(dialog).not.toHaveAttribute("aria-modal");
+    expect(showModalMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: /закрыть увеличенный пример/i })).toHaveFocus();
+
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+
+    fireEvent.click(opener);
+    const reopened = screen.getByRole("dialog", { name: "Увеличенный пример" });
+    fireEvent(reopened, new Event("cancel", { cancelable: true }));
+    expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+    expect(container.querySelector(".image-modal[aria-modal]")).toBeNull();
+  });
+
+  it("keeps the result screenshot usable when dialog showModal is unavailable", () => {
+    const originalShowModal = HTMLDialogElement.prototype.showModal;
+    Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: undefined });
+
+    try {
+      render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+      const opener = screen.getByRole("button", { name: /увеличить пример результата/i });
+      opener.focus();
+      fireEvent.click(opener);
+
+      const dialog = screen.getByRole("dialog", { name: "Увеличенный пример" });
+      expect(dialog).toHaveAttribute("open");
+      fireEvent.click(screen.getByRole("button", { name: /закрыть увеличенный пример/i }));
+      expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+      expect(opener).toHaveFocus();
+    } finally {
+      Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: originalShowModal });
+    }
+  });
+
+  it("opens a guide screenshot as a native modal and restores the selected frame opener", () => {
+    render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const opener = screen.getByRole("button", { name: /увеличить кадр 2:/i });
+    opener.focus();
+
+    fireEvent.click(opener);
+
+    const dialog = screen.getByRole("dialog", { name: /увеличенный кадр 2/i });
+    expect(dialog.tagName).toBe("DIALOG");
+    expect(dialog).not.toHaveAttribute("aria-modal");
+    const close = screen.getByRole("button", { name: /закрыть увеличенный кадр 2/i });
+    expect(close).toHaveTextContent("Закрыть");
+    expect(close).toHaveFocus();
+
+    fireEvent(dialog, new Event("cancel", { cancelable: true }));
+    expect(screen.queryByRole("dialog", { name: /увеличенный кадр 2/i })).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+  });
+
+  it("keeps page and quest phase headings in document order", () => {
+    const server = render(<Quest project={getQuestProject("server-152fz")!} onHome={vi.fn()} />);
+    const workspace = server.container.querySelector<HTMLElement>('[data-quest-workspace="desktop"]')!;
+    const pageHeading = within(workspace).getByRole("heading", { level: 1, name: /решила, нужен ли мне сервер/i });
+    const offerHeading = within(workspace).getByRole("heading", { level: 2, name: /скидка 60% на сервер/i });
+    expect(pageHeading.compareDocumentPosition(offerHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    server.unmount();
+
+    render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const promptHeading = screen.getByRole("heading", { level: 2, name: /готовая команда для Codex/i });
+    const guideHeading = screen.getByRole("heading", { level: 2, name: /один кадр — одно маленькое действие/i });
+    const firstFrameHeading = screen.getByRole("heading", { level: 3, name: /откройте: Предпросмотр проекта/i });
+    expect(promptHeading.compareDocumentPosition(guideHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(guideHeading.compareDocumentPosition(firstFrameHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("keeps the desktop level map locked, current and synchronized with the opened step", () => {
     const project = getQuestProject("planner")!;
     const { container } = render(<Quest project={project} onHome={vi.fn()} />);
