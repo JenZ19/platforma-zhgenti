@@ -108,6 +108,7 @@ export function MobileQuest({
   const storageSlug = bundled ? branchStorageSlug(project.slug, output!, "mobile") : installQuest ? `mobile:install-codex:${setupPlatform}` : `mobile:${concrete.slug}`;
   return (
     <MobileQuestBody
+      key={storageSlug}
       project={concrete}
       storageSlug={storageSlug}
       profileSlug={concrete.slug}
@@ -368,9 +369,10 @@ function MobileQuestBody({
                 const unlocked = isStepUnlocked(progress, item.id);
                 const done = progress.completed.includes(item.id);
                 const current = item.id === step.id;
-                const status = done ? "Пройден" : current ? "Сейчас" : unlocked ? "Доступен" : "Закрыт";
+                const status = current && done ? "Сейчас · пройден" : current ? "Сейчас" : done ? "Пройден" : unlocked ? "Доступен" : "Закрыт";
+                const stateLabel = current && done ? ", текущий, пройден" : current ? ", текущий" : done ? ", пройден" : unlocked ? "" : ", закрыт";
                 return (
-                  <button type="button" key={item.id} disabled={!unlocked} aria-current={current ? "step" : undefined} aria-label={`Уровень ${item.id}: ${item.title}${done ? ", пройден" : unlocked ? "" : ", закрыт"}`} onClick={() => openMobileStep(item.id)}>
+                  <button type="button" key={item.id} disabled={!unlocked} aria-current={current ? "step" : undefined} aria-label={`Уровень ${item.id}: ${item.title}${stateLabel}`} onClick={() => openMobileStep(item.id)}>
                     <span aria-hidden="true">{done ? "✓" : item.id}</span><b>{item.title}<small>{status}</small></b>
                   </button>
                 );

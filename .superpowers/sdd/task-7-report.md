@@ -80,3 +80,40 @@ exit 0
 - Task 7 exposes semantic hooks only; sticky bottom-safe styling and final responsive Pink Cloud presentation remain assigned to Task 8.
 - The successful build retains the existing Node `punycode` deprecation and large-client-chunk warnings.
 - JSDOM retains its existing native-navigation notices in unrelated modified-link tests; all tests pass.
+
+## Review follow-up
+
+### RED
+
+```text
+npm run test:unit -- app/components/App.test.tsx -t "marks mobile levels|resets transient mobile"
+Test Files  1 failed (1)
+Tests  2 failed | 107 skipped (109)
+```
+
+The regressions proved that transient map/help/dialog state could survive when React reused `MobileQuest` for another quest route, and that an active completed map item exposed only `Пройден` instead of both current and completed state.
+
+### Fixes
+
+- `MobileQuestBody` is keyed by the exact `storageSlug`, so quest, bundle-output, and setup-platform branch changes remount transient UI state while persisted branch state reloads from its existing namespace.
+- A completed active level now visibly says `Сейчас · пройден`, keeps `aria-current="step"`, and exposes both `текущий` and `пройден` in its accessible name.
+- The content-order regression now asserts every mandatory node explicitly, includes the step heading, preserves optional terms in the sequence, and adds a project-specific server fixture proving prompt → links → result order.
+
+### Review GREEN
+
+```text
+npm run test:unit -- app/components/App.test.tsx -t "marks mobile levels|resets transient mobile"
+Test Files  1 passed (1)
+Tests  2 passed | 107 skipped (109)
+```
+
+Final post-review verification:
+
+```text
+Focused mobile/routes/content: 3 files passed, 138 tests passed
+Full unit: 23 files passed, 277 tests passed
+Scripts: 7 passed, 0 failed
+Lint: exit 0
+Build: complete, exit 0
+git diff --check: exit 0
+```

@@ -1001,8 +1001,8 @@ describe("academy interface", () => {
       completed: Array.from({ length: 8 }, (_, index) => index + 1),
       score: 80,
     }));
-    const { container } = render(<MobileQuest project={getQuestProject("api-keys")!} onHome={vi.fn()} />);
-    const workspace = container.querySelector<HTMLElement>('[data-quest-workspace="mobile"]')!;
+    const api = render(<MobileQuest project={getQuestProject("api-keys")!} onHome={vi.fn()} />);
+    const workspace = api.container.querySelector<HTMLElement>('[data-quest-workspace="mobile"]')!;
 
     expect(workspace.querySelector(".mobile-capability")).toHaveTextContent(/действия на компьютере/i);
     expect(workspace.querySelector(".mobile-action")).not.toBeNull();
@@ -1011,20 +1011,42 @@ describe("academy interface", () => {
     expect(within(workspace).getByRole("button", { name: /увеличить мобильный пример/i })).toBeInTheDocument();
 
     fireEvent.click(within(workspace).getByRole("button", { name: /^нужна помощь$/i }));
-    const ordered = [
+    const mandatory = [
+      workspace.querySelector(".mobile-quest-step-heading"),
       workspace.querySelector(".mobile-why"),
-      workspace.querySelector(".beginner-terms"),
       workspace.querySelector(".mobile-do"),
       workspace.querySelector(".mobile-prompt"),
       workspace.querySelector(".quest-guide"),
       workspace.querySelector(".mobile-result"),
       workspace.querySelector(".mobile-quest-help"),
       workspace.querySelector(".mobile-quest-step-actions"),
+    ];
+    expect(mandatory.every(Boolean)).toBe(true);
+    const ordered = [
+      mandatory[0],
+      mandatory[1],
+      workspace.querySelector(".beginner-terms"),
+      mandatory[2],
+      mandatory[3],
+      mandatory[4],
+      workspace.querySelector(".quest-links"),
+      mandatory[5],
+      mandatory[6],
+      mandatory[7],
     ].filter((node): node is Element => Boolean(node));
-    expect(ordered).toHaveLength(7);
     for (let index = 0; index < ordered.length - 1; index += 1) {
       expect(ordered[index]!.compareDocumentPosition(ordered[index + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     }
+
+    api.unmount();
+    localStorage.setItem(progressKey("mobile:server-152fz"), JSON.stringify({ version: 1, activeStep: 9, completed: [1, 2, 3, 4, 5, 6, 7, 8], score: 80 }));
+    const server = render(<MobileQuest project={getQuestProject("server-152fz")!} onHome={vi.fn()} />);
+    const serverPrompt = server.container.querySelector(".mobile-prompt")!;
+    const serverLinks = server.container.querySelector(".quest-links")!;
+    const serverResult = server.container.querySelector(".mobile-result")!;
+    expect(serverLinks).toHaveTextContent(/152-ФЗ|AdminVPS/i);
+    expect(serverPrompt.compareDocumentPosition(serverLinks) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(serverLinks.compareDocumentPosition(serverResult) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("marks mobile levels current, locked and done, then closes the map after selection", async () => {
@@ -1053,6 +1075,29 @@ describe("academy interface", () => {
     expect(container.querySelector(".mobile-quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
     expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
     await waitFor(() => expect(screen.getByRole("button", { name: /открыть карту уровней/i })).toHaveFocus());
+
+    fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
+    const revisited = screen.getByRole("button", { name: /уровень 1:.*текущий.*пройден/i });
+    expect(revisited).toHaveAttribute("aria-current", "step");
+    expect(revisited).toHaveTextContent(/сейчас.*пройден/i);
+  });
+
+  it("resets transient mobile workspace state when the route reuses the component for another project", () => {
+    localStorage.setItem(preparationKey("mobile:pressure-diary"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    localStorage.setItem(preparationKey("mobile:recipe-book"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    const { rerender } = render(<MobileQuest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /увеличить мобильный пример/i }));
+    expect(screen.getByRole("navigation", { name: /карта уровней/i })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: /увеличенный мобильный пример/i })).toBeInTheDocument();
+
+    rerender(<MobileQuest project={getQuestProject("recipe-book")!} onHome={vi.fn()} />);
+
+    expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /увеличенный мобильный пример/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^нужна помощь$/i })).toHaveAttribute("aria-expanded", "false");
   });
 
   it("uses one mobile step opener for a completed revisit, continuation and back", () => {
