@@ -339,10 +339,10 @@ function MobileQuestBody({
   if (preparation === null || !ready) {
     return (
       <main className="mobile-quest-shell" data-visual-theme="tactile-album">
-        <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>S</span><b>SUBMARINE<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
+        <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>Н</span><b>НЕЙРОПРОФИ<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
         <section className="mobile-quest-hero"><button type="button" onClick={onHome}>← Все мобильные проекты</button><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><p>Неделя {project.week} · {project.track}</p><h1>{bundle?.title ?? project.title}</h1><span>{project.outcome}</span>{format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}{setupPlatform && <div className="data-mode-badge setup-platform"><span>{setupPlatform === "mac" ? "⌘" : "⊞"}</span> Компьютер: {setupPlatform === "mac" ? "Mac" : "Windows"}</div>}<div className="mobile-progress"><div><b>{progress.completed.length} из {totalLevels}</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div><QuestResetButton mobile onReset={reset} /></section>
         {preparation === null ? <section className="preparation-card preparation-loading">Готовим мобильный квест…</section> : <QuestPreparation project={project} preparation={preparation} mobile onChooseDemo={() => storePreparation({ version: 1, mode: "demo", checked: [], ready: true })} onChooseReal={() => storePreparation({ version: 1, mode: "real", checked: [], ready: false })} onToggle={togglePreparation} onStartReal={() => checklist.every((item) => preparation.checked.includes(item.id)) && storePreparation({ ...preparation, ready: true })} onBack={() => { resetPreparation(storageSlug, window.localStorage); setPreparation(createEmptyPreparation()); }} />}
-        <footer className="mobile-footer"><span>SUBMARINE</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
+        <footer className="mobile-footer"><span>НЕЙРОПРОФИ</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
       </main>
     );
   }
@@ -352,7 +352,7 @@ function MobileQuestBody({
   return (
     <>
       <main className="mobile-quest-workspace mobile-quest-shell" data-quest-workspace="mobile" data-visual-theme="tactile-album">
-        <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>S</span><b>SUBMARINE<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
+        <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>Н</span><b>НЕЙРОПРОФИ<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
         <section className="mobile-quest-hero">
           <button type="button" onClick={onHome}>← Все мобильные проекты</button>
           <div className={`mobile-capability ${capability.id}`}>{capability.label}</div>
@@ -427,7 +427,7 @@ function MobileQuestBody({
           </aside>
         )}
 
-        <footer className="mobile-footer"><span>SUBMARINE</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
+        <footer className="mobile-footer"><span>НЕЙРОПРОФИ</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
       </main>
 
       {step.showScreenshot !== false && (

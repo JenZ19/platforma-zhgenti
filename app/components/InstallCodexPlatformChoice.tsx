@@ -21,7 +21,7 @@ export function InstallCodexPlatformChoice({
     <main className={shell} data-visual-theme="pink-cloud">
       <header className={mobile ? "mobile-topbar" : "site-header quest-site-header"}>
         <button type="button" className="brand brand-button" onClick={onHome}>
-          <span>S</span><b>SUBMARINE<small>{mobile ? "Квесты с телефона" : "Все квесты"}</small></b>
+          <span>Н</span><b>НЕЙРОПРОФИ<small>{mobile ? "Квесты с телефона" : "Все квесты"}</small></b>
         </button>
         <span className="format-choice-progress">Перед началом</span>
       </header>

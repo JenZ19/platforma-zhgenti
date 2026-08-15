@@ -420,7 +420,7 @@ function QuestBody({
     return (
       <main className="quest-shell" data-visual-theme="tactile-album">
         <header className="site-header quest-site-header">
-          <button type="button" className="brand brand-button" onClick={onHome}><span>S</span><b>SUBMARINE<small>Все квесты</small></b></button>
+          <button type="button" className="brand brand-button" onClick={onHome}><span>Н</span><b>НЕЙРОПРОФИ<small>Все квесты</small></b></button>
           <div className="quest-head-meta"><span>Неделя {project.week}</span><span><i>✦</i> {progress.score} искр</span></div>
         </header>
 
@@ -446,7 +446,7 @@ function QuestBody({
           />
         )}
 
-        <footer className="academy-footer"><span>SUBMARINE</span><p>Один проект за другим.<br />Так появляется новая профессия.</p></footer>
+        <footer className="academy-footer"><span>НЕЙРОПРОФИ</span><p>Один проект за другим.<br />Так появляется новая профессия.</p></footer>
       </main>
     );
   }

@@ -129,7 +129,7 @@ function SceneVisual({ frame }: { frame: QuestGuideFrame }) {
 export function HomeHelperGuideScene({ frame, step, mode }: { frame: QuestGuideFrame; step: number; mode: "real" | "demo" }) {
   return (
     <main id="capture-guide-scene" className="guide-capture-canvas">
-      <header><div className="capture-brand"><span>S</span> SUBMARINE</div><div>HOME-HELPER · УРОВЕНЬ {String(step).padStart(2, "0")} · КАДР {String(frame.id).padStart(2, "0")}</div></header>
+      <header><div className="capture-brand"><span>Н</span> НЕЙРОПРОФИ</div><div>HOME-HELPER · УРОВЕНЬ {String(step).padStart(2, "0")} · КАДР {String(frame.id).padStart(2, "0")}</div></header>
       <section className="guide-capture-copy"><small>{mode === "real" ? "ВАШ РЕАЛЬНЫЙ ПРОЕКТ" : "ГОТОВЫЙ ПРИМЕР"} · ОТКРОЙТЕ: {frame.app.toUpperCase()}</small><h1>{frame.title}</h1><p>{frame.action}</p><div><b>✓ Готово, если:</b> {frame.doneWhen}</div></section>
       <section className="guide-capture-visual"><SceneVisual frame={frame} /></section>
     </main>

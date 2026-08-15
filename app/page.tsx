@@ -3,7 +3,7 @@ import { AppEntry } from "./components/AppEntry";
 
 export const metadata: Metadata = {
   title: "Академия квестов — ИИ-агенты и ИИ-сайты",
-  description: "42 разных проекта курса SUBMARINE: готовые команды, короткие уровни и понятный результат на каждом шаге.",
+  description: "42 разных проекта курса НЕЙРОПРОФИ: готовые команды, короткие уровни и понятный результат на каждом шаге.",
 };
 
 type PageSearchParams = Record<string, string | string[] | undefined>;
