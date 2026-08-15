@@ -361,25 +361,6 @@ function MobileQuestBody({
         </section>
 
         <button ref={mapTriggerRef} className="mobile-level-map-trigger" type="button" aria-expanded={mapOpen} aria-controls="mobile-level-sheet" onClick={() => setMapOpen((value) => !value)}>Уровень {step.id} из {totalLevels} · Открыть карту уровней</button>
-        {mapOpen && (
-          <aside id="mobile-level-sheet" className="mobile-level-sheet" aria-labelledby="mobile-level-sheet-title">
-            <header><h2 id="mobile-level-sheet-title">Карта уровней</h2><button type="button" onClick={closeMap} aria-label="Закрыть карту уровней"><span aria-hidden="true">×</span><span>Закрыть</span></button></header>
-            <nav aria-label="Карта уровней">
-              {steps.map((item) => {
-                const unlocked = isStepUnlocked(progress, item.id);
-                const done = progress.completed.includes(item.id);
-                const current = item.id === step.id;
-                const status = current && done ? "Сейчас · пройден" : current ? "Сейчас" : done ? "Пройден" : unlocked ? "Доступен" : "Закрыт";
-                const stateLabel = current && done ? ", текущий, пройден" : current ? ", текущий" : done ? ", пройден" : unlocked ? "" : ", закрыт";
-                return (
-                  <button type="button" key={item.id} disabled={!unlocked} aria-current={current ? "step" : undefined} aria-label={`Уровень ${item.id}: ${item.title}${stateLabel}`} onClick={() => openMobileStep(item.id)}>
-                    <span aria-hidden="true">{done ? "✓" : item.id}</span><b>{item.title}<small>{status}</small></b>
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
-        )}
 
         <article className="mobile-quest-step-card" aria-live="polite">
           <header className="mobile-quest-step-heading"><p>{step.eyebrow} · уровень {step.id} из {totalLevels} · ≈ {questLevelMinutes(step.id, "mobile")} мин</p><h1>{step.title}</h1></header>
@@ -418,6 +399,26 @@ function MobileQuestBody({
             <button type="button" disabled={finished && step.id === lastLevel} onClick={finishStep}>{stepDone ? (step.id === lastLevel ? "Квест пройден ✦" : "Продолжить →") : step.id === lastLevel ? "Завершить квест ✦" : "Я сделала — продолжить →"}</button>
           </footer>
         </article>
+
+        {mapOpen && (
+          <aside id="mobile-level-sheet" className="mobile-level-sheet" aria-labelledby="mobile-level-sheet-title">
+            <header><h2 id="mobile-level-sheet-title">Карта уровней</h2><button type="button" onClick={closeMap} aria-label="Закрыть карту уровней"><span aria-hidden="true">×</span><span>Закрыть</span></button></header>
+            <nav aria-label="Карта уровней">
+              {steps.map((item) => {
+                const unlocked = isStepUnlocked(progress, item.id);
+                const done = progress.completed.includes(item.id);
+                const current = item.id === step.id;
+                const status = current && done ? "Сейчас · пройден" : current ? "Сейчас" : done ? "Пройден" : unlocked ? "Доступен" : "Закрыт";
+                const stateLabel = current && done ? ", текущий, пройден" : current ? ", текущий" : done ? ", пройден" : unlocked ? "" : ", закрыт";
+                return (
+                  <button type="button" key={item.id} disabled={!unlocked} aria-current={current ? "step" : undefined} aria-label={`Уровень ${item.id}: ${item.title}${stateLabel}`} onClick={() => openMobileStep(item.id)}>
+                    <span aria-hidden="true">{done ? "✓" : item.id}</span><b>{item.title}<small>{status}</small></b>
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+        )}
 
         <footer className="mobile-footer"><span>SUBMARINE</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
       </main>

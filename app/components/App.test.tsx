@@ -994,6 +994,17 @@ describe("academy interface", () => {
     await waitFor(() => expect(trigger).toHaveFocus());
   });
 
+  it("keeps the mobile step h1 before the open map h2 in document order", () => {
+    localStorage.setItem(preparationKey("mobile:recipe-book"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
+    render(<MobileQuest project={getQuestProject("recipe-book")!} onHome={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
+
+    const stepHeading = screen.getByRole("heading", { level: 1 });
+    const mapHeading = screen.getByRole("heading", { level: 2, name: /карта уровней/i });
+    expect(stepHeading.compareDocumentPosition(mapHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("preserves the desktop information order and mobile-only lesson tools", () => {
     localStorage.setItem(progressKey("mobile:api-keys"), JSON.stringify({
       version: 1,

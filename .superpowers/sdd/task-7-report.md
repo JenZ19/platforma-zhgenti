@@ -117,3 +117,37 @@ Lint: exit 0
 Build: complete, exit 0
 git diff --check: exit 0
 ```
+
+## Final heading-order follow-up
+
+### RED
+
+```text
+npm run test:unit -- app/components/App.test.tsx -t "keeps the mobile step h1"
+Test Files  1 failed (1)
+Tests  1 failed | 109 skipped (110)
+```
+
+The regression opened the mobile level map and proved that its `h2` preceded the active step `h1` in document order.
+
+### Fix and GREEN
+
+- The map sheet now renders after the step article in the DOM while retaining its fixed-position CSS hook.
+- The existing trigger, `aria-controls`, `aria-expanded`, close/select behavior, guarded navigation, and exact trigger focus restoration are unchanged.
+
+```text
+npm run test:unit -- app/components/App.test.tsx -t "keeps the (ready mobile|mobile step h1)"
+Test Files  1 passed (1)
+Tests  2 passed | 108 skipped (110)
+```
+
+Final verification after the heading-order fix:
+
+```text
+Focused mobile/routes/content: 3 files passed, 139 tests passed
+Full unit: 23 files passed, 278 tests passed
+Scripts: 7 passed, 0 failed
+Lint: exit 0
+Build: complete, exit 0
+git diff --check: exit 0
+```
