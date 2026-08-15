@@ -20,11 +20,14 @@ test("project card headings stay bold and aligned on desktop, then relax on phon
   assert.match(css, /@media \(max-width:\s*767px\)[\s\S]*\.dashboard-card-body h3[\s\S]{0,240}min-height:\s*0/);
 });
 
-test("result covers fill their frame and bundles layer two whole results", () => {
-  assert.match(css, /\.dashboard-project-card \.project-preview img[\s\S]{0,420}object-fit:\s*cover/);
+test("result covers remain completely visible and bundles layer two whole results", () => {
+  assert.match(css, /\.dashboard-project-card > \.project-preview,[\s\S]{0,260}aspect-ratio:\s*840\s*\/\s*476/);
+  assert.match(css, /\.dashboard-project-card \.project-preview img[\s\S]{0,420}object-fit:\s*contain/);
   assert.match(css, /\.dashboard-project-card \.project-preview img[\s\S]{0,420}transform:\s*none/);
+  assert.match(css, /\.dashboard-project-card:hover \.project-preview img,[\s\S]{0,180}transform:\s*none/);
   assert.match(css, /\.bundle-preview-carousel\s*\{[\s\S]{0,420}position:\s*relative/);
   assert.match(css, /\.bundle-preview-slide\s*\{[\s\S]{0,520}position:\s*absolute[\s\S]{0,220}width:\s*100%/);
+  assert.doesNotMatch(css, /\.bundle-preview-slide\s*\{[\s\S]{0,520}transform:\s*scale/);
   assert.match(css, /\.bundle-preview-slide\.is-active[\s\S]{0,160}opacity:\s*1/);
   assert.match(css, /\.bundle-preview-format[\s\S]{0,520}z-index:\s*4/);
   assert.match(css, /\.bundle-preview-dots[\s\S]{0,520}z-index:\s*4/);
