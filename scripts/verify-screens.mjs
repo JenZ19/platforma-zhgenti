@@ -105,4 +105,4 @@ if (missing.length || wrongSize.length || extra.length || count !== expectedCoun
   process.exit(1);
 }
 
-console.log(`Проверено ${count} WebP-экранов: ${generalCount} общих, ${homeHelperCount} подробных home-helper и ${originalGuideCount} кадров одиннадцати подробных квестов, все 1200x800.`);
+console.log(`Проверено ${count} WebP-экранов: ${generalCount} общих, ${homeHelperCount} подробных home-helper и ${originalGuideCount} кадров одиннадцати подробных квестов, все 800x534.`);
