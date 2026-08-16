@@ -26,7 +26,7 @@ test("kurs1 proxy is isolated and rewrites every academy asset family", async ()
     "favicon-",
   ]) {
     assert.ok(
-      config.includes(`sub_filter '\"/${assetFamily}' '\"/kurs1/${assetFamily}';`),
+      config.includes(`sub_filter '"/${assetFamily}' '"/kurs1/${assetFamily}';`),
       `Missing /kurs1 rewrite for ${assetFamily}`,
     );
   }
