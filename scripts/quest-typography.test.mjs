@@ -11,7 +11,7 @@ function typographyBlock(selector) {
   return css.slice(start, end + 1);
 }
 
-test("Pink Cloud uses the approved adult font stack", () => {
+test("Elina Burgundy uses the approved adult font stack", () => {
   assert.match(typographyBlock("body {"), /font-family:\s*ui-sans-serif,\s*system-ui,\s*-apple-system,\s*BlinkMacSystemFont,\s*"Segoe UI",\s*sans-serif/);
   assert.doesNotMatch(css, /Baloo|Comic Neue/i);
   assert.doesNotMatch(css, /font-family:\s*Manrope|font:\s*[^;}]*Manrope/i);
@@ -35,8 +35,8 @@ test("mobile quest week label cannot fall back to legacy 8px type", () => {
   assert.match(block, /line-height:\s*1\.4/);
 });
 
-test("text-bearing Pink Cloud actions use an AA-safe solid color", () => {
-  const action = "#802153";
+test("text-bearing Elina Burgundy actions use an AA-safe solid color", () => {
+  const action = "#681426";
   const toRgb = (hex) => [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16));
   const luminance = (hex) => {
     const channels = toRgb(hex).map((value) => {
@@ -50,7 +50,8 @@ test("text-bearing Pink Cloud actions use an AA-safe solid color", () => {
     return (lighter + 0.05) / (darker + 0.05);
   };
   assert.ok(contrast("#ffffff", action) >= 4.5);
-  assert.match(css, /--cloud-action:\s*#802153/);
+  assert.match(css, /--academy-wine:\s*#681426/);
+  assert.match(css, /--cloud-action:\s*var\(--academy-wine\)/);
   for (const selector of [".next-quest-banner {", ".quest-step-actions button:last-child {", ".mobile-quest-step-actions button:last-child {", ".reward-modal .primary-button {"]) {
     assert.match(typographyBlock(selector), /background:\s*var\(--cloud-action\)/, `${selector} does not use the tested AA action color`);
   }
