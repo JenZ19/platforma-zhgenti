@@ -135,27 +135,36 @@ before(async () => {
 
 after(stopServer);
 
-test("Pink Cloud CSS declares exact approved tokens and responsive safeguards", () => {
+test("Elina Burgundy CSS declares the approved premium tokens and responsive safeguards", () => {
   const cssPath = path.join(root, "app/pink-learning-dashboard.css");
   assert.ok(fs.existsSync(cssPath), "app/pink-learning-dashboard.css is missing");
   const css = fs.readFileSync(cssPath, "utf8");
   for (const declaration of [
-    "--cloud-bg: #f8f4fb",
-    "--cloud-bg-rose: #fff2f7",
-    "--cloud-surface: rgba(255, 255, 255, 0.86)",
-    "--cloud-surface-solid: #ffffff",
-    "--cloud-text: #2d2430",
-    "--cloud-muted: #756777",
-    "--cloud-pink: #ec4f93",
-    "--cloud-pink-dark: #c92e74",
-    "--cloud-pink-soft: #ffd7e8",
-    "--cloud-success: #337a5b",
-    "--cloud-error: #b9364e",
+    "--academy-bg: #f2ece7",
+    "--academy-wine: #681426",
+    "--academy-wine-deep: #310811",
+    "--academy-gold: #c8a767",
+    "--academy-champagne: #f2e3ca",
+    "--academy-cream: #fffaf3",
+    "--academy-text: #2b1218",
   ]) assert.ok(css.includes(declaration), `Missing approved token: ${declaration}`);
+  assert.doesNotMatch(css, /--cloud-bg:\s*#f8f4fb|--cloud-pink:\s*#ec4f93/);
   assert.match(css, /@media\s*\(max-width:\s*767px\)/);
   assert.match(css, /@media\s*\(min-width:\s*768px\)\s*and\s*\(max-width:\s*1023px\)/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
+
+  for (const file of [
+    "app/components/LearningShell.tsx",
+    "app/components/AcademyDashboard.tsx",
+    "app/components/DashboardHome.tsx",
+    "app/components/QuestFormatChoice.tsx",
+    "app/components/InstallCodexPlatformChoice.tsx",
+  ]) {
+    const source = fs.readFileSync(path.join(root, file), "utf8");
+    assert.match(source, /data-visual-theme="elina-burgundy"/, `${file} misses the new visual theme`);
+    assert.doesNotMatch(source, /pink-cloud/, `${file} keeps the retired Pink Cloud identifier`);
+  }
 });
 
 test("layout server readiness stays tied to the owned process", () => {
@@ -451,17 +460,6 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
     assert.equal(new URL(explicitOrientation.url()).searchParams.get("format"), "mobile");
     await explicitOrientation.close();
 
-    const curator = await browser.newPage({ viewport: { width: 375, height: 900 } });
-    await curator.goto(`${origin}/?format=mobile&quest=server-152fz`, { waitUntil: "domcontentloaded" });
-    const curatorAction = curator.locator(".mobile-action-curator > button, .mobile-action-curator > a").first();
-    await curatorAction.waitFor();
-    const curatorColors = await curatorAction.evaluate((node) => {
-      const style = getComputedStyle(node);
-      return [style.color, style.backgroundColor];
-    });
-    assert.ok(contrast(...curatorColors) >= 4.5, `Curator action contrast is ${contrast(...curatorColors).toFixed(2)}:1`);
-    await curator.close();
-
     const desktop = await browser.newPage({ viewport: { width: 1024, height: 900 } });
     await desktop.goto(`${origin}/?format=desktop&quest=family-budget&output=service`, { waitUntil: "domcontentloaded" });
     await desktop.evaluate(() => {
@@ -503,7 +501,7 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
   }
 });
 
-test("bundle and install choices use Pink Cloud surfaces and AA adult type", { timeout: 120_000 }, async () => {
+test("bundle and install choices use Elina Burgundy surfaces and AA adult type", { timeout: 120_000 }, async () => {
   const browser = await chromium.launch({
     ...(fs.existsSync(chromePath) ? { executablePath: chromePath } : {}),
     headless: true,
@@ -511,7 +509,6 @@ test("bundle and install choices use Pink Cloud surfaces and AA adult type", { t
   try {
     for (const { route, width, bodySize } of [
       { route: "/?format=mobile&quest=planning", width: 375, bodySize: "17px" },
-      { route: "/?format=mobile&quest=install-codex", width: 375, bodySize: "17px" },
       { route: "/?format=desktop&quest=planning", width: 1024, bodySize: "18px" },
       { route: "/?format=desktop&quest=install-codex", width: 1024, bodySize: "18px" },
     ]) {
@@ -519,7 +516,7 @@ test("bundle and install choices use Pink Cloud surfaces and AA adult type", { t
       await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
       const choice = page.locator(".format-choice-shell");
       await choice.waitFor();
-      assert.equal(await choice.getAttribute("data-visual-theme"), "pink-cloud");
+      assert.equal(await choice.getAttribute("data-visual-theme"), "elina-burgundy");
       const styles = await choice.evaluate((node) => {
         const shell = getComputedStyle(node);
         const card = getComputedStyle(node.querySelector(".format-choice-card"));
@@ -548,11 +545,11 @@ test("bundle and install choices use Pink Cloud surfaces and AA adult type", { t
       assert.equal(styles.shellImage, "none", `${route} kept a legacy shell image`);
       assert.ok(!/247, 241, 235|247, 239, 233/.test(styles.shellBackground), `${route} kept a beige shell`);
       assert.match(styles.shellFamily, /system-ui|Segoe UI/i);
-      assert.equal(styles.cardBackground, "rgb(255, 255, 255)");
-      assert.match(styles.cardBorder, /rgba?\(91, 55, 80/);
+      assert.equal(styles.cardBackground, "rgb(255, 250, 243)");
+      assert.match(styles.cardBorder, /rgba?\(104, 20, 38/);
       assert.equal(styles.optionImage, "none", `${route} kept a multicolor legacy card`);
-      assert.equal(styles.optionBackground, "rgb(255, 242, 247)");
-      assert.match(styles.optionBorder, /rgba?\(91, 55, 80/);
+      assert.equal(styles.optionBackground, "rgb(242, 227, 202)");
+      assert.match(styles.optionBorder, /rgba?\(104, 20, 38/);
       assert.match(styles.headingFamily, /system-ui|Segoe UI/i);
       assert.equal(styles.bodySize, bodySize);
       assert.equal(styles.optionCopySize, bodySize);

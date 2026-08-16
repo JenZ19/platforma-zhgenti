@@ -100,7 +100,7 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
       <main
         className="dashboard-loading"
         data-dashboard-format={format}
-        data-visual-theme="pink-cloud"
+        data-visual-theme="elina-burgundy"
         aria-label="Учебный кабинет"
       >
         <p role="status" aria-live="polite">Загружаем учебный кабинет…</p>

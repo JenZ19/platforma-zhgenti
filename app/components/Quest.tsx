@@ -462,7 +462,7 @@ function QuestBody({
 
   return (
     <>
-      <main className="quest-workspace" data-quest-workspace="desktop" data-visual-theme="pink-cloud">
+      <main className="quest-workspace" data-quest-workspace="desktop" data-visual-theme="elina-burgundy">
         <article ref={questStepCardRef} className="quest-step-card" aria-live="polite" tabIndex={-1}>
           <header className="quest-step-heading">
             <div className="quest-step-project-bar">

@@ -33,7 +33,8 @@ test("the academy uses the NEYROPROFI brand everywhere while preserving the part
   assert.doesNotMatch(guide, /<span>S<\/span>/);
   assert.doesNotMatch(helperGuide, /<span>S<\/span>/);
   assert.match(favicon, />Н<\/text>/);
-  assert.match(favicon, /#D92D87/i);
+  assert.match(favicon, /#681426/i);
+  assert.match(favicon, /#C8A767/i);
   assert.doesNotMatch(favicon, /#0C79D8|#2E9EFF|#68C4FF/i);
   assert.match(layout, /\/og-neiroprofi\.png/);
   assert.match(layout, /\/favicon-neiroprofi\.svg/);

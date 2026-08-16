@@ -22,7 +22,7 @@ export function QuestFormatChoice({
   const shell = mobile ? "mobile-quest-shell format-choice-shell mobile" : "quest-shell format-choice-shell";
 
   return (
-    <main className={shell} data-visual-theme="pink-cloud">
+    <main className={shell} data-visual-theme="elina-burgundy">
       <header className={mobile ? "mobile-topbar" : "site-header quest-site-header"}>
         <button type="button" className="brand brand-button" onClick={onHome}>
           <span>Н</span><b>НЕЙРОПРОФИ<small>{mobile ? "Квесты с телефона" : "Все квесты"}</small></b>

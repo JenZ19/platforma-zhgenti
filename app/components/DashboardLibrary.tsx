@@ -78,7 +78,7 @@ function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibra
   }));
 
   return (
-    <main className="dashboard-section" data-dashboard-section="projects" data-dashboard-format={format} data-visual-theme="pink-cloud">
+    <main className="dashboard-section" data-dashboard-section="projects" data-dashboard-format={format} data-visual-theme="elina-burgundy">
       <header><p>Мой учебный путь</p><h1>Мои проекты</h1></header>
       <div className="dashboard-project-groups">
         {groups.map((group) => (
@@ -151,7 +151,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
   }
 
   return (
-    <main className="dashboard-section" data-dashboard-section="weeks" data-dashboard-format={format} data-visual-theme="pink-cloud">
+    <main className="dashboard-section" data-dashboard-section="weeks" data-dashboard-format={format} data-visual-theme="elina-burgundy">
       <header><p>Шесть недель практики</p><h1>Квесты по неделям</h1><span>Все проекты доступны сразу — неделя только подсказывает порядок.</span></header>
       <section className="dashboard-library-filters" aria-label="Фильтры квестов">
         <label>

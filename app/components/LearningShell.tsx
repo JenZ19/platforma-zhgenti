@@ -66,7 +66,7 @@ export function LearningShell({
   }
 
   return (
-    <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-client-ready={clientReady ? "true" : "false"} data-visual-theme="pink-cloud">
+    <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-client-ready={clientReady ? "true" : "false"} data-visual-theme="elina-burgundy">
       <aside className="learning-sidebar" aria-label="Навигация Академии">
         <button className="learning-brand" type="button" onClick={() => onNavigate("home")} aria-label="На главную Академии">
           <DashboardIcon name="fairy" />

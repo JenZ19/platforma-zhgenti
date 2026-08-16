@@ -129,7 +129,7 @@ export function DashboardPortfolio({ snapshot, format, onOpen }: DashboardPortfo
 
   if (!completed.length) {
     return (
-      <main className="dashboard-section" data-dashboard-section="portfolio" data-dashboard-format={format} data-visual-theme="pink-cloud">
+      <main className="dashboard-section" data-dashboard-section="portfolio" data-dashboard-format={format} data-visual-theme="elina-burgundy">
         <header><p>Моя витрина</p><h1>Портфолио</h1></header>
         <section className="dashboard-empty">
           <span aria-hidden="true">◇</span>
@@ -141,7 +141,7 @@ export function DashboardPortfolio({ snapshot, format, onOpen }: DashboardPortfo
   }
 
   return (
-    <main className="dashboard-section" data-dashboard-section="portfolio" data-dashboard-format={format} data-visual-theme="pink-cloud">
+    <main className="dashboard-section" data-dashboard-section="portfolio" data-dashboard-format={format} data-visual-theme="elina-burgundy">
       <header><p>Моя витрина</p><h1>Портфолио</h1><span>Работы добавляются автоматически после завершения всех уровней.</span></header>
       <div className="portfolio-grid">
         {completed.map((item) => isProjectBundle(item.project)

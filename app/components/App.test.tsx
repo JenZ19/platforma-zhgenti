@@ -760,7 +760,7 @@ describe("academy interface", () => {
 
     const question = await screen.findByRole("textbox", { name: /вопрос феечке/i });
     expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-dashboard-format", "desktop");
-    expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-visual-theme", "pink-cloud");
+    expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-visual-theme", "elina-burgundy");
     fireEvent.change(question, { target: { value: "<script>не выполнять</script>\nНе понимаю следующий шаг" } });
     fireEvent.click(screen.getByRole("button", { name: /сохранить вопрос/i }));
 
@@ -1504,7 +1504,7 @@ describe("academy interface", () => {
   it("uses the pink dashboard for academy surfaces and preserves tactile quests", async () => {
     const { container, rerender } = render(<Academy />);
 
-    expect(await screen.findByRole("main")).toHaveAttribute("data-visual-theme", "pink-cloud");
+    expect(await screen.findByRole("main")).toHaveAttribute("data-visual-theme", "elina-burgundy");
 
     rerender(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     expect(container.querySelector('main.quest-shell[data-visual-theme="tactile-album"]')).not.toBeNull();

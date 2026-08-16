@@ -344,7 +344,7 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
       data-dashboard-section="fairy"
       data-dashboard-format={format}
       data-fairy-scope={scope}
-      data-visual-theme="pink-cloud"
+      data-visual-theme="elina-burgundy"
     >
       {content}
     </main>

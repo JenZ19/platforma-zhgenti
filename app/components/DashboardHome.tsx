@@ -28,7 +28,8 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
   const primaryAction = next?.status === "new" ? "Начать квест" : "Продолжить";
 
   return (
-    <main className="dashboard-home" data-visual-theme="pink-cloud" data-dashboard-section="home" data-dashboard-format={format}>
+    <main className="dashboard-home" data-visual-theme="elina-burgundy" data-dashboard-section="home" data-dashboard-format={format}>
+      <p className="academy-kicker">НЕЙРОПРОФИ · Академия квестов</p>
       <section className="next-quest-banner" aria-labelledby="dashboard-next-title">
         {next ? (
           <>

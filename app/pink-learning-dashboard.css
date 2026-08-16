@@ -1,20 +1,28 @@
 :root {
-  --cloud-bg: #f8f4fb;
-  --cloud-bg-rose: #fff2f7;
-  --cloud-surface: rgba(255, 255, 255, 0.86);
-  --cloud-surface-solid: #ffffff;
-  --cloud-border: rgba(91, 55, 80, 0.12);
-  --cloud-text: #2d2430;
-  --cloud-muted: #756777;
-  --cloud-pink: #ec4f93;
-  --cloud-pink-dark: #c92e74;
-  --cloud-pink-soft: #ffd7e8;
-  --cloud-focus: #9b2868;
+  --academy-bg: #f2ece7;
+  --academy-wine: #681426;
+  --academy-wine-deep: #310811;
+  --academy-gold: #c8a767;
+  --academy-champagne: #f2e3ca;
+  --academy-cream: #fffaf3;
+  --academy-text: #2b1218;
+  --academy-muted: #5f4b50;
+  --cloud-bg: var(--academy-bg);
+  --cloud-bg-rose: var(--academy-champagne);
+  --cloud-surface: rgba(255, 250, 243, 0.94);
+  --cloud-surface-solid: var(--academy-cream);
+  --cloud-border: rgba(104, 20, 38, 0.16);
+  --cloud-text: var(--academy-text);
+  --cloud-muted: var(--academy-muted);
+  --cloud-pink: var(--academy-wine);
+  --cloud-pink-dark: var(--academy-wine);
+  --cloud-pink-soft: var(--academy-champagne);
+  --cloud-focus: var(--academy-wine);
   --cloud-success: #337a5b;
   --cloud-error: #b9364e;
-  --cloud-action: #802153;
-  --cloud-gradient: linear-gradient(135deg, #f05a9f 0%, #d83f8c 48%, #bb3f93 100%);
-  --cloud-shadow: 0 18px 60px rgba(75, 42, 68, 0.10);
+  --cloud-action: var(--academy-wine);
+  --cloud-gradient: linear-gradient(90deg, var(--academy-gold), #e4c88e);
+  --cloud-shadow: 0 20px 60px rgba(49, 8, 17, 0.12);
   --cloud-radius-lg: 28px;
   --cloud-radius-md: 20px;
   --cloud-body: 17px;
@@ -35,8 +43,8 @@ body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:
-    radial-gradient(circle at 80% 0%, #ffe1ee 0, transparent 34%),
-    radial-gradient(circle at 4% 48%, rgba(229, 211, 242, 0.68) 0, transparent 28%),
+    radial-gradient(circle at 84% 0%, rgba(200, 167, 103, 0.18) 0, transparent 32%),
+    radial-gradient(circle at 2% 46%, rgba(104, 20, 38, 0.08) 0, transparent 30%),
     var(--cloud-bg);
   color: var(--cloud-text);
 }
@@ -59,7 +67,7 @@ select {
 }
 
 :focus-visible {
-  outline: 3px solid #9b2868;
+  outline: 3px solid var(--academy-gold);
   outline-offset: 3px;
 }
 
@@ -3363,5 +3371,401 @@ select {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* Elina Burgundy — premium learning cabinet */
+.learning-shell {
+  position: relative;
+  background:
+    radial-gradient(circle at 84% 5%, rgba(200, 167, 103, 0.15), transparent 24%),
+    linear-gradient(145deg, #f7f1ec 0%, var(--academy-bg) 60%, #eadfd9 100%);
+}
+
+.learning-shell::before {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  inset: 0 0 0 264px;
+  pointer-events: none;
+  opacity: 0.36;
+  background-image: linear-gradient(rgba(104, 20, 38, 0.035) 1px, transparent 1px);
+  background-size: 100% 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+.learning-sidebar {
+  border-right-color: rgba(242, 227, 202, 0.18);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(200, 167, 103, 0.18), transparent 28%),
+    linear-gradient(180deg, var(--academy-wine) 0%, var(--academy-wine-deep) 100%);
+  box-shadow: 18px 0 54px rgba(49, 8, 17, 0.18);
+  color: var(--academy-cream);
+  backdrop-filter: none;
+}
+
+.learning-brand,
+.learning-sidebar nav button,
+.format-switch {
+  color: rgba(255, 250, 243, 0.82);
+}
+
+.learning-brand {
+  min-height: 66px;
+  align-items: flex-start;
+  padding-top: 10px;
+  border-bottom: 1px solid rgba(242, 227, 202, 0.18);
+  border-radius: 0;
+}
+
+.learning-brand > svg {
+  color: var(--academy-gold);
+}
+
+.learning-brand b {
+  color: var(--academy-cream);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+
+.learning-brand small {
+  margin-top: 5px;
+  color: rgba(242, 227, 202, 0.7);
+  letter-spacing: 0.02em;
+}
+
+.learning-sidebar nav button:hover,
+.learning-sidebar nav button.active,
+.learning-sidebar nav button[aria-current="page"] {
+  background: rgba(242, 227, 202, 0.14);
+  color: var(--academy-cream);
+}
+
+.learning-sidebar nav button[aria-current="page"] {
+  box-shadow: inset 3px 0 var(--academy-gold);
+}
+
+.format-switch {
+  border-color: rgba(242, 227, 202, 0.24);
+  background: rgba(255, 250, 243, 0.06);
+  color: rgba(255, 250, 243, 0.72);
+}
+
+.format-switch:hover {
+  border-color: var(--academy-gold);
+  background: rgba(242, 227, 202, 0.14);
+  color: var(--academy-cream);
+}
+
+.learning-main {
+  position: relative;
+  z-index: 1;
+}
+
+.learning-topbar {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(104, 20, 38, 0.12);
+}
+
+.learning-topbar label {
+  border-color: rgba(104, 20, 38, 0.14);
+  background: rgba(255, 250, 243, 0.86);
+  box-shadow: 0 12px 34px rgba(49, 8, 17, 0.06);
+}
+
+.learning-topbar label:focus-within {
+  border-color: var(--academy-wine);
+  box-shadow: 0 0 0 3px rgba(200, 167, 103, 0.3);
+}
+
+.learning-topbar form button {
+  background: var(--academy-wine);
+  color: var(--academy-cream);
+}
+
+.learning-topbar form button:hover {
+  background: var(--academy-wine-deep);
+  box-shadow: 0 10px 26px rgba(49, 8, 17, 0.22);
+}
+
+.academy-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  color: var(--academy-wine);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.academy-kicker::before {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: var(--academy-gold);
+}
+
+.next-quest-banner {
+  position: relative;
+  border-color: rgba(242, 227, 202, 0.22);
+  background:
+    radial-gradient(circle at 86% 12%, rgba(200, 167, 103, 0.32), transparent 28%),
+    linear-gradient(135deg, var(--academy-wine) 0%, var(--academy-wine-deep) 100%);
+  box-shadow: 0 30px 80px rgba(49, 8, 17, 0.22);
+  color: var(--academy-cream);
+}
+
+.next-quest-banner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  background: linear-gradient(180deg, var(--academy-gold), #ead49f);
+}
+
+.next-quest-banner p {
+  color: var(--academy-gold);
+}
+
+.next-quest-banner a {
+  border: 1px solid rgba(200, 167, 103, 0.42);
+  background: var(--academy-champagne);
+  color: var(--academy-wine-deep);
+  box-shadow: 0 12px 32px rgba(17, 2, 6, 0.2);
+}
+
+.next-quest-banner a:hover {
+  background: var(--academy-cream);
+  box-shadow: 0 14px 36px rgba(17, 2, 6, 0.3);
+}
+
+.next-quest-banner > .project-preview {
+  border-color: rgba(242, 227, 202, 0.34);
+  background: rgba(255, 250, 243, 0.98);
+  box-shadow: 0 24px 60px rgba(17, 2, 6, 0.34);
+}
+
+.dashboard-stat-grid article,
+.dashboard-project-card,
+.portfolio-grid > article,
+.quest-step-card,
+.quest-level-panel,
+.dashboard-library-filters,
+.dashboard-empty,
+.dashboard-week {
+  border-color: rgba(104, 20, 38, 0.14);
+  background: rgba(255, 250, 243, 0.94);
+  box-shadow: 0 18px 54px rgba(49, 8, 17, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.dashboard-stat-grid article {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-stat-grid article::after {
+  content: "";
+  position: absolute;
+  right: -24px;
+  bottom: -34px;
+  width: 90px;
+  height: 90px;
+  border: 1px solid rgba(200, 167, 103, 0.28);
+  border-radius: 50%;
+}
+
+.dashboard-stat-grid strong {
+  color: var(--academy-wine);
+}
+
+.dashboard-row > header p,
+.dashboard-section > header > p {
+  color: var(--academy-wine);
+}
+
+.dashboard-row h2,
+.dashboard-section > header h1,
+.dashboard-card-body h3,
+.portfolio-grid h2,
+.portfolio-grid h3 {
+  color: var(--academy-text);
+}
+
+.dashboard-project-card > .project-preview,
+.portfolio-grid > article > .project-preview,
+.bundle-preview-carousel {
+  border-bottom-color: rgba(104, 20, 38, 0.14);
+  background: linear-gradient(145deg, #f7eee5, var(--academy-champagne));
+}
+
+.dashboard-card-labels span {
+  border: 1px solid rgba(104, 20, 38, 0.1);
+  background: rgba(242, 227, 202, 0.72);
+  color: #665055;
+}
+
+.dashboard-progress i,
+.quest-level-progress i {
+  background: #e5d8d2;
+}
+
+.dashboard-card-body footer a,
+.portfolio-card-body a,
+.dashboard-empty button {
+  background: var(--academy-wine);
+  color: var(--academy-cream);
+}
+
+.dashboard-card-body footer a:hover,
+.portfolio-card-body a:hover,
+.dashboard-empty button:hover {
+  background: var(--academy-wine-deep);
+}
+
+.dashboard-card-body footer button,
+.dashboard-filter-reset {
+  border-color: rgba(104, 20, 38, 0.18);
+  background: var(--academy-cream);
+}
+
+.fairy-floating-trigger {
+  border: 1px solid rgba(200, 167, 103, 0.36);
+  background: var(--academy-wine);
+  color: var(--academy-cream);
+  box-shadow: 0 18px 40px rgba(49, 8, 17, 0.24);
+}
+
+.learning-main .format-choice-hero,
+.learning-main .format-choice-card,
+.learning-main .preparation-card,
+.learning-main .quest-customizer {
+  border-color: rgba(104, 20, 38, 0.16);
+  background: var(--academy-cream);
+  box-shadow: 0 20px 56px rgba(49, 8, 17, 0.1);
+}
+
+.learning-main .format-option,
+.learning-main .format-option.service,
+.learning-main .format-option.agent,
+.learning-main .format-option.mac,
+.learning-main .format-option.windows {
+  border-color: rgba(104, 20, 38, 0.16);
+  background: var(--academy-champagne);
+  box-shadow: 0 14px 36px rgba(49, 8, 17, 0.08);
+}
+
+.learning-main .format-option:hover,
+.learning-main .format-option:focus-visible {
+  border-color: var(--academy-wine);
+  background: var(--academy-cream);
+  box-shadow: 0 18px 44px rgba(49, 8, 17, 0.14);
+}
+
+.learning-main .format-option-icon,
+.learning-main .format-option.agent .format-option-icon,
+.learning-main .format-option.mac .format-option-icon,
+.learning-main .format-option.windows .format-option-icon {
+  background: var(--academy-wine);
+  color: var(--academy-gold);
+}
+
+.learning-main .quest-hero,
+.learning-main .mobile-quest-hero {
+  border: 1px solid rgba(200, 167, 103, 0.2);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(200, 167, 103, 0.22), transparent 32%),
+    linear-gradient(135deg, var(--academy-wine), var(--academy-wine-deep));
+  color: var(--academy-cream);
+  box-shadow: 0 22px 58px rgba(49, 8, 17, 0.18);
+}
+
+.learning-main .quest-hero h1,
+.learning-main .quest-hero > p:not(.kicker),
+.learning-main .mobile-quest-hero h1,
+.learning-main .mobile-quest-hero > p,
+.learning-main .mobile-quest-hero > span {
+  color: var(--academy-cream);
+}
+
+.learning-main .quest-hero .back-link,
+.learning-main .mobile-quest-hero > button,
+.learning-main .quest-hero .kicker,
+.learning-main .mobile-capability {
+  color: var(--academy-gold);
+}
+
+@media (max-width: 767px) {
+  .learning-shell {
+    display: block;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, #f7f1ec, var(--academy-bg));
+  }
+
+  .learning-shell::before {
+    inset: 0;
+    opacity: 0.2;
+  }
+
+  .learning-main {
+    padding-top: 16px;
+  }
+
+  .learning-topbar {
+    border-bottom: 0;
+  }
+
+  .academy-kicker {
+    margin-bottom: 11px;
+    font-size: 10px;
+    letter-spacing: 0.11em;
+  }
+
+  .academy-kicker::before {
+    width: 22px;
+  }
+
+  .next-quest-banner {
+    min-height: 0;
+    padding: 24px 20px 22px;
+    border-radius: 24px;
+  }
+
+  .next-quest-banner::after {
+    width: 4px;
+  }
+
+  .next-quest-banner h1 {
+    font-size: clamp(31px, 10vw, 42px);
+  }
+
+  .next-quest-banner a {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .learning-bottom-nav {
+    border-top-color: rgba(242, 227, 202, 0.18);
+    background: rgba(49, 8, 17, 0.97);
+    box-shadow: 0 -14px 34px rgba(49, 8, 17, 0.22);
+    backdrop-filter: blur(20px);
+  }
+
+  .learning-bottom-nav button {
+    color: rgba(255, 250, 243, 0.66);
+  }
+
+  .learning-bottom-nav button[aria-current="page"] {
+    color: var(--academy-gold);
+  }
+
+  .dashboard-stat-grid article,
+  .dashboard-project-card,
+  .portfolio-grid > article {
+    background: var(--academy-cream);
   }
 }
