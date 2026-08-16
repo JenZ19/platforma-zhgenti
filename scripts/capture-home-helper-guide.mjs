@@ -5,6 +5,7 @@ import {
   homeHelperGuideFrameCounts,
   homeHelperGuideScreenPath,
 } from "./projects.mjs";
+import { writeWebpScreenshot } from "./webp-screenshot.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -37,7 +38,7 @@ async function worker(number) {
         if (!response?.ok()) throw new Error(`HTTP ${response?.status() ?? "без ответа"}`);
         const scene = page.locator("#capture-guide-scene");
         await scene.waitFor({ state: "visible", timeout: 30_000 });
-        await scene.screenshot({ path: task.file, animations: "disabled" });
+        await writeWebpScreenshot(scene, task.file);
         lastError = undefined;
         break;
       } catch (error) {

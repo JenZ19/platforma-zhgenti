@@ -216,7 +216,7 @@ export function buildOriginalMobileQuest(
         ...step,
         action: `Откройте обе готовые версии с телефона. ${step.action} Отправьте Фее один безопасный экран результата.`,
         prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает только через Telegram, личный Codex на сервере и мобильный предпросмотр. Не проси открывать локальную папку телефона и не показывай служебные данные сервера.\n\n${step.prompt}`,
-        screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+        screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`,
         guide: undefined,
         mobileAction: { tool: "screenshot", label: "Отправить итог проверки Фее", note: "Пришлите только экран результата без личных данных и секретов." },
       };
@@ -227,7 +227,7 @@ export function buildOriginalMobileQuest(
       ...step,
       action: actions[source - 1],
       prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает только через Telegram, личный Codex на сервере и мобильный предпросмотр. Не проси открывать локальную папку телефона и не показывай служебные данные сервера.\n\n${step.prompt}`,
-      screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+      screenshot: `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`,
       guide: undefined,
       help: {
         ...step.help,

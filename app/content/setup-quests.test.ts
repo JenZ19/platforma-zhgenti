@@ -58,11 +58,11 @@ describe("computer setup quests", () => {
 
     expect(steps.slice(1, 6).map((step) => step.screenshotKind)).toEqual(["real", "real", "real", "real", "real"]);
     expect(steps.slice(1, 6).map((step) => step.screenshot)).toEqual([
-      "/screens/server-152fz/real-step-02.png",
+      "/screens/server-152fz/real-step-02.webp",
       "/screens/server-152fz/real-step-03.jpg",
-      "/screens/server-152fz/real-step-04.png",
-      "/screens/server-152fz/real-step-05.png",
-      "/screens/server-152fz/real-step-06.png",
+      "/screens/server-152fz/real-step-04.webp",
+      "/screens/server-152fz/real-step-05.webp",
+      "/screens/server-152fz/real-step-06.webp",
     ]);
     expect(steps[6]).toMatchObject({
       screenshotKind: "placeholder",

@@ -11,6 +11,7 @@ import {
   root,
   screenPath,
 } from "./projects.mjs";
+import { assertWebpSize } from "./webp-screenshot.mjs";
 
 const originalQuestSlugs = ["family-expenses", "planner", "idea-vault", "child-schedule", "carousel-agent", "threads-agent", "webinar-moderator-agent", "family-health-hub", "install-codex", "api-keys", "unique-design"];
 
@@ -28,11 +29,11 @@ for (const slug of slugs) {
         missing.push(file);
         continue;
       }
-      const bytes = fs.readFileSync(file);
-      const isPng = bytes.subarray(1, 4).toString("ascii") === "PNG";
-      const width = isPng && bytes.length >= 24 ? bytes.readUInt32BE(16) : 0;
-      const height = isPng && bytes.length >= 24 ? bytes.readUInt32BE(20) : 0;
-      if (!isPng || width !== 1200 || height !== 800) wrongSize.push(`${file}: ${width}x${height}`);
+      try {
+        await assertWebpSize(file);
+      } catch (error) {
+        wrongSize.push(error instanceof Error ? error.message : String(error));
+      }
       count += 1;
     }
   }
@@ -45,31 +46,31 @@ for (const directory of ["screens", "screens-mobile"]) {
     const questDirectory = path.join(base, entry.name);
     if (!slugSet.has(entry.name)) {
       extra.push(...fs.readdirSync(questDirectory)
-        .filter((name) => name.endsWith(".png"))
+        .filter((name) => name.endsWith(".webp"))
         .map((name) => path.join(questDirectory, name)));
       continue;
     }
     const limit = projectStepCount(entry.name);
     for (const name of fs.readdirSync(questDirectory)) {
-      const match = name.match(/^step-(\d+)\.png$/);
+      const match = name.match(/^step-(\d+)\.webp$/);
       if (match && Number(match[1]) > limit) extra.push(path.join(questDirectory, name));
     }
   }
 }
 
 for (const mode of ["real", "demo"]) {
-  homeHelperGuideFrameCounts.forEach((frameCount, stepIndex) => {
+  for (const [stepIndex, frameCount] of homeHelperGuideFrameCounts.entries()) {
     for (let frame = 1; frame <= frameCount; frame += 1) {
       const file = homeHelperGuideScreenPath(mode, stepIndex + 1, frame);
       if (!fs.existsSync(file)) { missing.push(file); continue; }
-      const bytes = fs.readFileSync(file);
-      const isPng = bytes.subarray(1, 4).toString("ascii") === "PNG";
-      const width = isPng && bytes.length >= 24 ? bytes.readUInt32BE(16) : 0;
-      const height = isPng && bytes.length >= 24 ? bytes.readUInt32BE(20) : 0;
-      if (!isPng || width !== 1200 || height !== 800) wrongSize.push(`${file}: ${width}x${height}`);
+      try {
+        await assertWebpSize(file);
+      } catch (error) {
+        wrongSize.push(error instanceof Error ? error.message : String(error));
+      }
       count += 1;
     }
-  });
+  }
 }
 
 for (const slug of originalQuestSlugs) {
@@ -77,17 +78,17 @@ for (const slug of originalQuestSlugs) {
     for (let frame = 1; frame <= 3; frame += 1) {
       const file = originalGuideScreenPath(slug, step, frame);
       if (!fs.existsSync(file)) { missing.push(file); continue; }
-      const bytes = fs.readFileSync(file);
-      const isPng = bytes.subarray(1, 4).toString("ascii") === "PNG";
-      const width = isPng && bytes.length >= 24 ? bytes.readUInt32BE(16) : 0;
-      const height = isPng && bytes.length >= 24 ? bytes.readUInt32BE(20) : 0;
-      if (!isPng || width !== 1200 || height !== 800) wrongSize.push(`${file}: ${width}x${height}`);
+      try {
+        await assertWebpSize(file);
+      } catch (error) {
+        wrongSize.push(error instanceof Error ? error.message : String(error));
+      }
       count += 1;
     }
   }
   const guideDirectory = path.join(root, "public", "guides", slug);
   for (const name of fs.readdirSync(guideDirectory)) {
-    const match = name.match(/^step-(\d+)-frame-(\d+)\.png$/);
+    const match = name.match(/^step-(\d+)-frame-(\d+)\.webp$/);
     if (match && Number(match[1]) > originalGuideStepCount(slug)) extra.push(path.join(guideDirectory, name));
   }
 }
@@ -104,4 +105,4 @@ if (missing.length || wrongSize.length || extra.length || count !== expectedCoun
   process.exit(1);
 }
 
-console.log(`Проверено ${count} PNG-экранов: ${generalCount} общих, ${homeHelperCount} подробных home-helper и ${originalGuideCount} кадров одиннадцати подробных квестов, все 1200x800.`);
+console.log(`Проверено ${count} WebP-экранов: ${generalCount} общих, ${homeHelperCount} подробных home-helper и ${originalGuideCount} кадров одиннадцати подробных квестов, все 1200x800.`);

@@ -7,7 +7,7 @@ function attachFrames(mode: DataMode, step: number, frames: FrameInput[]): Quest
   return frames.map((frame, index) => ({
     ...frame,
     id: index + 1,
-    screenshot: `/guides/home-helper/${mode}/step-${String(step).padStart(2, "0")}-frame-${String(index + 1).padStart(2, "0")}.png`,
+    screenshot: `/guides/home-helper/${mode}/step-${String(step).padStart(2, "0")}-frame-${String(index + 1).padStart(2, "0")}.webp`,
   }));
 }
 

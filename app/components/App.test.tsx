@@ -1613,7 +1613,7 @@ describe("academy interface", () => {
     expect(screen.getByText("реальный экран")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /реальный экран AdminVPS.+выбрала сервер в России/i })).toHaveAttribute(
       "src",
-      "/screens/server-152fz/real-step-02.png",
+      "/screens/server-152fz/real-step-02.webp",
     );
     desktop.unmount();
 
@@ -1751,7 +1751,7 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     const guide = screen.getByRole("region", { name: /делайте по картинкам/i });
     expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(3);
-    expect(screen.getByRole("img", { name: /прототип уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.png");
+    expect(screen.getByRole("img", { name: /прототип уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.webp");
   });
 
   it("renders a different functional result screen for every AI agent", () => {

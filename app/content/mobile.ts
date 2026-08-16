@@ -180,7 +180,7 @@ export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "d
       ...step,
       screenshot: step.screenshotKind === "real" || step.screenshotKind === "placeholder"
         ? step.screenshot
-        : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+        : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`,
       mobileAction: project.slug === "server-152fz" && step.id === 8
         ? { tool: "curator", label: "Открыть Codex на компьютере", note: "Читайте команду на телефоне, а работу с папкой проекта и сервером продолжайте в Codex на Mac или Windows." }
         : project.slug === "server-152fz" && step.id === 9
@@ -201,7 +201,7 @@ export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "d
         ...desktopStep,
         action: `Откройте обе готовые версии с телефона. ${desktopStep.action} Отправьте Фее один скриншот результата без личных данных и секретов.`,
         prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает через Telegram, личный Codex и мобильный предпросмотр. Не проси её открывать локальные папки или писать код.\n\n${desktopStep.prompt}`,
-        screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.png`,
+        screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.webp`,
         mobileAction: { tool: "screenshot", label: "Отправить итог проверки Фее", note: "Пришлите только экран результата без личных данных, паролей и секретов." },
       };
     }
@@ -214,7 +214,7 @@ export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "d
       prompt: project.kind === "agent"
         ? agentPromptFor(project, source, mode, selectedCustomization)
         : promptFor(project, source, mode),
-      screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.png`,
+      screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.webp`,
       reward: desktopStep.reward,
       help: {
         ...desktopStep.help,

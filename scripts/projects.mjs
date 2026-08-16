@@ -31,11 +31,11 @@ export function originalGuideStepCount(slug) {
 }
 
 export function screenPath(slug, step) {
-  return path.join(root, "public", "screens", slug, `step-${String(step).padStart(2, "0")}.png`);
+  return path.join(root, "public", "screens", slug, `step-${String(step).padStart(2, "0")}.webp`);
 }
 
 export function mobileScreenPath(slug, step) {
-  return path.join(root, "public", "screens-mobile", slug, `step-${String(step).padStart(2, "0")}.png`);
+  return path.join(root, "public", "screens-mobile", slug, `step-${String(step).padStart(2, "0")}.webp`);
 }
 
 export function projectCoverStep(slug) {
@@ -49,9 +49,9 @@ export function coverPath(slug) {
 export const homeHelperGuideFrameCounts = [4, 3, 5, 4, 4, 3, 4, 3, 3, 3, 4, 3, 3, 3, 3, 4, 4];
 
 export function homeHelperGuideScreenPath(mode, step, frame) {
-  return path.join(root, "public", "guides", "home-helper", mode, `step-${String(step).padStart(2, "0")}-frame-${String(frame).padStart(2, "0")}.png`);
+  return path.join(root, "public", "guides", "home-helper", mode, `step-${String(step).padStart(2, "0")}-frame-${String(frame).padStart(2, "0")}.webp`);
 }
 
 export function originalGuideScreenPath(slug, step, frame) {
-  return path.join(root, "public", "guides", slug, `step-${String(step).padStart(2, "0")}-frame-${String(frame).padStart(2, "0")}.png`);
+  return path.join(root, "public", "guides", slug, `step-${String(step).padStart(2, "0")}-frame-${String(frame).padStart(2, "0")}.webp`);
 }

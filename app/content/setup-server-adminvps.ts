@@ -42,7 +42,7 @@ export const serverSteps: SetupStepInput[] = [
       external("Открыть официальный AdminVPS", "https://adminvps.ru/", "Сайт провайдера для выбора VPS."),
       external("Скачать полную инструкцию в PDF", "/materials/adminvps-vps-instruction.pdf", "Все шесть страниц исходной инструкции со всеми экранами."),
     ],
-    screenshot: "/screens/server-152fz/real-step-02.png",
+    screenshot: "/screens/server-152fz/real-step-02.webp",
     screenshotKind: "real",
   },
   {
@@ -76,7 +76,7 @@ export const serverSteps: SetupStepInput[] = [
     scene: "academy",
     target: "Данные владельца → Оплатить",
     help: "Если платёж не прошёл, сначала проверьте статус в банке. Не нажимайте оплату много раз и никому не отправляйте CVC или SMS-код.",
-    screenshot: "/screens/server-152fz/real-step-04.png",
+    screenshot: "/screens/server-152fz/real-step-04.webp",
     screenshotKind: "real",
   },
   {
@@ -92,7 +92,7 @@ export const serverSteps: SetupStepInput[] = [
     target: "Услуги → Товары/Услуги → IP",
     help: "Создание сервера может занять несколько минут. Если статус ещё меняется, подождите и обновите страницу; второй сервер не покупайте.",
     links: [external("Открыть личный кабинет AdminVPS", "https://my.adminvps.ru/", "Карточка оплаченного сервера.")],
-    screenshot: "/screens/server-152fz/real-step-05.png",
+    screenshot: "/screens/server-152fz/real-step-05.webp",
     screenshotKind: "real",
   },
   {
@@ -108,7 +108,7 @@ export const serverSteps: SetupStepInput[] = [
     scene: "codex",
     target: "SSH Keys → Добавить → команда Codex",
     help: "Если видите BEGIN OPENSSH PRIVATE KEY или PRIVATE KEY, ничего не копируйте и попросите Codex показать только публичный файл .pub. Если доступ пропал, используйте консоль провайдера, а не переустановку.",
-    screenshot: "/screens/server-152fz/real-step-06.png",
+    screenshot: "/screens/server-152fz/real-step-06.webp",
     screenshotKind: "real",
   },
   {

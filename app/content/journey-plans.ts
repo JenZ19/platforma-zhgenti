@@ -312,7 +312,7 @@ function renumber(project: ProjectDefinition, steps: QuestStep[]): QuestStep[] {
     const id = index + 1;
     const screenshot = step.screenshotKind === "real" || step.screenshotKind === "placeholder"
       ? step.screenshot
-      : `/screens/${project.slug}/step-${String(id).padStart(2, "0")}.png`;
+      : `/screens/${project.slug}/step-${String(id).padStart(2, "0")}.webp`;
     return {
       ...step,
       id,

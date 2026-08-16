@@ -3,6 +3,7 @@ import path from "node:path";
 import { chromium } from "playwright";
 import { selectedNumbers } from "./capture-selection.mjs";
 import { projectSlugs, projectStepCount, screenPath } from "./projects.mjs";
+import { writeWebpScreenshot } from "./webp-screenshot.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
 const force = process.env.FORCE_SCREENS === "1";
@@ -39,7 +40,7 @@ async function worker(number) {
         if (!response?.ok()) throw new Error(`HTTP ${response?.status() ?? "без ответа"}`);
         const scene = page.locator("#capture-scene");
         await scene.waitFor({ state: "visible", timeout: 30_000 });
-        await scene.screenshot({ path: file, animations: "disabled" });
+        await writeWebpScreenshot(scene, file);
         saved = true;
       } catch (error) {
         lastError = error;

@@ -40,11 +40,11 @@ describe("quest builders", () => {
         expect(step.beginnerTerms, `${project.slug}/${step.id}`).toBeDefined();
         if (step.screenshotKind === "real" || step.screenshotKind === "placeholder") {
           expect(step.screenshot).toMatch(
-            new RegExp(`^/screens/${project.slug}/(?:real-step|placeholder-(?:mac-step|windows-step|step))-[0-9]{2}\\.(?:png|jpe?g|svg)$`),
+            new RegExp(`^/screens/${project.slug}/(?:real-step|placeholder-(?:mac-step|windows-step|step))-[0-9]{2}\\.(?:webp|jpe?g|svg)$`),
           );
         } else {
           expect(step.screenshot).toBe(
-            `/screens/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`,
+            `/screens/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`,
           );
         }
         const text = stepText(step);
@@ -164,7 +164,7 @@ describe("quest builders", () => {
           expect(frame.doneWhen.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(12);
           expect(frame.fallback.length, `${mode}/${step.id}/${frame.id}`).toBeGreaterThan(20);
           expect(frame.screenshot, `${mode}/${step.id}/${frame.id}`).toBe(
-            `/guides/home-helper/${mode}/step-${String(step.id).padStart(2, "0")}-frame-${String(frame.id).padStart(2, "0")}.png`,
+            `/guides/home-helper/${mode}/step-${String(step.id).padStart(2, "0")}-frame-${String(frame.id).padStart(2, "0")}.webp`,
           );
         }
       }

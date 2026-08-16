@@ -27,7 +27,7 @@ describe("mobile quest builder", () => {
         const desktopStep = desktopSteps[step.id - 1];
         const expectedScreenshot = desktopStep.screenshotKind === "real" || desktopStep.screenshotKind === "placeholder"
           ? desktopStep.screenshot
-          : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.png`;
+          : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`;
         expect(step.screenshot, `${project.slug}/${step.id}`).toBe(expectedScreenshot);
       }
       total += steps.length;

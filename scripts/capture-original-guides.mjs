@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
 import { originalGuideScreenPath, originalGuideStepCount } from "./projects.mjs";
+import { assertWebpSize, writeWebpScreenshot } from "./webp-screenshot.mjs";
 
 const origin = process.env.QUEST_ORIGIN || "http://localhost:3000";
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -11,13 +12,6 @@ const tasks = selectedSlugs.flatMap((slug) => Array.from({ length: originalGuide
 let cursor = 0;
 let finished = 0;
 
-function assertPng(file) {
-  const bytes = fs.readFileSync(file);
-  const width = bytes.readUInt32BE(16);
-  const height = bytes.readUInt32BE(20);
-  if (bytes.subarray(1, 4).toString("ascii") !== "PNG" || width !== 1200 || height !== 800) throw new Error(`Неверный PNG ${file}: ${width}x${height}`);
-}
-
 const browser = await chromium.launch({ executablePath, headless: true });
 const context = await browser.newContext({ viewport: { width: 1200, height: 800 }, deviceScaleFactor: 1 });
 
@@ -26,7 +20,7 @@ async function worker(number) {
   while (cursor < tasks.length) {
     const task = tasks[cursor++];
     const file = originalGuideScreenPath(task.slug, task.step, task.frame);
-    if (!force && fs.existsSync(file)) { assertPng(file); finished += 1; continue; }
+    if (!force && fs.existsSync(file)) { await assertWebpSize(file); finished += 1; continue; }
     fs.mkdirSync(path.dirname(file), { recursive: true });
     const route = `?capture-guide=${task.slug}--real--step-${String(task.step).padStart(2, "0")}--frame-${String(task.frame).padStart(2, "0")}`;
     let lastError;
@@ -36,8 +30,8 @@ async function worker(number) {
         if (!response?.ok()) throw new Error(`HTTP ${response?.status() ?? "без ответа"}`);
         const scene = page.locator("#capture-guide-scene");
         await scene.waitFor({ state: "visible", timeout: 30_000 });
-        await scene.screenshot({ path: file, animations: "disabled" });
-        assertPng(file);
+        await writeWebpScreenshot(scene, file);
+        await assertWebpSize(file);
         lastError = undefined;
         break;
       } catch (error) {

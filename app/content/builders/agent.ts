@@ -25,7 +25,7 @@ function step(project: ProjectDefinition, id: number, seed: StepSeed): QuestStep
     kind: "prompt",
     prompt: seed.prompt,
     expected: seed.expected,
-    screenshot: `/screens/${project.slug}/step-${String(id).padStart(2, "0")}.png`,
+    screenshot: `/screens/${project.slug}/step-${String(id).padStart(2, "0")}.webp`,
     reward: rewards[id],
     help: {
       title: seed.helpTitle,

@@ -20,7 +20,7 @@ const rewardAt: Record<number, string> = {
 };
 
 function shot(project: ProjectDefinition, id: number) {
-  return `/screens/${project.slug}/step-${String(id).padStart(2, "0")}.png`;
+  return `/screens/${project.slug}/step-${String(id).padStart(2, "0")}.webp`;
 }
 
 function demo(project: ProjectDefinition, index: number) {
