@@ -13,9 +13,23 @@ try {
   await page.goto(`${base}?format=desktop&section=weeks`);
   await page.getByRole("heading", { name: "Один результат за раз" }).waitFor();
   assert.equal(await page.locator(".course-milestone").count(), 6);
-  await page.locator(".course-milestone select").first().selectOption("family-budget:service");
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const card of await page.locator(".course-milestone").all()) {
+      const trigger = card.locator(".course-choice-trigger");
+      await trigger.click();
+      const buttonBox = await trigger.boundingBox();
+      const optionsBox = await card.locator(".course-choice-options").boundingBox();
+      assert.ok(optionsBox.y >= buttonBox.y + buttonBox.height, "Choices must open below the trigger");
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      await trigger.click();
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.locator(".course-choice-trigger").first().click();
+  await page.getByRole("radio", { name: "Вести семейный бюджет", exact: true }).click();
   await page.reload();
-  assert.equal(await page.locator(".course-milestone select").first().inputValue(), "family-budget:service");
+  assert.match(await page.locator(".course-choice-trigger").first().innerText(), /Вести семейный бюджет/);
   await page.screenshot({ path: "/tmp/neiroprofi-qa/route-desktop.png" });
   await page.locator(".course-milestone").first().getByRole("link").click();
   await page.getByRole("heading", { name: "Что вы получите и зачем" }).waitFor();

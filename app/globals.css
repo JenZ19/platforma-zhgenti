@@ -9228,6 +9228,15 @@ button {
 .quest-prompt pre, .mobile-prompt pre { max-height: 360px; overflow: auto; }
 .course-milestone .dashboard-primary-action { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-size: 1rem; font-weight: 700; }
 .course-milestone p { margin: 12px 0; }
+.course-choice { max-width: 650px; display: grid; gap: 8px; font-size: 1rem; }
+.course-choice-trigger { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; min-height: 48px; padding: 12px; border: 1px solid #b99eac; border-radius: 10px; background: #fff; color: #30232c; font: inherit; text-align: left; cursor: pointer; }
+/* Stay in normal document flow: options always appear below, never flip or cover a lesson. */
+.course-choice-options { position: static; min-width: 0; margin: 0; padding: 8px; border: 1px solid #b99eac; border-radius: 10px; background: #fff8fb; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; }
+.course-choice-options legend { padding: 0 6px; font-size: .9rem; }
+.course-milestone .course-choice-options label { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px; font-weight: 400; cursor: pointer; }
+.course-choice-options input { flex: 0 0 auto; width: 20px; height: 20px; accent-color: #80244e; }
+.course-choice-options label:has(input:checked) { background: #f5dbe7; border-radius: 8px; }
+.course-choice-trigger:focus-visible, .course-choice-options label:focus-within { outline: 3px solid #80244e; outline-offset: 3px; }
 .dashboard-section[data-dashboard-section="weeks"] > h1 { font-size: 2rem; font-weight: 700; line-height: 1.3; }
 .dashboard-section[data-dashboard-section="portfolio"] > header { display: block; margin-bottom: 26px; }
 .dashboard-section[data-dashboard-section="portfolio"] > header h1 { font-size: 2rem; line-height: 1.3; font-weight: 700; margin: 10px 0; overflow-wrap: normal; }

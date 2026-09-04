@@ -1,9 +1,35 @@
 "use client";
 
+import { useId, useRef, useState } from "react";
+import type { CourseChoice } from "../content/course-route";
 import type { DashboardSnapshot } from "../lib/academy-dashboard";
 import { selectCourseChoice } from "../lib/course-route";
 import type { ProjectFormat } from "../content/types";
 import { dashboardQuestHref } from "./DashboardProjectCard";
+
+function ProjectChoice({ week, selected, choices, onSelect }: {
+  week: number; selected: CourseChoice; choices: CourseChoice[]; onSelect: (choice: CourseChoice) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const close = () => { setOpen(false); trigger.current?.focus(); };
+  return <div className="course-choice">
+    <span id={`${id}-label`}>Что будем делать</span>
+    <button ref={trigger} type="button" className="course-choice-trigger" aria-labelledby={`${id}-label ${id}-value`} aria-expanded={open} aria-controls={`${id}-options`} onClick={() => setOpen(!open)}>
+      <span id={`${id}-value`}>{selected.label}</span><span aria-hidden="true">{open ? "▴" : "▾"}</span>
+    </button>
+    {open && <fieldset id={`${id}-options`} className="course-choice-options">
+      <legend>Проект недели {week}</legend>
+      {choices.map((option) => <label key={`${option.slug}:${option.output}`}>
+        <input type="radio" name={id} checked={option.slug === selected.slug && option.output === selected.output} onChange={() => { onSelect(option); close(); }} onKeyDown={(event) => {
+          if (event.key === "Escape") { event.preventDefault(); close(); }
+        }} />
+        <span>{option.label}</span>
+      </label>)}
+    </fieldset>}
+  </div>;
+}
 
 export function CourseRoute({ snapshot, format, onOpen, onChange, compact = false }: {
   snapshot: DashboardSnapshot; format: "desktop" | "mobile";
@@ -15,14 +41,9 @@ export function CourseRoute({ snapshot, format, onOpen, onChange, compact = fals
     {milestones?.map((week) => <article className="course-milestone" key={week.week}>
       <p className="academy-kicker">Неделя {week.week} · {week.complete ? "Пройдена ✓" : "Один проект на выбор"}</p>
       <h3>{week.title}</h3><p>{week.why}</p>
-      <label>Что будем делать
-        <select value={`${week.selected.slug}:${week.selected.output ?? ""}`} onChange={(event) => {
-          const option = week.choices.find((entry) => `${entry.slug}:${entry.output ?? ""}` === event.target.value);
-          if (option) { selectCourseChoice(week.week, option, window.localStorage); onChange(); }
-        }}>
-          {week.choices.map((option) => <option key={`${option.slug}:${option.output}`} value={`${option.slug}:${option.output ?? ""}`}>{option.label}</option>)}
-        </select>
-      </label>
+      <ProjectChoice week={week.week} selected={week.selected} choices={week.choices} onSelect={(option) => {
+        selectCourseChoice(week.week, option, window.localStorage); onChange();
+      }} />
       <p><strong>В результате:</strong> {week.result}</p>
       {week.item ? <p>В выбранном квесте пройдено {week.item.completedLevels} из {week.item.totalLevels} шагов.</p> : null}
       <a className="dashboard-primary-action" href={dashboardQuestHref(week.selected.slug, format, week.selected.output)} onClick={(event) => {
