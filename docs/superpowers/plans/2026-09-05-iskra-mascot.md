@@ -24,7 +24,7 @@ scripts/check-question-heading.mjs — геометрия шапки на 1440/3
 
 Изображение выделено встроенной генерацией из согласованной сравнительной доски: только центральная Искра, розовый матовый материал, два глаза, без надписей, прочих персонажей и фона.
 
-Финальный ресурс — на однотонном белом фоне, используется как аватар внутри белого скруглённого квадрата. Генерация с прозрачностью дала нарисованную шахматную сетку, поэтому она не использована. Финальный промпт: «Extract ONLY the center character Искра ... rounded four-point star, rose pink matte surface, two tiny dark burgundy eyes ... solid pure white #FFFFFF ... no checkerboard, text, buttons or other characters». Встроенная генерация; не API/CLI.
+После замечания 5 сентября 2026 года белая подложка заменена настоящей прозрачностью: итоговый `iskra-mascot-transparent.png` содержит альфа-канал от 0 до 255. Промпт редактирования: «Remove ONLY the white background and output a genuinely transparent PNG with alpha. Preserve the mascot exactly ... no checkerboard pattern, colored halo, white rectangle, floor, shadow or text». Встроенная генерация; не API/CLI.
 
 Проверка: 311 unit/UI-тестов прошли; новый тест обнаружил отсутствие маскота до исправления. Живой браузерный тест старой версии обнаружил конфликт flex/grid; локальная исправленная версия прошла проверку на 1440 и 390 px, включая сохранение заметки и возврат фокуса.
 

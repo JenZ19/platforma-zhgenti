@@ -19,6 +19,8 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     const mascot = header.locator(".iskra-mascot");
     assert.ok(await mascot.evaluate((img) => img.complete && img.naturalWidth > 0), "Mascot must load at the deployed subpath");
+    assert.match(await mascot.getAttribute("src"), /iskra-mascot-transparent\.png$/, "Mascot must use the transparent asset");
+    assert.equal(await mascot.evaluate((img) => getComputedStyle(img).backgroundColor), "rgba(0, 0, 0, 0)", "Mascot element must not add a background");
     await page.getByText("ИИ-ответы ещё не подключены.", { exact: false }).waitFor();
     await page.screenshot({ path: `/tmp/question-heading-${width}.png` });
     await page.goto(`${process.env.COURSE_QA_URL || "http://localhost:55231/"}?format=${width < 600 ? "mobile" : "desktop"}&quest=pressure-diary`);
