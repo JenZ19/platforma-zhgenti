@@ -8,6 +8,7 @@ import {
 } from "../lib/academy-dashboard";
 import type { StorageLike } from "../lib/progress";
 import { DashboardIcon } from "./DashboardIcon";
+import { IskraMascot } from "./IskraMascot";
 
 type SpeechResultEvent = {
   results: ArrayLike<ArrayLike<{ transcript?: string }>>;
@@ -259,16 +260,16 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
   const content = (
     <>
       <header className="fairy-heading">
-        <DashboardIcon name="fairy" />
+        <IskraMascot />
         <div>
-          <p>Помощь внутри платформы</p>
+          <p>Искра · помощь внутри платформы</p>
           <h1 id={headingId}>Мои вопросы</h1>
-          <p>Блокнот вопросов, не ИИ-чат. Здесь можно записать вопрос голосом или текстом, сохранить и передать его куратору или вашему помощнику.</p>
         </div>
         {mode === "floating" && (
           <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть мои вопросы"><DashboardIcon name="close" /></button>
         )}
       </header>
+      <p className="iskra-connection-status">ИИ-ответы ещё не подключены. Вопросы сохраняются только у вас — их можно передать куратору. Автоматической отправки нет.</p>
       <p className="fairy-intro">
         Опишите, на каком экране остановились, что нажали и что увидели. Сохранённые вопросы хранятся в этом браузере на этом устройстве. Голос обрабатывает браузер; в зависимости от его настроек браузер может использовать внешний сервис распознавания речи.
       </p>

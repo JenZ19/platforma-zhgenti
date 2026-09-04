@@ -1085,11 +1085,30 @@ select {
   box-shadow: var(--cloud-shadow);
 }
 
-.fairy-heading {
+.fairy-assistant .fairy-heading {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: start;
+  justify-content: start;
   gap: 14px;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.fairy-assistant-full .fairy-heading { grid-template-columns: 64px minmax(0, 1fr); }
+.fairy-heading > div { min-width: 0; }
+.iskra-mascot { display: block; flex: 0 0 auto; width: 64px; height: 64px; object-fit: contain; border-radius: 16px; background: white; }
+.learning-sidebar nav .iskra-mascot, .learning-bottom-nav .iskra-mascot { width: 30px; height: 30px; border-radius: 8px; }
+.fairy-assistant .iskra-connection-status { margin: 0 0 16px; max-width: 65ch; color: var(--cloud-muted); font-size: 16px; font-weight: 400; line-height: 1.6; }
+.fairy-floating-trigger > span { display: grid; gap: 3px; text-align: left; }
+.fairy-floating-trigger > span b { font-size: 17px; }
+.fairy-floating-trigger > span small { font-size: 12px; font-weight: 500; }
+.fairy-floating-trigger .iskra-mascot { width: 48px; height: 48px; }
+@media (max-width: 600px) {
+  .fairy-assistant .fairy-heading { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; }
+  .fairy-assistant-full .fairy-heading { grid-template-columns: 44px minmax(0, 1fr); }
+  .fairy-heading > .iskra-mascot { width: 44px; height: 44px; }
+  .fairy-assistant .fairy-heading h1 { font-size: 28px; }
 }
 
 .fairy-heading > svg {

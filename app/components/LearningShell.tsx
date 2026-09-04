@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import type { DashboardSection } from "../lib/academy-dashboard";
 import { DashboardIcon, type DashboardIconName } from "./DashboardIcon";
 import { FairyAssistant } from "./FairyAssistant";
+import { IskraMascot } from "./IskraMascot";
 
 const items: { id: DashboardSection; label: string; mobileLabel: string; icon: DashboardIconName }[] = [
   { id: "home", label: "Главная", mobileLabel: "Главная", icon: "home" },
@@ -81,7 +82,7 @@ export function LearningShell({
               aria-current={activeSection === item.id ? "page" : undefined}
               onClick={() => onNavigate(item.id)}
             >
-              <DashboardIcon name={item.icon} />
+              {item.id === "fairy" ? <IskraMascot /> : <DashboardIcon name={item.icon} />}
               {item.label}
             </button>
           ))}
@@ -123,8 +124,8 @@ export function LearningShell({
             aria-expanded={fairyOpen}
             onClick={(event) => openContextualFairy(event.currentTarget)}
           >
-            <DashboardIcon name="fairy" />
-            <span>Записать вопрос</span>
+            <IskraMascot />
+            <span><b>Искра</b><small>Записать вопрос</small></span>
           </button>
           {fairyOpen && <FairyAssistant key={assistantScope} scope={assistantScope} mode="floating" onClose={closeFairy} />}
         </>
@@ -143,7 +144,7 @@ export function LearningShell({
               else onNavigate(item.id);
             }}
           >
-            <DashboardIcon name={item.icon} />
+            {item.id === "fairy" ? <IskraMascot /> : <DashboardIcon name={item.icon} />}
             <small>{item.mobileLabel}</small>
           </button>
         ))}
