@@ -902,11 +902,11 @@ describe("academy interface", () => {
     expect(() => view.unmount()).not.toThrow();
   });
 
-  it("explains browser-local note storage and browser-dependent voice processing", async () => {
+  it("keeps the question form concise without the technical browser-storage paragraph", () => {
     render(<FairyAssistant scope="academy" mode="full" />);
 
-    expect(await screen.findByText(/сохранённые вопросы хранятся в этом браузере на этом устройстве/i)).toBeInTheDocument();
-    expect(screen.getByText(/браузер может использовать внешний сервис распознавания речи/i)).toBeInTheDocument();
+    expect(screen.queryByText(/сохранённые вопросы хранятся в этом браузере на этом устройстве/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/браузер может использовать внешний сервис распознавания речи/i)).not.toBeInTheDocument();
   });
 
   it("keeps the draft and explains when browser storage rejects a save", async () => {

@@ -29,6 +29,18 @@ try {
     const dialog = page.getByRole("dialog", { name: "Мои вопросы" });
     await dialog.waitFor();
     assert.ok(await dialog.locator(".iskra-mascot").isVisible());
+    const closeGeometry = await dialog.getByRole("button", { name: "Закрыть мои вопросы" }).evaluate((button) => {
+      const control = button.getBoundingClientRect();
+      const icon = button.querySelector("svg").getBoundingClientRect();
+      return {
+        x: Math.abs((control.left + control.width / 2) - (icon.left + icon.width / 2)),
+        y: Math.abs((control.top + control.height / 2) - (icon.top + icon.height / 2)),
+        width: control.width,
+        height: control.height,
+      };
+    });
+    assert.ok(closeGeometry.x <= 1 && closeGeometry.y <= 1, `Close icon must be centered at ${width}px`);
+    assert.ok(Math.abs(closeGeometry.width - closeGeometry.height) <= 1, `Close button must be square at ${width}px`);
     await dialog.getByRole("textbox", { name: "Ваш вопрос" }).fill("Где найти пример этого шага?");
     await dialog.getByRole("button", { name: "Сохранить вопрос" }).click();
     await dialog.getByRole("status").filter({ hasText: "Вопрос сохранён" }).waitFor();

@@ -270,9 +270,6 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
         )}
       </header>
       <p className="iskra-connection-status">ИИ-ответы ещё не подключены. Вопросы сохраняются только у вас — их можно передать куратору. Автоматической отправки нет.</p>
-      <p className="fairy-intro">
-        Опишите, на каком экране остановились, что нажали и что увидели. Сохранённые вопросы хранятся в этом браузере на этом устройстве. Голос обрабатывает браузер; в зависимости от его настроек браузер может использовать внешний сервис распознавания речи.
-      </p>
       <div className="fairy-compose">
         <label htmlFor={`${headingId}-question`}>Ваш вопрос</label>
         <textarea

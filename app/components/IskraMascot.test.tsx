@@ -8,4 +8,5 @@ it("shows Iskra without claiming that AI answers are connected", () => {
   expect(screen.getByText(/ИИ-ответы ещё не подключены/)).toBeVisible();
   expect(screen.getByRole("textbox", { name: "Ваш вопрос" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Сохранить вопрос" })).toBeDisabled();
+  expect(screen.queryByText(/Опишите, на каком экране остановились/)).not.toBeInTheDocument();
 });
