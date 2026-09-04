@@ -25,6 +25,7 @@ function p(input: ProjectInput): ProjectDefinition {
     device: input.kind === "advanced-site" ? "лучше ноутбук" : "телефон или ноутбук",
     safety: defaultSafety[input.kind],
     ...input,
+    ...(["family-health-hub", "webinar-moderator-agent", "fairy-team-agent", "small-shop-site"].includes(input.slug) ? { week: 5 as const, track: "Дополнительные сложные проекты", device: "лучше ноутбук" as const } : {}),
   };
 }
 

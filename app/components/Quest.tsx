@@ -39,6 +39,8 @@ import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
 import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
 import { questLevelMinutes } from "../lib/quest-duration";
 import { DashboardIcon } from "./DashboardIcon";
+import { ProjectBrief, LessonChapter } from "./ProjectBrief";
+import { ApiProviderChoice } from "./ApiProviderChoice";
 
 export function Quest({
   project,
@@ -280,6 +282,7 @@ function QuestBody({
       : `Прототип уровня ${step.id}: ${step.title}`;
 
   function storePreparation(next: PreparationState) {
+    if (next.ready) window.scrollTo({ top: 0, behavior: "auto" });
     setPreparation(next);
     savePreparation(storageSlug, next, window.localStorage);
   }
@@ -434,6 +437,7 @@ function QuestBody({
           {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
         </section>
 
+        {!setupQuest && <ProjectBrief project={project} />}
         {preparation === null ? <section className="preparation-card preparation-loading">Готовим квест…</section> : (
           <QuestPreparation
             project={project}
@@ -479,6 +483,7 @@ function QuestBody({
             <QuestResetButton onReset={reset} />
             <p>{step.eyebrow} · уровень {step.id} из {totalLevels} · ≈ {questLevelMinutes(step.id, "desktop")} мин</p>
             <h1>{step.title}</h1>
+            {!setupQuest && <LessonChapter step={step.id} total={totalLevels} />}
           </header>
 
           {narrowViewport && <details ref={narrowLevelMapRef} className="narrow-desktop-level-map">
@@ -521,6 +526,7 @@ function QuestBody({
           <section className="quest-action">
             <h2>Что сделать</h2>
             <LessonText text={step.action} variant="action" kind="action" />
+            {project.slug === "api-keys" && step.id === 5 && <ApiProviderChoice />}
             {step.id === 2 && profile && customization && <QuestCustomizer profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
           </section>
 
@@ -534,14 +540,14 @@ function QuestBody({
             </section>
           )}
 
-          {step.guide && <QuestGuide frames={step.guide} />}
-          <QuestLinks links={step.links} />
+          {step.guide && <details className="lesson-extra"><summary>Нужны подробности? Открыть подсказки к шагу</summary><QuestGuide frames={step.guide} /></details>}
+          {!(project.slug === "api-keys" && step.id === 5) && <QuestLinks links={step.links} />}
 
           <section className="quest-result">
             <div className="quest-result-heading"><div><h2>Готово, если</h2><p>{resultHint}</p></div>{step.showScreenshot !== false && <span>{screenshotBadge}</span>}</div>
             {step.showScreenshot !== false && <button type="button" className={`reference-shot screenshot-${step.screenshotKind ?? "prototype"}`} onClick={(event) => { imageOpenerRef.current = event.currentTarget; setImageOpen(true); }} aria-label="Увеличить пример результата"><img src={step.screenshot} alt={screenshotAlt} /><span>Увеличить</span></button>}
             <ul>{step.expected.map((item) => <li key={item}><span aria-hidden="true">✓</span>{item}</li>)}</ul>
-            {finished && step.id === lastLevel && <section className="finish-card"><i aria-hidden="true">✦</i><p>Квест завершён</p><h3>{setupQuest ? "Рабочее место готово к следующим проектам" : "Теперь этот проект — часть твоего портфолио"}</h3><span>{setupQuest ? "Все обязательные проверки пройдены — сохраните итоговый чек-лист." : "Ссылка, описание и безопасные экраны готовы к показу."}</span></section>}
+            {finished && step.id === lastLevel && <section className="finish-card"><i aria-hidden="true">✦</i><p>Квест завершён</p><h3>{setupQuest ? "Подготовка пройдена" : "Сохраните свою работу в портфолио"}</h3><span>{setupQuest ? "Проверьте результат перед переходом к проектам." : "В разделе «Портфолио» добавьте настоящее название и ссылку. Отметка уроков сама по себе не публикует проект."}</span></section>}
           </section>
 
           <section className="quest-help">

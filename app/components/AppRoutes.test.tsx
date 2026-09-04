@@ -71,7 +71,7 @@ describe("bundle format routing", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Мои проекты" }));
     await waitFor(() => expect(window.location.search).toBe("?section=projects"));
 
-    fireEvent.click(screen.getByRole("button", { name: "Квесты по неделям" }));
+    fireEvent.click(screen.getByRole("button", { name: "Маршрут и библиотека" }));
     await waitFor(() => expect(window.location.search).toBe("?section=weeks"));
 
     fireEvent.change(screen.getByRole("searchbox", { name: /найти проект/i }), { target: { value: "давление" } });
@@ -112,7 +112,7 @@ describe("bundle format routing", () => {
     saveDashboardSection("portfolio", localStorage);
     window.history.replaceState({}, "", "/?section=weeks");
     render(<AppEntry />);
-    expect(await screen.findByRole("button", { name: "Квесты по неделям", current: "page" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Маршрут и библиотека", current: "page" })).toBeInTheDocument();
 
     window.history.replaceState({}, "", "/");
     window.dispatchEvent(new PopStateEvent("popstate"));

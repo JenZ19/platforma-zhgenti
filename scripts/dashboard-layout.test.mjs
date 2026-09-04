@@ -354,24 +354,19 @@ test("phone default, dialogs, focus and effective contrast stay usable", { timeo
       return [style.color, style.backgroundColor];
     });
     assert.ok(contrast(...actionColors) >= 4.5, `Mobile CTA contrast is ${contrast(...actionColors).toFixed(2)}:1`);
-    const telegramColors = await mobile.locator(".mobile-action-telegram > button, .mobile-action-telegram > a").first().evaluate((node) => {
+    const telegramColors = await mobile.locator(".mobile-action-telegram .learning-setup button").first().evaluate((node) => {
       const style = getComputedStyle(node);
       return [style.color, style.backgroundColor];
     });
     assert.ok(contrast(...telegramColors) >= 4.5, `Telegram action contrast is ${contrast(...telegramColors).toFixed(2)}:1`);
 
-    await mobile.getByRole("button", { name: /феечка, нижняя навигация/i }).click();
+    await mobile.getByRole("button", { name: /вопросы, нижняя навигация/i }).click();
     const fairy = mobile.locator('dialog[data-fairy-scope="pressure-diary"]');
     await fairy.waitFor();
     assert.equal(await mobile.locator(".fairy-assistant").count(), 1);
-    await fairy.getByRole("button", { name: /закрыть феечку/i }).click();
+    await fairy.getByRole("button", { name: /закрыть мои вопросы/i }).click();
 
-    const imageOpener = mobile.getByRole("button", { name: /увеличить мобильный пример/i });
-    await imageOpener.click();
-    const imageDialog = mobile.getByRole("dialog", { name: /увеличенный мобильный пример/i });
-    assert.equal(await imageDialog.evaluate((node) => node.tagName), "DIALOG");
-    await imageDialog.getByRole("button", { name: /закрыть увеличенный/i }).click();
-    assert.ok(await imageOpener.evaluate((node) => document.activeElement === node));
+    assert.equal(await mobile.getByRole("button", { name: /увеличить мобильный пример/i }).count(), 0, "Do not pass generated desktop prototypes off as mobile screenshots");
 
     let resetMessage = "";
     const resetDialog = new Promise((resolve) => mobile.once("dialog", async (dialog) => {

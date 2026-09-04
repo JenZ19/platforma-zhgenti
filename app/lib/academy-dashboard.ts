@@ -1,7 +1,7 @@
-import { isProjectBundle } from "../content/projects";
 import type { CatalogProject, ProjectFormat } from "../content/types";
 import type { QuestSurface } from "./output-format";
 import { getCatalogProjectProgressState, type StorageLike } from "./progress";
+import { buildCourseMilestones, type CourseMilestone } from "./course-route";
 
 const PREFIX = "feya-dashboard-v1";
 
@@ -31,6 +31,7 @@ export type DashboardSnapshot = {
   completedLevels: number;
   totalLevels: number;
   next: DashboardProjectState | null;
+  course?: CourseMilestone[];
 };
 
 export type QuestionNote = {
@@ -156,10 +157,6 @@ export function saveQuestionNote(
   return saveQuestionNoteResult(scope, text, storage, now).notes;
 }
 
-function projectWeeks(project: CatalogProject): readonly number[] {
-  return isProjectBundle(project) ? project.weeks : [project.week];
-}
-
 export function buildDashboardSnapshot(
   projects: CatalogProject[],
   storage: StorageLike,
@@ -199,16 +196,12 @@ export function buildDashboardSnapshot(
       return 0;
     });
   const completed = items.filter((item) => item.status === "completed");
-  const currentWeek = [1, 2, 3, 4, 5, 6].find((week) => items.some((item) =>
-    projectWeeks(item.project).includes(week) && item.status !== "completed",
-  )) ?? 6;
+  const course = buildCourseMilestones(items, storage, surface);
+  const currentWeek = course.find((week) => !week.complete)?.week ?? 6;
   const lastSlug = loadLastActiveProject(surface, storage);
-  const next = completed.length === items.length
-    ? null
-    : items.find((item) => item.project.slug === lastSlug && item.status === "started")
-      ?? started[0]
-      ?? items.find((item) => projectWeeks(item.project).includes(currentWeek) && item.status !== "completed")
-      ?? null;
+  const resumed = started.find((item) => item.project.slug === lastSlug) ?? started[0];
+  const install = surface === "desktop" && !resumed && !completed.length ? items.find((item) => item.project.slug === "install-codex" && item.status !== "completed") : undefined;
+  const next = resumed ?? install ?? course.find((week) => !week.complete)?.item ?? null;
 
   return {
     items,
@@ -219,5 +212,6 @@ export function buildDashboardSnapshot(
     completedLevels: items.reduce((sum, item) => sum + item.completedLevels, 0),
     totalLevels: items.reduce((sum, item) => sum + item.totalLevels, 0),
     next,
+    course,
   };
 }

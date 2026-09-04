@@ -8,9 +8,9 @@ import { FairyAssistant } from "./FairyAssistant";
 const items: { id: DashboardSection; label: string; mobileLabel: string; icon: DashboardIconName }[] = [
   { id: "home", label: "Главная", mobileLabel: "Главная", icon: "home" },
   { id: "projects", label: "Мои проекты", mobileLabel: "Проекты", icon: "projects" },
-  { id: "weeks", label: "Квесты по неделям", mobileLabel: "Недели", icon: "weeks" },
+  { id: "weeks", label: "Маршрут и библиотека", mobileLabel: "Маршрут", icon: "weeks" },
   { id: "portfolio", label: "Портфолио", mobileLabel: "Портфолио", icon: "portfolio" },
-  { id: "fairy", label: "Феечка", mobileLabel: "Феечка", icon: "fairy" },
+  { id: "fairy", label: "Мои вопросы", mobileLabel: "Вопросы", icon: "fairy" },
 ];
 
 export type LearningShellProps = {
@@ -118,13 +118,13 @@ export function LearningShell({
           <button
             type="button"
             className="fairy-floating-trigger"
-            aria-label="Открыть Феечку"
+            aria-label="Открыть мои вопросы"
             aria-haspopup="dialog"
             aria-expanded={fairyOpen}
             onClick={(event) => openContextualFairy(event.currentTarget)}
           >
             <DashboardIcon name="fairy" />
-            <span>Спросить Феечку</span>
+            <span>Записать вопрос</span>
           </button>
           {fairyOpen && <FairyAssistant key={assistantScope} scope={assistantScope} mode="floating" onClose={closeFairy} />}
         </>

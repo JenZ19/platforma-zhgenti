@@ -131,7 +131,7 @@ describe("academy interface", () => {
     expect(await screen.findByRole("heading", { level: 1, name: /дневник давления/i })).toBeInTheDocument();
     expect(container.querySelector(".dashboard-primary-action")).toHaveAccessibleName(/продолжить: дневник давления/i);
     expect(container.querySelector(".dashboard-primary-action")).toHaveAttribute("href", "?quest=pressure-diary");
-    expect(container.querySelectorAll(".dashboard-primary-action")).toHaveLength(1);
+    expect(container.querySelectorAll(".next-quest-banner .dashboard-primary-action")).toHaveLength(1);
   });
 
   it("saves and unsaves a recommended project without reloading", async () => {
@@ -166,7 +166,7 @@ describe("academy interface", () => {
   it("recommends only the first four projects of the current week", async () => {
     render(<Academy />);
 
-    const recommendations = await screen.findByRole("region", { name: /рекомендуемый порядок/i });
+    const recommendations = await screen.findByRole("region", { name: /другие варианты/i });
     expect(within(recommendations).getAllByRole("article")).toHaveLength(4);
     expect(within(recommendations).getByRole("heading", { name: /планирование/i })).toBeInTheDocument();
     expect(within(recommendations).queryByRole("heading", { name: /дневник давления/i })).not.toBeInTheDocument();
@@ -190,7 +190,7 @@ describe("academy interface", () => {
 
     view.unmount();
     render(<MobileAcademy section="weeks" onOpen={vi.fn()} />);
-    expect(await screen.findByRole("heading", { level: 1, name: "Квесты по неделям" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Маршрут и библиотека" })).toBeInTheDocument();
     expect(screen.queryByText("Устанавливаем Codex")).not.toBeInTheDocument();
   });
 
@@ -324,7 +324,7 @@ describe("academy interface", () => {
 
     expect(await screen.findByRole("link", { name: /начать квест: планирование/i })).toHaveAttribute(
       "href",
-      "?format=mobile&quest=planning",
+      "?format=mobile&quest=planning&output=service",
     );
     const ideas = screen.getByRole("article", { name: /идеи/i });
     expect(within(ideas).getByRole("link", { name: /начать: идеи/i })).toHaveAttribute(
@@ -339,7 +339,7 @@ describe("academy interface", () => {
 
     const primary = await screen.findByRole("link", { name: /начать квест: планирование/i });
     expect(fireEvent.click(primary)).toBe(false);
-    expect(onOpen).toHaveBeenLastCalledWith("planning");
+    expect(onOpen).toHaveBeenLastCalledWith("planning", "service");
 
     const ideas = screen.getByRole("article", { name: /идеи/i });
     const cardAction = within(ideas).getByRole("link", { name: /начать: идеи/i });
@@ -382,9 +382,9 @@ describe("academy interface", () => {
 
     render(<DashboardHome snapshot={snapshot} format="desktop" onOpen={vi.fn()} onSave={vi.fn()} />);
 
-    const recommendations = screen.getByRole("region", { name: /рекомендуемый порядок/i });
-    expect(within(recommendations).getAllByRole("article")).toHaveLength(1);
-    expect(within(recommendations).getByRole("heading", { name: /личный органайзер/i })).toBeInTheDocument();
+    const recommendations = screen.getByRole("region", { name: /другие варианты/i });
+    expect(snapshot.currentWeek).toBe(2);
+    expect(within(recommendations).queryByRole("heading", { name: /личный органайзер/i })).not.toBeInTheDocument();
   });
 
   it("routes an all-complete mobile dashboard to portfolio", () => {
@@ -627,103 +627,47 @@ describe("academy interface", () => {
     );
   });
 
-  it.each([
-    ["desktop", Academy, "server-152fz", "?quest=server-152fz", progressKey("server-152fz"), /покупаем сервер/i],
-    ["mobile", MobileAcademy, "pressure-diary", "?format=mobile&quest=pressure-diary", progressKey("mobile:pressure-diary"), /дневник давления/i],
-  ] as const)("automatically shows a completed project in the %s portfolio with a native quest link", async (_format, Component, slug, href, key, name) => {
-    const total = getProjectLevelCount(slug);
-    localStorage.setItem(key, JSON.stringify({
-      version: 1,
-      activeStep: total,
-      completed: Array.from({ length: total }, (_, index) => index + 1),
-      score: total * 10,
-      completedAt: "2026-08-14",
-    }));
+  it.each(["desktop", "mobile"] as const)("stores a real result independently from the %s lesson", async (surface) => {
+    const total = getProjectLevelCount("pressure-diary");
+    localStorage.setItem(progressKey(surface === "mobile" ? "mobile:pressure-diary" : "pressure-diary"), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
+    const Component = surface === "mobile" ? MobileAcademy : Academy;
     const onOpen = vi.fn();
-
     render(<Component section="portfolio" onOpen={onOpen} />);
-
-    const card = await screen.findByRole("article", { name });
-    expect(within(card).getByRole("img", { name })).toBeInTheDocument();
-    expect(within(card).getByText("14.08.2026")).toHaveAttribute("datetime", "2026-08-14");
-
-    const action = within(card).getByRole("link", { name: new RegExp(`открыть проект: ${slug === "server-152fz" ? "покупаем сервер по 152-фз" : "дневник давления"}`, "i") });
-    expect(action).toHaveAttribute("href", href);
-    action.setAttribute("href", "#browser-portfolio-card");
-    expect(fireEvent.click(action, { metaKey: true })).toBe(true);
-    expect(onOpen).not.toHaveBeenCalled();
-    expect(fireEvent.click(action)).toBe(false);
-    expect(onOpen).toHaveBeenCalledWith(slug);
+    const card = await screen.findByRole("article", { name: /дневник давления/i });
+    expect(within(card).queryByRole("link", { name: /открыть мою работу/i })).not.toBeInTheDocument();
+    fireEvent.change(within(card).getByLabelText("Ваше название"), { target: { value: "Мой дневник" } });
+    fireEvent.change(within(card).getByLabelText("Ссылка на результат"), { target: { value: "https://example.com/my-diary" } });
+    fireEvent.click(within(card).getByRole("button", { name: "Сохранить карточку" }));
+    expect(within(card).getByRole("link", { name: /открыть мою работу/i })).toHaveAttribute("href", "https://example.com/my-diary");
+    fireEvent.click(within(card).getByRole("button", { name: /вернуться к уроку/i }));
+    expect(onOpen).toHaveBeenCalledWith("pressure-diary", undefined);
   });
 
-  it.each([
-    ["desktop", Academy, "service", "?quest=planning&output=service", branchStorageSlug("planning", "service", "desktop")],
-    ["mobile", MobileAcademy, "agent", "?format=mobile&quest=planning&output=agent", branchStorageSlug("planning", "agent", "mobile")],
-  ] as const)("shows only the completed %s bundle branch facts in portfolio", async (_surface, Component, output, href, storageSlug) => {
-    const bundle = getBundle("planning");
-    const branch = bundle.formats[output];
+  it.each(["service", "agent"] as const)("keeps the completed %s result in a separate portfolio card", async (output) => {
+    const branch = getBundle("planning").formats[output];
     const total = getProjectLevelCount(branch);
-    localStorage.setItem(progressKey(storageSlug), JSON.stringify({
-      version: 1,
-      activeStep: total,
-      completed: Array.from({ length: total }, (_, index) => index + 1),
-      score: total * 10,
-      completedAt: "2026-08-14",
-    }));
-    saveOutputChoice("planning", _surface, output, localStorage);
-    const onOpen = vi.fn();
-
-    render(<Component section="portfolio" onOpen={onOpen} />);
-
-    const card = await screen.findByRole("article", { name: /планирование/i });
-    expect(card).toHaveTextContent(`Формат: ${output === "service" ? "Сервис" : "ИИ-агент"}`);
-    expect(card).toHaveTextContent(branch.audience);
-    expect(card).not.toHaveTextContent(bundle.formats[output === "service" ? "agent" : "service"].audience);
-    const action = within(card).getByRole("link", { name: new RegExp(`открыть ${output === "service" ? "сервис" : "ии-агента"}: планирование`, "i") });
-    expect(action).toHaveAttribute("href", href);
-    action.setAttribute("href", "#browser-bundle-portfolio");
-    expect(fireEvent.click(action, { ctrlKey: true })).toBe(true);
-    expect(onOpen).not.toHaveBeenCalled();
-    expect(fireEvent.click(action)).toBe(false);
-    expect(onOpen).toHaveBeenCalledWith("planning", output);
+    localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
+    render(<Academy section="portfolio" />);
+    expect(await screen.findByRole("article", { name: branch.title })).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.getByText(/ссылка ещё не добавлена/i)).toBeInTheDocument();
   });
 
-  it("shows both completed bundle outputs without merging their facts", async () => {
-    const bundle = getBundle("planning");
+  it("keeps both completed bundle outputs as two independently editable works", async () => {
     for (const output of ["service", "agent"] as const) {
-      const total = getProjectLevelCount(bundle.formats[output]);
-      localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({
-        version: 1,
-        activeStep: total,
-        completed: Array.from({ length: total }, (_, index) => index + 1),
-        score: total * 10,
-        completedAt: output === "service" ? "2026-08-14" : "2026-08-15",
-      }));
+      const total = getProjectLevelCount(getBundle("planning").formats[output]);
+      localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
     }
-
     render(<Academy section="portfolio" />);
-
-    const card = await screen.findByRole("article", { name: /планирование/i });
-    expect(card).toHaveTextContent("Готовы оба формата");
-    expect(within(card).getByRole("link", { name: /открыть сервис: планирование/i })).toHaveAttribute("href", "?quest=planning&output=service");
-    expect(within(card).getByRole("link", { name: /открыть ии-агента: планирование/i })).toHaveAttribute("href", "?quest=planning&output=agent");
-    expect(card).toHaveTextContent("14.08.2026");
-    expect(card).toHaveTextContent("15.08.2026");
+    expect(await screen.findAllByRole("article")).toHaveLength(2);
+    expect(screen.getAllByLabelText("Ваше название")).toHaveLength(2);
   });
 
-  it("omits a completion date for legacy finished progress", async () => {
-    const total = getProjectLevelCount("server-152fz");
-    localStorage.setItem(progressKey("server-152fz"), JSON.stringify({
-      version: 1,
-      activeStep: total,
-      completed: Array.from({ length: total }, (_, index) => index + 1),
-      score: total * 10,
-    }));
-
+  it("excludes completed setup lessons from portfolio", async () => {
+    localStorage.setItem(progressKey("server-152fz"), JSON.stringify({ version: 1, activeStep: 9, completed: [1,2,3,4,5,6,7,8,9], score: 90 }));
     render(<Academy section="portfolio" />);
-
-    const card = await screen.findByRole("article", { name: /покупаем сервер/i });
-    expect(card).not.toHaveTextContent(/Готово \d{2}\.\d{2}\.\d{4}/i);
+    expect(await screen.findByRole("heading", { name: "Начните первый проект" })).toBeInTheDocument();
+    expect(screen.queryByRole("article", { name: /покупаем сервер/i })).not.toBeInTheDocument();
   });
 
   it("labels a completed project card action as opening, not continuing", async () => {
@@ -751,14 +695,14 @@ describe("academy interface", () => {
     expect(screen.getByText(/нет проектов на потом/i)).toBeInTheDocument();
 
     rerender(<Academy section="portfolio" />);
-    expect(await screen.findByText(/здесь появится первая готовая работа/i)).toBeInTheDocument();
+    expect(await screen.findByText(/начните первый проект/i)).toBeInTheDocument();
   });
 
   it("saves a full-page Fairy question in the academy scope without inventing an AI reply", async () => {
     window.history.replaceState({}, "", "/?section=fairy");
     const { container } = render(<AppEntry />);
 
-    const question = await screen.findByRole("textbox", { name: /вопрос феечке/i });
+    const question = await screen.findByRole("textbox", { name: /ваш вопрос/i });
     expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-dashboard-format", "desktop");
     expect(container.querySelector('main[data-dashboard-section="fairy"]')).toHaveAttribute("data-visual-theme", "elina-burgundy");
     fireEvent.change(question, { target: { value: "<script>не выполнять</script>\nНе понимаю следующий шаг" } });
@@ -780,11 +724,11 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?quest=pressure-diary");
     render(<AppEntry />);
 
-    const trigger = await screen.findByRole("button", { name: /открыть феечку/i });
+    const trigger = await screen.findByRole("button", { name: /открыть мои вопросы/i });
     fireEvent.click(trigger);
-    const dialog = screen.getByRole("dialog", { name: /феечка/i });
+    const dialog = screen.getByRole("dialog", { name: /мои вопросы/i });
     expect(showModalMock).toHaveBeenCalledTimes(1);
-    const question = within(dialog).getByRole("textbox", { name: /вопрос феечке/i });
+    const question = within(dialog).getByRole("textbox", { name: /ваш вопрос/i });
     expect(question).toHaveFocus();
 
     fireEvent.change(question, { target: { value: "Где я остановилась?" } });
@@ -795,7 +739,7 @@ describe("academy interface", () => {
     expect(localStorage.getItem("feya-dashboard-v1:notes:academy")).toBeNull();
 
     fireEvent(dialog, new Event("cancel", { cancelable: true }));
-    expect(screen.queryByRole("dialog", { name: /феечка/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /мои вопросы/i })).not.toBeInTheDocument();
     expect(closeDialogMock).toHaveBeenCalledTimes(1);
     expect(trigger).toHaveFocus();
   });
@@ -803,26 +747,26 @@ describe("academy interface", () => {
   it("closes and removes the floating Fairy when the full Fairy section becomes active", async () => {
     render(<AppEntry />);
 
-    fireEvent.click(await screen.findByRole("button", { name: /открыть феечку/i }));
-    expect(screen.getByRole("dialog", { name: /феечка/i })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: /открыть мои вопросы/i }));
+    expect(screen.getByRole("dialog", { name: /мои вопросы/i })).toBeInTheDocument();
 
     window.history.pushState({}, "", "/?section=fairy");
     window.dispatchEvent(new PopStateEvent("popstate"));
 
     await waitFor(() => expect(document.querySelector('main[data-dashboard-section="fairy"]')).not.toBeNull());
-    expect(within(document.querySelector('main[data-dashboard-section="fairy"]')!).getByRole("heading", { name: "Феечка" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: /феечка/i })).not.toBeInTheDocument());
-    expect(screen.queryByRole("button", { name: /открыть феечку/i })).not.toBeInTheDocument();
-    expect(screen.getAllByRole("textbox", { name: /вопрос феечке/i })).toHaveLength(1);
+    expect(within(document.querySelector('main[data-dashboard-section="fairy"]')!).getByRole("heading", { name: "Мои вопросы" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: /мои вопросы/i })).not.toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: /открыть мои вопросы/i })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("textbox", { name: /ваш вопрос/i })).toHaveLength(1);
     expect(closeDialogMock).toHaveBeenCalledTimes(1);
   });
 
   it("uses the academy scope for the floating Fairy outside a quest", async () => {
     render(<AppEntry />);
 
-    fireEvent.click(await screen.findByRole("button", { name: /открыть феечку/i }));
-    const dialog = screen.getByRole("dialog", { name: /феечка/i });
-    fireEvent.change(within(dialog).getByRole("textbox", { name: /вопрос феечке/i }), { target: { value: "Как выбрать проект?" } });
+    fireEvent.click(await screen.findByRole("button", { name: /открыть мои вопросы/i }));
+    const dialog = screen.getByRole("dialog", { name: /мои вопросы/i });
+    fireEvent.change(within(dialog).getByRole("textbox", { name: /ваш вопрос/i }), { target: { value: "Как выбрать проект?" } });
     fireEvent.click(within(dialog).getByRole("button", { name: /сохранить вопрос/i }));
 
     expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:notes:academy")!)).toMatchObject([
@@ -834,13 +778,13 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?format=mobile&quest=pressure-diary");
     render(<AppEntry />);
 
-    const trigger = await screen.findByRole("button", { name: /феечка, нижняя навигация/i });
+    const trigger = await screen.findByRole("button", { name: /мои вопросы, нижняя навигация/i });
     fireEvent.click(trigger);
 
-    const dialog = screen.getByRole("dialog", { name: /феечка/i });
+    const dialog = screen.getByRole("dialog", { name: /мои вопросы/i });
     expect(dialog).toHaveAttribute("data-fairy-scope", "pressure-diary");
     expect(window.location.search).toBe("?format=mobile&quest=pressure-diary");
-    expect(screen.getAllByRole("textbox", { name: /вопрос феечке/i })).toHaveLength(1);
+    expect(screen.getAllByRole("textbox", { name: /ваш вопрос/i })).toHaveLength(1);
     expect(document.querySelector('main[data-dashboard-section="fairy"]')).toBeNull();
   });
 
@@ -848,12 +792,12 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
 
-    fireEvent.click(await screen.findByRole("button", { name: /феечка, нижняя навигация/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /мои вопросы, нижняя навигация/i }));
 
     await waitFor(() => expect(document.querySelector('main[data-dashboard-section="fairy"]')).not.toBeNull());
     expect(window.location.search).toBe("?format=mobile&section=fairy");
-    expect(screen.queryByRole("dialog", { name: /феечка/i })).not.toBeInTheDocument();
-    expect(screen.getAllByRole("textbox", { name: /вопрос феечке/i })).toHaveLength(1);
+    expect(screen.queryByRole("dialog", { name: /мои вопросы/i })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("textbox", { name: /ваш вопрос/i })).toHaveLength(1);
   });
 
   it("shows the microphone only when speech recognition exists and never auto-saves a transcript", async () => {
@@ -865,7 +809,7 @@ describe("academy interface", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Говорите — текст появится в поле вопроса. Он не сохранится сам.");
 
     act(() => MockSpeechRecognition.latest?.emitTranscript("Продиктованный вопрос"));
-    expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toHaveValue("Продиктованный вопрос");
+    expect(screen.getByRole("textbox", { name: /ваш вопрос/i })).toHaveValue("Продиктованный вопрос");
     expect(screen.getByRole("status")).toHaveTextContent("Голос распознан. Проверьте текст и нажмите «Сохранить вопрос».");
     expect(localStorage.getItem("feya-dashboard-v1:notes:academy")).toBeNull();
   });
@@ -880,7 +824,7 @@ describe("academy interface", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "Микрофон недоступен. Напишите вопрос в поле — текстовый ввод работает без микрофона.",
     );
-    expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toBeEnabled();
+    expect(screen.getByRole("textbox", { name: /ваш вопрос/i })).toBeEnabled();
   });
 
   it("handles speech start and end failures without submitting the question", async () => {
@@ -912,18 +856,18 @@ describe("academy interface", () => {
     const { rerender } = render(<FairyAssistant scope="planner" mode="full" />);
 
     expect(await screen.findByText("Старый вопрос")).toBeInTheDocument();
-    fireEvent.change(screen.getByRole("textbox", { name: /вопрос феечке/i }), { target: { value: "Черновик старого проекта" } });
+    fireEvent.change(screen.getByRole("textbox", { name: /ваш вопрос/i }), { target: { value: "Черновик старого проекта" } });
     fireEvent.click(await screen.findByRole("button", { name: /начать голосовой ввод/i }));
     const oldRecognition = MockSpeechRecognition.latest!;
 
     rerender(<FairyAssistant scope="pressure-diary" mode="full" />);
 
     expect(oldRecognition.stop).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: /ваш вопрос/i })).toHaveValue("");
     expect(screen.queryByText("Старый вопрос")).not.toBeInTheDocument();
     expect(await screen.findByText("Новый вопрос")).toBeInTheDocument();
     act(() => oldRecognition.emitTranscript("Запоздалый старый текст"));
-    expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: /ваш вопрос/i })).toHaveValue("");
   });
 
   it("keeps an open shell dialog remounted in the new quest scope", async () => {
@@ -931,9 +875,9 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?quest=pressure-diary");
     render(<AppEntry />);
 
-    fireEvent.click(await screen.findByRole("button", { name: /открыть феечку/i }));
-    const oldDialog = screen.getByRole("dialog", { name: /феечка/i });
-    fireEvent.change(within(oldDialog).getByRole("textbox", { name: /вопрос феечке/i }), { target: { value: "Старый черновик" } });
+    fireEvent.click(await screen.findByRole("button", { name: /открыть мои вопросы/i }));
+    const oldDialog = screen.getByRole("dialog", { name: /мои вопросы/i });
+    fireEvent.change(within(oldDialog).getByRole("textbox", { name: /ваш вопрос/i }), { target: { value: "Старый черновик" } });
     fireEvent.click(await within(oldDialog).findByRole("button", { name: /начать голосовой ввод/i }));
     const oldRecognition = MockSpeechRecognition.latest!;
 
@@ -941,11 +885,11 @@ describe("academy interface", () => {
     window.dispatchEvent(new PopStateEvent("popstate"));
 
     await waitFor(() => expect(document.querySelector('dialog[data-fairy-scope="planning"]')).not.toBeNull());
-    const newDialog = screen.getByRole("dialog", { name: /феечка/i });
-    expect(within(newDialog).getByRole("textbox", { name: /вопрос феечке/i })).toHaveValue("");
+    const newDialog = screen.getByRole("dialog", { name: /мои вопросы/i });
+    expect(within(newDialog).getByRole("textbox", { name: /ваш вопрос/i })).toHaveValue("");
     expect(oldRecognition.stop).toHaveBeenCalledTimes(1);
     act(() => oldRecognition.emitTranscript("Запоздалый старый текст"));
-    expect(within(newDialog).getByRole("textbox", { name: /вопрос феечке/i })).toHaveValue("");
+    expect(within(newDialog).getByRole("textbox", { name: /ваш вопрос/i })).toHaveValue("");
   });
 
   it("swallows recognition cleanup errors while unmounting", async () => {
@@ -967,7 +911,7 @@ describe("academy interface", () => {
 
   it("keeps the draft and explains when browser storage rejects a save", async () => {
     render(<FairyAssistant scope="academy" mode="full" />);
-    const question = await screen.findByRole("textbox", { name: /вопрос феечке/i });
+    const question = await screen.findByRole("textbox", { name: /ваш вопрос/i });
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Quota exceeded", "QuotaExceededError");
     });
@@ -996,7 +940,7 @@ describe("academy interface", () => {
       expect(await screen.findByRole("status")).toHaveTextContent(
         "Не удалось открыть сохранённые вопросы в этом браузере. Новый вопрос лучше скопировать вручную.",
       );
-      expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toBeEnabled();
+      expect(screen.getByRole("textbox", { name: /ваш вопрос/i })).toBeEnabled();
     } finally {
       getItem.mockRestore();
     }
@@ -1012,7 +956,7 @@ describe("academy interface", () => {
       expect(await screen.findByRole("status")).toHaveTextContent(
         "Не удалось открыть сохранённые вопросы в этом браузере. Новый вопрос лучше скопировать вручную.",
       );
-      expect(screen.getByRole("textbox", { name: /вопрос феечке/i })).toBeEnabled();
+      expect(screen.getByRole("textbox", { name: /ваш вопрос/i })).toBeEnabled();
     } finally {
       localStorageAccess.mockRestore();
     }
@@ -1021,7 +965,7 @@ describe("academy interface", () => {
   it("hides the microphone when browser speech recognition is unavailable", async () => {
     render(<FairyAssistant scope="academy" mode="full" />);
 
-    expect(await screen.findByRole("textbox", { name: /вопрос феечке/i })).toBeInTheDocument();
+    expect(await screen.findByRole("textbox", { name: /ваш вопрос/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /голосовой ввод/i })).not.toBeInTheDocument();
   });
 
@@ -1409,9 +1353,9 @@ describe("academy interface", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
     fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /увеличить мобильный пример/i }));
+    expect(screen.queryByRole("button", { name: /увеличить мобильный пример/i })).not.toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /карта уровней/i })).toBeInTheDocument();
-    expect(screen.getByRole("dialog", { name: /увеличенный мобильный пример/i })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /увеличенный мобильный пример/i })).not.toBeInTheDocument();
 
     rerender(<MobileQuest project={getQuestProject("recipe-book")!} onHome={vi.fn()} />);
 
@@ -1912,7 +1856,7 @@ describe("academy interface", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
     fireEvent.click(screen.getByRole("button", { name: /скопировать команду помощи/i }));
-    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(expect.stringMatching(/мобильная помощь.+техническую часть/is)));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(expect.stringMatching(/ФОРМАТ: С ТЕЛЕФОНА.+техническую работу/is)));
   });
 
   it("hydrates project cards without changing saved progress during hydration", async () => {
@@ -2050,8 +1994,8 @@ describe("academy interface", () => {
     render(<MobileQuest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     expect(screen.getByRole("heading", { name: /увидела, каким станет мой бюджет/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /открыть фею в telegram/i })).toBeDisabled();
-    expect(screen.getByText(/Telegram называет оболочку ботом, но внутри неё работает ваш ИИ-агент/i)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /открыть моего помощника/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/Сначала добавьте ссылку на личного помощника/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
     expect(localStorage.getItem(progressKey("mobile:family-expenses"))).toContain('"completed":[1]');
     expect(localStorage.getItem(progressKey("family-expenses"))).toBeNull();

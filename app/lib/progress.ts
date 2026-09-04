@@ -154,6 +154,10 @@ export function getCatalogProjectProgressState(
   if (!isProjectBundle(project)) {
     const storageSlug = `${surface === "mobile" ? "mobile:" : ""}${project.slug}`;
     const totalLevels = getProjectLevelCount(project);
+    if (project.slug === "install-codex") {
+      const options = [storageSlug, `${storageSlug}:mac`, `${storageSlug}:windows`].map((slug) => loadProgress(slug, storage, totalLevels));
+      return { progress: options.sort((a, b) => b.completed.length - a.completed.length)[0], totalLevels };
+    }
     return { progress: loadProgress(storageSlug, storage, totalLevels), totalLevels };
   }
 

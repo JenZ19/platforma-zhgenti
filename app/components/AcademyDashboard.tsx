@@ -15,6 +15,7 @@ import { DashboardHome } from "./DashboardHome";
 import { DashboardLibrary } from "./DashboardLibrary";
 import { DashboardPortfolio } from "./DashboardPortfolio";
 import { FairyAssistant } from "./FairyAssistant";
+import { CourseRoute } from "./CourseRoute";
 
 export type AcademyDashboardProps = {
   section: DashboardSection;
@@ -30,6 +31,7 @@ function renderDashboardSection(
   snapshot: DashboardSnapshot,
   props: Pick<AcademyDashboardProps, "format" | "onOpen" | "onOpenPortfolio" | "onSearchQueryChange" | "searchQuery">,
   onSave: (slug: string) => void,
+  onRefresh: () => void,
 ) {
   switch (section) {
     case "home":
@@ -40,6 +42,7 @@ function renderDashboardSection(
           onOpen={props.onOpen}
           onSave={onSave}
           onOpenPortfolio={props.onOpenPortfolio}
+          onRefresh={onRefresh}
         />
       );
     case "projects":
@@ -56,6 +59,10 @@ function renderDashboardSection(
       );
     case "weeks":
       return (
+        <main className="dashboard-section" data-dashboard-section="weeks" data-visual-theme="elina-burgundy">
+        <h1>Маршрут и библиотека</h1>
+        <CourseRoute snapshot={snapshot} format={props.format} onOpen={props.onOpen} onChange={onRefresh} />
+        <details className="course-library"><summary>Библиотека всех вариантов — необязательно проходить всё</summary>
         <DashboardLibrary
           snapshot={snapshot}
           mode="weeks"
@@ -65,6 +72,7 @@ function renderDashboardSection(
           onSave={onSave}
           onQueryChange={props.onSearchQueryChange}
         />
+        </details></main>
       );
     case "portfolio":
       return <DashboardPortfolio snapshot={snapshot} format={props.format} onOpen={props.onOpen} />;
@@ -89,10 +97,13 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
     setDashboardState({ format, snapshot: buildDashboardSnapshot(availableProjects, window.localStorage, format) });
   }, [format]);
 
-  function onSave(slug: string) {
-    toggleSavedProject(slug, window.localStorage);
+  function refresh() {
     const availableProjects = format === "mobile" ? projects.filter(isAvailableInMobileTrack) : projects;
     setDashboardState({ format, snapshot: buildDashboardSnapshot(availableProjects, window.localStorage, format) });
+  }
+  function onSave(slug: string) {
+    toggleSavedProject(slug, window.localStorage);
+    refresh();
   }
 
   if (!snapshot) {
@@ -108,5 +119,5 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
     );
   }
 
-  return renderDashboardSection(section, snapshot, { format, onOpen, onOpenPortfolio, onSearchQueryChange, searchQuery }, onSave);
+  return renderDashboardSection(section, snapshot, { format, onOpen, onOpenPortfolio, onSearchQueryChange, searchQuery }, onSave, refresh);
 }

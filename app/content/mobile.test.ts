@@ -1,156 +1,49 @@
 import { describe, expect, it } from "vitest";
 import { buildMobileQuest, getMobileCapability } from "./mobile";
-import { getQuestProject, questProjects } from "./projects";
-import { getAgentContract } from "./agent-contracts";
-import { defaultCustomization } from "./customization";
 import { buildQuest } from "./quests";
+import { questProjects, getQuestProject } from "./projects";
 import { getProjectLevelCount } from "../lib/progress";
 
-function stepText(value: unknown): string {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value.map(stepText).join(" ");
-  if (value && typeof value === "object") return Object.values(value).map(stepText).join(" ");
-  return "";
-}
-
-describe("mobile quest builder", () => {
-  it("builds the intended phone-only steps for every project", () => {
-    let total = 0;
-    for (const project of questProjects) {
-      const steps = buildMobileQuest(project, "demo");
-      const desktopSteps = buildQuest(project, "demo");
-      const totalLevels = getProjectLevelCount(project);
-      expect(steps, project.slug).toHaveLength(totalLevels);
-      expect(steps.map((step) => step.id), project.slug).toEqual(Array.from({ length: totalLevels }, (_, index) => index + 1));
-      if (project.journey !== "setup") expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" "), project.slug).not.toMatch(/терминал|npm|\bgit\b|папк.+компьютер/i);
-      for (const step of steps) {
-        const desktopStep = desktopSteps[step.id - 1];
-        const expectedScreenshot = desktopStep.screenshotKind === "real" || desktopStep.screenshotKind === "placeholder"
-          ? desktopStep.screenshot
-          : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`;
-        expect(step.screenshot, `${project.slug}/${step.id}`).toBe(expectedScreenshot);
-      }
-      total += steps.length;
-    }
-    expect(total).toBeGreaterThan(824);
-  });
-
-  it("gives every project the actions needed for a phone workflow", () => {
-    for (const project of questProjects) {
-      const steps = buildMobileQuest(project, "demo");
-      const tools = steps.map((step) => step.mobileAction.tool);
-      if (project.journey === "setup") {
-        expect(getMobileCapability(project).label).toMatch(/компьютер/i);
-        expect(tools.every((tool) => tool === "curator"), project.slug).toBe(true);
-        continue;
-      }
-      expect(tools, project.slug).toContain("telegram");
-      expect(tools, project.slug).toContain("screenshot");
-      expect(tools.some((tool) => tool === "lovable" || tool === "chatium"), project.slug).toBe(true);
-      expect(getMobileCapability(project).label.length, project.slug).toBeGreaterThan(5);
+describe("consistent mobile journey", () => {
+  it("preserves every project's actual task and checks on both devices", () => {
+    for (const project of questProjects) for (const mode of ["real", "demo"] as const) {
+      const desktop = buildQuest(project, mode);
+      const mobile = buildMobileQuest(project, mode);
+      expect(mobile, project.slug).toHaveLength(getProjectLevelCount(project));
+      mobile.forEach((step, i) => {
+        expect(step.id).toBe(desktop[i].id);
+        expect(step.title).toBe(desktop[i].title);
+        expect(step.expected).toEqual(desktop[i].expected);
+        if (project.journey !== "setup") {
+          expect(step.prompt).toContain(desktop[i].prompt ?? desktop[i].action);
+          expect(step.prompt).toContain("ТЕКУЩАЯ ЗАДАЧА: " + step.title);
+          expect(step.prompt).toContain("Не создавай ещё один проект");
+          expect(step.action).not.toMatch(/создайте.*файл|откройте.*терминал/i);
+          expect(step.showScreenshot).toBe(step.screenshotKind === "real" || step.screenshotKind === "placeholder");
+          expect(step.mobileAction.note).toContain("не отправляется автоматически");
+        }
+      });
     }
   });
-
-  it("routes advanced setup to a curator and keeps real prompts grounded", () => {
-    for (const project of questProjects.filter((item) => item.journey !== "setup")) {
+  it("does not invent server rooms or automatic transfers", () => {
+    for (const project of questProjects.filter((p) => p.journey !== "setup")) {
       const steps = buildMobileQuest(project, "real");
-      const prompts = steps.flatMap((step) => step.prompt ?? []);
-      expect(prompts.join(" "), project.slug).toMatch(/голосом или текстом/i);
-      expect(prompts.join(" "), project.slug).toMatch(/папки, файлы и поля.+создавай (?:их )?сам/i);
-      expect(prompts.join(" "), project.slug).toMatch(/один короткий вопрос за раз|задавай строго по одному вопросу/i);
-      if (project.kind === "advanced-site") {
-        expect(steps.map((step) => step.mobileAction.tool), project.slug).toContain("curator");
-      }
+      expect(steps.map((s) => s.action).join(" ")).not.toMatch(/Фея откроет именно|ссылка появится|серверную комнату/i);
+      expect(steps[0].prompt).toContain("Не утверждай, что подключение или перенос");
+      expect(steps[0].prompt).toMatch(/РЕЖИМ РЕАЛЬНЫХ ДАННЫХ/);
     }
   });
-
-  it("keeps the two final server levels on the guided computer path", () => {
-    const steps = buildMobileQuest(getQuestProject("server-152fz")!, "real");
-
-    expect(steps).toHaveLength(9);
-    expect(steps[7].mobileAction).toMatchObject({
-      tool: "curator",
-      label: expect.stringMatching(/Codex/i),
-    });
-    expect(steps[8].mobileAction).toMatchObject({
-      tool: "curator",
-      label: expect.stringMatching(/Codex.+ChatGPT/i),
-    });
-    expect(steps[8].mobileAction.href).toBeUndefined();
-  });
-
-  it("collects pressure-diary answers in chat without a prepared source file", () => {
-    const project = getQuestProject("pressure-diary")!;
-    const steps = buildMobileQuest(project, "real");
-    const interview = steps.find((step) => step.sourceStepId === 4)!;
-    expect(interview.action).not.toContain("мои-измерения.csv");
-    expect(interview.action).toMatch(/дата.+время.+верхн.+нижн.+пульс.+самочувств/i);
-    expect(interview.action).toMatch(/по одному вопросу голосом или текстом/i);
-    expect(steps.flatMap((step) => step.prompt ?? []).join(" ")).not.toContain("мои-измерения.csv");
-  });
-
-  it("gives the planner its own server-room and client-copy phone path", () => {
-    const planner = getQuestProject("planner")!;
-    const steps = buildMobileQuest(planner, "real");
-    expect(steps[2].action).toMatch(/опрос.+по одному голосом или текстом/i);
-    expect(steps[3].action).toMatch(/Codex сам создаст.+серверную комнату planner.+файлы и поля/i);
-    expect(steps[3].action).not.toMatch(/откройте локальн.+папк/i);
-    expect(steps[12].action).toMatch(/одной рукой.+добавьте дело.+перенесите/i);
-    expect(steps[14].action).toContain("planner-client");
-    expect(steps[15].action).toMatch(/planner-client.+восемь вопросов по одному голосом или текстом/i);
-  });
-
-  it("gives the idea vault a fast-capture and client-copy phone path", () => {
-    const vault = getQuestProject("idea-vault")!;
-    const steps = buildMobileQuest(vault, "real");
-    expect(steps[2].action).toMatch(/опрос.+по одному голосом или текстом/i);
-    expect(steps[3].action).toMatch(/Codex сам создаст.+серверную комнату idea-vault.+файлы и поля/i);
-    expect(steps[12].action).toMatch(/одной рукой.+запишите идею.+поиск/i);
-    expect(steps[14].action).toContain("idea-vault-client");
-    expect(steps[15].action).toMatch(/idea-vault-client.+восемь вопросов по одному голосом или текстом/i);
-  });
-
-  it("gives the child schedule a private server-room and client-copy phone path", () => {
-    const child = getQuestProject("child-schedule")!;
-    const steps = buildMobileQuest(child, "real");
-    expect(steps[2].action).toMatch(/опрос.+по одному голосом или текстом/i);
-    expect(steps[3].action).toMatch(/Codex сам создаст.+серверную комнату child-schedule.+файлы и поля/i);
-    expect(steps[12].action).toMatch(/телефоне.+Ребёнок А.+Что взять/i);
-    expect(steps[14].action).toContain("child-schedule-client");
-    expect(steps[15].action).toMatch(/child-schedule-client.+восемь вопросов по одному голосом или текстом/i);
-    expect(steps.map((step) => `${step.action} ${step.prompt ?? ""}`).join(" ")).toMatch(/не спрашивай ФИО.+адрес.+геолокацию/i);
-  });
-
-  it("keeps every mobile agent path conversational and subject-specific", () => {
-    const agents = questProjects.filter((project) => project.kind === "agent");
-    expect(agents).toHaveLength(20);
-
-    for (const project of agents) {
-      const contract = getAgentContract(project.slug);
-      const steps = buildMobileQuest(project, "real", defaultCustomization(project.slug));
-      const text = stepText(steps);
-
-      expect(text, project.slug).toContain(contract.inputExample);
-      expect(text, project.slug).toContain(contract.firstQuestion);
-      expect(text, project.slug).toContain(contract.resultTitle);
-      expect(text, project.slug).toMatch(/голосом или текстом/i);
-      expect(text, project.slug).toMatch(/один вопрос за раз/i);
-      expect(text, project.slug).toMatch(/Да, подтверждаю/i);
-      expect(text, project.slug).toContain(contract.handoff);
-      for (const step of steps) {
-        expect(step.action, `${project.slug}/step-${step.id}`).not.toMatch(/подготовьте.+файл|создайте.+папку/i);
-      }
+  it("labels difficult phone projects as curator-assisted", () => {
+    for (const slug of ["family-health-hub", "webinar-moderator-agent", "fairy-team-agent", "school-pro-site"]) {
+      expect(getMobileCapability(getQuestProject(slug)!).id).toBe("curator");
     }
+    expect(getMobileCapability(getQuestProject("planner")!).label).toBe("С телефона после настройки");
   });
-
-  it("uses the word agent publicly and keeps one exact Telegram technical explanation", () => {
-    const allowed = "Telegram называет оболочку ботом, но внутри неё работает ваш ИИ-агент";
-    const publicText = [
-      stepText(questProjects),
-      ...questProjects.map((project) => stepText(buildQuest(project))),
-      ...questProjects.map((project) => stepText(buildMobileQuest(project))),
-    ].join(" ").replaceAll(allowed, "");
-
-    expect(publicText).not.toMatch(/(?:^|[^а-яё])бот[а-яё]*(?=$|[^а-яё])/iu);
+  it("keeps setup on the computer without simulated mobile actions", () => {
+    for (const project of questProjects.filter((p) => p.journey === "setup")) {
+      const steps = buildMobileQuest(project);
+      expect(steps.every((step) => step.mobileAction.tool === "curator")).toBe(true);
+      expect(steps.every((step) => step.mobileAction.note?.includes("Mac или Windows"))).toBe(true);
+    }
   });
 });

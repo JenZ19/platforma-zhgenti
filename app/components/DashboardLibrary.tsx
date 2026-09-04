@@ -40,7 +40,7 @@ function EmptySearch({ onReset }: { onReset: () => void }) {
 
 function projectBelongsToWeek(item: DashboardProjectState, week: number): boolean {
   return isProjectBundle(item.project)
-    ? item.project.weeks.includes(week as 1 | 2)
+    ? item.project.weeks[0] === week
     : item.project.week === week;
 }
 
@@ -152,7 +152,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
 
   return (
     <main className="dashboard-section" data-dashboard-section="weeks" data-dashboard-format={format} data-visual-theme="elina-burgundy">
-      <header><p>Шесть недель практики</p><h1>Квесты по неделям</h1><span>Все проекты доступны сразу — неделя только подсказывает порядок.</span></header>
+      <header><p>Дополнительная практика</p><h2>Библиотека вариантов</h2><span>Все варианты доступны, но проходить их все не нужно. Личный агент и сайт с разными нишами выбираются в основном маршруте выше.</span></header>
       <section className="dashboard-library-filters" aria-label="Фильтры квестов">
         <label>
           <span>Поиск</span>

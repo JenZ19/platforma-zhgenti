@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MobileAction } from "../content/mobile";
+import { normalizePersonalBot, personalBotKey } from "../lib/learning-backup";
+import { LearningSetup } from "./LearningSetup";
 
-function telegramHref(base: string, slug: string, step: number): string {
-  const clean = base.replace(/\/$/, "");
-  return `${clean}?start=q_${slug}_${String(step).padStart(2, "0")}`;
-}
-
-export function MobileActionButton({ action, projectSlug, step }: { action: MobileAction; projectSlug: string; step: number }) {
+export function MobileActionButton({ action }: { action: MobileAction; projectSlug: string; step: number }) {
   const [notice, setNotice] = useState("");
-  const telegramUrl = process.env.NEXT_PUBLIC_COURSE_BOT_URL?.trim() ?? "";
+  const [telegramUrl, setTelegramUrl] = useState("");
+  useEffect(() => {
+    const sync = () => setTelegramUrl(normalizePersonalBot(window.localStorage.getItem(personalBotKey) ?? "") ?? "");
+    sync(); window.addEventListener("learning-settings", sync);
+    return () => window.removeEventListener("learning-settings", sync);
+  }, []);
   const isTelegram = action.tool === "telegram" || action.tool === "screenshot";
-  const href = isTelegram && telegramUrl ? telegramHref(telegramUrl, projectSlug, step) : action.href;
+  const href = isTelegram && telegramUrl ? telegramUrl : action.href;
 
   if (href) {
     return (
@@ -26,15 +28,15 @@ export function MobileActionButton({ action, projectSlug, step }: { action: Mobi
   if (isTelegram) {
     return (
       <div className="mobile-action mobile-action-telegram unavailable">
-        <button type="button" disabled>{action.label}</button>
-        <p><b>Telegram называет оболочку ботом, но внутри неё работает ваш ИИ-агент.</b> Технические шаги BotFather и Telegram Bot API выполнит куратор по инструкции. Пока сохраните этот уровень — ссылка появится здесь автоматически.</p>
+        <p><b>Сначала добавьте ссылку на личного помощника.</b> Она не появляется автоматически. После подключения скопируйте команду из урока и отправьте её в чат.</p>
+        <LearningSetup mobile />
       </div>
     );
   }
 
   return (
     <div className={`mobile-action mobile-action-${action.tool}`}>
-      <button type="button" onClick={() => setNotice("Готово — отправьте куратору ссылку на предпросмотр и название проекта.")}>{action.label}</button>
+      <button type="button" onClick={() => setNotice("Откройте ваш учебный чат вручную и отправьте куратору название проекта, ссылку и вопрос. Платформа не отправляет сообщения за вас.")}>Как обратиться к куратору</button>
       <p>{notice || action.note}</p>
     </div>
   );

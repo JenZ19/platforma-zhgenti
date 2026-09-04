@@ -262,17 +262,18 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
         <DashboardIcon name="fairy" />
         <div>
           <p>Помощь внутри платформы</p>
-          <h1 id={headingId}>Феечка</h1>
+          <h1 id={headingId}>Мои вопросы</h1>
+          <p>Блокнот вопросов, не ИИ-чат. Здесь можно записать вопрос голосом или текстом, сохранить и передать его куратору или вашему помощнику.</p>
         </div>
         {mode === "floating" && (
-          <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть Феечку"><DashboardIcon name="close" /></button>
+          <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть мои вопросы"><DashboardIcon name="close" /></button>
         )}
       </header>
       <p className="fairy-intro">
         Опишите, на каком экране остановились, что нажали и что увидели. Сохранённые вопросы хранятся в этом браузере на этом устройстве. Голос обрабатывает браузер; в зависимости от его настроек браузер может использовать внешний сервис распознавания речи.
       </p>
       <div className="fairy-compose">
-        <label htmlFor={`${headingId}-question`}>Вопрос Феечке</label>
+        <label htmlFor={`${headingId}-question`}>Ваш вопрос</label>
         <textarea
           ref={textareaRef}
           id={`${headingId}-question`}

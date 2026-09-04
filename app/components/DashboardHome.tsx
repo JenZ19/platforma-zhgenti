@@ -3,6 +3,8 @@ import type { ProjectFormat } from "../content/types";
 import type { DashboardSnapshot } from "../lib/academy-dashboard";
 import { DashboardProjectCard, dashboardQuestHref, shouldHandleSpaNavigation } from "./DashboardProjectCard";
 import { ProjectPreview } from "./ProjectPreview";
+import { CourseRoute } from "./CourseRoute";
+import { LearningSetup } from "./LearningSetup";
 
 export type DashboardHomeProps = {
   snapshot: DashboardSnapshot;
@@ -10,13 +12,14 @@ export type DashboardHomeProps = {
   onOpen: (slug: string, output?: ProjectFormat) => void;
   onSave: (slug: string) => void;
   onOpenPortfolio?: () => void;
+  onRefresh?: () => void;
 };
 
 function portfolioHref(format: "desktop" | "mobile"): string {
   return format === "mobile" ? "?format=mobile&section=portfolio" : "?section=portfolio";
 }
 
-export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfolio }: DashboardHomeProps) {
+export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfolio, onRefresh = () => undefined }: DashboardHomeProps) {
   const { next } = snapshot;
   const weekItems = snapshot.items
     .filter((item) => isProjectBundle(item.project)
@@ -30,6 +33,7 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
   return (
     <main className="dashboard-home" data-visual-theme="elina-burgundy" data-dashboard-section="home" data-dashboard-format={format}>
       <p className="academy-kicker">НЕЙРОПРОФИ · Академия квестов</p>
+      <LearningSetup mobile={format === "mobile"} onRefresh={onRefresh} />
       <section className="next-quest-banner" aria-labelledby="dashboard-next-title">
         {next ? (
           <>
@@ -55,8 +59,8 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
           </>
         ) : (
           <div>
-            <p>Все квесты пройдены</p>
-            <h1 id="dashboard-next-title">Все проекты готовы</h1>
+            <p>Основной маршрут пройден</p>
+            <h1 id="dashboard-next-title">Пора показать свои работы</h1>
             <span>Работы уже собраны — можно проверить их и подготовить к показу.</span>
             <a
               className="dashboard-primary-action"
@@ -73,6 +77,8 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
           </div>
         )}
       </section>
+
+      <CourseRoute snapshot={snapshot} format={format} onOpen={onOpen} onChange={onRefresh} compact />
 
       <section className="dashboard-stat-grid" aria-label="Ваш прогресс">
         <article><span>Текущая неделя</span><strong>{snapshot.currentWeek}</strong></article>
@@ -95,8 +101,8 @@ export function DashboardHome({ snapshot, format, onOpen, onSave, onOpenPortfoli
 
       <section className="dashboard-row" aria-labelledby="dashboard-week-title">
         <header>
-          <div><p>Неделя {snapshot.currentWeek}</p><h2 id="dashboard-week-title">Рекомендуемый порядок</h2></div>
-          <span>Можно выбрать любой проект</span>
+          <div><p>Библиотека</p><h2 id="dashboard-week-title">Другие варианты — по желанию</h2></div>
+          <span>Они не задерживают переход к следующей неделе</span>
         </header>
         {weekItems.length > 0 ? (
           <div className="dashboard-card-grid">

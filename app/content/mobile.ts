@@ -1,229 +1,34 @@
 import type { DataMode } from "../lib/preparation";
-import { getPreparationProfile } from "./preparation";
-import type { ProjectDefinition, ProjectKind, QuestCustomization, QuestStep, SetupPlatform } from "./types";
-import { defaultCustomization } from "./customization";
-import { buildOriginalMobileQuest } from "./original-quests/mobile";
-import { getAgentContract } from "./agent-contracts";
+import type { ProjectDefinition, QuestCustomization, QuestStep, SetupPlatform } from "./types";
 import { buildQuest } from "./quests";
-import { addBeginnerLanguage } from "./beginner-language";
 
 export type MobileCapability = "phone-full" | "phone-template" | "curator";
 export type MobileTool = "telegram" | "lovable" | "chatium" | "screenshot" | "curator";
-export type MobileAction = {
-  tool: MobileTool;
-  label: string;
-  href?: string;
-  note?: string;
-};
+export type MobileAction = { tool: MobileTool; label: string; href?: string; note?: string };
 export type MobileQuestStep = QuestStep & { mobileAction: MobileAction };
-
-export type MobileCapabilityInfo = {
-  id: MobileCapability;
-  label: string;
-  detail: string;
-};
-
-const capabilityByKind: Record<ProjectKind, MobileCapabilityInfo> = {
-  service: { id: "phone-full", label: "Полностью с телефона", detail: "Telegram и мобильный конструктор" },
-  agent: { id: "phone-full", label: "Полностью с телефона", detail: "Текст, голос и проверка через Telegram" },
-  "simple-site": { id: "phone-full", label: "Полностью с телефона", detail: "Сборка и публикация в Lovable" },
-  "advanced-site": { id: "curator", label: "С помощью куратора", detail: "Домен, платежи и секреты проверяет куратор" },
-  portfolio: { id: "phone-template", label: "С телефона по шаблону", detail: "Готовая мобильная витрина работ" },
-};
-
-const constructorByKind: Record<ProjectKind, "lovable" | "chatium"> = {
-  service: "lovable",
-  agent: "chatium",
-  "simple-site": "lovable",
-  "advanced-site": "lovable",
-  portfolio: "lovable",
-};
-
-function constructorAction(project: ProjectDefinition, label?: string): MobileAction {
-  const tool = constructorByKind[project.kind];
-  if (tool === "chatium") {
-    return { tool, label: label ?? "Открыть Чатиум", href: "https://chatium.com/", note: "Войдите в свой аккаунт: Фея откроет именно этот проект и этот уровень." };
-  }
-  const prompt = `Создай мобильный проект «${project.title}» для аудитории «${project.audience}». Результат: ${project.outcome}. Функции: ${project.features.join(", ")}. Сделай интерфейс для телефона, крупные кнопки, понятные пустые состояния и правило безопасности: ${project.safety}`;
-  return { tool, label: label ?? "Создать в Lovable", href: `https://lovable.dev/?autosubmit=true#prompt=${encodeURIComponent(prompt)}`, note: "Lovable откроется с уже подготовленным заданием." };
-}
-
-function mobileAction(project: ProjectDefinition, step: number): MobileAction {
-  if (step <= 8 || step === 12 || step === 14 || step === 16 || step === 17) return { tool: "telegram", label: step === 7 ? "Запустить мой Codex" : step === 16 ? "Создать клиентскую копию" : step === 17 ? "Получить две карточки" : "Открыть Фею в Telegram", note: "Фея откроет именно этот проект и этот уровень." };
-  if (step === 11 || step === 13) return { tool: "screenshot", label: "Отправить скриншот Фее", note: "Сделайте обычный скриншот телефона и отправьте его в чат проекта." };
-  if (step === 15 && project.kind === "advanced-site") return { tool: "curator", label: "Позвать куратора", note: "Куратор проверит домен, платежи и закрытые настройки перед публикацией." };
-  if (step === 15) return constructorAction(project, project.kind === "agent" ? "Открыть личного агента" : "Опубликовать личную версию");
-  return constructorAction(project);
-}
-
-function modeLine(mode: DataMode, project: ProjectDefinition, step: number): string {
-  const profile = getPreparationProfile(project.slug);
-  if (mode === "demo") return `Работай с безопасными учебными примерами: ${project.demo.join("; ")}. Не добавляй настоящие контакты, пароли и личные данные.`;
-  const shared = "Папки, файлы и поля создавай сам в личной серверной комнате проекта. Не проси ученицу готовить служебные файлы, не додумывай отсутствующие факты и не публикуй частные данные.";
-  if (step < 4) return `Режим реальных данных выбран. На этом уровне не начинай опрос: выполни только текущее действие и подготовь ученицу к следующему шагу. ${shared}`;
-  if (step === 4) return `Сейчас один раз собери сведения для проекта. Задавай строго один короткий вопрос за раз и принимай ответы голосом или текстом. Уточни: ${profile.sourceFields.join(", ")}. Если уже есть документ или фотография, можно предложить прикрепить безопасную копию. После ответов покажи сводку и дождись подтверждения. ${shared}`;
-  if (step === 5) return `Продолжи уже начатый короткий разговор только вопросами об аудитории, результате и нужных функциях. Задавай по одному вопросу и принимай ответы голосом или текстом. Не повторяй уже полученные вопросы. ${shared}`;
-  return `Используй уже подтверждённые ответы ученицы из этого чата и не начинай опрос заново. Если для текущего уровня не хватает одного факта, задай один короткий вопрос и прими ответ голосом или текстом. ${shared}`;
-}
-
-function agentPromptFor(project: ProjectDefinition, step: number, mode: DataMode, customization: QuestCustomization): string {
-  const contract = getAgentContract(project.slug);
-  const fields = contract.requiredFields.join(", ");
-  const checks = contract.selfCheck.join("; ");
-  const base = modeLine(mode, project, step);
-  const requests = [
-    `Открой только проект ${project.slug} «${customization.name}» и покажи первое безопасное сообщение. Фея должна открыть именно этот проект и этот уровень.`,
-    "Проверь персональное подключение Codex. Не показывай токены, пароль, служебные данные и сведения аккаунта.",
-    `Зафиксируй мою версию: имя «${customization.name}», аудитория «${customization.audience}», тон «${customization.tone}», функция «${customization.feature}», цветовая гамма «${customization.palette.name}». Ничего пока не меняй.`,
-    `Прими свободное сообщение «${contract.inputExample}» как обычный текст или голосовую расшифровку. Выдели только подтверждённые поля из списка ${fields}, не требуй анкеты и ничего не выдумывай.`,
-    `Задавай строго один вопрос за раз. Первым дословно спроси: «${contract.firstQuestion}». Следующий вопрос можно задать только после ответа голосом или текстом и только об одном недостающем поле.`,
-    `Покажи паспорт ИИ-агента «${customization.name}»: для кого, входные поля ${fields}, правило «${contract.decisionRule}», результат «${contract.resultTitle}», подтверждение и граница «${contract.handoff}». Дождись слов «Всё верно».`,
-    `Установи мастер-инструкцию агента: свободный текст и голос; один вопрос за раз; поля ${fields}; первый вопрос «${contract.firstQuestion}»; решение «${contract.decisionRule}»; результат «${contract.resultTitle}»; самопроверка ${checks}; правило «${contract.confirmationRule}»; передача человеку «${contract.handoff}».`,
-    `Заверши тестовый разговор и покажи результат «${contract.resultTitle}» с частями ${contract.resultItems.join(", ")}. Используй только подтверждённые сведения, выдержи тон «${customization.tone}» и дай один следующий шаг.`,
-    `Подготовь перенос проверенной инструкции в Чатиум. Сохрани вход текстом и голосом, один вопрос за раз, результат «${contract.resultTitle}», самопроверку и передачу человеку. Не проси токен и не показывай закрытые настройки.`,
-    `Проверь голосовой вход «${contract.voiceExample}». Покажи расшифровку, выделенные поля ${fields} и единственный уточняющий вопрос, если без него нельзя продолжить.`,
-    `По скриншоту мобильного диалога «${customization.name}» найди только три проблемы: читаемость, удобство голосового ответа и ясность результата «${contract.resultTitle}».`,
-    `Исправь три найденные проблемы и повтори самопроверку: ${checks}. Не меняй предметную логику, поля, вопрос и границу передачи человеку.`,
-    `Пройди полный разговор: сообщение «${contract.inputExample}» → вопрос «${contract.firstQuestion}» → ответ голосом или текстом → правило «${contract.decisionRule}» → результат «${contract.resultTitle}». Покажи «работает / исправить» для каждого перехода.`,
-    `Проверь защиту внешнего действия: ${contract.confirmationRule} До точной фразы «Да, подтверждаю» покажи черновик и остановись. На «Нет» ничего не меняй. При границе выполни передачу человеку: ${contract.handoff}`,
-    `Установи и проверь личную Telegram-версию «${customization.name}». Сохрани текст, голос, один вопрос за раз, результат «${contract.resultTitle}», самопроверку, фразу «Да, подтверждаю» и правило передачи «${contract.handoff}».`,
-    `Создай отдельный ${project.slug}-client и не меняй личную версию. Задай восемь вопросов строго по одному и принимай ответы голосом или текстом: аудитория, задача, входные поля, первый вопрос, правило решения, результат, подтверждение, граница. Покажи «было / станет» и ничего не меняй до подтверждения. Затем проверь клиентскую копию без реального внешнего действия.`,
-    `Оформи две версии для портфолио: личную «${customization.name}» и клиентскую ${project.slug}-client. Для каждой покажи аудиторию, вход, вопрос, результат «${contract.resultTitle}», самопроверку, подтверждение, границу, ссылку и три безопасных кадра. Не придумывай клиента, отзыв или доход.`,
-  ];
-  return `Ты — Фея мобильного проекта. Ученица работает только с телефона через Telegram, Codex и Чатиум. ${base}\n\n${requests[step - 1]}`;
-}
-
-function promptFor(project: ProjectDefinition, step: number, mode: DataMode): string {
-  const base = modeLine(mode, project, step);
-  const requests = [
-    "Подтверди, что открылся правильный учебный проект, и покажи одну кнопку для продолжения.",
-    "Проверь персональное подключение Codex. Не показывай токены, служебные данные и сведения аккаунта.",
-    "Зафиксируй выбранный режим данных отдельно для этого проекта и перечисли, что можно безопасно использовать.",
-    `Проверь материалы для сущностей: ${project.entities.join(", ")}. Если важного не хватает, задай один короткий вопрос.`,
-    `Задай по одному простому вопросу про аудиторию, результат и функции ${project.features.slice(0, 3).join(", ")}.`,
-    `Собери паспорт проекта: для кого, какой результат, что умеет, какие данные использует и какие ограничения соблюдает.`,
-    `Запусти создание проекта «${project.title}» по паспорту. Делай изменения маленькими шагами и сохраняй рабочую версию.`,
-    `Покажи первый понятный результат: ${project.outcome}. Дай ссылку или безопасный предпросмотр для телефона.`,
-    `Подготовь перенос проекта в ${constructorByKind[project.kind] === "lovable" ? "Lovable" : "Чатиум"}: один готовый промпт, структуру экранов и тексты кнопок.`,
-    `Проверь первый экран: за пять секунд должно быть понятно, что это «${project.title}» и как выполнить ${project.features[0]}.`,
-    "По скриншоту найди только три самые важные проблемы мобильного интерфейса и объясни их простыми словами.",
-    "Составь одну готовую команду, которая исправит найденные проблемы, не затронув уже работающие функции.",
-    `Проверь главный путь пользователя: ${project.features.slice(0, 3).join(" → ")}. Верни короткий список «работает / исправить».`,
-    `Проверь правило безопасности: ${project.safety} Отдельно подтверди отсутствие токенов, паролей и закрытых данных.`,
-    "Проведи аудит на ширине 390 пикселей: текст читается, кнопки нажимаются большим пальцем, формы не выходят за экран, ошибок нет.",
-    "Подготовь безопасную публикацию. Если нужны домен, платежный секрет или рискованная настройка, остановись и передай шаг куратору.",
-    `Оформи карточку проекта «${project.title}»: польза, четыре функции, моя роль, честное ограничение, ссылка и три безопасных скриншота.`,
-  ];
-  return `Ты — Фея мобильного проекта. Ученица работает только с телефона через Telegram, Codex и мобильный конструктор. ${base}\n\n${requests[step - 1]}`;
-}
-
-function agentActionText(project: ProjectDefinition, step: number): string {
-  const contract = getAgentContract(project.slug);
-  const actions = [
-    "Нажмите большую кнопку ниже. Фея откроет в Telegram именно вашего ИИ-агента и первый уровень.",
-    "Один раз подключите собственный Codex по безопасной ссылке. Пароль и секреты остаются только у вас.",
-    "Выберите имя, аудиторию, тон, одну особенную функцию и цветовую гамму. Нажмите «Сохранить мою версию».",
-    `Отправьте Фее обычную фразу «${contract.inputExample}» свободным текстом или голосом. Никакую анкету и файл готовить не нужно.`,
-    `Дождитесь одного вопроса «${contract.firstQuestion}». Ответьте голосом или текстом; следующий вопрос появится только после ответа.`,
-    "Прочитайте паспорт агента на одном экране. Если всё правильно, напишите «Всё верно»; иначе отправьте одно исправление.",
-    "Нажмите «Запустить мой Codex». Фея сообщит, когда мастер-инструкция будет установлена и проверена.",
-    `Откройте готовый результат «${contract.resultTitle}» и проверьте, что в нём нет придуманных сведений.`,
-    "Откройте Чатиум по готовой кнопке. Фея уже передала туда инструкцию именно этого ИИ-агента.",
-    "Нажмите микрофон, наговорите один ответ и отправьте. Проверьте расшифровку и смысл, который понял агент.",
-    "Сделайте скриншот диалога на телефоне и отправьте его Фее в чат этого проекта.",
-    "Скопируйте одну готовую команду исправления, дождитесь результата и повторите самопроверку.",
-    `Пройдите полный разговор: свободное сообщение → один вопрос за раз → результат «${contract.resultTitle}». Отправьте Фее финальный экран.`,
-    `Попросите внешнее действие и проверьте остановку. Введите «Нет», затем повторите тест с точной фразой «Да, подтверждаю». Граница: ${contract.handoff}`,
-    "Откройте личную версию в Telegram и повторите текстовый и голосовой тесты. Никакие секреты в сообщение не вставляйте.",
-    `Нажмите «Создать клиентскую копию». Ответьте на восемь вопросов по одному голосом или текстом, проверьте «было / станет» и подтвердите ${project.slug}-client.`,
-    "Получите две карточки и шесть безопасных кадров, затем добавьте личную и клиентскую версии в портфолио.",
-  ];
-  return actions[step - 1];
-}
-
-function actionText(project: ProjectDefinition, step: number, mode: DataMode): string {
-  const constructor = constructorByKind[project.kind] === "lovable" ? "Lovable" : "Чатиум";
-  const profile = getPreparationProfile(project.slug);
-  const actions = [
-    "Нажмите большую кнопку ниже. Фея откроет нужный проект в Telegram.",
-    "Один раз подключите собственный аккаунт Codex по ссылке и коду, который пришлёт Фея.",
-    "Выберите учебные или реальные данные. Выбор сохранится только для этого проекта.",
-    mode === "real"
-      ? `Откройте Фею и нажмите «Начать короткий опрос». Отвечайте по одному вопросу голосом или текстом: ${profile.sourceFields.join(", ")}. Ничего заранее оформлять не нужно — серверную комнату и файлы создаст Codex.`
-      : `Отправьте в чат готовые учебные примеры проекта «${project.title}». Настоящие контакты, оригиналы и секреты не отправляйте.`,
-    "Ответьте Фее на три коротких вопроса. Можно голосовыми сообщениями.",
-    "Прочитайте готовый паспорт и нажмите «Всё верно» или напишите одно исправление.",
-    "Нажмите «Запустить мой Codex». Можно закрыть Telegram — Фея сообщит, когда результат будет готов.",
-    "Откройте полученную ссылку и проверьте, что видите название проекта и первый результат.",
-    `Откройте ${constructor} по готовой кнопке. Задание уже подготовлено — останется войти в свой аккаунт.`,
-    "Посмотрите первый экран одной рукой: понятно ли, что делать дальше, и видна ли главная кнопка.",
-    "Сделайте скриншот телефона и отправьте его Фее в чат этого проекта.",
-    "Скопируйте готовую команду Феи в конструктор и дождитесь одного аккуратного исправления.",
-    `Пройдите главное действие: ${project.features.slice(0, 3).join(" → ")}. Отправьте Фее финальный экран.`,
-    "Нажмите «Проверить безопасность» и убедитесь, что в публикации нет закрытых материалов.",
-    project.kind === "advanced-site" ? "Передайте куратору ссылку на предпросмотр. Не подключайте домен, платежи и секреты самостоятельно." : "Проведите мобильный аудит, опубликуйте личную версию и повторите главное действие по готовой ссылке.",
-    `Нажмите «Создать клиентскую копию». Ответьте на восемь вопросов по одному голосом или текстом, проверьте «было / станет» и подтвердите ${project.slug}-client.`,
-    "Получите две карточки и шесть безопасных кадров, затем добавьте личную и клиентскую версии в портфолио.",
-  ];
-  return actions[step - 1];
-}
+export type MobileCapabilityInfo = { id: MobileCapability; label: string; detail: string };
 
 export function getMobileCapability(project: ProjectDefinition): MobileCapabilityInfo {
   if (project.journey === "setup") return { id: "curator", label: "Действия на компьютере", detail: "Телефон можно держать рядом как инструкцию" };
-  return capabilityByKind[project.kind];
+  if (project.kind === "advanced-site" || ["family-health-hub", "webinar-moderator-agent", "fairy-team-agent", "small-shop-site"].includes(project.slug)) return { id: "curator", label: "С помощью куратора", detail: "Сервер, доступы и внешние подключения проверяем вместе с куратором. Это дополнительный сложный проект." };
+  return { id: "phone-template", label: "С телефона после настройки", detail: "Нужны личный помощник от школы и доступ к выбранному конструктору. Установка Codex на телефон не требуется." };
 }
 
+/** One source of truth for the objective, prompt and success checks on both surfaces. */
 export function buildMobileQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization, setupPlatform: SetupPlatform = "mac"): MobileQuestStep[] {
-  const finish = (steps: MobileQuestStep[]) => addBeginnerLanguage(steps);
-  if (project.journey === "setup") {
-    return finish(buildQuest(project, mode, customization, setupPlatform).map((step) => ({
-      ...step,
-      screenshot: step.screenshotKind === "real" || step.screenshotKind === "placeholder"
-        ? step.screenshot
-        : `/screens-mobile/${project.slug}/step-${String(step.id).padStart(2, "0")}.webp`,
-      mobileAction: project.slug === "server-152fz" && step.id === 8
-        ? { tool: "curator", label: "Открыть Codex на компьютере", note: "Читайте команду на телефоне, а работу с папкой проекта и сервером продолжайте в Codex на Mac или Windows." }
-        : project.slug === "server-152fz" && step.id === 9
-          ? { tool: "curator", label: "Открыть Codex или ChatGPT на компьютере", note: "Скопируйте готовую команду и отвечайте на вопросы по одному. Реальные данные людей и секреты не отправляйте." }
-          : step.links?.[0]
-            ? { tool: "curator", label: step.links[0].label, href: step.links[0].href, note: step.links[0].note }
-            : { tool: "curator", label: "Продолжить у компьютера", note: "Читайте этот уровень на телефоне, а указанное действие выполняйте на Mac или Windows." },
-    })));
-  }
-  const selectedCustomization = customization ?? defaultCustomization(project.slug)!;
-  const original = buildOriginalMobileQuest(project, mode, selectedCustomization);
-  if (original) return finish(original);
-  const desktopSteps = buildQuest(project, mode, selectedCustomization);
-  return finish(desktopSteps.map((desktopStep) => {
-    const id = desktopStep.id;
-    if (desktopStep.journeyCheck) {
-      return {
-        ...desktopStep,
-        action: `Откройте обе готовые версии с телефона. ${desktopStep.action} Отправьте Фее один скриншот результата без личных данных и секретов.`,
-        prompt: `МОБИЛЬНЫЙ ПУТЬ. Ученица работает через Telegram, личный Codex и мобильный предпросмотр. Не проси её открывать локальные папки или писать код.\n\n${desktopStep.prompt}`,
-        screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.webp`,
-        mobileAction: { tool: "screenshot", label: "Отправить итог проверки Фее", note: "Пришлите только экран результата без личных данных, паролей и секретов." },
-      };
-    }
-    const source = desktopStep.sourceStepId ?? id;
-    const action = mobileAction(project, source);
-    return {
-      ...desktopStep,
-      action: project.kind === "agent" ? agentActionText(project, source) : actionText(project, source, mode),
-      kind: "prompt",
-      prompt: project.kind === "agent"
-        ? agentPromptFor(project, source, mode, selectedCustomization)
-        : promptFor(project, source, mode),
-      screenshot: `/screens-mobile/${project.slug}/step-${String(id).padStart(2, "0")}.webp`,
-      reward: desktopStep.reward,
-      help: {
-        ...desktopStep.help,
-        body: action.tool === "curator"
-          ? `${desktopStep.help.body} На этом шаге отправьте куратору ссылку и дождитесь проверки.`
-          : `${desktopStep.help.body} Если нужной кнопки не видно, вернитесь в Telegram и отправьте готовую команду помощи ниже.`,
-        prompt: `${desktopStep.help.prompt}\n\nМОБИЛЬНАЯ ПОМОЩЬ. Объясни только этот уровень одним нажатием на телефоне и сам выполни всю техническую часть, которую можно сделать без меня.`,
-      },
-      mobileAction: action,
-    };
+  const steps = buildQuest(project, mode, customization, setupPlatform);
+  if (project.journey === "setup") return steps.map((step) => ({ ...step, mobileAction: { tool: "curator", label: "Продолжить на компьютере", note: "Этот инструмент настраивается на Mac или Windows. На телефоне можно прочитать инструкцию." } }));
+  const host = project.kind === "agent" ? "подключённый личный помощник в Telegram" : "тот же проект в Lovable или подключённый личный помощник в Telegram";
+  const boundaries = `ФОРМАТ: С ТЕЛЕФОНА. Работай только с текущим проектом ${project.slug}. Не проси ученицу открывать терминал, локальные папки или создавать файлы вручную. Если команда упоминает Codex или файл, выполни техническую работу сам в подключённом рабочем месте. Не утверждай, что подключение или перенос в Lovable/Чатиум выполнен, пока это не проверено. Не создавай ещё один проект вместо продолжения текущего. Если доступа нет, назови, какой именно доступ нужен от куратора. Не проси пароли и API-ключи в чате. Для внешних действий, публикации и расходов сначала покажи план и дождись согласия.`;
+  return steps.map((step) => ({
+    ...step,
+    kind: "prompt",
+    action: `Откройте ${host}. Скопируйте команду ниже и отправьте её целиком. Ответьте на уточнение, если оно появится.\n\nЗатем откройте полученный результат на телефоне и проверьте пункты «Готово, если». Не переходите дальше только потому, что помощник написал «сделано»: проверьте результат сами.`,
+    prompt: `${boundaries}\n\nТЕКУЩАЯ ЗАДАЧА: ${step.title}\n\n${step.prompt ?? step.action}\n\nПРОВЕРКА РЕЗУЛЬТАТА:\n${step.expected.map((item) => `- ${item}`).join("\n")}`,
+    guide: undefined,
+    showScreenshot: step.screenshotKind === "real" || step.screenshotKind === "placeholder",
+    help: { ...step.help, prompt: `${boundaries}\n\n${step.help.prompt}` },
+    mobileAction: { tool: "telegram", label: "Открыть моего помощника", note: "Откроется чат. Команда не отправляется автоматически: вставьте её в поле сообщения и отправьте." },
+    links: [...(step.links ?? []), ...(project.kind !== "agent" ? [{ label: "Открыть Lovable", href: "https://lovable.dev/", external: true, note: "Войдите и откройте уже созданный проект. Переноса из Telegram автоматически нет." }] : [])],
   }));
 }

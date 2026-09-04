@@ -22,6 +22,7 @@ import { buildUniqueDesignQuest } from "./original-quests/unique-design";
 import { attachApiKeysQuestLinks, buildSetupQuest, isSetupQuestSlug } from "./setup-quests";
 import { applyJourneyPlan } from "./journey-plans";
 import { addBeginnerLanguage } from "./beginner-language";
+import { editLearningJourney } from "./learning-editorial";
 
 function applyCustomization(
   steps: QuestStep[],
@@ -44,9 +45,9 @@ function applyCustomization(
 }
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization, setupPlatform: SetupPlatform = "mac"): QuestStep[] {
-  const finish = (steps: QuestStep[]) => addBeginnerLanguage(
+  const finish = (steps: QuestStep[]) => editLearningJourney(project, addBeginnerLanguage(
     applyJourneyPlan(project, attachApiKeysQuestLinks(steps, project.slug), mode),
-  );
+  ), mode);
   if (isSetupQuestSlug(project.slug)) {
     return finish(buildSetupQuest(project, setupPlatform));
   }
