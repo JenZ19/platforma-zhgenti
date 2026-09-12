@@ -54,14 +54,14 @@ describe("bundle format routing", () => {
 
     window.history.replaceState({}, "", "/?quest=missing-project");
     render(<AppEntry />);
-    expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "С чего начать обучение" })).toBeInTheDocument();
   });
 
   it("returns computer-only setup links to the mobile project track", async () => {
     window.history.replaceState({}, "", "/?format=mobile&quest=install-codex");
     render(<AppEntry />);
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Планирование" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "С чего начать обучение" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: /выберите компьютер/i })).not.toBeInTheDocument();
     await waitFor(() => expect(window.location.search).toBe("?format=mobile"));
   });

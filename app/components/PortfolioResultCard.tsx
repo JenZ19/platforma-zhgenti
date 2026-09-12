@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { ProjectDefinition, ProjectFormat } from "../content/types";
-import { loadPortfolioResults, savePortfolioResult, type PortfolioResult } from "../lib/portfolio-results";
+import { loadPortfolioResults, savePortfolioResult, workKindLabel, type PortfolioResult } from "../lib/portfolio-results";
 import { ProjectPreview } from "./ProjectPreview";
 
 export function PortfolioResultCard({ id, project, onOpen, output }: { id: string; project: ProjectDefinition; onOpen: () => void; output?: ProjectFormat }) {
@@ -18,7 +18,7 @@ export function PortfolioResultCard({ id, project, onOpen, output }: { id: strin
     <div className="portfolio-card-body">
       <small>Обложка — пример из курса, не скриншот вашей работы</small>
       <h2>{saved?.title || project.title}</h2>
-      <p>{output === "agent" ? "ИИ-агент" : project.kind.includes("site") ? "Сайт" : "Проект"} · {saved?.status === "client" ? "Для заказчика" : saved?.status === "personal" ? "Для себя" : "Учебная работа"}</p>
+      <p>{workKindLabel(project, output)} · {saved?.status === "client" ? "Для заказчика" : saved?.status === "personal" ? "Для себя" : "Учебная работа"}</p>
       {saved?.description ? <p>{saved.description}</p> : <p>Добавьте описание: кому помогает ваша версия и какую задачу решает.</p>}
       {saved?.url ? <a className="dashboard-primary-action" href={saved.url} target="_blank" rel="noreferrer">Открыть мою работу ↗</a> : <p><strong>Ссылка ещё не добавлена.</strong> Прохождение урока не публикует работу автоматически.</p>}
       <details open={!saved || undefined}><summary>{saved ? "Изменить карточку" : "Заполнить карточку своей работы"}</summary>

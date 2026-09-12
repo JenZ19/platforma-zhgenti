@@ -5,7 +5,9 @@ import {
   completeStep,
   createEmptyProgress,
   getAcademyStats,
+  getProjectLevelCount,
   isStepUnlocked,
+  journeyRevisionInfo,
   loadProgress,
   parseProgress,
   progressKey,
@@ -17,6 +19,13 @@ class MemoryStorage {
   getItem(key: string) { return this.values.get(key) ?? null; }
   setItem(key: string, value: string) { this.values.set(key, value); }
   removeItem(key: string) { this.values.delete(key); }
+}
+
+function currentProgress(slug: string, total: number, completed: number) {
+  let progress = createEmptyProgress();
+  for (let id = 1; id <= completed; id += 1) progress = completeStep(progress, id, total);
+  const info = journeyRevisionInfo(slug, total);
+  return { ...progress, ...(info ? { journeyRevision: info.revision } : {}) };
 }
 
 describe("academy progress", () => {
@@ -157,20 +166,26 @@ describe("academy progress", () => {
 
   it("calculates statistics by catalogue card instead of summing both branches", () => {
     const storage = new MemoryStorage();
-    let finished = createEmptyProgress();
-    for (let id = 1; id <= 17; id += 1) finished = completeStep(finished, id);
+    const planning = projects.find((project) => project.slug === "planning")!;
+    if (!("formats" in planning)) throw new Error("planning must be a bundle");
+    const agentTotal = getProjectLevelCount(planning.formats.agent);
+    const serviceTotal = getProjectLevelCount(planning.formats.service);
+    const pressure = projects.find((project) => project.slug === "pressure-diary")!;
+    const pressureTotal = getProjectLevelCount(pressure);
+    const finished = currentProgress(branchStorageSlug("planning", "agent", "desktop"), agentTotal, agentTotal);
     saveOutputChoice("planning", "desktop", "agent", storage);
-    saveProgress(branchStorageSlug("planning", "agent", "desktop"), finished, storage);
-    saveProgress(branchStorageSlug("planning", "service", "desktop"), completeStep(createEmptyProgress(), 1), storage);
-    saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage);
-    expect(getAcademyStats(projects, storage)).toEqual({
-      totalProjects: 42,
+    saveProgress(branchStorageSlug("planning", "agent", "desktop"), finished, storage, () => new Date(), agentTotal);
+    saveProgress(branchStorageSlug("planning", "service", "desktop"), currentProgress(branchStorageSlug("planning", "service", "desktop"), serviceTotal, 1), storage, () => new Date(), serviceTotal);
+    saveProgress("pressure-diary", currentProgress("pressure-diary", pressureTotal, 1), storage, () => new Date(), pressureTotal);
+    const stats = getAcademyStats(projects, storage);
+    expect(stats).toMatchObject({
+      totalProjects: projects.length,
       startedProjects: 2,
       completedProjects: 1,
-      completedSteps: 18,
-      totalSteps: 763,
-      score: 180,
+      completedSteps: agentTotal + 1,
+      score: (agentTotal + 1) * 10,
     });
+    expect(stats.totalSteps).toBe(351);
   });
 
   it("uses the most advanced branch when a bundle has no valid saved choice", () => {
@@ -183,7 +198,7 @@ describe("academy progress", () => {
     let agent = createEmptyProgress();
     agent = completeStep(agent, 1);
     agent = completeStep(agent, 2);
-    saveProgress(branchStorageSlug("planning", "agent", "desktop"), agent, storage);
+    saveProgress(branchStorageSlug("planning", "agent", "desktop"), agent, storage, () => new Date(), 10);
     expect(getAcademyStats(projects, storage)).toMatchObject({
       startedProjects: 1,
       completedSteps: 2,

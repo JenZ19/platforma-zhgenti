@@ -28,6 +28,7 @@ export function QuestPreparation({
 }) {
   const checklist = buildRealDataChecklist(project, mobile ? "mobile" : "desktop");
   const allChecked = checklist.every((item) => preparation.checked.includes(item.id));
+  const assistant = mobile ? "Помощник от школы" : "Codex";
 
   if (preparation.mode === "real") {
     return (
@@ -36,7 +37,7 @@ export function QuestPreparation({
         <p className="section-kicker">Шаг 0 · Реальный проект</p>
         <h2>Ничего заранее создавать не нужно</h2>
         <p className="preparation-lead">
-          Codex сам создаст проект, папки, файлы и нужные поля. Вы только вспомните несколько простых ответов — назвать их можно будет голосом или текстом.
+          {assistant} выполнит техническую работу. Здесь проверим только нужные материалы и доступы. Личные записи вы введёте в готовый продукт, а не в переписку с ИИ.
         </p>
         <div className="checklist-progress"><span>{preparation.checked.length} из {checklist.length}</span><i><b style={{ width: `${Math.round((preparation.checked.length / checklist.length) * 100)}%` }} /></i></div>
         <div className={`preparation-list ${checklist.some((item) => item.steps?.length) ? "detailed-preparation-list" : ""}`}>
@@ -70,7 +71,7 @@ export function QuestPreparation({
           })}
         </div>
         <aside className="privacy-note"><span>!</span><p><b>Важно</b> Не называйте пароли, коды из СМС, токены, реквизиты и паспортные данные. Если проекту понадобится существующий документ или фотография, Codex отдельно объяснит, какую безопасную копию прикрепить.</p></aside>
-        <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>Готова отвечать Codex — начать квест →</button>
+        <button type="button" className="primary-button preparation-start" disabled={!allChecked} onClick={onStartReal}>Готова — начать квест →</button>
       </section>
     );
   }
@@ -83,11 +84,11 @@ export function QuestPreparation({
       <div className="mode-options">
         <button type="button" onClick={onChooseDemo} aria-label="Работать на вымышленных данных">
           <span className="mode-option-icon" aria-hidden="true"><DashboardIcon name="fairy" /></span>
-          <span className="mode-option-content"><span className="mode-option-meta">Легче для первого раза</span><span className="mode-option-title">На вымышленных</span><span className="mode-option-copy">Все примеры уже готовы. Можно сразу пройти весь путь проекта и ни о чём не переживать.</span><span className="mode-option-action">Начать тренировку →</span></span>
+          <span className="mode-option-content"><span className="mode-option-meta">Легче для первого раза</span><span className="mode-option-title">На вымышленных</span><span className="mode-option-copy">Проверяем результат на учебных примерах. Нужные шаблоны и доступы указаны в первом шаге.</span><span className="mode-option-action">Начать тренировку →</span></span>
         </button>
         <button type="button" onClick={onChooseReal} aria-label="Работать на реальных данных">
           <span className="mode-option-icon" aria-hidden="true"><DashboardIcon name="projects" /></span>
-          <span className="mode-option-content"><span className="mode-option-meta">Для себя или клиента</span><span className="mode-option-title">На реальных</span><span className="mode-option-copy">Сначала вспомним нужные ответы, затем Codex задаст вопросы и сам создаст всё остальное.</span><span className="mode-option-action">Открыть чек-лист →</span></span>
+          <span className="mode-option-content"><span className="mode-option-meta">Для себя или клиента</span><span className="mode-option-title">На реальных</span><span className="mode-option-copy">Берём ваши материалы и настройки. Учебные проверки выполняются отдельно и не заменяют ваши данные.</span><span className="mode-option-action">Открыть чек-лист →</span></span>
         </button>
       </div>
       <p className="choice-note">Не уверены? Выбирайте вымышленные данные — проект всё равно получится полноценным.</p>

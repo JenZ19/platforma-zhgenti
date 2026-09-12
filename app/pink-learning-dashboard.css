@@ -271,12 +271,47 @@ select {
 .dashboard-loading {
   min-height: 280px;
   display: grid;
-  place-items: center;
+  align-content: start;
+  justify-items: stretch;
+  gap: 18px;
+  padding: 26px;
   border: 1px solid var(--cloud-border);
   border-radius: var(--cloud-radius-lg);
   background: var(--cloud-surface);
   box-shadow: var(--cloud-shadow);
   color: var(--cloud-muted);
+}
+
+.dashboard-skeleton {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-skeleton span {
+  display: block;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--academy-champagne) 25%, rgba(255, 250, 243, .85) 45%, var(--academy-champagne) 65%);
+  background-size: 280% 100%;
+  animation: dashboard-skeleton-sweep 1.6s linear infinite;
+}
+
+.dashboard-skeleton-banner {
+  height: 128px;
+}
+
+.dashboard-skeleton-row {
+  height: 56px;
+}
+
+@keyframes dashboard-skeleton-sweep {
+  from { background-position: 140% 0; }
+  to { background-position: -140% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-skeleton span {
+    animation: none;
+  }
 }
 
 /* Dashboard */
@@ -372,7 +407,7 @@ select {
 .dashboard-stat-grid {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 18px;
   margin: 20px 0 40px;
 }
@@ -1098,6 +1133,45 @@ select {
 .fairy-assistant-full .fairy-heading { grid-template-columns: 64px minmax(0, 1fr); }
 .fairy-heading > div { min-width: 0; }
 .iskra-mascot { display: block; flex: 0 0 auto; width: 64px; height: 64px; object-fit: contain; }
+/* Quiet continuous motion on the original transparent artwork, including
+   the mobile navigation. Transforms never move the surrounding layout. */
+.learning-shell .iskra-mascot {
+  transform-origin: 50% 70%;
+  animation: iskra-idle 4.8s ease-in-out infinite;
+}
+
+@keyframes iskra-idle {
+  0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  25% { transform: translateY(-2px) rotate(-4deg) scale(1.015); }
+  50% { transform: translateY(-4px) rotate(0) scale(1.025); }
+  75% { transform: translateY(-2px) rotate(4deg) scale(1.015); }
+}
+
+@keyframes iskra-wave {
+  0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  25% { transform: translateY(-3px) rotate(-10deg) scale(1.06); }
+  50% { transform: translateY(-3px) rotate(8deg) scale(1.06); }
+  75% { transform: translateY(-1px) rotate(-4deg) scale(1.02); }
+}
+
+@media (hover: hover) {
+  .learning-shell button:hover > .iskra-mascot {
+    animation: iskra-wave 900ms ease-in-out 1, iskra-idle 4.8s ease-in-out 900ms infinite;
+  }
+}
+.learning-shell button:focus-visible > .iskra-mascot {
+  animation: iskra-wave 900ms ease-in-out 1, iskra-idle 4.8s ease-in-out 900ms infinite;
+}
+.learning-shell button:active > .iskra-mascot {
+  animation: none;
+  transform: scale(0.9, 0.94);
+}
+@media (prefers-reduced-motion: reduce) {
+  .learning-shell .iskra-mascot {
+    animation: none !important;
+    transform: none !important;
+  }
+}
 .learning-sidebar nav .iskra-mascot, .learning-bottom-nav .iskra-mascot { width: 30px; height: 30px; border-radius: 8px; }
 .fairy-assistant .iskra-connection-status { margin: 0 0 16px; max-width: 65ch; color: var(--cloud-muted); font-size: 16px; font-weight: 400; line-height: 1.6; }
 .fairy-floating-trigger > span { display: grid; gap: 3px; text-align: left; }
@@ -3788,5 +3862,181 @@ select {
   .dashboard-project-card,
   .portfolio-grid > article {
     background: var(--academy-cream);
+  }
+}
+
+/* Маршрут курса целиком: шесть недель, а не один квест. */
+.course-progress {
+  min-width: 0;
+  margin: 0 0 28px;
+  padding: 22px;
+  border: 1px solid var(--cloud-border);
+  background: var(--cloud-surface);
+  border-radius: var(--cloud-radius-md);
+  box-shadow: var(--cloud-shadow);
+}
+
+.course-progress header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.course-progress h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.course-progress header p {
+  margin: 0;
+  color: var(--cloud-muted);
+}
+
+.course-progress-weeks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.course-progress-weeks li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--cloud-muted);
+}
+
+.course-progress-weeks i {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--cloud-border);
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.course-progress-weeks li[data-state="done"] i {
+  background: var(--academy-wine);
+  border-color: var(--academy-wine);
+  color: #fff;
+}
+
+.course-progress-weeks li[data-state="current"] i {
+  background: var(--academy-champagne);
+  border-color: var(--academy-gold);
+  color: var(--academy-text);
+}
+
+.course-progress-weeks li[data-state="current"] span {
+  color: var(--cloud-text);
+  font-weight: 600;
+}
+
+.course-progress-bar {
+  height: 8px;
+  margin: 0 0 12px;
+  border-radius: 999px;
+  background: var(--academy-champagne);
+  overflow: hidden;
+}
+
+.course-progress-bar b {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--academy-wine);
+}
+
+.course-progress-hint {
+  margin: 0;
+  font-size: 15px;
+  color: var(--cloud-muted);
+}
+
+.dashboard-stat-grid small {
+  display: block;
+  margin-top: 6px;
+  color: var(--cloud-muted);
+  font-size: 13px;
+}
+
+/* Полка наград: куда уходят искры. */
+.reward-shelf {
+  min-width: 0;
+  margin: 28px 0 0;
+  padding: 22px;
+  border: 1px solid var(--cloud-border);
+  background: var(--cloud-surface);
+  border-radius: var(--cloud-radius-md);
+  box-shadow: var(--cloud-shadow);
+}
+
+.reward-shelf h2 {
+  margin: 6px 0 8px;
+  font-size: 28px;
+}
+
+.reward-shelf h2 i {
+  color: var(--academy-gold);
+  font-style: normal;
+}
+
+.reward-shelf header p {
+  margin: 0;
+  color: var(--cloud-muted);
+}
+
+.reward-shelf-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reward-shelf-list li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--cloud-border);
+  border-radius: 16px;
+  background: var(--academy-cream);
+}
+
+.reward-shelf-list i {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--academy-gold);
+  font-style: normal;
+  font-size: 20px;
+}
+
+.reward-shelf-list small {
+  color: var(--cloud-muted);
+  font-size: 13px;
+}
+
+.reward-shelf-next {
+  margin: 16px 0 0;
+  color: var(--cloud-muted);
+}
+
+@media (max-width: 760px) {
+  .dashboard-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -1,13 +1,15 @@
 import { isProjectBundle } from "../content/projects";
 import type { CatalogProject, ProjectFormat } from "../content/types";
 import { branchStorageSlug, loadOutputChoice, type QuestSurface } from "./output-format";
-import { getJourneyLevelCount } from "../content/journey-plans";
+import { getJourneyLevelCount, legacyQuestLevelCounts } from "../content/journey-plans";
+import { concreteProgressSlug, CURRICULUM_REVISION, reviewedLevelCounts } from "../content/reviewed/revision";
 
 export const LEVELS_PER_QUEST = 17;
 const PREFIX = "feya-academy-progress-v1";
 
 export type QuestProgress = {
   version: 1;
+  journeyRevision?: string;
   activeStep: number;
   completed: number[];
   score: number;
@@ -95,6 +97,7 @@ export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST
       completed: sequential,
       score: sequential.length * 10,
     };
+    if (["planning-20260908", CURRICULUM_REVISION].includes(value.journeyRevision ?? "")) progress.journeyRevision = value.journeyRevision;
     if (typeof value.updatedAt === "string" && Number.isFinite(Date.parse(value.updatedAt))) {
       progress.updatedAt = value.updatedAt;
     }
@@ -108,7 +111,34 @@ export function parseProgress(raw: string | null, totalLevels = LEVELS_PER_QUEST
 }
 
 export function loadProgress(slug: string, storage: StorageLike, totalLevels = LEVELS_PER_QUEST): QuestProgress {
-  return parseProgress(storage.getItem(progressKey(slug)), totalLevels);
+  return readJourneyProgress(slug, storage.getItem(progressKey(slug)), totalLevels);
+}
+
+export function journeyRevisionInfo(slug: string, totalLevels: number): { revision: string; oldTotal: number; milestones: number[] } | undefined {
+  const route = slug.replace(/^mobile:/, "");
+  if (["planner", "planning:service"].includes(route) && totalLevels === 9) return { revision:"planning-20260908", oldTotal:17, milestones:[6, 7, 10, 11, 11, 12, 14, 14, 17] };
+  if (["day-planner-agent", "planning:agent"].includes(route) && totalLevels === 10) return { revision:"planning-20260908", oldTotal:17, milestones:[6, 15, 15, 15, 15, 15, 15, 15, 15, 17] };
+  const concrete=concreteProgressSlug(slug);
+  if(reviewedLevelCounts[concrete] !== totalLevels) return undefined;
+  const oldTotal=legacyQuestLevelCounts[concrete as keyof typeof legacyQuestLevelCounts];
+  if(!oldTotal) return undefined;
+  // New functional tests are not equivalent to old generic checkboxes. Preserve
+  // the proven working base, archive the rest; fully finished routes stay finished.
+  const milestones=concrete === "api-keys" ? [1,2,3,4,5,10,11,14] : [6,...Array.from({length:totalLevels-1},()=>oldTotal)];
+  return { revision:CURRICULUM_REVISION, oldTotal, milestones };
+}
+
+export function readJourneyProgress(slug: string, raw: string | null, totalLevels: number): QuestProgress {
+  const info = journeyRevisionInfo(slug, totalLevels);
+  const current = parseProgress(raw, totalLevels);
+  if (!info || current.journeyRevision === info.revision) return current;
+  const old = parseProgress(raw, info.oldTotal);
+  const count = info.milestones.filter((required) => old.completed.includes(required)).length;
+  return {
+    ...old, journeyRevision: info.revision, completed: Array.from({ length: count }, (_, i) => i + 1),
+    activeStep: Math.min(count + 1, totalLevels), score: count * 10,
+    completedAt: count === totalLevels ? old.completedAt : undefined,
+  };
 }
 
 export function saveProgress(
@@ -128,11 +158,20 @@ export function saveProgress(
     ?? (progress.completed.length === totalLevels && previous.completed.length < totalLevels
       ? today
       : undefined);
-  storage.setItem(progressKey(slug), JSON.stringify({ ...progress, updatedAt, completedAt }));
+  const raw = storage.getItem(progressKey(slug));
+  const reviewed = journeyRevisionInfo(slug, totalLevels);
+  if (reviewed && raw && parseProgress(raw, reviewed.oldTotal).journeyRevision !== reviewed.revision) {
+    const archive = `${progressKey(slug)}:legacy-20260908`;
+    if (!storage.getItem(archive)) storage.setItem(archive, raw);
+  }
+  storage.setItem(progressKey(slug), JSON.stringify({ ...progress, ...(reviewed ? { journeyRevision: reviewed.revision } : {}), updatedAt, completedAt }));
+  // Копия в аккаунте узнаёт об отметке отсюда: другого места записи прогресса нет.
+  if (typeof window !== "undefined" && storage === window.localStorage) window.dispatchEvent(new Event("learning-progress-saved"));
 }
 
 export function resetProgress(slug: string, storage: StorageLike): void {
   storage.removeItem(progressKey(slug));
+  storage.removeItem(`${progressKey(slug)}:legacy-20260908`);
 }
 
 export type CatalogProjectProgressState = {

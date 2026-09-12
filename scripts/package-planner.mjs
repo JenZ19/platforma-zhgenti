@@ -1,0 +1,16 @@
+import {mkdtempSync, mkdirSync, copyFileSync, readFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const temp=mkdtempSync(join(tmpdir(),'planner-package-'));
+mkdirSync(join(temp,'planner'));
+for(const name of ['index.html','START-HERE.md','AGENTS.md'])copyFileSync(join(root,'learning-kits/planner',name),join(temp,'planner',name));
+const zip=resolve(root,'public/materials/learning-kits/planner-2026-09-09.1.zip');
+mkdirSync(resolve(root,'public/materials/planner-example'),{recursive:true});
+execFileSync('zip',['-q',zip,'planner/index.html','planner/START-HERE.md','planner/AGENTS.md'],{cwd:temp});
+execFileSync('unzip',['-tq',zip]);
+copyFileSync(join(root,'learning-kits/planner/index.html'),resolve(root,'public/materials/planner-example/index.html'));
+console.log(JSON.stringify({zip,sha256:createHash('sha256').update(readFileSync(zip)).digest('hex')}));

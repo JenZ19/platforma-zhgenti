@@ -1,3 +1,5 @@
+import { readJourneyProgress, journeyRevisionInfo, getProjectLevelCount } from "./progress";
+import { concreteProgressSlug } from "../content/reviewed/revision";
 const progressPrefix = "feya-academy-progress-v1:";
 const allowed = [progressPrefix, "feya-academy-output-v1:", "submarine:setup-platform:", "neiroprofi-course-route-v1", "neiroprofi-results-v1"];
 export function isLearningKey(key: string) { return allowed.some((prefix) => key.startsWith(prefix)); }
@@ -21,12 +23,26 @@ export function importLearningBackup(text: string, storage: Storage) {
   for (const [key, value] of entries) if (!key.startsWith("submarine:setup-platform:")) JSON.parse(value as string);
   const previous = new Map<string, string | null>();
   try {
-    for (const [key, value] of entries) {
+    // Handle current records first so an imported archive cannot take the place
+    // of the original already stored on this device.
+    const ordered = [...entries].sort(([a], [b]) => Number(a.endsWith(":legacy-20260908")) - Number(b.endsWith(":legacy-20260908")));
+    for (const [key, value] of ordered) {
       const old = storage.getItem(key);
+      if (key.endsWith(":legacy-20260908") && old !== null) continue;
       if (key.startsWith(progressPrefix) && old) {
+        let archiveOriginal = false;
         try {
-          if ((JSON.parse(old).completed?.length ?? 0) > (JSON.parse(value as string).completed?.length ?? 0)) continue;
+          const slug = key.slice(progressPrefix.length);
+          const total = getProjectLevelCount(concreteProgressSlug(slug));
+          if (readJourneyProgress(slug, old, total).completed.length > readJourneyProgress(slug, value as string, total).completed.length) continue;
+          const info=journeyRevisionInfo(slug,total);
+          archiveOriginal = !!info && JSON.parse(old)?.journeyRevision !== info.revision;
         } catch { /* replace malformed saved value */ }
+        const archive = `${key}:legacy-20260908`;
+        if (archiveOriginal && storage.getItem(archive) === null) {
+          previous.set(archive, null);
+          storage.setItem(archive, old);
+        }
       }
       previous.set(key, old);
       storage.setItem(key, value as string);
@@ -42,7 +58,7 @@ export function importLearningBackup(text: string, storage: Storage) {
 
 export const personalBotKey = "neiroprofi-personal-bot-v1";
 export function normalizePersonalBot(value: string): string | undefined {
-  const match = /^(?:https:\/\/t\.me\/|@)?([a-zA-Z][a-zA-Z0-9_]{4,31})\/?$/.exec(value.trim());
-  if (!match || !/bot$/i.test(match[1])) return undefined;
+  const match = /^(?:(?:https:\/\/)?t\.me\/|@)?([a-zA-Z][a-zA-Z0-9_]{4,31})\/?$/i.exec(value.trim());
+  if (!match || !/bot$/i.test(match[1]) || match[1].toLowerCase() === "feyakrestnayasbm_bot") return undefined;
   return `https://t.me/${match[1]}`;
 }

@@ -23,6 +23,15 @@ import { attachApiKeysQuestLinks, buildSetupQuest, isSetupQuestSlug } from "./se
 import { applyJourneyPlan } from "./journey-plans";
 import { addBeginnerLanguage } from "./beginner-language";
 import { editLearningJourney } from "./learning-editorial";
+import { buildReviewedPlanning, isReviewedPlanning } from "./reviewed/planning";
+import { finishReviewed } from "./reviewed/shared";
+import { attachRewards } from "./quest-rewards";
+import { attachExampleLink } from "./quest-examples";
+import { buildServiceLessons } from "./reviewed/services";
+import { buildAgentLessons } from "./reviewed/agents";
+import { buildSiteLessons } from "./reviewed/sites";
+import { buildSpecialLessons } from "./reviewed/special";
+import { reviewSetupLessons } from "./reviewed/setup";
 
 function applyCustomization(
   steps: QuestStep[],
@@ -45,8 +54,19 @@ function applyCustomization(
 }
 
 export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization, setupPlatform: SetupPlatform = "mac"): QuestStep[] {
+  if (isReviewedPlanning(project.slug)) return attachRewards(project, attachExampleLink(project, buildReviewedPlanning(project, mode, customization)));
+  if (isSetupQuestSlug(project.slug)) return attachRewards(project, attachApiKeysQuestLinks(reviewSetupLessons(project, buildSetupQuest(project, setupPlatform)), project.slug));
+  const lessons = buildSpecialLessons(project, mode, customization)
+    ?? buildServiceLessons(project, mode, customization)
+    ?? buildAgentLessons(project, mode, customization)
+    ?? buildSiteLessons(project, mode, customization);
+  if (!lessons) throw new Error(`No reviewed lessons for ${project.slug}`);
+  return attachRewards(project, attachExampleLink(project, attachApiKeysQuestLinks(finishReviewed(project, mode, lessons), project.slug)));
+}
+
+function buildLegacyQuest(project: ProjectDefinition, mode: DataMode = "demo", customization?: QuestCustomization, setupPlatform: SetupPlatform = "mac"): QuestStep[] {
   const finish = (steps: QuestStep[]) => editLearningJourney(project, addBeginnerLanguage(
-    applyJourneyPlan(project, attachApiKeysQuestLinks(steps, project.slug), mode),
+    applyJourneyPlan(project, attachApiKeysQuestLinks(steps, project.slug), mode, true),
   ), mode);
   if (isSetupQuestSlug(project.slug)) {
     return finish(buildSetupQuest(project, setupPlatform));
@@ -104,4 +124,12 @@ export function buildQuest(project: ProjectDefinition, mode: DataMode = "demo", 
 export function getQuest(slug: string): QuestStep[] | undefined {
   const project = getQuestProject(slug);
   return project ? buildQuest(project) : undefined;
+}
+
+/** Historical illustration routes retain their frame numbers, independently of lesson revisions. */
+export function buildIllustrationQuest(project: ProjectDefinition, mode: DataMode = "demo"): QuestStep[] {
+  if (!isReviewedPlanning(project.slug)) return buildLegacyQuest(project, mode);
+  const custom = defaultCustomization(project.slug)!;
+  const steps = project.slug === "planner" ? buildPlannerQuest(project, mode, custom) : adaptQuestToDataMode(buildAgentQuest(project, custom), project, mode);
+  return editLearningJourney(project, addBeginnerLanguage(steps.map(step => ({ ...step, sourceStepId: step.id }))), mode);
 }

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Семейный хаб здоровья{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_version('style.css') }}">
+  <script src="/static/app.js?v={{ asset_version('app.js') }}" defer></script>
+  <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+  <!-- Иконка для домашнего экрана телефона: именно PNG. SVG здесь iOS не
+       понимает и молча подставляет уменьшенный скриншот страницы.
+       apple-mobile-web-app-capable убирает адресную строку — с домашнего
+       экрана хаб открывается как приложение. -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Здоровье">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#faf7f2">
+</head>
+<body>
+{% include "_avatars.svg" %}
+  {% if is_copy() %}
+  <div class="copy-banner">
+    Это <b>отдельная копия</b>. Её записи не синхронизируются с другими установками.
+  </div>
+  {% endif %}
+  <header class="site-header">
+    <a class="brand" href="/">Семейный хаб здоровья</a>
+    <nav>
+      <a href="/">Главная</a>
+      <a href="/documents">Документы</a>
+      <a href="/inbox">Входящие</a>
+      <a href="/settings">Настройки</a>
+    </nav>
+    <form class="search-form" action="/search" method="get">
+      <input type="text" name="q" placeholder="Поиск…" value="{{ q|default('') }}">
+      <button class="btn secondary" type="submit">Найти</button>
+    </form>
+  </header>
+  <main>
+    <p role="note">Хаб хранит записи и показывает данные из документов, но не ставит диагнозов и не назначает лечение. Результат распознавания нужно сверять с оригиналом.</p>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

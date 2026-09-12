@@ -1,4 +1,5 @@
 import type { StorageLike } from "./progress";
+import type { ProjectDefinition, ProjectFormat } from "../content/types";
 export const resultsKey = "neiroprofi-results-v1";
 export type PortfolioResult = { title: string; url: string; description: string; status: "study" | "personal" | "client"; updatedAt: string };
 export function safeProjectUrl(value: string): boolean {
@@ -20,4 +21,13 @@ export function savePortfolioResult(id: string, value: Omit<PortfolioResult, "up
   const next = { ...loadPortfolioResults(storage), [id]: { title: value.title.trim().slice(0, 120), url: value.url.trim().slice(0, 2000), description: value.description.trim().slice(0, 1500), status: value.status, updatedAt: new Date().toISOString() } };
   storage.setItem(resultsKey, JSON.stringify(next));
   return next;
+}
+
+/** Как называется работа в портфолио: одинаково в карточке и на открытой странице. */
+export function workKindLabel(project: Pick<ProjectDefinition, "kind">, output?: ProjectFormat): string {
+  if (output === "agent") return "ИИ-агент";
+  if (output === "service") return "Сервис";
+  if (project.kind.includes("site")) return "Сайт";
+  if (project.kind.includes("agent")) return "ИИ-агент";
+  return "Проект";
 }

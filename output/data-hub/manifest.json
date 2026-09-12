@@ -1,0 +1,1005 @@
+{
+  "version": "2026-09-11.1",
+  "files": {
+    "index.html": {
+      "bytes": 274908,
+      "sha256": "41c12518c683eadcdb0dfa943eebbb3b828d94db55de6f30630bf921e9912eff"
+    },
+    "index.json": {
+      "bytes": 22447,
+      "sha256": "79b02be8f471052d0454f70ac5e1a410be4b41d69ddebf59fbbbf49dd6075baf"
+    },
+    "llms.txt": {
+      "bytes": 5437,
+      "sha256": "9439c024d6c822671d2aaa119c5df041aa1d3481af8a60779b157ba2f23269d0"
+    },
+    "sets/administrator-agent/README.md": {
+      "bytes": 4386,
+      "sha256": "6d5b3771e1eea0de06e3c12197be9691c68a378699624faf1ccbfc553db032f2"
+    },
+    "sets/administrator-agent/dataset.json": {
+      "bytes": 5039,
+      "sha256": "14f21ad8582b19e4fe572c82f7da03217f2cd67e358ed3c9449765f3e2c7d5be"
+    },
+    "sets/administrator-agent/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/administrator-agent/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/administrator-agent/slots.csv": {
+      "bytes": 225,
+      "sha256": "eba3e74e347616782008f53c4ddbc5d520014e98eaa27a4f6779ccbda3f6e1f7"
+    },
+    "sets/api-keys/README.md": {
+      "bytes": 3790,
+      "sha256": "6b81139e0c64f32d5c6530d1bc32940e9ded09a5ed35734a708efd62316c06e9"
+    },
+    "sets/api-keys/dataset.json": {
+      "bytes": 4168,
+      "sha256": "c9b78383627d9d94d1cd8989c1023f075556735fdecae4087d369a7aa46b4d9a"
+    },
+    "sets/api-keys/moderation.csv": {
+      "bytes": 441,
+      "sha256": "65574a7022ba17e271aee1fceddb5d5dd36512074a2d9b1859bd31f05a00292c"
+    },
+    "sets/api-keys/setup.csv": {
+      "bytes": 744,
+      "sha256": "5f32340b86715b7fca180d58ef34cfe33c1187e75d5aca3be954a0838d9493be"
+    },
+    "sets/beauty-site/README.md": {
+      "bytes": 6389,
+      "sha256": "2ba3809fbfdae750f5f8e3fcfa0b045568bda7c699a8d0aa0e657c6ba2e1d220"
+    },
+    "sets/beauty-site/brief.csv": {
+      "bytes": 860,
+      "sha256": "88b050ae2b3f46e2d43ca624a6e03e292610f04695b49c60c1d0e151fc771258"
+    },
+    "sets/beauty-site/dataset.json": {
+      "bytes": 7419,
+      "sha256": "2830da0972113c00e5e0e31ba037bad64986326629fbea0b71ca77803c69abd8"
+    },
+    "sets/beauty-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/beauty-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/beauty-site/site.csv": {
+      "bytes": 555,
+      "sha256": "de0989ea72d1bc54ec708e727daaefdec14776519a5e570dcc78439056aae5c1"
+    },
+    "sets/brief-agent/README.md": {
+      "bytes": 5251,
+      "sha256": "5f7865648b90c08d2e3044e39707215fc5b4194cd26d3880394a0df0120b5871"
+    },
+    "sets/brief-agent/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/brief-agent/dataset.json": {
+      "bytes": 6018,
+      "sha256": "911d0c937913e6f0e3bb122e8cf7d7c4cb8871a5a89253526f65cf9705525545"
+    },
+    "sets/brief-agent/inquiries.csv": {
+      "bytes": 1034,
+      "sha256": "48533ee654cacea5d2cc0373cc830e485580323062a4374f8aa6004015693ebb"
+    },
+    "sets/brief-agent/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/carousel-agent/README.md": {
+      "bytes": 6010,
+      "sha256": "0e40b5482260602dc9d3d356df95f65736037a6545dbaea9c057bf22a1c0b177"
+    },
+    "sets/carousel-agent/dataset.json": {
+      "bytes": 6662,
+      "sha256": "dadcebfff8205887e9794de54cfe87a30ffc9968f6c8e34a4647f6b1706563c2"
+    },
+    "sets/carousel-agent/design.csv": {
+      "bytes": 853,
+      "sha256": "983f5c79fbf494f7da975d29f8fb8b792b021464c18d92bd441add241cee9ae3"
+    },
+    "sets/carousel-agent/posts.csv": {
+      "bytes": 1663,
+      "sha256": "d1a4368767c678d1ec04e89400bc8e58225b4781c92aa52912add48fb9a4d3be"
+    },
+    "sets/carousel-agent/voice.csv": {
+      "bytes": 501,
+      "sha256": "bd96379a304a2487753254e8dc48e3df15f1093a0e912fd959a18c0f581c79b3"
+    },
+    "sets/catalog-pro-site/README.md": {
+      "bytes": 6989,
+      "sha256": "8d1cc8daab6c7371f3c4c609e42001ca58c03359c43378625a817e6cb7964569"
+    },
+    "sets/catalog-pro-site/brief.csv": {
+      "bytes": 876,
+      "sha256": "d4028dee5b733d775cd3817be5a87d4bfe89b5c00bed54739c9406b3fb8d26bb"
+    },
+    "sets/catalog-pro-site/dataset.json": {
+      "bytes": 8177,
+      "sha256": "5ce2cf75eb5deb991ea7cd21b98c34d775a56773aa2f9015a174c60c8970a0ea"
+    },
+    "sets/catalog-pro-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/catalog-pro-site/products.csv": {
+      "bytes": 839,
+      "sha256": "ada381828669560a4a189bca199c2a75f190c287c5eaf4aade004b4763fdef83"
+    },
+    "sets/catalog-pro-site/site.csv": {
+      "bytes": 571,
+      "sha256": "5bdeacf884aec3136306e39179c3a2d1928cb0f6543ff50b59f989e8a06c8b9f"
+    },
+    "sets/child-schedule/README.md": {
+      "bytes": 3852,
+      "sha256": "f5783db763a5a9ce0dbcb680666b891ed479f0990875a6d00cd6676d9c1a3c76"
+    },
+    "sets/child-schedule/dataset.json": {
+      "bytes": 4379,
+      "sha256": "68b73b5d017b775159ad3d67dbc5108db7449b792845903e4aa1ae042d9c7790"
+    },
+    "sets/child-schedule/family.csv": {
+      "bytes": 457,
+      "sha256": "93d758153a0852fedcfc713ab47470f790faaa824e7785c8e21d4faa599f566b"
+    },
+    "sets/child-schedule/schedule.csv": {
+      "bytes": 624,
+      "sha256": "3d8197436afd3fba68216983faa1bb39a80618a69bc3969c6539c34bd30a0b84"
+    },
+    "sets/client-care-agent/README.md": {
+      "bytes": 6000,
+      "sha256": "1869c1858ad29422c516cff1fa5f791c7c7c8d5ef6dfc5bd151b67c1bce5bbfc"
+    },
+    "sets/client-care-agent/dataset.json": {
+      "bytes": 7055,
+      "sha256": "053fb0fc125315bae65fa0516d936e90e69a9fb7099a2a70884ef9e90cff8f57"
+    },
+    "sets/client-care-agent/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/client-care-agent/inquiries.csv": {
+      "bytes": 1034,
+      "sha256": "48533ee654cacea5d2cc0373cc830e485580323062a4374f8aa6004015693ebb"
+    },
+    "sets/client-care-agent/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/client-care-agent/slots.csv": {
+      "bytes": 225,
+      "sha256": "eba3e74e347616782008f53c4ddbc5d520014e98eaa27a4f6779ccbda3f6e1f7"
+    },
+    "sets/consultant-agent/README.md": {
+      "bytes": 5384,
+      "sha256": "73118b2cd5fe5f297c9f844e2e4f24729c6de28a9388cf2c0c7b91ed9fdc3efc"
+    },
+    "sets/consultant-agent/dataset.json": {
+      "bytes": 6123,
+      "sha256": "ca7af483362eb0a75d64b3a0f11f00085086bb0e298a335f1780a9b46f1065b9"
+    },
+    "sets/consultant-agent/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/consultant-agent/inquiries.csv": {
+      "bytes": 1034,
+      "sha256": "48533ee654cacea5d2cc0373cc830e485580323062a4374f8aa6004015693ebb"
+    },
+    "sets/consultant-agent/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/consultation-site/README.md": {
+      "bytes": 6439,
+      "sha256": "18dff1578f00415d35acd4a0c1d7cf031627007c6d46e2bae1577841916a889a"
+    },
+    "sets/consultation-site/brief.csv": {
+      "bytes": 872,
+      "sha256": "f58dd947b90b566652a9cc83f3a9ccf250a5e176021d12161cc8ffaae6ccf884"
+    },
+    "sets/consultation-site/dataset.json": {
+      "bytes": 7469,
+      "sha256": "c988033351adddf98145edb68c4e09bdac4a709cf4a01b0899c2855ffb71557a"
+    },
+    "sets/consultation-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/consultation-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/consultation-site/site.csv": {
+      "bytes": 567,
+      "sha256": "898f76849e5351e5cde63f449171934b7f86aab133e1e6bc05d01e0875daa7ac"
+    },
+    "sets/content-agent/README.md": {
+      "bytes": 5913,
+      "sha256": "8d5b8786b200d4943b315ef0ebf23f9bc146f57edc8f05b9550bee0280e3fbc0"
+    },
+    "sets/content-agent/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/content-agent/dataset.json": {
+      "bytes": 6574,
+      "sha256": "2f210e88b95acc7fcc324495e665d72633d98c88f388ff07ff3eef7a308489a2"
+    },
+    "sets/content-agent/posts.csv": {
+      "bytes": 1663,
+      "sha256": "d1a4368767c678d1ec04e89400bc8e58225b4781c92aa52912add48fb9a4d3be"
+    },
+    "sets/content-agent/voice.csv": {
+      "bytes": 501,
+      "sha256": "bd96379a304a2487753254e8dc48e3df15f1093a0e912fd959a18c0f581c79b3"
+    },
+    "sets/course-site/README.md": {
+      "bytes": 6255,
+      "sha256": "6d7657a319c4f2cb316e0330b7a93c94aa81cc05c84091d3d57a0c45ed5f04b5"
+    },
+    "sets/course-site/brief.csv": {
+      "bytes": 891,
+      "sha256": "53d07ea241333dd57edcd737679da0b349caac09c4e8e08136f8599102d93eb5"
+    },
+    "sets/course-site/dataset.json": {
+      "bytes": 7260,
+      "sha256": "99bbb8562d801b097d51a491b9961e57164af5bf52aa87c439173dc0d2c841ed"
+    },
+    "sets/course-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/course-site/site.csv": {
+      "bytes": 586,
+      "sha256": "bb568858000801413fcae262c78a4c97ef8b78f0d27906beee1f0a2d186ef729"
+    },
+    "sets/course-site/tariffs.csv": {
+      "bytes": 463,
+      "sha256": "e476fdd1e731bada568e80064395bd7415afa1aa4ffad551ed8ec33c5d260459"
+    },
+    "sets/day-planner-agent/README.md": {
+      "bytes": 4647,
+      "sha256": "d610835cf419ff42a59d59dd795865263c4b485fb5166262f2263cc5dfbd726d"
+    },
+    "sets/day-planner-agent/dataset.json": {
+      "bytes": 5381,
+      "sha256": "69b4f96d305f2a3c79872586fa9eadb884f4e7f524993c4409a281306bf976f5"
+    },
+    "sets/day-planner-agent/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/day-planner-agent/tasks.csv": {
+      "bytes": 950,
+      "sha256": "7dddcb38176af72bbe74eff2298c325c2b061208acd81a1fecd0b60681274827"
+    },
+    "sets/designer-site/README.md": {
+      "bytes": 6475,
+      "sha256": "96dfc15bdac5651962ac813f4dddc0609b117d9b10c78f174ab9d4c6f05632d0"
+    },
+    "sets/designer-site/brief.csv": {
+      "bytes": 899,
+      "sha256": "0b4d6d4a2243875e71fbc121d0bd939dd9c095bd4e21841b2a1c52e62cdef59a"
+    },
+    "sets/designer-site/dataset.json": {
+      "bytes": 7505,
+      "sha256": "042dda0aa6652da01747e3443ed2c5ae59a5847b1a6b0084f860150caf553124"
+    },
+    "sets/designer-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/designer-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/designer-site/site.csv": {
+      "bytes": 594,
+      "sha256": "54ea376778b6a90183af105c9eeda9ee3f0bb2b0d599ba626129f7afbec840b9"
+    },
+    "sets/event-organizer-agent/README.md": {
+      "bytes": 5085,
+      "sha256": "1138d6078de254133804a4fba01fb450de251e6cf37b34ab60c55bfdcf697a82"
+    },
+    "sets/event-organizer-agent/agenda.csv": {
+      "bytes": 381,
+      "sha256": "670dd5a947e93f40e71926731f66000856334becf7ad958d45a491f7a0f55143"
+    },
+    "sets/event-organizer-agent/dataset.json": {
+      "bytes": 5908,
+      "sha256": "94697c5ce3b18034c08ae40875ec70daac8f9ece33d5c230d7992ae7d3083697"
+    },
+    "sets/event-organizer-agent/event.csv": {
+      "bytes": 504,
+      "sha256": "95dbd116d7bd3a800a4a39d751a2c8e231d798b07bd545f0d2092ebc938930c8"
+    },
+    "sets/event-organizer-agent/inquiries.csv": {
+      "bytes": 1034,
+      "sha256": "48533ee654cacea5d2cc0373cc830e485580323062a4374f8aa6004015693ebb"
+    },
+    "sets/event-site/README.md": {
+      "bytes": 6346,
+      "sha256": "d570454be534a88903156619f798e59ad335d89f1f985db12d2e9db61491efe8"
+    },
+    "sets/event-site/agenda.csv": {
+      "bytes": 381,
+      "sha256": "670dd5a947e93f40e71926731f66000856334becf7ad958d45a491f7a0f55143"
+    },
+    "sets/event-site/brief.csv": {
+      "bytes": 908,
+      "sha256": "b76b5cf647e42cb15bb55afddbabc9f513ea12763607ff1c6b41be3f13b80b3e"
+    },
+    "sets/event-site/dataset.json": {
+      "bytes": 7413,
+      "sha256": "d7d64c3d233fb466bd5d2ad5e194a7ba0935b8d71af0078430cd82e246c4208f"
+    },
+    "sets/event-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/event-site/site.csv": {
+      "bytes": 603,
+      "sha256": "9bc475f600a024f77dea65c686c827331245db3c5308f2647dd1fabf6451e4b8"
+    },
+    "sets/expense-agent/README.md": {
+      "bytes": 4094,
+      "sha256": "158d4859c12659be9976d436b14a0ccb4d11a8b1aa8af74a57c23bdfb81fa6d4"
+    },
+    "sets/expense-agent/budgets.csv": {
+      "bytes": 199,
+      "sha256": "2d5408b433846421fc435214cd436a69d732687558f71b6612ecc15d0f3dd647"
+    },
+    "sets/expense-agent/dataset.json": {
+      "bytes": 4712,
+      "sha256": "2244928a48b8cf5459f0412dd060576d50769c94999bdf4c90571bd1603fd084"
+    },
+    "sets/expense-agent/expenses.csv": {
+      "bytes": 829,
+      "sha256": "bea424bb531c5a12c77bba2274445588ae9bc721d6cd51905041b82c889b68aa"
+    },
+    "sets/expert-assistant-agent/README.md": {
+      "bytes": 4979,
+      "sha256": "8524272bdb0481681ba1f1dffa570e378cb6f97af1d58a4f5c7aafa7a3dcc90b"
+    },
+    "sets/expert-assistant-agent/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/expert-assistant-agent/dataset.json": {
+      "bytes": 5630,
+      "sha256": "2b7fe4d8c6a03bbe5d42dcfc902e07b68c067549147c2c33591baf3966f04994"
+    },
+    "sets/expert-assistant-agent/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/expert-assistant-agent/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/expert-pro-site/README.md": {
+      "bytes": 6534,
+      "sha256": "574802f8459a139002abdb07b4bc6dcfadaef3837dc3978bb64bb5b5ea18b55f"
+    },
+    "sets/expert-pro-site/brief.csv": {
+      "bytes": 904,
+      "sha256": "e49f4db64fbde2d9a2aaa076daaf93c4d4f4895b258732b2ef214b014352f82a"
+    },
+    "sets/expert-pro-site/dataset.json": {
+      "bytes": 7564,
+      "sha256": "d7b1cffb7ca18ed2d7e47f7f5b15b7008ae8fe573e41437bcdd9cd164af2fca2"
+    },
+    "sets/expert-pro-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/expert-pro-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/expert-pro-site/site.csv": {
+      "bytes": 599,
+      "sha256": "b1d059a3a312b1ec826ec40ee4f539c3a840666289eb98584c0187ccf7627d99"
+    },
+    "sets/expert-site/README.md": {
+      "bytes": 6456,
+      "sha256": "7267e58d96e8661585f275e581854d2d9b401ec9dac9e7fe60cab8d91a64e27d"
+    },
+    "sets/expert-site/brief.csv": {
+      "bytes": 887,
+      "sha256": "1f6930e126744e6ade5bcf458280c1f7300e99da62d1ff541152aac677712626"
+    },
+    "sets/expert-site/dataset.json": {
+      "bytes": 7486,
+      "sha256": "56c711cd5bb3d3d3dac36cd68b380621e3ccbaeddadc6857e78c61264837e1be"
+    },
+    "sets/expert-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/expert-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/expert-site/site.csv": {
+      "bytes": 582,
+      "sha256": "260a038f9b4a2df72b47faa3140dff5b7017b4a3e7ca8819c20c6bf3c0d16e77"
+    },
+    "sets/fairy-team-agent/README.md": {
+      "bytes": 5922,
+      "sha256": "6a13646878f68670f7ecfb3fd4320701be33d50bc0ed642df4de63bc430353e2"
+    },
+    "sets/fairy-team-agent/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/fairy-team-agent/dataset.json": {
+      "bytes": 6592,
+      "sha256": "e13e15a3d427d97cd53540c4ef132abf10b48d54470982e8c0d73b84a6c52a54"
+    },
+    "sets/fairy-team-agent/posts.csv": {
+      "bytes": 1663,
+      "sha256": "d1a4368767c678d1ec04e89400bc8e58225b4781c92aa52912add48fb9a4d3be"
+    },
+    "sets/fairy-team-agent/voice.csv": {
+      "bytes": 501,
+      "sha256": "bd96379a304a2487753254e8dc48e3df15f1093a0e912fd959a18c0f581c79b3"
+    },
+    "sets/family-expenses/README.md": {
+      "bytes": 4055,
+      "sha256": "7c230f9652c3bc91bdb263cc6ac389d6c857233ac9199447124fe7d7c1b8f558"
+    },
+    "sets/family-expenses/budgets.csv": {
+      "bytes": 199,
+      "sha256": "2d5408b433846421fc435214cd436a69d732687558f71b6612ecc15d0f3dd647"
+    },
+    "sets/family-expenses/dataset.json": {
+      "bytes": 4673,
+      "sha256": "bf5cc2f3033d6c045f85029795bdff67690bbf259221edf6c41835f06acec675"
+    },
+    "sets/family-expenses/expenses.csv": {
+      "bytes": 829,
+      "sha256": "bea424bb531c5a12c77bba2274445588ae9bc721d6cd51905041b82c889b68aa"
+    },
+    "sets/family-health-hub/README.md": {
+      "bytes": 5025,
+      "sha256": "b796d7ad54de2838a905d824a22e9a39753fe9666f00a94d1d786f382eaf4c1f"
+    },
+    "sets/family-health-hub/dataset.json": {
+      "bytes": 5835,
+      "sha256": "f22715fec4c18f6ed4431369c0efe32d35fe4cf9dc4869cc202c085a5b79f65d"
+    },
+    "sets/family-health-hub/family.csv": {
+      "bytes": 457,
+      "sha256": "93d758153a0852fedcfc713ab47470f790faaa824e7785c8e21d4faa599f566b"
+    },
+    "sets/family-health-hub/healthChecks.csv": {
+      "bytes": 798,
+      "sha256": "c15f8ab9a5de5d99dd1e8ccbe89cbaff36e3a9777bf0502ff75c7d50798bfbb6"
+    },
+    "sets/family-health-hub/labs.csv": {
+      "bytes": 549,
+      "sha256": "e229ed5e895e4b5b1dbf5e6ff81c5cadc0d2b5e785a12f2de50078b2e5f671c8"
+    },
+    "sets/family-health-hub/study-lab-a.pdf": {
+      "bytes": 2143,
+      "sha256": "d569947df2467a5f0448d3533acb2c1c4dc36f64c3855721588f0cc2858089b5"
+    },
+    "sets/family-health-hub/study-lab-b.pdf": {
+      "bytes": 2146,
+      "sha256": "5519acc90815090d8a79fbbf8fac2f02df62662debaaa5089fa75f4688986298"
+    },
+    "sets/family-schedule-agent/README.md": {
+      "bytes": 3978,
+      "sha256": "8893f30961c55267f68bf9fdb81d701faffe261faf29c7d12f275cd01b9335b8"
+    },
+    "sets/family-schedule-agent/dataset.json": {
+      "bytes": 4505,
+      "sha256": "89e58598febbb938039fb0667cdbfc3037b932bbb862aacd916fe40adf2d1ec4"
+    },
+    "sets/family-schedule-agent/family.csv": {
+      "bytes": 457,
+      "sha256": "93d758153a0852fedcfc713ab47470f790faaa824e7785c8e21d4faa599f566b"
+    },
+    "sets/family-schedule-agent/schedule.csv": {
+      "bytes": 624,
+      "sha256": "3d8197436afd3fba68216983faa1bb39a80618a69bc3969c6539c34bd30a0b84"
+    },
+    "sets/fitness-tracker/README.md": {
+      "bytes": 3835,
+      "sha256": "56f4f3f4c162be57a3ce0d996f0d837178e2d27816f4923a7c4a3413d7505ad8"
+    },
+    "sets/fitness-tracker/dataset.json": {
+      "bytes": 4347,
+      "sha256": "ba237f1d66be1fcdc2448a7cdff376e1d882bcf35bdecd040dab2b08912fbaf2"
+    },
+    "sets/fitness-tracker/habits.csv": {
+      "bytes": 616,
+      "sha256": "2939df0480bf7bdf873871520fd5d32c6d1eaf7f57e30ff4c83fc37eb5a56ec6"
+    },
+    "sets/fitness-tracker/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/graduate-portfolio/README.md": {
+      "bytes": 4741,
+      "sha256": "b00ce9745d68e8163e2c7cdf7a2fee2c882a0bb1b8149411758d40551fe2bd0b"
+    },
+    "sets/graduate-portfolio/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/graduate-portfolio/dataset.json": {
+      "bytes": 5398,
+      "sha256": "4ad56710680539b08d45f4a405ff482a16b891131bf971814f423809e89b8684"
+    },
+    "sets/graduate-portfolio/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/graduate-portfolio/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/habit-agent/README.md": {
+      "bytes": 3873,
+      "sha256": "6afafcd9f9fab4be9f5c6b318cbffd9b95cdcbfaaf5d3d6c535dc06ef7fdb314"
+    },
+    "sets/habit-agent/dataset.json": {
+      "bytes": 4385,
+      "sha256": "7be55f37011d0513bbb9f548d18d434caafd5e66e1ba2a429fedf46e7e74bf4a"
+    },
+    "sets/habit-agent/habits.csv": {
+      "bytes": 616,
+      "sha256": "2939df0480bf7bdf873871520fd5d32c6d1eaf7f57e30ff4c83fc37eb5a56ec6"
+    },
+    "sets/habit-agent/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/home-helper/README.md": {
+      "bytes": 3938,
+      "sha256": "3caf809a6ab3245cdb5601ff2ef8d2ca7801cd8bf5555a19a075bd016984a452"
+    },
+    "sets/home-helper/dataset.json": {
+      "bytes": 4451,
+      "sha256": "84764e470ef965e69e5c17f79515f107e63cfe50498631be4243e35fbc22b80b"
+    },
+    "sets/home-helper/home.csv": {
+      "bytes": 728,
+      "sha256": "3c5d9c00841c88e1e3e7a50e3d5a5522da83a69bac61d170f206e345a0825847"
+    },
+    "sets/home-helper/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/home-organizer-agent/README.md": {
+      "bytes": 4010,
+      "sha256": "76e01168efc77d2f214a791f430d46025cbbe7dae219552d976142c3ae985832"
+    },
+    "sets/home-organizer-agent/dataset.json": {
+      "bytes": 4528,
+      "sha256": "f3c15b939e92ac21187d2e5c69555387780d392d925c9df423a7b74a3e77cecb"
+    },
+    "sets/home-organizer-agent/family.csv": {
+      "bytes": 457,
+      "sha256": "93d758153a0852fedcfc713ab47470f790faaa824e7785c8e21d4faa599f566b"
+    },
+    "sets/home-organizer-agent/home.csv": {
+      "bytes": 728,
+      "sha256": "3c5d9c00841c88e1e3e7a50e3d5a5522da83a69bac61d170f206e345a0825847"
+    },
+    "sets/idea-analysis-agent/README.md": {
+      "bytes": 4550,
+      "sha256": "66ea2f702f576826450466f9eebb8bdd795f1b6b9da5948befc02751e97c7f59"
+    },
+    "sets/idea-analysis-agent/dataset.json": {
+      "bytes": 5119,
+      "sha256": "44852c41863fa33495c056af63e189dd00d63f85002f29ad43b791883acab5e8"
+    },
+    "sets/idea-analysis-agent/ideas.csv": {
+      "bytes": 1105,
+      "sha256": "555a8752c93792cd5a64c230af1d75b5319829f13137715234db7ee6904efb24"
+    },
+    "sets/idea-analysis-agent/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/idea-vault/README.md": {
+      "bytes": 5759,
+      "sha256": "b536584ac9ae14139bf4a00f3267b19c982e5cb1a668879464e908e0f1f73900"
+    },
+    "sets/idea-vault/dataset.json": {
+      "bytes": 6783,
+      "sha256": "6d51085100e1aca68361997cbe932b31b7be98e0cb186b125b7687685ac0d9e9"
+    },
+    "sets/idea-vault/ideas.csv": {
+      "bytes": 1105,
+      "sha256": "555a8752c93792cd5a64c230af1d75b5319829f13137715234db7ee6904efb24"
+    },
+    "sets/idea-vault/tasks.csv": {
+      "bytes": 950,
+      "sha256": "7dddcb38176af72bbe74eff2298c325c2b061208acd81a1fecd0b60681274827"
+    },
+    "sets/install-codex/README.md": {
+      "bytes": 5122,
+      "sha256": "9b08380642ea4fcc6c6e9c19d851adaecf787c6148e04adc0fa09b673207c573"
+    },
+    "sets/install-codex/dataset.json": {
+      "bytes": 5975,
+      "sha256": "357f396f9fc3cd70f8dcd3ae4a16446fe558dbd877d0eec5846bcf74e304507a"
+    },
+    "sets/install-codex/setup.csv": {
+      "bytes": 744,
+      "sha256": "5f32340b86715b7fca180d58ef34cfe33c1187e75d5aca3be954a0838d9493be"
+    },
+    "sets/install-codex/tasks.csv": {
+      "bytes": 950,
+      "sha256": "7dddcb38176af72bbe74eff2298c325c2b061208acd81a1fecd0b60681274827"
+    },
+    "sets/meal-planning-agent/README.md": {
+      "bytes": 5898,
+      "sha256": "608b5517558e629a92c7fe776fd480c9e481b9b8b6cfa199bbd5d69a37bf3942"
+    },
+    "sets/meal-planning-agent/dataset.json": {
+      "bytes": 6892,
+      "sha256": "98d801c895294c98e953b0b88fb9d9bbdbf89d9b5a868219f74cf2a8e0e66eea"
+    },
+    "sets/meal-planning-agent/menu.csv": {
+      "bytes": 481,
+      "sha256": "6fc13bd966a1295b3547b5a008810e1292a8e310aedca92eace52b2b1c7c9c60"
+    },
+    "sets/meal-planning-agent/pantry.csv": {
+      "bytes": 242,
+      "sha256": "e19294dfe5f05b381cc9f061c4d753dfa8502c23b46b6ad808f4f8197f20de62"
+    },
+    "sets/meal-planning-agent/recipes.csv": {
+      "bytes": 1817,
+      "sha256": "851d077ffd7544b4ea85417f58f2a5add60d4e98e3feadd831834170aebe0438"
+    },
+    "sets/online-school-agent/README.md": {
+      "bytes": 5486,
+      "sha256": "391b253c370010eccb80bc09bb129eafa351de89524e87ef2e9e901fb6089e2f"
+    },
+    "sets/online-school-agent/dataset.json": {
+      "bytes": 6136,
+      "sha256": "e39e0efe2769fc55cb03a9d3d346c3c12623127cfbf4959742f38e8275ef5f6c"
+    },
+    "sets/online-school-agent/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/online-school-agent/lessons.csv": {
+      "bytes": 1281,
+      "sha256": "95e68f479b6f2cff4c1e696b407be5fcc06b72dda02561449b001fe1034e4d99"
+    },
+    "sets/online-school-agent/tariffs.csv": {
+      "bytes": 463,
+      "sha256": "e476fdd1e731bada568e80064395bd7415afa1aa4ffad551ed8ec33c5d260459"
+    },
+    "sets/personal-organizer/README.md": {
+      "bytes": 6983,
+      "sha256": "4eee89c53937552b36e185a9c3f636e2253fbab290f37ce740d65fba0e124eb2"
+    },
+    "sets/personal-organizer/dataset.json": {
+      "bytes": 8511,
+      "sha256": "fb90c2f4818b923628dcc50e1585cf87a2c0ed0d0484a2bdeb1f4244297a9129"
+    },
+    "sets/personal-organizer/ideas.csv": {
+      "bytes": 1105,
+      "sha256": "555a8752c93792cd5a64c230af1d75b5319829f13137715234db7ee6904efb24"
+    },
+    "sets/personal-organizer/schedule.csv": {
+      "bytes": 624,
+      "sha256": "3d8197436afd3fba68216983faa1bb39a80618a69bc3969c6539c34bd30a0b84"
+    },
+    "sets/personal-organizer/tasks.csv": {
+      "bytes": 950,
+      "sha256": "7dddcb38176af72bbe74eff2298c325c2b061208acd81a1fecd0b60681274827"
+    },
+    "sets/photographer-site/README.md": {
+      "bytes": 6468,
+      "sha256": "7d13da25be78cf099745da506ed28438db93850ee2f5018a4a68bcf0bb910ce3"
+    },
+    "sets/photographer-site/brief.csv": {
+      "bytes": 897,
+      "sha256": "bc307562734fd3e6b7a9d96286f80b0e60f56fe6430cba869bde11b6e9000fc8"
+    },
+    "sets/photographer-site/dataset.json": {
+      "bytes": 7498,
+      "sha256": "4cdb974abc3692c163ff588c8fa109b3f65ef62a4993de9bd246628370cc8082"
+    },
+    "sets/photographer-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/photographer-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/photographer-site/site.csv": {
+      "bytes": 592,
+      "sha256": "59029e4e50c14db1afe628e7e5d8187a5dd4646da55e924f9ab8ffe232e1ef0d"
+    },
+    "sets/planner/README.md": {
+      "bytes": 4619,
+      "sha256": "7bcc617c64f5d916dd75ba47a20c0920f4277a29444366f0f6099d1bbc31e1ab"
+    },
+    "sets/planner/dataset.json": {
+      "bytes": 5353,
+      "sha256": "5ef05a313cb33950d7503063e0a479d6bb7c641cb0efab28b93dde519045a593"
+    },
+    "sets/planner/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/planner/tasks.csv": {
+      "bytes": 950,
+      "sha256": "7dddcb38176af72bbe74eff2298c325c2b061208acd81a1fecd0b60681274827"
+    },
+    "sets/portfolio-site/README.md": {
+      "bytes": 6510,
+      "sha256": "972e603caec2ec8aa3204287d4b3efc87587ff642e74451a869c256a20b8085e"
+    },
+    "sets/portfolio-site/brief.csv": {
+      "bytes": 911,
+      "sha256": "cc1dfd592ca37c2e49b31165639d3ecc47d6413eaa02e3b3765fd12c792e6e83"
+    },
+    "sets/portfolio-site/dataset.json": {
+      "bytes": 7540,
+      "sha256": "d84ceba47c9e3f2f0470027060d5b91e8eb54448a41da61eebf48c734a0edc9d"
+    },
+    "sets/portfolio-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/portfolio-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/portfolio-site/site.csv": {
+      "bytes": 606,
+      "sha256": "bfbce270bbc5298bbb16c61dd32d53258813f94abf362cc153f0e2ae4bb6ac24"
+    },
+    "sets/pressure-diary/README.md": {
+      "bytes": 3836,
+      "sha256": "a6467403e981ad1112594f6b0c17bdc613b998ed7df3865981a4866ea4cadd1e"
+    },
+    "sets/pressure-diary/dataset.json": {
+      "bytes": 4368,
+      "sha256": "a9a41c5e05347d4991d1f7d28eacb136f0fe5a466c9effdcaa9677da87317939"
+    },
+    "sets/pressure-diary/family.csv": {
+      "bytes": 457,
+      "sha256": "93d758153a0852fedcfc713ab47470f790faaa824e7785c8e21d4faa599f566b"
+    },
+    "sets/pressure-diary/pressure.csv": {
+      "bytes": 385,
+      "sha256": "198c829f69026895f03b36cf343741e0882405d0020dede9bf876593b42a6fd5"
+    },
+    "sets/psychologist-site/README.md": {
+      "bytes": 6577,
+      "sha256": "049369df4b744ad9277db44fc08475fb74a08b4d02b5c59b76242127d84ce255"
+    },
+    "sets/psychologist-site/brief.csv": {
+      "bytes": 944,
+      "sha256": "c729e225ea943f16dc51b3485dd68c9b3ea5a03e10c3b2aaeee8f84f969d429a"
+    },
+    "sets/psychologist-site/dataset.json": {
+      "bytes": 7607,
+      "sha256": "45e9e01db69dc578658f27aa1dd9b83e761752676836639120729863965e07d5"
+    },
+    "sets/psychologist-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/psychologist-site/portfolio.csv": {
+      "bytes": 625,
+      "sha256": "a8cb27867dc692634dfa0fa33f4a4f71452fd226ad23cfc01a18a284d5fb7717"
+    },
+    "sets/psychologist-site/site.csv": {
+      "bytes": 639,
+      "sha256": "38e5b21910fdea95611e77c2f29cc23fb6498a4c4f2d75ac1cfd22d187b24d58"
+    },
+    "sets/recipe-book/README.md": {
+      "bytes": 5852,
+      "sha256": "9e56b9688d5004f728c595aede3753e1ca9ef93662fd249c8e9235450cd1c823"
+    },
+    "sets/recipe-book/dataset.json": {
+      "bytes": 6846,
+      "sha256": "f6a211c3c99f907cdf4fd84182d357e2bb78740d12393038860885e55690e3c2"
+    },
+    "sets/recipe-book/menu.csv": {
+      "bytes": 481,
+      "sha256": "6fc13bd966a1295b3547b5a008810e1292a8e310aedca92eace52b2b1c7c9c60"
+    },
+    "sets/recipe-book/pantry.csv": {
+      "bytes": 242,
+      "sha256": "e19294dfe5f05b381cc9f061c4d753dfa8502c23b46b6ad808f4f8197f20de62"
+    },
+    "sets/recipe-book/recipes.csv": {
+      "bytes": 1817,
+      "sha256": "851d077ffd7544b4ea85417f58f2a5add60d4e98e3feadd831834170aebe0438"
+    },
+    "sets/school-pro-site/README.md": {
+      "bytes": 6311,
+      "sha256": "cb142f37e6ab25238bef88edf26fb57b1d840284b97f41dbfb6b5978643c03f5"
+    },
+    "sets/school-pro-site/brief.csv": {
+      "bytes": 906,
+      "sha256": "7365b437b0138c7f4775b308cbcf29a43afda27c9333ca8f26574687935aed01"
+    },
+    "sets/school-pro-site/dataset.json": {
+      "bytes": 7316,
+      "sha256": "a40b5f04c72a0aa228751be1c10a3554ff00f602eb7a5413f9804d0877727cd1"
+    },
+    "sets/school-pro-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/school-pro-site/site.csv": {
+      "bytes": 601,
+      "sha256": "631d51f90296ab0784b47cf979686ce5b2dae4777e4ed804b70eddb5bce56d47"
+    },
+    "sets/school-pro-site/tariffs.csv": {
+      "bytes": 463,
+      "sha256": "e476fdd1e731bada568e80064395bd7415afa1aa4ffad551ed8ec33c5d260459"
+    },
+    "sets/server-152fz/README.md": {
+      "bytes": 4262,
+      "sha256": "41c1c6dab250536f3e89a520dcb030b427d749a1599994238b14e925c94af204"
+    },
+    "sets/server-152fz/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/server-152fz/dataset.json": {
+      "bytes": 4713,
+      "sha256": "021644f4d53761f044cbabb5e168a1a3639fae6be271d858a826f1616c0f1e8f"
+    },
+    "sets/server-152fz/setup.csv": {
+      "bytes": 744,
+      "sha256": "5f32340b86715b7fca180d58ef34cfe33c1187e75d5aca3be954a0838d9493be"
+    },
+    "sets/service-pro-site/README.md": {
+      "bytes": 6022,
+      "sha256": "eafeb2052f56119ebf2eda594c714e8bf53c22413bc4ed5107114b32cbba0d9f"
+    },
+    "sets/service-pro-site/brief.csv": {
+      "bytes": 865,
+      "sha256": "0eeb3467826a5027b6a7d4fd00bb1f7f1e39d0672546423ad8843fac8700bb3e"
+    },
+    "sets/service-pro-site/calculator.csv": {
+      "bytes": 279,
+      "sha256": "3e61a733041ca26d480c9c93ff743327869caf8b200f12bae2cb7d82fee70e95"
+    },
+    "sets/service-pro-site/dataset.json": {
+      "bytes": 7028,
+      "sha256": "aaf69f484fc0254a90af462dd303f0d802d01586eb9df3685c4bd71ffc6f0a48"
+    },
+    "sets/service-pro-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/service-pro-site/site.csv": {
+      "bytes": 560,
+      "sha256": "430b2b5a717066b56e3bf7e8028bff4aca9e033c06c7f6d410ed1f9e8cfb13ab"
+    },
+    "sets/small-shop-site/README.md": {
+      "bytes": 6975,
+      "sha256": "6e45668de367256c805807135bc0cb97fff3291dc5b91ec0d77a279ade795f0a"
+    },
+    "sets/small-shop-site/brief.csv": {
+      "bytes": 874,
+      "sha256": "cbbcb18d0b3543d4ebe078bfa4f8fd5431d50401f3560b4174a83ac1c2d2796c"
+    },
+    "sets/small-shop-site/dataset.json": {
+      "bytes": 8163,
+      "sha256": "4b75e8a9d1624070d8b62af0b25fbaedb6ee96fb071638e76798c452635dbe7e"
+    },
+    "sets/small-shop-site/faq.csv": {
+      "bytes": 912,
+      "sha256": "f11bfc718110f1ee35bf4dfa01b23ea38147f2a93b8ef2e6156b1bc6346c6b66"
+    },
+    "sets/small-shop-site/products.csv": {
+      "bytes": 839,
+      "sha256": "ada381828669560a4a189bca199c2a75f190c287c5eaf4aade004b4763fdef83"
+    },
+    "sets/small-shop-site/site.csv": {
+      "bytes": 569,
+      "sha256": "494ced095e57d2eb5481db3453b2266d688c0e8331e3fe6ade167163539c2a5e"
+    },
+    "sets/study-agent/README.md": {
+      "bytes": 4277,
+      "sha256": "8a07011fe431a81c7864fb223533e06cdc2bfb5a123bb8f87269a3a94e31460e"
+    },
+    "sets/study-agent/dataset.json": {
+      "bytes": 4614,
+      "sha256": "35ab5d605de579b334b08641cbdaef3b2b967ffa1fe9c42a9b1e719b35123ace"
+    },
+    "sets/study-agent/lessons.csv": {
+      "bytes": 1281,
+      "sha256": "95e68f479b6f2cff4c1e696b407be5fcc06b72dda02561449b001fe1034e4d99"
+    },
+    "sets/study-agent/planningRules.csv": {
+      "bytes": 470,
+      "sha256": "94d44d167ac19bad2853ef0774a2f765321e3c76ea105ba721e5496356a01c08"
+    },
+    "sets/threads-agent/README.md": {
+      "bytes": 5935,
+      "sha256": "6356c5f1a0864c2c7651e7e478fc8885b33bed6afd55df57c1e365bad2ba7ddf"
+    },
+    "sets/threads-agent/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/threads-agent/dataset.json": {
+      "bytes": 6596,
+      "sha256": "a31d7e4cdcb01ec3b791e3fb4e0bd492785521782780ab74a48a235c5f4005d3"
+    },
+    "sets/threads-agent/posts.csv": {
+      "bytes": 1663,
+      "sha256": "d1a4368767c678d1ec04e89400bc8e58225b4781c92aa52912add48fb9a4d3be"
+    },
+    "sets/threads-agent/voice.csv": {
+      "bytes": 501,
+      "sha256": "bd96379a304a2487753254e8dc48e3df15f1093a0e912fd959a18c0f581c79b3"
+    },
+    "sets/unique-design/README.md": {
+      "bytes": 4980,
+      "sha256": "400a13e500683e68c8af9a9dae8962c50d59d7991674bd1f7cc383337737fd9a"
+    },
+    "sets/unique-design/brief.csv": {
+      "bytes": 750,
+      "sha256": "9d9bb7d42d1453cf98e8dc647824ad13e522d4af1d155a774ad9b54e31a0083d"
+    },
+    "sets/unique-design/dataset.json": {
+      "bytes": 5637,
+      "sha256": "76c48184689ffd504741ec76d8dab7a0746293a9da16c8375c30220fa96e39fb"
+    },
+    "sets/unique-design/design.csv": {
+      "bytes": 853,
+      "sha256": "983f5c79fbf494f7da975d29f8fb8b792b021464c18d92bd441add241cee9ae3"
+    },
+    "sets/unique-design/services.csv": {
+      "bytes": 411,
+      "sha256": "c606e546aa9975f9c9024fb395ded3eb10fe1aef8150f4b3b2fa8757b12e05cd"
+    },
+    "sets/webinar-moderator-agent/README.md": {
+      "bytes": 4908,
+      "sha256": "6ce663168e14fe2fcfe734160e5f494a8720cd247271013ef54be6ad53260bdd"
+    },
+    "sets/webinar-moderator-agent/dataset.json": {
+      "bytes": 5691,
+      "sha256": "35f715272daf6adf7512e29e0a4d05765cd13e0b00bd79c308c60aa3c5469895"
+    },
+    "sets/webinar-moderator-agent/event.csv": {
+      "bytes": 504,
+      "sha256": "95dbd116d7bd3a800a4a39d751a2c8e231d798b07bd545f0d2092ebc938930c8"
+    },
+    "sets/webinar-moderator-agent/moderation.csv": {
+      "bytes": 441,
+      "sha256": "65574a7022ba17e271aee1fceddb5d5dd36512074a2d9b1859bd31f05a00292c"
+    },
+    "sets/webinar-moderator-agent/webinar.csv": {
+      "bytes": 813,
+      "sha256": "02b96e18807c9501997b9c7f0d0dc9dcbde6204fc55dc10aa5b7974f465adbfe"
+    },
+    "site.css": {
+      "bytes": 5981,
+      "sha256": "321483db3a32f9a4a10a7f6594f2b54a32774531826c482fd7f547691e11b6e3"
+    },
+    "site.js": {
+      "bytes": 3126,
+      "sha256": "300975537a2f4c82112d0ece896f846f2fd88db726c683e62cb476d633680574"
+    }
+  }
+}

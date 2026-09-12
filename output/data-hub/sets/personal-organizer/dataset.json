@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "version": "2026-09-11.1",
+  "fictional": true,
+  "slug": "personal-organizer",
+  "title": "Личный органайзер",
+  "category": "Для себя",
+  "description": "Дела, идеи и календарь",
+  "provenance": "Создано НЕЙРОПРОФИ специально для учебных квестов. Не содержит записей реальных людей.",
+  "usage": "Можно копировать и адаптировать для учебных и демонстрационных проектов. Сохраняйте пометку о вымышленных данных. Не используйте как отзыв, медицинский документ или подтверждение результата.",
+  "reference_date": "2026-10-05",
+  "timezone": "Europe/Moscow",
+  "currency": "RUB",
+  "tables": {
+    "tasks": {
+      "title": "Дела на неделю",
+      "columns": [
+        "title",
+        "date",
+        "time",
+        "minutes",
+        "priority",
+        "status"
+      ],
+      "rows": [
+        {
+          "id": "demo-1",
+          "title": "Купить продукты",
+          "date": "2026-10-05",
+          "time": "10:00",
+          "minutes": 30,
+          "priority": "high",
+          "status": "todo"
+        },
+        {
+          "id": "demo-2",
+          "title": "Разобрать полку",
+          "date": "2026-10-05",
+          "time": "14:00",
+          "minutes": 20,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-3",
+          "title": "Собрать сумку для кружка",
+          "date": "2026-10-05",
+          "time": "16:30",
+          "minutes": 10,
+          "priority": "normal",
+          "status": "done"
+        },
+        {
+          "id": "demo-4",
+          "title": "Прочитать урок",
+          "date": "2026-10-06",
+          "time": "11:00",
+          "minutes": 25,
+          "priority": "high",
+          "status": "todo"
+        },
+        {
+          "id": "demo-5",
+          "title": "Заказать корм",
+          "date": "2026-10-06",
+          "time": "12:00",
+          "minutes": 10,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-6",
+          "title": "Погулять в парке",
+          "date": "2026-10-07",
+          "time": "17:00",
+          "minutes": 40,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-7",
+          "title": "Разобрать фотографии",
+          "date": "2026-10-08",
+          "time": "13:00",
+          "minutes": 20,
+          "priority": "low",
+          "status": "todo"
+        },
+        {
+          "id": "demo-8",
+          "title": "Проверить семейный календарь",
+          "date": "2026-10-09",
+          "time": "09:30",
+          "minutes": 15,
+          "priority": "high",
+          "status": "todo"
+        },
+        {
+          "id": "demo-9",
+          "title": "Полить растения",
+          "date": "2026-10-10",
+          "time": "10:00",
+          "minutes": 10,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-10",
+          "title": "Подвести итоги недели",
+          "date": "2026-10-11",
+          "time": "19:00",
+          "minutes": 15,
+          "priority": "normal",
+          "status": "todo"
+        }
+      ]
+    },
+    "ideas": {
+      "title": "Копилка идей",
+      "columns": [
+        "title",
+        "category",
+        "note",
+        "effort_minutes",
+        "status"
+      ],
+      "rows": [
+        {
+          "id": "demo-1",
+          "title": "Меню на три вечера",
+          "category": "Дом",
+          "note": "Собрать блюда из похожих ингредиентов",
+          "effort_minutes": 30,
+          "status": "new"
+        },
+        {
+          "id": "demo-2",
+          "title": "Обмен детскими книгами",
+          "category": "Семья",
+          "note": "Пробная встреча трёх семей",
+          "effort_minutes": 60,
+          "status": "new"
+        },
+        {
+          "id": "demo-3",
+          "title": "Каталог комнатных растений",
+          "category": "Дом",
+          "note": "Фото, полив и заметки",
+          "effort_minutes": 45,
+          "status": "selected"
+        },
+        {
+          "id": "demo-4",
+          "title": "Мини-урок о списках",
+          "category": "Обучение",
+          "note": "Показать один простой приём",
+          "effort_minutes": 20,
+          "status": "new"
+        },
+        {
+          "id": "demo-5",
+          "title": "Подарочные открытки",
+          "category": "Творчество",
+          "note": "Три макета для печати",
+          "effort_minutes": 50,
+          "status": "parked"
+        },
+        {
+          "id": "demo-6",
+          "title": "План прогулок",
+          "category": "Семья",
+          "note": "Пять маршрутов рядом с домом",
+          "effort_minutes": 30,
+          "status": "new"
+        },
+        {
+          "id": "demo-7",
+          "title": "Чек-лист рабочего стола",
+          "category": "Работа",
+          "note": "Порядок перед началом дня",
+          "effort_minutes": 15,
+          "status": "done"
+        },
+        {
+          "id": "demo-8",
+          "title": "Меню на 3 вечера",
+          "category": "Дом",
+          "note": "Намеренный похожий дубль для проверки",
+          "effort_minutes": 30,
+          "status": "new"
+        }
+      ]
+    },
+    "schedule": {
+      "title": "Семейное расписание",
+      "columns": [
+        "profile",
+        "date",
+        "start",
+        "end",
+        "event",
+        "responsible"
+      ],
+      "rows": [
+        {
+          "id": "demo-1",
+          "profile": "demo-child-a",
+          "date": "2026-10-05",
+          "start": "16:00",
+          "end": "17:00",
+          "event": "Рисование",
+          "responsible": "demo-parent-a"
+        },
+        {
+          "id": "demo-2",
+          "profile": "demo-child-b",
+          "date": "2026-10-05",
+          "start": "16:30",
+          "end": "17:30",
+          "event": "Робототехника",
+          "responsible": "demo-parent-a"
+        },
+        {
+          "id": "demo-3",
+          "profile": "demo-child-a",
+          "date": "2026-10-06",
+          "start": "17:00",
+          "end": "18:00",
+          "event": "Плавание",
+          "responsible": "demo-parent-b"
+        },
+        {
+          "id": "demo-4",
+          "profile": "demo-child-b",
+          "date": "2026-10-07",
+          "start": "15:00",
+          "end": "16:00",
+          "event": "Библиотека",
+          "responsible": "demo-parent-a"
+        },
+        {
+          "id": "demo-5",
+          "profile": "demo-child-a",
+          "date": "2026-10-08",
+          "start": "16:00",
+          "end": "17:00",
+          "event": "Рисование",
+          "responsible": "demo-parent-a"
+        },
+        {
+          "id": "demo-6",
+          "profile": "demo-child-b",
+          "date": "2026-10-09",
+          "start": "16:30",
+          "end": "17:30",
+          "event": "Робототехника",
+          "responsible": "demo-parent-b"
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "input": "Найти все дела и занятия на 2026-10-05",
+      "expected": "Разные типы записей видны отдельно, ничего не потеряно"
+    },
+    {
+      "input": "Повторно открыть проект после сохранения",
+      "expected": "Учебные записи сохранены; личные записи не заменены; повторный импорт не создаёт дублей"
+    }
+  ],
+  "files": [],
+  "cautions": [
+    "Цены, персонажи, услуги и результаты вымышлены. Оплата и реальные рассылки не подключены."
+  ]
+}

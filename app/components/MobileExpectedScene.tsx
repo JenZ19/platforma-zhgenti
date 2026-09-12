@@ -1,6 +1,7 @@
 "use client";
 
-import { buildMobileQuest, getMobileCapability } from "../content/mobile";
+import { getMobileCapability } from "../content/mobile";
+import { buildIllustrationQuest } from "../content/quests";
 import type { ProjectDefinition } from "../content/types";
 import { OriginalServiceScene } from "./OriginalServiceScene";
 import { getAgentContract } from "../content/agent-contracts";
@@ -48,7 +49,7 @@ function Phone({ project, step }: { project: ProjectDefinition; step: number }) 
 
 export function MobileExpectedScene({ project, step }: { project: ProjectDefinition; step: number }) {
   const capability = getMobileCapability(project);
-  const questStep = buildMobileQuest(project)[step - 1];
+  const questStep = buildIllustrationQuest(project)[step - 1];
   if (!questStep) return null;
   const sourceStep = questStep.sourceStepId || step;
   const title = questStep.title;

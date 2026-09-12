@@ -1,47 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { questProjects } from "./projects";
 import { buildQuest } from "./quests";
-import {
-  getJourneyPlan,
-  getJourneyLevelCount,
-  questLevelCounts,
-} from "./journey-plans";
 
-describe("complete quest journey passports", () => {
-  it("covers every concrete route and keeps its declared final product", () => {
-    expect(Object.keys(questLevelCounts).sort()).toEqual(
-      questProjects.map((project) => project.slug).sort(),
-    );
-
+describe("journey plans", () => {
+  it("covers every concrete project with a sequential route", () => {
     for (const project of questProjects) {
-      const plan = getJourneyPlan(project);
-      expect(plan.outcome, project.slug).toBe(project.outcome);
-      expect(plan.levelCount, project.slug).toBe(getJourneyLevelCount(project.slug));
       const steps = buildQuest(project);
-      expect(plan.levelCount, project.slug).toBe(steps.length);
-      if (project.journey !== "setup") {
-        expect(steps.at(-1)?.sourceStepId, project.slug).toBe(17);
-        expect(steps.at(-1)?.title, project.slug).toMatch(/портфолио|упаковала|две версии|готовую услугу/i);
-      }
-      expect(plan.finalProof.length, project.slug).toBeGreaterThan(20);
+      expect(steps.length, project.slug).toBeGreaterThan(0);
+      expect(steps.map((step) => step.id), project.slug).toEqual(steps.map((_, index) => index + 1));
+      expect(new Set(steps.map((step) => step.title)).size, project.slug).toBe(steps.length);
     }
   });
 
-  it("uses the number of levels required by each project instead of one course-wide number", () => {
-    expect(new Set(Object.values(questLevelCounts)).size).toBeGreaterThanOrEqual(8);
-    expect(getJourneyLevelCount("server-152fz")).toBe(9);
-    expect(getJourneyLevelCount("api-keys")).toBe(14);
-    expect(getJourneyLevelCount("planner")).toBe(17);
-    expect(getJourneyLevelCount("pressure-diary")).toBe(19);
-    expect(getJourneyLevelCount("client-care-agent")).toBe(20);
-    expect(getJourneyLevelCount("catalog-pro-site")).toBe(22);
+  it("allows route length to follow the project instead of a fixed 17-level contract", () => {
+    const lengths = questProjects.map((project) => buildQuest(project).length);
+    expect(new Set(lengths).size).toBeGreaterThan(2);
+    expect(lengths.some((length) => length < 10)).toBe(true);
   });
 
-  it("adds only named project checks and never repeats a check inside one route", () => {
-    for (const project of questProjects) {
-      const checks = getJourneyPlan(project).checks;
-      expect(new Set(checks).size, project.slug).toBe(checks.length);
-      expect(checks.every((check) => check.length > 3), project.slug).toBe(true);
+  it("ends project routes with portfolio and optional client extension", () => {
+    for (const project of questProjects.filter((item) => item.journey !== "setup" && item.kind !== "portfolio")) {
+      const last = buildQuest(project).at(-1)!;
+      expect(JSON.stringify(last), project.slug).toMatch(/портфолио|показываем/i);
+      expect(`${last.extension?.title} ${last.extension?.description}`, project.slug).toMatch(/по желанию|можно пропустить/i);
     }
   });
 });

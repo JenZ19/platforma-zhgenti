@@ -1,0 +1,18 @@
+{
+  "educational_fiction": true,
+  "network": "disabled",
+  "documents": 1,
+  "values": [
+    {
+      "raw_name": "Glucose",
+      "value_num": 5.0,
+      "unit": "ммоль/л"
+    },
+    {
+      "raw_name": "Hemoglobin",
+      "value_num": 140.0,
+      "unit": "г/л"
+    }
+  ],
+  "duplicate": "duplicate"
+}

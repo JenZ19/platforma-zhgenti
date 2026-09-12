@@ -1,0 +1,26 @@
+{
+  "carousel-agent": {
+    "version": "2026-09-08.1",
+    "bytes": 2617039,
+    "sha256": "191bb5ee64e6d1e8855cdc3a361312eae07dcc00cb512b124b2f7148ee731365",
+    "files": 31
+  },
+  "threads-agent": {
+    "version": "2026-09-08.1",
+    "bytes": 45237,
+    "sha256": "bdae8272ceb0e54991fbf75647d8bb966e7b92989d7a615d9ee668528da61554",
+    "files": 19
+  },
+  "webinar-moderator-agent": {
+    "version": "2026-09-08.1",
+    "bytes": 89648,
+    "sha256": "ae09bee043919da44b46a059c5fdded92210ffb3c404ac0ae74859b9d4e20894",
+    "files": 28
+  },
+  "family-health-hub": {
+    "version": "2026-09-08.1",
+    "bytes": 210199,
+    "sha256": "9bcbd34bd85e087d3bddd48ea2a8ed3dad6ad6f6e0c094ff9b8fecc83c957b6a",
+    "files": 58
+  }
+}

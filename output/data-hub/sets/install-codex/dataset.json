@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "version": "2026-09-11.1",
+  "fictional": true,
+  "slug": "install-codex",
+  "title": "Устанавливаем Codex",
+  "category": "Подготовка",
+  "description": "Учебная папка и первая проверка",
+  "provenance": "Создано НЕЙРОПРОФИ специально для учебных квестов. Не содержит записей реальных людей.",
+  "usage": "Можно копировать и адаптировать для учебных и демонстрационных проектов. Сохраняйте пометку о вымышленных данных. Не используйте как отзыв, медицинский документ или подтверждение результата.",
+  "reference_date": "2026-10-05",
+  "timezone": "Europe/Moscow",
+  "currency": "RUB",
+  "tables": {
+    "setup": {
+      "title": "Параметры учебной среды",
+      "columns": [
+        "field",
+        "value",
+        "meaning"
+      ],
+      "rows": [
+        {
+          "id": "demo-1",
+          "field": "project",
+          "value": "demo-workshop",
+          "meaning": "Имя вымышленного проекта"
+        },
+        {
+          "id": "demo-2",
+          "field": "server_ip",
+          "value": "192.0.2.10",
+          "meaning": "Документационный адрес, не подключаться"
+        },
+        {
+          "id": "demo-3",
+          "field": "domain",
+          "value": "demo.example.com",
+          "meaning": "Демонстрационный домен, не настраивать"
+        },
+        {
+          "id": "demo-4",
+          "field": "cpu",
+          "value": 2,
+          "meaning": "Условный пример, не рекомендация тарифа"
+        },
+        {
+          "id": "demo-5",
+          "field": "ram_gb",
+          "value": 4,
+          "meaning": "Условный пример"
+        },
+        {
+          "id": "demo-6",
+          "field": "api_key",
+          "value": "NOT_A_REAL_KEY",
+          "meaning": "Не рабочий ключ, не отправлять запрос"
+        },
+        {
+          "id": "demo-7",
+          "field": "ssh_public_key",
+          "value": "NOT_A_REAL_PUBLIC_KEY",
+          "meaning": "Ключ надо создать отдельно для настоящей среды"
+        }
+      ]
+    },
+    "tasks": {
+      "title": "Дела на неделю",
+      "columns": [
+        "title",
+        "date",
+        "time",
+        "minutes",
+        "priority",
+        "status"
+      ],
+      "rows": [
+        {
+          "id": "demo-1",
+          "title": "Купить продукты",
+          "date": "2026-10-05",
+          "time": "10:00",
+          "minutes": 30,
+          "priority": "high",
+          "status": "todo"
+        },
+        {
+          "id": "demo-2",
+          "title": "Разобрать полку",
+          "date": "2026-10-05",
+          "time": "14:00",
+          "minutes": 20,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-3",
+          "title": "Собрать сумку для кружка",
+          "date": "2026-10-05",
+          "time": "16:30",
+          "minutes": 10,
+          "priority": "normal",
+          "status": "done"
+        },
+        {
+          "id": "demo-4",
+          "title": "Прочитать урок",
+          "date": "2026-10-06",
+          "time": "11:00",
+          "minutes": 25,
+          "priority": "high",
+          "status": "todo"
+        },
+        {
+          "id": "demo-5",
+          "title": "Заказать корм",
+          "date": "2026-10-06",
+          "time": "12:00",
+          "minutes": 10,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-6",
+          "title": "Погулять в парке",
+          "date": "2026-10-07",
+          "time": "17:00",
+          "minutes": 40,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-7",
+          "title": "Разобрать фотографии",
+          "date": "2026-10-08",
+          "time": "13:00",
+          "minutes": 20,
+          "priority": "low",
+          "status": "todo"
+        },
+        {
+          "id": "demo-8",
+          "title": "Проверить семейный календарь",
+          "date": "2026-10-09",
+          "time": "09:30",
+          "minutes": 15,
+          "priority": "high",
+          "status": "todo"
+        },
+        {
+          "id": "demo-9",
+          "title": "Полить растения",
+          "date": "2026-10-10",
+          "time": "10:00",
+          "minutes": 10,
+          "priority": "normal",
+          "status": "todo"
+        },
+        {
+          "id": "demo-10",
+          "title": "Подвести итоги недели",
+          "date": "2026-10-11",
+          "time": "19:00",
+          "minutes": 15,
+          "priority": "normal",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "input": "Создать тестовую заметку из первых двух дел",
+      "expected": "Заметка содержит только два учебных дела; установка на телефон не заявлена"
+    },
+    {
+      "input": "Повторно открыть проект после сохранения",
+      "expected": "Учебные записи сохранены; личные записи не заменены; повторный импорт не создаёт дублей"
+    }
+  ],
+  "files": [],
+  "cautions": [
+    "Цены, персонажи, услуги и результаты вымышлены. Оплата и реальные рассылки не подключены."
+  ]
+}

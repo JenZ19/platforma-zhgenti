@@ -1,0 +1,21 @@
+[
+  ".env.example",
+  ".gitignore",
+  "AGENTS.md",
+  "PROVENANCE.md",
+  "START-HERE.md",
+  "channels.yml",
+  "bot.py",
+  "compose.py",
+  "config.py",
+  "generate.py",
+  "ingest.py",
+  "kb.py",
+  "llm.py",
+  "pipeline.py",
+  "requirements.txt",
+  "requirements-dev.txt",
+  "sources.yml",
+  "study_check.py",
+  "tests/test_study.py"
+]

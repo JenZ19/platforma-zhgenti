@@ -1,0 +1,7 @@
+﻿"id","profile","date","start","end","event","responsible"
+"demo-1","demo-child-a","2026-10-05","16:00","17:00","Рисование","demo-parent-a"
+"demo-2","demo-child-b","2026-10-05","16:30","17:30","Робототехника","demo-parent-a"
+"demo-3","demo-child-a","2026-10-06","17:00","18:00","Плавание","demo-parent-b"
+"demo-4","demo-child-b","2026-10-07","15:00","16:00","Библиотека","demo-parent-a"
+"demo-5","demo-child-a","2026-10-08","16:00","17:00","Рисование","demo-parent-a"
+"demo-6","demo-child-b","2026-10-09","16:30","17:30","Робототехника","demo-parent-b"

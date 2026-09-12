@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ProjectBundleDefinition, ProjectFormat } from "../content/types";
 import { QuestResetButton } from "./QuestResetButton";
 import { DashboardIcon } from "./DashboardIcon";
+import { projectArtworkUrl } from "../lib/project-artwork";
 
 export function QuestFormatChoice({
   project,
@@ -22,7 +23,7 @@ export function QuestFormatChoice({
   const shell = mobile ? "mobile-quest-shell format-choice-shell mobile" : "quest-shell format-choice-shell";
 
   return (
-    <main className={shell} data-visual-theme="elina-burgundy">
+    <main className={shell} data-track-layout="comfortable" data-visual-theme="elina-burgundy">
       <header className={mobile ? "mobile-topbar" : "site-header quest-site-header"}>
         <button type="button" className="brand brand-button" onClick={onHome}>
           <span>Н</span><b>НЕЙРОПРОФИ<small>{mobile ? "Квесты с телефона" : "Все квесты"}</small></b>
@@ -44,14 +45,19 @@ export function QuestFormatChoice({
         </div>
         <div className="format-choice-grid">
           <button type="button" className="format-option service" aria-label="Выбрать сервис" onClick={() => onChoose("service")}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="format-result-image" src={projectArtworkUrl(project.formats.service.slug)} alt={`Пример сервиса «${project.title}»`} />
             <span className="format-option-icon" aria-hidden="true"><DashboardIcon name="service" /></span>
             <span className="format-option-content"><span className="format-option-meta">Экран с кнопками</span><span className="format-option-title">Сервис</span><span className="format-option-copy">Вы сами добавляете и меняете данные в красивом приложении.</span><span className="format-option-action">Выбрать сервис →</span></span>
           </button>
           <button type="button" className="format-option agent" aria-label="Выбрать ИИ-агента" onClick={() => onChoose("agent")}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="format-result-image" src={projectArtworkUrl(project.formats.agent.slug)} alt={`Пример ИИ-агента «${project.title}»`} />
             <span className="format-option-icon" aria-hidden="true"><DashboardIcon name="agent" /></span>
             <span className="format-option-content"><span className="format-option-meta">Разговор текстом или голосом</span><span className="format-option-title">ИИ-агент</span><span className="format-option-copy">Вы рассказываете своими словами, а агент уточняет и готовит результат.</span><span className="format-option-action">Выбрать ИИ-агента →</span></span>
           </button>
         </div>
+        <p className="format-result-note">Иллюстрации результата. Внутри каждой версии можно выбрать своё оформление.</p>
         <button type="button" className="format-help-toggle" aria-expanded={explanationOpen} onClick={() => setExplanationOpen((value) => !value)}>
           Не знаю, что выбрать
         </button>

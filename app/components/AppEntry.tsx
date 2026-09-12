@@ -13,7 +13,7 @@ import { Quest } from "./Quest";
 import { HomeHelperGuideScene } from "./HomeHelperGuideScene";
 import { OriginalQuestGuideScene } from "./OriginalQuestGuideScene";
 import { isOriginalQuestSlug } from "../content/customization";
-import { buildQuest } from "../content/quests";
+import { buildIllustrationQuest as buildQuest } from "../content/quests";
 import { isSourcePrototypeSlug } from "./SourceProjectPrototypeScene";
 import { isSetupQuestSlug } from "../content/setup-quests";
 import { isAvailableInMobileTrack } from "../content/mobile-availability";
@@ -24,6 +24,7 @@ import {
   type DashboardSection,
 } from "../lib/academy-dashboard";
 import { LearningShell } from "./LearningShell";
+import { useProgressSync } from "../lib/progress-sync";
 
 type Route =
   | { type: "home"; format: "desktop" | "mobile"; formatExplicit: boolean; section: DashboardSection; search: string }
@@ -115,6 +116,7 @@ function dashboardUrl(section: DashboardSection, format: "desktop" | "mobile", s
 export function AppEntry({ initialSearch = "" }: { initialSearch?: string }) {
   const [route, setRoute] = useState<Route>(() => parseRoute(initialSearch).route);
   const [clientReady, setClientReady] = useState(false);
+  useProgressSync();
 
   useEffect(() => {
     const readBrowserRoute = (restoreSavedSection: boolean) => {

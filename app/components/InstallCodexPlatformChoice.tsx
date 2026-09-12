@@ -3,6 +3,7 @@
 import type { ProjectDefinition } from "../content/types";
 import type { SetupPlatform } from "../lib/setup-platform";
 import { DashboardIcon } from "./DashboardIcon";
+import { QuestResultShowcase } from "./QuestResultShowcase";
 
 export function InstallCodexPlatformChoice({
   project,
@@ -18,7 +19,7 @@ export function InstallCodexPlatformChoice({
   const shell = mobile ? "mobile-quest-shell format-choice-shell mobile" : "quest-shell format-choice-shell";
 
   return (
-    <main className={shell} data-visual-theme="elina-burgundy">
+    <main className={shell} data-track-layout="comfortable" data-visual-theme="elina-burgundy">
       <header className={mobile ? "mobile-topbar" : "site-header quest-site-header"}>
         <button type="button" className="brand brand-button" onClick={onHome}>
           <span>Н</span><b>НЕЙРОПРОФИ<small>{mobile ? "Квесты с телефона" : "Все квесты"}</small></b>
@@ -26,12 +27,12 @@ export function InstallCodexPlatformChoice({
         <span className="format-choice-progress">Перед началом</span>
       </header>
 
-      <section className="format-choice-hero install-platform-hero">
+      <div className="quest-entry-layout"><section className="format-choice-hero install-platform-hero">
         <button type="button" className="back-link" onClick={onHome}>← Вернуться ко всем проектам</button>
         <p className="kicker"><span /> Неделя 1 · быстрый старт</p>
         <h1>{project.title}</h1>
         <p>Выберите свой компьютер — дальше останется только нужная инструкция без лишней ветки.</p>
-      </section>
+      </section><QuestResultShowcase project={project} /></div>
 
       <section className="format-choice-card install-platform-card" aria-labelledby="install-platform-title">
         <div className="format-choice-heading">

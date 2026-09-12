@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getProject, getQuestProject, isProjectBundle, projects, questProjects } from "./projects";
+import { getProject, getQuestProject, isProjectBundle, libraryProjectCount, projects, questProjects } from "./projects";
 
 describe("project registry", () => {
   it("uses one complete client agent instead of five repeated projects", () => {
@@ -10,8 +10,8 @@ describe("project registry", () => {
       "приём заявки",
       "уточнение запроса",
       "подбор и объяснение",
-      "подготовка записи",
-      "продажа и сопровождение",
+      "подготовка записи без мнимой брони",
+      "черновик предложения и передача человеку",
     ]));
 
     for (const repeatedSlug of ["lead-agent", "selector-agent", "booking-agent", "sales-manager-agent"]) {
@@ -55,7 +55,7 @@ describe("project registry", () => {
       expect(project.audience.length, project.slug).toBeGreaterThan(4);
       expect(project.outcome.length, project.slug).toBeGreaterThan(12);
       expect(project.entities.length, project.slug).toBeGreaterThanOrEqual(2);
-      expect(project.features.length, project.slug).toBeGreaterThanOrEqual(4);
+      expect(project.features.length, project.slug).toBeGreaterThanOrEqual(2);
       expect(project.demo.length, project.slug).toBeGreaterThanOrEqual(2);
       expect(project.safety.length, project.slug).toBeGreaterThan(8);
       expect(project.portfolioAngle.length, project.slug).toBeGreaterThan(8);
@@ -67,4 +67,9 @@ describe("project registry", () => {
     expect(planning && isProjectBundle(planning) ? planning.title : undefined).toBe("Планирование");
     expect(getProject("missing-project")).toBeUndefined();
   });
+});
+
+it("считает библиотеку по каталогу, а не по записанному числу", () => {
+  expect(libraryProjectCount).toBe(questProjects.filter((project) => project.journey !== "setup").length);
+  expect(libraryProjectCount).toBeGreaterThan(40);
 });

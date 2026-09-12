@@ -8,7 +8,9 @@ const preview = fs.readFileSync(path.join(root, "app/components/ProjectPreview.t
 const css = fs.readFileSync(path.join(root, "app/pink-learning-dashboard.css"), "utf8");
 
 test("project cards use result covers instead of lesson screenshots", () => {
-  assert.match(preview, /\/covers\/\$\{project\.slug\}\.webp/);
+  assert.match(preview, /projectArtworkUrl\(project\.slug\)/);
+  const artwork = fs.readFileSync(path.join(root,"app/lib/project-artwork.ts"),"utf8");
+  assert.match(artwork, /\/covers\/\$\{slug\}\.webp/);
   assert.doesNotMatch(preview, /\/screens\//);
 });
 

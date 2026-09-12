@@ -1,0 +1,13 @@
+[Unit]
+Description=Midweek nudge for learners whose lesson progress stands still
+
+[Timer]
+# Четверг, 12:00 по Москве — середина недели, подальше от понедельничной рассылки.
+# Часовой пояс в строке требует systemd 252+. Перед включением проверить:
+# systemd-analyze calendar "Thu *-*-* 12:00:00 Europe/Moscow"
+OnCalendar=Thu *-*-* 12:00:00 Europe/Moscow
+Persistent=true
+AccuracySec=1m
+
+[Install]
+WantedBy=timers.target

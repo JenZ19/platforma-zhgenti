@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { AppEntry } from "./components/AppEntry";
+import { libraryProjectCount } from "./content/projects";
 
 export const metadata: Metadata = {
   title: "НЕЙРОПРОФИ — ИИ-агенты и ИИ-сайты",
-  description: "42 разных проекта курса НЕЙРОПРОФИ: готовые команды, короткие уровни и понятный результат на каждом шаге.",
+  description: `${libraryProjectCount} разных проектов курса НЕЙРОПРОФИ: готовые команды, короткие уровни и понятный результат на каждом шаге.`,
 };
 
 type PageSearchParams = Record<string, string | string[] | undefined>;

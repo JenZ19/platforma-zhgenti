@@ -1,0 +1,496 @@
+{
+  "version": "2026-09-08",
+  "description": "AI-generated concepts, not real interface screenshots. Full uncropped devices; lesson instructions remain separate.",
+  "images": [
+    {
+      "slug": "install-codex",
+      "src": "/covers/install-codex.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "66c7d7f540962ff332320e68556d76c37e732905ddd992d257e038cce831f6e8",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Asset type: illustrative course result concept, not an instructional screenshot. Create one crisp high-end photorealistic device product mockup in wide landscape 3:2. Consistent premium feminine design school art direction, restrained burgundy accent, rich real materials, generous negative space and soft studio light. Whole device entirely visible with at least 12% safe margin on every edge, no chopped screen or props. Realistic simple Russian interface specific to project, large legible short headings, no gibberish paragraphs, use only stated demo information. No feature invention, no certification or compliance seals, no medical interpretation, no actual passwords/API keys or personal information, no watermark. No floating decorative app windows outside device. Silver laptop open on warm ivory desk, matte rose ceramic cup and closed burgundy notebook. Display a refined minimal coding workspace result with header \"Учебный проект\", a folder named \"Мой первый проект\", and concise completed task card \"Первая задача готова\"; small neutral footer \"Учебный пример\". Screen white and charcoal, subtle rose selection. No fake installation settings or credentials. Calm three-quarter eye-level composition, full laptop body and keyboard visible."
+    },
+    {
+      "slug": "server-152fz",
+      "src": "/covers/server-152fz.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "4d11177b00f4975afbff7f7ad690e9ff1d73d8a80a05dba7c1bc87e56956f992",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Asset type: illustrative course result concept, not an instructional screenshot. Create one crisp high-end photorealistic device product mockup in wide landscape 3:2. Consistent premium feminine design school art direction, restrained burgundy accent, rich real materials, generous negative space and soft studio light. Whole device entirely visible with at least 12% safe margin on every edge, no chopped screen or props. Realistic simple Russian interface specific to project, large legible short headings, no gibberish paragraphs, use only stated demo information. No feature invention, no certification or compliance seals, no medical interpretation, no actual passwords/API keys or personal information, no watermark. No floating decorative app windows outside device. Graphite laptop on cool pale sage desk, small brushed metal external backup drive and pale burgundy checklist card beside it. Screen is a clean conceptual project hosting decision dashboard, heading \"Размещение проекта\", three tidy cards \"Требования\", \"Доступ\", \"Резервная копия\", a modest note \"Учебный пример\". Not a real provider interface. Show an understated architecture diagram with project connected to one server and backup. Do not write 152-ФЗ, compliance, discount or Active; no legal certifications or IP addresses. Laptop slightly angled left, complete laptop and drive visible."
+    },
+    {
+      "slug": "api-keys",
+      "src": "/covers/api-keys.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "f914b17c1b006ee0754ea2b35d440a43bc4cc9019273a57df4b5f3171577cf43",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. A premium illustrative course result concept, not real instruction or production evidence. One high-end photorealistic device mockup in landscape 3:2, crisp sophisticated feminine design school art direction. WHOLE device completely visible, generous 12% margins all sides, props fully visible, soft daylight and realistic materials. Screen contains large clean short Russian text specified below and relevant simple usable UI only, no invented functionality, no personal data, no medical interpretation, no security credentials or compliance seals, no watermark. No floating UI outside screen. Small screen footer \"Учебный пример\". A full slim silver laptop seen frontal three-quarter on pale blue stone with tiny burgundy pencil and clear frosted paperweight. Conceptual connection dashboard heading \"Подключение API\", three rows \"Ключ скрыт\", \"Тестовый запрос\", \"Расход проверен\", hidden field dots only, a compact one-request result card. No provider names, no actual key, no usage numbers. Navy, ivory and dusty pink UI."
+    },
+    {
+      "slug": "family-expenses",
+      "src": "/covers/family-expenses.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "7cc396791222158b0618e9161e33faac2c7ab27c33a9d0863285dbed72218c48",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. A premium illustrative course result concept, not real instruction or production evidence. One high-end photorealistic device mockup in landscape 3:2, crisp sophisticated feminine design school art direction. WHOLE device completely visible, generous 12% margins all sides, props fully visible, soft daylight and realistic materials. Screen contains large clean short Russian text specified below and relevant simple usable UI only, no invented functionality, no personal data, no medical interpretation, no security credentials or compliance seals, no watermark. No floating UI outside screen. Small screen footer \"Учебный пример\". Full upright modern phone on pale peach countertop, small ceramic coin dish with blank coins and folded plain receipt beside it. Screen: elegant local expense ledger header \"Расходы семьи\", prominent \"550 ₽\", three entries \"Продукты\", \"Дом\", \"Транспорт\", a pencil edit icon and small button \"Сохранить копию\". This is fictitious demo expenses, no bank logos or connections. Warm terracotta, cream and burgundy interface, ledger not a chatbot."
+    },
+    {
+      "slug": "planner",
+      "src": "/covers/planner.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "ce532f88a59e7e918fcd71ca2863bb49f87308f3906e41f92e4d754aac219a4a",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. A premium illustrative course result concept, not real instruction or production evidence. One high-end photorealistic device mockup in landscape 3:2, crisp sophisticated feminine design school art direction. WHOLE device completely visible, generous 12% margins all sides, props fully visible, soft daylight and realistic materials. Screen contains large clean short Russian text specified below and relevant simple usable UI only, no invented functionality, no personal data, no medical interpretation, no security credentials or compliance seals, no watermark. No floating UI outside screen. Small screen footer \"Учебный пример\". Full cream-edged phone lying at gentle angle on lavender desktop with a small hourglass and slim burgundy pen. Screen a beautiful daily planner heading \"Мой день\", distinct priority card \"Главное сегодня\", tidy three-item checklist \"Отправить документы\", \"Купить продукты\", \"Время для себя\", small seven-day strip. Soft lilac and white with berry selected card, task planner not chat."
+    },
+    {
+      "slug": "idea-vault",
+      "src": "/covers/idea-vault.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "a2c2c008d57798f0c7892c1ea105cd98e5fc559e0315acd4716f39c98fdb5c8a",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. One elegant photorealistic UPRIGHT PORTRAIT SMARTPHONE on pale peach studio plinth, device has realistic tall narrow 19.5:9 phone proportions, NOT tablet, NOT landscape device, entire phone visible with 12% safe margins. Wide 1536x1024 photograph. Only props: exactly three small blank pastel index cards and one short plain pencil, no flowers, plants, cups, posters, motivational text, books, logos or school branding. Screen heading \"Копилка идей\", search field \"Найти идею\", three vertically stacked clean idea cards \"Подарок маме\", \"Маршрут на выходные\", \"Идея для поста\", small tags \"Новое\", \"В работе\", bottom \"Следующий шаг\". Coral cream graphite mint palette, refined crisp type. Small footer \"Учебный пример\". This is a local ideas app, not a generic chatbot; no added integrations, analytics, notifications or invented features. All screen text Russian, short and accurate."
+    },
+    {
+      "slug": "child-schedule",
+      "src": "/covers/child-schedule.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "8b27998d4a7908c1ee5529d5267e693f81157b15f5cfc7684d4909c60b2b4c83",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full upright silver phone on powder-blue shelf with one small pair of swim goggles and rolled pale blue towel. Screen header \"Учебная неделя\", mini week calendar September 2026 with two distinct swim entries \"16 сентября\", \"17 сентября\", responsibility chip \"Взрослый 1\" and label \"Разовый перенос\". Blue, coral and warm white. No real child names, location or contact."
+    },
+    {
+      "slug": "pressure-diary",
+      "src": "/covers/pressure-diary.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "97e2631fa0b6f4695dc71c780adbdfe12200d37f8675ee859d44a5ec72e14316",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full upright white phone on muted plum tabletop beside a closed paper notebook and neutral digital blood pressure cuff, no reading visible on cuff. Screen header \"Дневник давления\", simple recording table showing \"12 августа · 09:00\", \"120/80\", \"Пульс 72\", button \"Новая запись\" and note \"Только записи\". Off-white lavender plum. No interpretation, green/red risk classification, diagnoses or advice."
+    },
+    {
+      "slug": "fitness-tracker",
+      "src": "/covers/fitness-tracker.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "e5f97b01113de57314e8b1331499257fcd29ea7a3c3d33a35a3f8a398150f53a",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full phone tilted on peach gym mat with a small burgundy resistance band loop and plain water flask, plenty empty background. Screen header \"Моя привычка\", main card \"Прогулка 10 минут\", seven understated dots for week, labels \"Сделано\", \"Пропуск\", \"Без отметки\", tiny \"Изменить\". Apricot white terracotta. One habit only, no calories, weight or health scores."
+    },
+    {
+      "slug": "recipe-book",
+      "src": "/covers/recipe-book.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "8f3eafca677d0508cd32e6122c603dc4fdabe5d629f90782ebdababd8db9941a",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full cream phone upright on pale pistachio kitchen surface with one small plate of homemade syrniki and linen napkin. Screen header \"Мои рецепты\", appetizing small syrniki photo, title \"Сырники\", portion selector \"2 → 4 порции\", list with \"Творог\", \"Яйца\", button \"В покупки\". Sage buttercream burgundy detail. Recipe app not chat. No nutrition/medical claims."
+    },
+    {
+      "slug": "personal-organizer",
+      "src": "/covers/personal-organizer.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "0e1a015c7543376fd5cbc9e6a67af92438a38a6eb0a95bf098335ef7cb596292",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full black phone in clean flatlay on pale pink desk with two small differently colored bookmarks and a slim grey pencil. Screen header \"Мой старт\", exactly two large link tiles \"Планер\" and \"Расходы\", drag handles and small \"Копия настроек\". Modern editorial black blush ivory. This is links to independent tools only, not integrated dashboard or merged data."
+    },
+    {
+      "slug": "home-helper",
+      "src": "/covers/home-helper.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "a60a6e9c1b3b0c24519c77baa382bb43cb79bdef7d3d072d57ce6e83658b020f",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full phone on pale warm terracotta block beside a small folded cleaning cloth and wooden handled brush. Screen header \"Дела дома\", three clean task cards \"Заказать воду\", \"Протереть стол\", \"Разобрать полку\", chips \"Сегодня\", \"Еженедельно\", \"Взрослый 1\", one completed checkmark. Sand, teal and muted burgundy. No shared online notifications or invented integrations."
+    },
+    {
+      "slug": "family-health-hub",
+      "src": "/covers/family-health-hub.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "ba4882cec2060d3ed0a1c13ab30dfc387d2747d375e5a4428be05f29c9b30dec",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create one minimal high-end photorealistic silver LAPTOP mockup, entire laptop and keyboard visible with generous margins, landscape 1536x1024. Pale lavender studio desk, exactly one blank document folder and tiny external drive. No plants, cups, slogans or school branding. Screen depicts a private FAMILY MEDICAL DOCUMENT archive, NOT invoices, NOT receipts, NOT financial documents. Heading in Russian \"Учебный медицинский архив\", exactly one profile \"Профиль 1\". Split view: LEFT a single fictional LABORATORY PDF entitled \"Учебный анализ крови\" and short neutral rows \"Гемоглобин 130 г/л\", \"Эритроциты 4,5\". RIGHT a matching extracted table with the same values, heading \"Сверка с оригиналом\", neutral grey row \"Неразобранная строка\". Show small \"Учебный пример\". This is document storage and transcription only: no diagnosis, medical interpretation, advice, risk colors, normal/abnormal markers, arrows or health ratings. No real personal names, addresses, IDs or secrets. Elegant simple Russian typography. Prop surfaces blank. Do not invent any additional feature or automatic connection. Entire laptop completely in frame."
+    },
+    {
+      "slug": "day-planner-agent",
+      "src": "/covers/day-planner-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "a920f79d2e2fb130deba9532a33f90627e1d7006a33fa22752beb0edd7ffe892",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete upright graphite phone on powder yellow surface beside small analog desk clock. Screen heading \"План дня\", one short input \"Главное — документы\", then a well-structured response timeline cards \"Отправить документы\", \"Обед\", \"Запас 30 минут\", lower label \"Можно скорректировать\". Navy butter yellow berry. Generic private assistant, no Telegram logo, no automated calendar promises. Concrete useful response not generic chat cover."
+    },
+    {
+      "slug": "home-organizer-agent",
+      "src": "/covers/home-organizer-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "775032e6a91999c4d01919fbb88fa63c578d01718d726db2230c9a121be10f21",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete rose-edged phone angled on moss-green surface beside tiny wicker tray and wooden laundry peg. Screen heading \"План для дома\", user bubble \"Вода и детская\", response with checked subheading \"Сегодня\", \"Заказать воду\", followed by \"Завтра\" and \"15 минут на полку\". Cream forest green berry. Assistant offers manageable plan, not automatic task execution. No Telegram marks."
+    },
+    {
+      "slug": "meal-planning-agent",
+      "src": "/covers/meal-planning-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "589531314b6fdf3b452f66fbd40062ed67d7589f485e034e1382b66906708e22",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full silver phone upright on deep teal kitchen studio backdrop with one red tomato and small wooden spoon, all complete. Screen heading \"Меню на три дня\", response shows three elegant dish rows \"Паста с овощами\", \"Омлет\", \"Овощной суп\" plus section \"Список покупок\", small user note \"До 30 минут\". Teal cream tomato red. Ordinary meal suggestions, no medical diet, nutrition guarantees or allergy safety claims. No Telegram."
+    },
+    {
+      "slug": "study-agent",
+      "src": "/covers/study-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "84adb645fab6073b7a18b5c19a0379e50cf40af2c3823c152ab727b9d17b1971",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete cream phone lying on dusky blue desktop with two closed books and one burgundy pencil. Screen heading \"Разберём материал\", short excerpt card labeled \"Источник\", then \"Проверка понимания\", numbered question cards \"1\", \"2\", \"3\", one compact feedback card \"Вернёмся к примеру\". Navy white light rose. Private study conversation based on supplied text, no invented knowledge source details."
+    },
+    {
+      "slug": "idea-analysis-agent",
+      "src": "/covers/idea-analysis-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "5a7e8e61b19d5ec2399697613ef25fd4c53cf471eefa2a79e97e86b5e94caa7c",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full black phone upright on pale violet sculptural block beside exactly three folded colored paper tabs. Screen heading \"Выбираем идею\", user chip \"4 часа на неделю\", three minimal option cards \"Пост\", \"Мини-гайд\", \"Серия видео\", selected feasible card \"Пост\" and result \"Следующий шаг: план\". Violet cream plum. Show reasoned constrained choice, no scores or income claims."
+    },
+    {
+      "slug": "expense-agent",
+      "src": "/covers/expense-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d267cec63db74def33d947778757a748ba2c2436dcd5d80b6ef85d2ae582c5ba",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full rose phone flatlay on sage notebook beside one small blank receipt and silver paperclip. Screen heading \"Запись расхода\", user bubble \"300 ₽ на продукты\", assistant card structured rows \"Сумма 300 ₽\", \"Продукты\", \"Уточните дату\", button \"Подтвердить\". Sage white burgundy. Clearly prepared draft requiring date and confirmation, no bank linking or auto-save promise."
+    },
+    {
+      "slug": "family-schedule-agent",
+      "src": "/covers/family-schedule-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "640754bcfa964e3888aa2e6cf7eb49bda741af5e63e82cc551a475eae8c6b144",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full navy phone upright on pale coral surface with two anonymous color-coded planner tokens and a miniature neutral clock. Screen heading \"Семейный план\", two timeline rows \"Ребёнок А\", \"Ребёнок Б\", same overlapping block outlined gently amber, result \"Нужно перенести одно занятие\", responsibility \"Взрослый 1\". Coral ink ivory. No real child information, addresses or external calendar integration."
+    },
+    {
+      "slug": "habit-agent",
+      "src": "/covers/habit-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "da1dbf3dd1ebab3ff4827a371cc9938681ca650c2ac6aedd699548985b23f9d4",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full graphite phone leaning on light olive block, one walking shoe heel visible completely at side and rolled pale towel. Screen heading \"Маленький шаг\", user bubble \"Вчера пропустила\", response \"Начнём с 5 минут\", single action card \"Прогулка после обеда\", warm small footer \"Можно изменить план\". Olive cream muted raspberry. No streak pressure, medical guidance or automated reminders."
+    },
+    {
+      "slug": "brief-agent",
+      "src": "/covers/brief-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "156c50f933676d607552a71c56817373d4ce06f1926e8e28c5ca70a47367e50b",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full silver phone beside a short stack of blank client brief cards on cool grey-blue desk. Screen heading \"Бриф на сайт\", concise dialogue \"Для какой услуги?\" / \"Для консультации\", below a structured summary card titled \"Сводка\" with rows \"Цель\", \"Аудитория\", \"Что уточнить\" and button \"Подтвердить бриф\". Slate rose ivory. No invented filled facts, no automatic project start."
+    },
+    {
+      "slug": "content-agent",
+      "src": "/covers/content-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "6dd37c81b716b8b2f513b3224110a937392751815aa7286a0eb75581afccb797",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full cream phone on dusty red tabletop beside small unlit artisanal candle and a plain kraft note. Screen heading \"Черновик поста\", small source chip \"История мастерской\", a designed post preview with title \"Как рождается свеча\", short two-line body, lower editing tags \"Факты\", \"Голос автора\", button \"Уточнить фразу\". Dusty red buttercream black. Fictitious candle workshop story, no invented clients, revenue or achievements, no publish automation."
+    },
+    {
+      "slug": "expert-assistant-agent",
+      "src": "/covers/expert-assistant-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "a83f5862a743cd8365b8546aad4d7d691e6506040813f4633fcc862bc853c8f4",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full black phone on warm grey shelf with a burgundy notebook and slim metal bookmark. Screen heading \"План встречи\", three orderly sections \"Цель\", \"Вопросы\", \"Следующий шаг\", each with small source-reference chips \"Материал · п. 1\", \"Материал · п. 2\". Professional charcoal parchment muted plum. Internal preparation draft only, no messages sent or advice claims."
+    },
+    {
+      "slug": "administrator-agent",
+      "src": "/covers/administrator-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "cf6043c20c38af74c8753fc8a5f1e0f7e6964f8e2da3bddb26cceb6418f6b1bf",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full white phone on deep mauve desktop with one small silver service bell and a plain folded appointment card. Screen heading \"Запрос на запись\", clear service request card \"Консультация\", \"Время уточняется\", response \"Передать администратору\". Mauve white muted teal. Unconfirmed request, no available-slot calendar, no confirmed booking badge, no customer personal data."
+    },
+    {
+      "slug": "consultant-agent",
+      "src": "/covers/consultant-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "5d8541e91d5299ee1ef49bff12d0cd567771d75ba4ede405c93f509441d6e338",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full graphite phone upright on pale slate blue platform beside two paper brochure swatches. Screen heading \"Выбор услуги\", user bubble \"Нужна поддержка\", side-by-side compact two service cards \"Разбор\", \"Сопровождение\", response footer \"По материалам\", button \"Уточнить у эксперта\". Slate white burgundy. No ungrounded price, guarantee, financial/legal/medical advice."
+    },
+    {
+      "slug": "online-school-agent",
+      "src": "/covers/online-school-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "3f910c3212d4dacdb36d125ec19cc781475cef8d02736add617ec6d326fb6ada",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full cream phone beside one closed workbook and small rose bookmark on powder mint desk. Screen heading \"Помощник по курсу\", user bubble \"Что после урока?\", concise FAQ response card \"Следующий шаг\", \"Откройте учебный шаблон\", small status \"Тариф уточнён\", secondary action \"Вопрос куратору\". Mint ink berry. Conceptual FAQ guide no actual school branding, no promised access manipulation or private content exposure."
+    },
+    {
+      "slug": "event-organizer-agent",
+      "src": "/covers/event-organizer-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "8e2ab5364e3b483dbcbaa4045d19580fd14c0e739becec0076dbdf956b36fabd",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full silver phone upright on pale peach event planning board surface with two small ivory folded place cards and a burgundy ribbon loop. Screen heading \"План события\", visible task checklist \"Подготовить программу\", \"Проверить ссылку\", \"Репетиция\", sections \"Сроки\" and \"Что проверить\". Peach aubergine cream. Planning draft only, no automatic invitations or calendar writes."
+    },
+    {
+      "slug": "client-care-agent",
+      "src": "/covers/client-care-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "83bdec377798e4dbac06763e2bc541819992c6ddb79193a34363241d98b929c0",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full graphite phone angled on deep forest green studio table with one plain cream envelope and rose paperclip. Screen heading \"Запрос клиента\", short user bubble \"Разбор до 4 000 ₽\", clear response card \"Уточним задачу\", \"Подберём формат\", lower footer \"Запись требует подтверждения\". Forest white salmon. No confirmed slot, payment, sales guarantee or unapproved outgoing message."
+    },
+    {
+      "slug": "fairy-team-agent",
+      "src": "/covers/fairy-team-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "09032812bed5c1a9459ea748d3937b493d5f018a2d228add0cf1c31d6e946003",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full cream phone on lavender plinth, three small translucent glass paperweights rose blue amber nearby, no characters or wings. Screen heading \"Один анонс — три роли\", stacked process cards \"Исследователь\", \"Автор\", \"Редактор\", final card \"Анонс проверен\" with tiny factual correction marker \"Дата уточнена\". Lavender ivory berry. One collaborative draft outcome, no automatic publishing, no general chat filler."
+    },
+    {
+      "slug": "carousel-agent",
+      "src": "/covers/carousel-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "78473f741201adf7d2f404542326acda4230cf47fa804c9d6ae0454d80d23850",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full silver phone on cobalt blue surface with a small fan of five matching miniature editorial print cards. Screen heading \"Карусель готова\", a neat grid of five slide previews with simple cream and coral typography, \"5 PNG-слайдов\", selected one labelled \"Слайд 3\", control \"Правка слайда\". Cobalt coral cream. Content-preserving template layout, no autonomous Instagram publishing or fake analytics."
+    },
+    {
+      "slug": "threads-agent",
+      "src": "/covers/threads-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d39ff503308fd463953059676db03bcb6daa195b876935f3fb3ff1294f977f39",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full graphite phone on rose-red desk with a short stack of narrow white paper strips and black pen. Screen heading \"Черновики Threads\", chip \"10 черновиков\", two visible short numbered draft cards, source labels \"Источник\", status controls \"Не беру\", \"Уже выложила\"; no social network notification badges. Red ivory graphite. Prepared text drafts only, manual publishing, no automatic posting or reach metrics."
+    },
+    {
+      "slug": "webinar-moderator-agent",
+      "src": "/covers/webinar-moderator-agent.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "172984ac82507baa4dceba9b95c1fe2e3993c23997ddb8f9759b78af3e7371bf",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full navy phone upright on cool lavender surface next to one small tabletop microphone, whole mic and phone in frame. Screen heading \"Вопросы вебинара\", status \"Тестовая комната\", response cards tagged \"Вопрос по теме\", \"Организационный\", footer \"Решает модератор\", button \"Дайджест\". Lavender navy pale pink. Observation and human-assisted decisions, no automatic answers, blocking or deleting participants."
+    },
+    {
+      "slug": "unique-design",
+      "src": "/covers/unique-design.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "651e7082697da3c44360415a8d9dbe604036fcfa3dc92b567a881ba688db10ab",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Full silver laptop on bold dusty coral surface with three small physical color swatches cream ink moss and typographic reference cards. Screen heading \"Паспорт оформления\", main refined web page preview, tiny separate thumbnail labels \"До\", \"После\", bottom three color circles and type specimen \"Аа\". Coral cream ink. Revised existing project concept with consistent typography, not a generic design school dashboard. No copied brands or logos."
+    },
+    {
+      "slug": "expert-site",
+      "src": "/covers/expert-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "e231ea905b2d72a2345b9a9837c94a62f2e3a2befd4ecce432574567b4418aeb",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete silver laptop on pale sand surface beside simple budget notebook and a matte burgundy pen. Screen refined editorial one-page expert website heading \"Порядок в бюджете\", subtitle \"Разбор 45 минут\", button \"Обсудить разбор\", concise process section of three simple steps. Cream chocolate dusty rose. Fictional home budget expert, no fabricated credentials, testimonials, metrics or income promises."
+    },
+    {
+      "slug": "psychologist-site",
+      "src": "/covers/psychologist-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "6db5b270afd6d038e2a06c454b3c414869b84e3f0208136f4df0b4864f441fe7",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete cream laptop on subdued sage desk with a smooth stone and folded oat linen. Screen calm spacious specialist site heading \"Первая встреча\", modest text \"Онлайн · 50 минут\", sections \"Формат\" and \"Границы помощи\", button \"Связаться\". Sage ivory soft charcoal with tiny burgundy accent. No diagnosis, healing claim, qualifications invented, sensitive intake form or emotional manipulation."
+    },
+    {
+      "slug": "beauty-site",
+      "src": "/covers/beauty-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "01f253e85cb5be25284c65ff0f111d4f40758f31d2b03a80def7c5040e1971eb",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete rose-silver laptop on pale lilac lacquer desk with one closed mauve nail polish bottle and clean nail color swatch wheel. Screen elegant manicure website heading \"Маникюр\", two polished close-up nail-work image tiles, \"90 минут\", \"Учебная цена 2 000 ₽\", button \"Спросить о маникюре\". Lilac plum ivory. One service only, no fake reviews or confirmed booking."
+    },
+    {
+      "slug": "photographer-site",
+      "src": "/covers/photographer-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "151d9a8b6fc0979726f2caa12a24b6160342279054f10a7e99e77fdff6eabd3e",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete graphite laptop on warm dark cocoa studio table beside small camera lens and two photo prints. Screen tasteful photography site heading \"Семейная прогулка\", varied landscape and portrait photo gallery of anonymous fictional family outdoors, line \"1 час · 20 кадров\", button \"Обсудить съёмку\". Cocoa cream olive, images more important than text. No invented photographer awards, client claims or reviews."
+    },
+    {
+      "slug": "designer-site",
+      "src": "/covers/designer-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "673cbc1e8ca704f8e912ae1950dc03b2c9e3058cb682f11c5278abbbca79b90a",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete silver laptop on pale lemon desktop beside printed coffee menu and burgundy pencil. Screen bold editorial designer portfolio heading \"Меню кофейни\", large graphic menu project mockup, columns \"Задача\", \"Ограничение\", \"Решение\", button \"Запрос дизайнеру\", small \"Учебный кейс\". Butter yellow ink berry. One honest design case, no fabricated sales growth or client endorsement."
+    },
+    {
+      "slug": "consultation-site",
+      "src": "/covers/consultation-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "443fa622ba8079fb34160024b70545c371c61114c0129f3124216ca9437e91a7",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete white laptop on terracotta desk with one plain archive folder and stack of neatly sorted photo envelopes. Screen refined service website heading \"Порядок в архиве\", line \"Консультация · 40 минут\", clear result card \"Схема папок\", section \"Что подготовить\", button \"Обсудить консультацию\". Terracotta ivory soft brown. One home archive organizing consultation only, no guarantees or fake testimonials."
+    },
+    {
+      "slug": "course-site",
+      "src": "/covers/course-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "84ded02d9afee4166d631047579dd26df5bda73482528322fb37ed3dab0a7660",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete silver laptop on cool blue surface with three small numbered lesson cards and one closed notebook. Screen mini-course landing page heading \"Порядок в фото\", three numbered lesson blocks \"Отбор\", \"Папки\", \"Резервная копия\", button \"Узнать о курсе\". Sky blue white burgundy. Exactly three lessons, no invented course duration, price, certificates or student outcomes."
+    },
+    {
+      "slug": "event-site",
+      "src": "/covers/event-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "a2a359c6084344a0be6155cd7e42282f5c10eb1ee79bffedf921e39666e268ae",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete graphite laptop on pale peach table with a plain folded agenda card and tiny neutral timer. Screen event landing heading \"Онлайн-мастерская\", large \"15 октября 2026\", \"18:00 МСК · UTC+3\", compact program and button \"Запросить участие\". Peach deep plum ivory. Fictional educational webinar, do not show confirmed registration or fake speaker credentials."
+    },
+    {
+      "slug": "small-shop-site",
+      "src": "/covers/small-shop-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "6c4ec8c7a8c059c3e7ad277c338a76443e150f72ca50f4a1df3bbeb308c6e5fe",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete cream laptop on muted olive counter beside physical ivory ceramic mug and unlit candle in glass jar. Screen tasteful small shop storefront heading \"Тёплый дом\", two product cards, \"Кружка · 800 ₽\", \"Свеча · нет в наличии\", button \"Спросить о товаре\". Olive cream ochre burgundy. Clearly educational pricing, no payment checkout or fake stock promise."
+    },
+    {
+      "slug": "portfolio-site",
+      "src": "/covers/portfolio-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "99cf72f787ebd0d1a408c73f51787a286d9af0d360b263930fd5367f6f994786",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete silver laptop on pale pink desk with a slim dark notebook and one copper paperclip. Screen elegant beginner portfolio heading \"Мои проекты\", exactly one large existing work card titled \"Планер\", small label \"Учебная работа\", concise labels \"Задача\", \"Мой вклад\", button \"Открыть проект\", contact link. Pink graphite cream. No invented clients, expertise or multiple extra projects."
+    },
+    {
+      "slug": "expert-pro-site",
+      "src": "/covers/expert-pro-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "dce3bee9abc908da079cc1f6b8a3ee0f2d40621f418531fe050d28a3d3970a4f",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete graphite laptop on pale oat table with one printed single-page checklist and burgundy binder clip. Screen expert website heading \"Порядок в бюджете\", prominent download panel \"Полезный чек-лист\" with button \"Скачать PDF\", a separate small \"Связаться\". Oat burgundy dark olive. Only enhancement is one downloadable gift; no payment, account, email collection or automation."
+    },
+    {
+      "slug": "school-pro-site",
+      "src": "/covers/school-pro-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d7513037742413fdd3aec23fb4607f0382fa73b2ba22d6b90724363b6bb537e4",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete silver laptop on dusty navy table with two contrasting cream and blush bookmarks and closed workbook. Screen course landing heading \"Выберите формат\", exactly two side-by-side comparison cards, first \"Самостоятельно\", \"2 000 ₽\", second \"С поддержкой\", no numeric price on second, selected first card, button \"Обсудить выбранный тариф\". Navy cream soft rose. Demo tariffs, no payment or claimed enrollment, choice passed in enquiry only."
+    },
+    {
+      "slug": "service-pro-site",
+      "src": "/covers/service-pro-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "6deafaae8142e0ea023dcaf3d285991c878a01e4d3fb42a18f64138c6a090525",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete white laptop on pale grey workshop desktop beside small retractable measuring tape and a burgundy carpenter pencil. Screen refined service calculator heading \"Предварительный расчёт\", field \"45 м²\", rate \"600 ₽/м²\", result \"27 000 ₽\", button \"Обсудить расчёт\". Grey teal ivory muted berry. Clear estimate not binding price, no invented reviews, payment or scheduled booking."
+    },
+    {
+      "slug": "catalog-pro-site",
+      "src": "/covers/catalog-pro-site.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "2c950ceab0b4ba225c6ad16a92c898254ee92ce73153cbdcdf7c5fdcfad681b3",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete silver laptop on muted salmon desktop with two different small ceramic mugs and a plain notebook. Screen editorial product catalogue heading \"Коллекция для дома\", three item cards, filter chips, right order-request panel showing \"2 кружки и блокнот\", \"Итого 2 100 ₽\", button \"Отправить запрос\". Salmon ink ivory. Fictitious product demo, request cart only, no checkout/payment or order confirmation."
+    },
+    {
+      "slug": "graduate-portfolio",
+      "src": "/covers/graduate-portfolio.webp",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d9e61c3beae02b6a51e897ca6af1d5b563696652ad965614e255b5ef60e88728",
+      "generator": "built-in image_gen",
+      "kind": "illustrative-result-mockup",
+      "prompt": "Use case: product-mockup. Create ONE 1536x1024 landscape 3:2 photorealistic product photograph of a distinctive modern digital project result. Studio art direction, elegant editorial minimalism, sophisticated rich palette stated below, realistic materials, soft shadows. IMPORTANT: blank minimal backdrop with ONLY the one or two explicitly described props; absolutely NO flowers, plants, cups, posters, motivational quotes, slogans, books unless specified, decorative text, school branding, leaf logos or hearts. Do NOT write design school or any school name. Keep all props UNLETTERED except actual indicated document labels. Device occupies at most 65 percent of image width and 76 percent of height; show ENTIRE device including all corners, keyboard or phone frame, at least 12 percent empty margin. Screen: simple credible task-specific Russian UI showing ONLY specified features and short phrases, no invented metrics, credentials, personal data, legal compliance, medical interpretations, automatic actions or integrations. This is an illustrative result concept, not real interface instructions; small footer \"Учебный пример\". No Telegram branding. No floating UI panels outside device. Specific scene and UI: Complete graphite laptop on warm ivory desk beside a closed burgundy portfolio folder and three small project print cards. Screen confident minimalist portfolio heading \"Мои готовые проекты\", exactly three clear project cards \"Планер\", \"ИИ-помощник\", \"Сайт\", section \"Одна услуга\", a small draft panel \"Черновик обращения\". Burgundy cream graphite with subtle lavender. Honest educational projects; no client logos, fabricated testimonials, income, guarantees or automatic sending."
+    }
+  ]
+}

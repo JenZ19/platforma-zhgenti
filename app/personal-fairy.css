@@ -1,0 +1,32 @@
+.personal-fairy { min-width: 0; max-width: 100%; }
+.personal-fairy form { display: grid; gap: 12px; max-width: 560px; padding: 20px; border: 1px solid #e7d1d9; border-radius: 18px; background: #fffafa; color: #38232c; }
+.personal-fairy form label { font-size: 17px; line-height: 1.4; font-weight: 700; }
+.personal-fairy form p, .personal-fairy form summary { margin: 0; font-size: 15px; line-height: 1.55; color: #67535d; }
+.dashboard-home .next-quest-banner .personal-fairy .personal-fairy-problem p,
+.dashboard-home .next-quest-banner .personal-fairy form p { font-size: 15px; line-height: 1.55; font-weight: 400; text-transform: none; letter-spacing: normal; color: #67535d; margin: 0; }
+.personal-fairy form input { width: 100%; min-width: 0; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; background: white; color: #38232c; border: 1px solid #cbb9c1; border-radius: 10px; }
+.personal-fairy form .learning-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; }
+.personal-fairy button { cursor: pointer; min-height: 44px; padding: 12px 18px; border: 1px solid #873453; border-radius: 12px; background: #873453; color: white; font: inherit; font-size: 16px; font-weight: 650; }
+.personal-fairy button:disabled { opacity: .65; cursor: wait; }
+.personal-fairy :is(input,button,a,summary):focus-visible { outline: 3px solid #cba658; outline-offset: 3px; }
+.personal-fairy form [role=alert] { color: #a21843; }
+.personal-fairy form details { margin: 0; }
+.personal-fairy form details p { margin-top: 8px; }
+.personal-fairy-loading { font-size: 15px; line-height: 1.5; }
+.workbench-actions > .personal-fairy { flex: 1 1 220px; }
+@media(max-width:640px) { .personal-fairy form { padding: 16px; } .personal-fairy form button { width: 100%; } }
+
+.personal-fairy-problem {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.personal-fairy-problem p {
+  margin: 0;
+}

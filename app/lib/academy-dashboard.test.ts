@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isProjectBundle, projects } from "../content/projects";
 import { branchStorageSlug, saveOutputChoice } from "./output-format";
-import { completeStep, createEmptyProgress, getProjectLevelCount, progressKey, resetProgress, saveProgress } from "./progress";
+import { completeStep, createEmptyProgress, getProjectLevelCount, journeyRevisionInfo, progressKey, resetProgress, saveProgress } from "./progress";
 import {
   buildDashboardSnapshot,
   loadDashboardSection,
@@ -23,14 +23,38 @@ class MemoryStorage {
   removeItem(key: string) { this.values.delete(key); }
 }
 
+function currentProgress(slug: string, total: number, completed = 1) {
+  let progress = createEmptyProgress();
+  for (let id = 1; id <= completed; id += 1) progress = completeStep(progress, id, total);
+  const info = journeyRevisionInfo(slug, total);
+  return { ...progress, ...(info ? { journeyRevision: info.revision } : {}) };
+}
+
 describe("academy dashboard state", () => {
-  it("isolates malformed values and preserves old progress", () => {
+  it("lists every concrete result in its own week with independent branch progress", () => {
+    const storage = new MemoryStorage();
+    const planning = projects.find((project) => project.slug === "planning")!;
+    if (!isProjectBundle(planning)) throw new Error("Expected planning bundle");
+    const slug = branchStorageSlug("planning", "service", "mobile");
+    const total = getProjectLevelCount(planning.formats.service);
+    saveProgress(slug, currentProgress(slug, total, 2), storage, undefined, total);
+    const snapshot = buildDashboardSnapshot(projects, storage, "mobile");
+    const variants = snapshot.items.flatMap((item) => item.variants ?? [item]);
+    const week2 = variants.filter((item) => !isProjectBundle(item.project) && item.project.week === 2);
+    expect(week2).toHaveLength(8);
+    expect(week2.every((item) => !isProjectBundle(item.project) && item.project.kind === "agent")).toBe(true);
+    expect(new Set(variants.map((item) => item.project.slug)).size).toBe(variants.length);
+    expect(variants.find((item) => item.catalogSlug === "planning" && item.output === "service")).toMatchObject({ completedLevels: 2, status: "started" });
+    expect(variants.find((item) => item.catalogSlug === "planning" && item.output === "agent")).toMatchObject({ completedLevels: 0, status: "new" });
+  });
+  it("isolates malformed values and archives a lone obsolete first step", () => {
     const storage = new MemoryStorage();
     storage.setItem("feya-dashboard-v1:saved", "broken");
     storage.setItem(progressKey("pressure-diary"), JSON.stringify(completeStep(createEmptyProgress(), 1)));
 
     expect(loadSavedProjects(storage)).toEqual([]);
-    expect(buildDashboardSnapshot(projects, storage, "desktop").started.map((item) => item.project.slug)).toContain("pressure-diary");
+    const item = buildDashboardSnapshot(projects, storage, "desktop").items.find((entry) => entry.project.slug === "pressure-diary")!;
+    expect(item).toMatchObject({ completedLevels: 0, status: "new" });
   });
 
   it("saves one project once and removes it on the next click", () => {
@@ -61,7 +85,7 @@ describe("academy dashboard state", () => {
   it("keeps a legacy finished project without inventing a completion date", () => {
     const storage = new MemoryStorage();
     const project = projects.find((item) => item.slug === "pressure-diary")!;
-    const totalLevels = getProjectLevelCount(project);
+    const totalLevels = 19;
     let progress = createEmptyProgress();
     for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
     storage.setItem(progressKey("pressure-diary"), JSON.stringify(progress));
@@ -82,7 +106,8 @@ describe("academy dashboard state", () => {
       ["content-agent", "2026-08-15T11:00:00.000Z"],
     ]);
     for (const project of selected) {
-      saveProgress(project.slug, completeStep(createEmptyProgress(), 1), storage, () => times.get(project.slug)!);
+      const total = getProjectLevelCount(project);
+      saveProgress(project.slug, currentProgress(project.slug, total), storage, () => times.get(project.slug)!, total);
     }
 
     expect(buildDashboardSnapshot(selected, storage, "desktop").started.map((item) => item.project.slug)).toEqual([
@@ -96,7 +121,9 @@ describe("academy dashboard state", () => {
     const storage = new MemoryStorage();
     const selected = projects.filter((project) => ["install-codex", "pressure-diary"].includes(project.slug));
     saveLastActiveProject("install-codex", "desktop", storage);
-    saveProgress("pressure-diary", completeStep(createEmptyProgress(), 1), storage, () => "2026-08-15T12:00:00.000Z");
+    const pressure = selected.find((project) => project.slug === "pressure-diary")!;
+    const total = getProjectLevelCount(pressure);
+    saveProgress("pressure-diary", currentProgress("pressure-diary", total), storage, () => "2026-08-15T12:00:00.000Z", total);
 
     expect(buildDashboardSnapshot(selected, storage, "desktop").next?.project.slug).toBe("pressure-diary");
   });
@@ -123,7 +150,8 @@ describe("academy dashboard state", () => {
     const storage = new MemoryStorage();
     const selected = projects.filter((project) => ["pressure-diary", "personal-organizer", "content-agent"].includes(project.slug));
     for (const project of selected) {
-      storage.setItem(progressKey(project.slug), JSON.stringify(completeStep(createEmptyProgress(), 1)));
+      const total = getProjectLevelCount(project);
+      storage.setItem(progressKey(project.slug), JSON.stringify(currentProgress(project.slug, total)));
     }
 
     expect(buildDashboardSnapshot(selected, storage, "desktop").started.map((item) => item.project.slug)).toEqual(
@@ -135,14 +163,15 @@ describe("academy dashboard state", () => {
     const storage = new MemoryStorage();
     const bundle = projects.find((project) => project.slug === "family-budget")!;
     saveOutputChoice("family-budget", "desktop", "agent", storage);
-    let progress = createEmptyProgress();
-    for (let id = 1; id <= 18; id += 1) progress = completeStep(progress, id, 19);
-    saveProgress(branchStorageSlug("family-budget", "agent", "desktop"), progress, storage);
+    const storageSlug = branchStorageSlug("family-budget", "agent", "desktop");
+    const total = 8;
+    const progress = currentProgress(storageSlug, total, 7);
+    saveProgress(storageSlug, progress, storage, () => new Date(), total);
 
     expect(buildDashboardSnapshot([bundle], storage, "desktop").items[0]).toMatchObject({
-      completedLevels: 18,
-      totalLevels: 19,
-      percent: 95,
+      completedLevels: 7,
+      totalLevels: 8,
+      percent: 88,
       status: "started",
     });
   });
@@ -153,7 +182,8 @@ describe("academy dashboard state", () => {
     const totalLevels = getProjectLevelCount(project);
     let progress = createEmptyProgress();
     for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
-    storage.setItem(progressKey(project.slug), JSON.stringify(progress));
+    const info = journeyRevisionInfo(project.slug, totalLevels)!;
+    storage.setItem(progressKey(project.slug), JSON.stringify({ ...progress, journeyRevision: info.revision }));
 
     expect(buildDashboardSnapshot([project], storage, "desktop").next).toBeNull();
   });
@@ -161,7 +191,7 @@ describe("academy dashboard state", () => {
   it("ignores old dashboard observation dates instead of treating them as completion", () => {
     const storage = new MemoryStorage();
     const project = projects.find((item) => item.slug === "pressure-diary")!;
-    const totalLevels = getProjectLevelCount(project);
+    const totalLevels = 19;
     let progress = createEmptyProgress();
     for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
     storage.setItem(progressKey("pressure-diary"), JSON.stringify(progress));
@@ -177,8 +207,7 @@ describe("academy dashboard state", () => {
     const storage = new MemoryStorage();
     const project = projects.find((item) => item.slug === "pressure-diary")!;
     const totalLevels = getProjectLevelCount(project);
-    let progress = createEmptyProgress();
-    for (let id = 1; id <= totalLevels; id += 1) progress = completeStep(progress, id, totalLevels);
+    const progress = currentProgress("pressure-diary", totalLevels, totalLevels);
     storage.setItem(progressKey("pressure-diary"), JSON.stringify({ ...progress, completedAt: "2026-08-14" }));
     storage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify({ ...progress, completedAt: "2026-08-15" }));
 
@@ -201,6 +230,7 @@ describe("academy dashboard state", () => {
       for (let id = 1; id <= total; id += 1) progress = completeStep(progress, id, total);
       storage.setItem(progressKey(branchStorageSlug("planning", format, "desktop")), JSON.stringify({
         ...progress,
+        journeyRevision: "planning-20260908",
         completedAt: format === "service" ? "2026-08-14" : "2026-08-15",
       }));
     }

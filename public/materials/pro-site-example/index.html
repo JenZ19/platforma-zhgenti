@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Учебный пример — сайт с калькулятором и заявкой</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#2d2430;background:#fdfbf7;--accent:#7a5a3c;--soft:#f3ece2;--line:#e6dccf}
+*{box-sizing:border-box}body{margin:0}
+.wrap{max-width:900px;margin:auto;padding:0 20px 44px}
+.kicker{letter-spacing:.09em;text-transform:uppercase;font-size:12px;font-weight:700;color:var(--accent);margin:28px 0 0}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;letter-spacing:-1.2px;margin:10px 0 14px}
+.lead{font-size:19px;color:#5c5048;max-width:52ch;margin:0 0 10px}
+section{padding:32px 0;border-top:1px solid var(--line)}
+h2{font-size:24px;letter-spacing:-.5px;margin:0 0 6px}
+.hint{color:#7a6f65;margin:0 0 18px}
+.calc{display:grid;gap:16px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+.calc label{display:grid;gap:8px;font-weight:600}
+.calc select,.calc input[type=number]{font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fffdfa}
+.opts{display:flex;flex-wrap:wrap;gap:10px}
+.opts label{display:flex;gap:8px;align-items:center;font-weight:400;background:var(--soft);border-radius:999px;padding:9px 15px;cursor:pointer}
+.total{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px dashed var(--line);padding-top:16px}
+.total b{font-size:30px;letter-spacing:-1px}
+.total small{color:#7a6f65}
+form.request{display:grid;gap:14px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+form.request label{display:grid;gap:8px;font-weight:600}
+form.request input,form.request textarea{font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fffdfa}
+button{cursor:pointer;background:var(--accent);color:#fff;border:0;border-radius:12px;padding:13px 20px;font:inherit;font-weight:650}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #b08a63;outline-offset:2px}
+.sent{margin:0;padding:14px 16px;border-radius:12px;background:var(--soft)}
+.files{display:grid;gap:10px;padding:0;margin:0;list-style:none}
+.files li{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.files a{color:var(--accent);font-weight:650}
+footer{color:#8a7f74;font-size:14px;padding-top:26px;border-top:1px solid var(--line)}
+</style></head><body><div class="wrap">
+<p class="kicker">Учебный пример · неделя 5</p>
+<h1>Тот же сайт, но с одной новой функцией</h1>
+<p class="lead">На пятой неделе вы не начинаете новый сайт. Вы берёте свой сайт четвёртой недели, сохраняете копию и добавляете то, чего ему не хватало. Здесь показаны три частых варианта.</p>
+
+<section>
+  <h2>Вариант 1. Калькулятор стоимости</h2>
+  <p class="hint">Человек сам считает примерную цену и перестаёт бояться спрашивать.</p>
+  <div class="calc">
+    <label>Формат работы
+      <select id="format">
+        <option value="4500">Разовая консультация, 60 минут</option>
+        <option value="12000">Разбор с планом, 3 встречи</option>
+        <option value="26000">Сопровождение, месяц</option>
+      </select>
+    </label>
+    <div>
+      <p style="margin:0 0 8px;font-weight:600">Что добавить</p>
+      <div class="opts">
+        <label><input type="checkbox" class="extra" value="2000">Разбор для двоих</label>
+        <label><input type="checkbox" class="extra" value="1500">Письменное резюме</label>
+        <label><input type="checkbox" class="extra" value="3000">Проверка через месяц</label>
+      </div>
+    </div>
+    <div class="total"><span><b id="sum">4 500 ₽</b><br><small id="note">Ориентир, точную цену называю после заявки.</small></span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Вариант 2. Заявка прямо на сайте</h2>
+  <p class="hint">Форма вместо «напишите мне в личку». Заявка приходит вам, а человек видит, что она ушла.</p>
+  <form class="request" id="request">
+    <label>Как вас зовут<input required maxlength="80" placeholder="Ирина"></label>
+    <label>Как ответить<input required maxlength="120" placeholder="@nickname или почта"></label>
+    <label>Что сейчас беспокоит<textarea rows="3" maxlength="600" placeholder="Пара слов о ситуации"></textarea></label>
+    <button type="submit">Отправить заявку</button>
+    <p class="sent" id="sent" hidden>Заявка отправлена — в учебном примере она никуда не уходит. На вашем сайте она придёт вам в Telegram или на почту.</p>
+  </form>
+</section>
+
+<section>
+  <h2>Вариант 3. Материалы после заявки</h2>
+  <p class="hint">То, что вы и так отправляете каждому вручную, лежит на сайте одним списком.</p>
+  <ul class="files">
+    <li><span><strong>Памятка перед встречей</strong><br><small>что подготовить, 1 страница</small></span><a href="#">Открыть</a></li>
+    <li><span><strong>Шаблон таблицы расходов</strong><br><small>заполняется за 20 минут</small></span><a href="#">Открыть</a></li>
+    <li><span><strong>Как я работаю с данными</strong><br><small>что храню и что удаляю</small></span><a href="#">Открыть</a></li>
+  </ul>
+</section>
+
+<footer>Учебный пример школы НЕЙРОПРОФИ. Цены и человек вымышленные. Добавляйте одну функцию за раз и сохраняйте копию прежней версии — к ней можно вернуться.</footer>
+</div>
+<script>
+const base = document.getElementById("format");
+const sum = document.getElementById("sum");
+function recount() {
+  let total = Number(base.value);
+  for (const box of document.querySelectorAll(".extra")) if (box.checked) total += Number(box.value);
+  sum.textContent = total.toLocaleString("ru-RU") + " ₽";
+}
+base.onchange = recount;
+for (const box of document.querySelectorAll(".extra")) box.onchange = recount;
+document.getElementById("request").onsubmit = (event) => {
+  event.preventDefault();
+  document.getElementById("sent").hidden = false;
+};
+recount();
+</script></body></html>

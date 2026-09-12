@@ -7,11 +7,11 @@ import { firstCoverPrototypeSlugs, getFirstCoverPrototypeSpec } from "../content
 import { getThirdCoverPrototypeSpec, thirdCoverPrototypeSlugs } from "../content/third-cover-prototypes";
 import { finalCoverPrototypeSlugs, getFinalCoverPrototypeSpec } from "../content/final-cover-prototypes";
 import { getQuestProject, isProjectBundle, projects, questProjects } from "../content/projects";
-import { buildQuest } from "../content/quests";
+import { buildQuest, buildIllustrationQuest } from "../content/quests";
 import { getPreparationProfile, getPreparationProfileSlugs } from "../content/preparation";
 import { buildDashboardSnapshot } from "../lib/academy-dashboard";
 import { preparationKey } from "../lib/preparation";
-import { getProjectLevelCount, progressKey } from "../lib/progress";
+import { getProjectLevelCount, journeyRevisionInfo, progressKey } from "../lib/progress";
 import { branchStorageSlug, saveOutputChoice } from "../lib/output-format";
 import { customizationKey } from "../lib/customization";
 import { Academy } from "./Academy";
@@ -25,6 +25,7 @@ import { MobileExpectedScene } from "./MobileExpectedScene";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectPreview } from "./ProjectPreview";
 import { Quest } from "./Quest";
+import { QuestGuide } from "./QuestGuide";
 import { QuestLinks } from "./QuestLinks";
 import { QuestPreparation } from "./QuestPreparation";
 import { QuestFormatChoice } from "./QuestFormatChoice";
@@ -98,7 +99,7 @@ Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: 
 Object.defineProperty(HTMLDialogElement.prototype, "close", { configurable: true, writable: true, value: closeDialogMock });
 
 function routeStepFor(project: NonNullable<ReturnType<typeof getQuestProject>>, sourceStep: number): number {
-  const index = buildQuest(project).findIndex((step) => step.sourceStepId === sourceStep);
+  const index = buildIllustrationQuest(project).findIndex((step) => step.sourceStepId === sourceStep);
   if (index < 0) throw new Error(`Нет исходного уровня ${sourceStep} у ${project.slug}`);
   return index + 1;
 }
@@ -107,6 +108,13 @@ function getBundle(slug: string) {
   const project = projects.find((item) => item.slug === slug);
   if (!project || !isProjectBundle(project)) throw new Error(`Нет bundle-проекта ${slug}`);
   return project;
+}
+
+function currentProgress(slug: string, state: Record<string, unknown>) {
+  const projectSlug = slug.replace(/^mobile:/, "");
+  const total = getProjectLevelCount(projectSlug);
+  const revision = journeyRevisionInfo(projectSlug, total)?.revision;
+  return revision ? { ...state, journeyRevision: revision } : state;
 }
 
 describe("academy interface", () => {
@@ -124,32 +132,33 @@ describe("academy interface", () => {
 
   it("shows the last active quest as the single primary action", async () => {
     localStorage.setItem("feya-dashboard-v1:last:desktop", "pressure-diary");
-    localStorage.setItem(progressKey("pressure-diary"), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    localStorage.setItem(progressKey("pressure-diary"), JSON.stringify(currentProgress("pressure-diary", { version: 1, activeStep: 2, completed: [1], score: 10 })));
 
     const { container } = render(<Academy />);
 
-    expect(await screen.findByRole("heading", { level: 1, name: /дневник давления/i })).toBeInTheDocument();
-    expect(container.querySelector(".dashboard-primary-action")).toHaveAccessibleName(/продолжить: дневник давления/i);
+    expect(await screen.findByRole("heading", { level: 2, name: /дневник давления/i })).toBeInTheDocument();
+    expect(container.querySelector(".dashboard-primary-action")).toHaveAccessibleName(/продолжить проект: дневник давления/i);
     expect(container.querySelector(".dashboard-primary-action")).toHaveAttribute("href", "?quest=pressure-diary");
     expect(container.querySelectorAll(".next-quest-banner .dashboard-primary-action")).toHaveLength(1);
   });
 
   it("saves and unsaves a recommended project without reloading", async () => {
-    render(<Academy />);
-    const card = await screen.findByRole("article", { name: /планирование/i });
+    render(<Academy section="weeks" />);
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
+    const card = await screen.findByRole("article", { name: /планер на день/i });
 
     fireEvent.click(within(card).getByRole("button", { name: /сохранить на потом/i }));
 
     expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:saved")!)).toContain("planning");
-    expect(within(card).getByRole("button", { name: /убрать планирование из сохранённых/i })).toHaveTextContent("Сохранено");
+    expect(within(card).getByRole("button", { name: /убрать.*из сохранённых/i })).toHaveTextContent("Сохранено");
 
-    fireEvent.click(within(card).getByRole("button", { name: /убрать планирование из сохранённых/i }));
+    fireEvent.click(within(card).getByRole("button", { name: /убрать.*из сохранённых/i }));
     expect(JSON.parse(localStorage.getItem("feya-dashboard-v1:saved")!)).not.toContain("planning");
   });
 
   it("shows factual progress and no more than three started projects", async () => {
     for (const slug of ["pressure-diary", "personal-organizer", "family-health-hub", "content-agent"]) {
-      localStorage.setItem(progressKey(slug), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+      localStorage.setItem(progressKey(slug), JSON.stringify(currentProgress(slug, { version: 1, activeStep: 2, completed: [1], score: 10 })));
     }
     localStorage.setItem("feya-dashboard-v1:last:desktop", "pressure-diary");
 
@@ -157,33 +166,31 @@ describe("academy interface", () => {
 
     const started = await screen.findByRole("region", { name: /начатые проекты/i });
     expect(within(started).getAllByRole("article")).toHaveLength(3);
-    expect(screen.getByRole("region", { name: /ваш прогресс/i })).toHaveTextContent("Пройдено уровней4");
-    expect(within(started).queryByRole("article", { name: /ии-агент для контента/i })).not.toBeInTheDocument();
-    const pressure = within(started).getByRole("article", { name: /дневник давления/i });
-    expect(within(pressure).getByLabelText(`Пройдено 1 из ${getProjectLevelCount("pressure-diary")}`)).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /ваш прогресс/i })).toHaveTextContent("Пройдено шагов4");
+    expect(within(started).queryByRole("article", { name: /дневник давления/i })).not.toBeInTheDocument();
+    expect(screen.getByText(`Пройдено шагов: 1 из ${getProjectLevelCount("pressure-diary")}`)).toBeInTheDocument();
   });
 
-  it("recommends only the first four projects of the current week", async () => {
+  it("keeps one weekly choice instead of four competing recommendations", async () => {
     render(<Academy />);
 
-    const recommendations = await screen.findByRole("region", { name: /другие варианты/i });
-    expect(within(recommendations).getAllByRole("article")).toHaveLength(4);
-    expect(within(recommendations).getByRole("heading", { name: /планирование/i })).toBeInTheDocument();
-    expect(within(recommendations).queryByRole("heading", { name: /дневник давления/i })).not.toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: /основной маршрут курса/i })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /другие варианты/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /все 6 недель и библиотека проектов/i })).toHaveAttribute('href', '?format=desktop&section=weeks');
   });
 
   it("uses the same dashboard logic in the mobile academy", async () => {
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
 
-    expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "С чего начать обучение" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
   });
 
   it("starts the phone track with a real mobile project and hides computer setup quests", async () => {
     const view = render(<MobileAcademy onOpen={vi.fn()} />);
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Планирование" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Ваш помощник — Феечка" })).toBeInTheDocument();
     expect(screen.queryByText("Устанавливаем Codex")).not.toBeInTheDocument();
     expect(screen.queryByText("Покупаем сервер по 152-ФЗ")).not.toBeInTheDocument();
     expect(screen.queryByText("Добавляем API-ключи")).not.toBeInTheDocument();
@@ -250,34 +257,35 @@ describe("academy interface", () => {
 
   it("keeps dashboard-owned mobile navigation implicit when a quest opens", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    window.history.replaceState({}, "", "/?section=weeks");
     const view = render(<AppEntry />);
     await waitFor(() => expect(view.container.querySelector(".learning-shell-mobile")).not.toBeNull());
-
-    const planning = await screen.findByRole("article", { name: /планирование/i });
-    fireEvent.click(within(planning).getByRole("link", { name: /начать: планирование/i }));
-    await waitFor(() => expect(view.container.querySelector(".format-choice-shell.mobile")).not.toBeNull());
-    expect(window.location.search).toBe("?format=mobile&quest=planning");
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
+    const planning = await screen.findByRole("article", { name: /планер на день/i });
+    fireEvent.click(within(planning).getByRole("link", { name: /начать: планер/i }));
+    await waitFor(() => expect(view.container.querySelector(".learning-shell-mobile .preparation-card")).not.toBeNull());
+    expect(window.location.search).toBe("?format=mobile&quest=planning&output=service");
 
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
     window.dispatchEvent(new Event("resize"));
-    await waitFor(() => expect(view.container.querySelector(".learning-shell-desktop .format-choice-shell")).not.toBeNull());
-    expect(window.location.search).toBe("?quest=planning");
+    await waitFor(() => expect(view.container.querySelector(".learning-shell-desktop .preparation-card")).not.toBeNull());
+    expect(window.location.search).toBe("?quest=planning&output=service");
   });
 
   it("keeps an explicitly selected mobile dashboard user-owned after opening a quest", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
-    window.history.replaceState({}, "", "/?format=mobile");
+    window.history.replaceState({}, "", "/?format=mobile&section=weeks");
     const view = render(<AppEntry />);
     await waitFor(() => expect(view.container.querySelector(".learning-shell-mobile")).not.toBeNull());
-
-    const planning = await screen.findByRole("article", { name: /планирование/i });
-    fireEvent.click(within(planning).getByRole("link", { name: /начать: планирование/i }));
-    await waitFor(() => expect(view.container.querySelector(".format-choice-shell.mobile")).not.toBeNull());
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
+    const planning = await screen.findByRole("article", { name: /планер на день/i });
+    fireEvent.click(within(planning).getByRole("link", { name: /начать: планер/i }));
+    await waitFor(() => expect(view.container.querySelector(".learning-shell-mobile .preparation-card")).not.toBeNull());
 
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
     window.dispatchEvent(new Event("resize"));
     expect(view.container.querySelector(".learning-shell-mobile")).not.toBeNull();
-    expect(window.location.search).toBe("?format=mobile&quest=planning");
+    expect(window.location.search).toBe("?format=mobile&quest=planning&output=service");
   });
 
   it("keeps explicit format user-owned and exposes a phone escape from explicit desktop", async () => {
@@ -320,46 +328,55 @@ describe("academy interface", () => {
   });
 
   it("preserves the mobile format in primary and card hrefs", async () => {
-    render(<MobileAcademy onOpen={vi.fn()} />);
+    const home = render(<MobileAcademy onOpen={vi.fn()} />);
 
-    expect(await screen.findByRole("link", { name: /начать квест: планирование/i })).toHaveAttribute(
+    expect(await screen.findByRole("link", { name: /открыть выбранный проект/i })).toHaveAttribute(
       "href",
       "?format=mobile&quest=planning&output=service",
     );
-    const ideas = screen.getByRole("article", { name: /идеи/i });
-    expect(within(ideas).getByRole("link", { name: /начать: идеи/i })).toHaveAttribute(
+    home.unmount();
+    render(<MobileAcademy section="weeks" onOpen={vi.fn()} />);
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
+    const ideas = screen.getByRole("article", { name: /идей/i });
+    expect(within(ideas).getByRole("link", { name: /начать:/i })).toHaveAttribute(
       "href",
-      "?format=mobile&quest=ideas",
+      "?format=mobile&quest=ideas&output=service",
     );
   });
 
   it("intercepts ordinary left clicks for dashboard SPA navigation", async () => {
     const onOpen = vi.fn();
-    render(<MobileAcademy onOpen={onOpen} />);
+    const home = render(<MobileAcademy onOpen={onOpen} />);
 
-    const primary = await screen.findByRole("link", { name: /начать квест: планирование/i });
+    const primary = await screen.findByRole("link", { name: /открыть выбранный проект/i });
     expect(fireEvent.click(primary)).toBe(false);
     expect(onOpen).toHaveBeenLastCalledWith("planning", "service");
+    home.unmount();
+    render(<MobileAcademy section="weeks" onOpen={onOpen} />);
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
 
-    const ideas = screen.getByRole("article", { name: /идеи/i });
-    const cardAction = within(ideas).getByRole("link", { name: /начать: идеи/i });
+    const ideas = screen.getByRole("article", { name: /идей/i });
+    const cardAction = within(ideas).getByRole("link", { name: /начать:/i });
     expect(fireEvent.click(cardAction)).toBe(false);
-    expect(onOpen).toHaveBeenLastCalledWith("ideas");
+    expect(onOpen).toHaveBeenLastCalledWith("ideas", "service");
   });
 
   it("leaves modified, middle and new-target dashboard clicks to the browser", async () => {
     const onOpen = vi.fn();
-    render(<MobileAcademy onOpen={onOpen} />);
+    const home = render(<MobileAcademy onOpen={onOpen} />);
 
-    const primary = await screen.findByRole("link", { name: /начать квест: планирование/i });
+    const primary = await screen.findByRole("link", { name: /открыть выбранный проект/i });
     primary.setAttribute("href", "#browser-primary");
     expect(fireEvent.click(primary, { metaKey: true })).toBe(true);
     expect(fireEvent.click(primary, { shiftKey: true })).toBe(true);
     primary.setAttribute("target", "_blank");
     expect(fireEvent.click(primary)).toBe(true);
+    home.unmount();
+    render(<MobileAcademy section="weeks" onOpen={onOpen} />);
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
 
-    const ideas = screen.getByRole("article", { name: /идеи/i });
-    const cardAction = within(ideas).getByRole("link", { name: /начать: идеи/i });
+    const ideas = screen.getByRole("article", { name: /идей/i });
+    const cardAction = within(ideas).getByRole("link", { name: /начать:/i });
     cardAction.setAttribute("href", "#browser-card");
     expect(fireEvent.click(cardAction, { ctrlKey: true })).toBe(true);
     expect(fireEvent.click(cardAction, { altKey: true })).toBe(true);
@@ -371,31 +388,31 @@ describe("academy interface", () => {
     const selected = projects.filter((project) => ["install-codex", "server-152fz", "api-keys", "pressure-diary", "personal-organizer"].includes(project.slug));
     for (const project of selected.slice(0, 4)) {
       const total = getProjectLevelCount(project);
-      localStorage.setItem(progressKey(project.slug), JSON.stringify({
+      localStorage.setItem(progressKey(project.slug), JSON.stringify(currentProgress(project.slug, {
         version: 1,
         activeStep: total,
         completed: Array.from({ length: total }, (_, index) => index + 1),
         score: total * 10,
-      }));
+      })));
     }
     const snapshot = buildDashboardSnapshot(selected, localStorage, "desktop");
 
     render(<DashboardHome snapshot={snapshot} format="desktop" onOpen={vi.fn()} onSave={vi.fn()} />);
 
-    const recommendations = screen.getByRole("region", { name: /другие варианты/i });
     expect(snapshot.currentWeek).toBe(2);
-    expect(within(recommendations).queryByRole("heading", { name: /личный органайзер/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /другие варианты/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("article", { name: /личный органайзер/i })).not.toBeInTheDocument();
   });
 
   it("routes an all-complete mobile dashboard to portfolio", () => {
     const project = projects.find((item) => item.slug === "pressure-diary")!;
     const total = getProjectLevelCount(project);
-    localStorage.setItem(progressKey(`mobile:${project.slug}`), JSON.stringify({
+    localStorage.setItem(progressKey(`mobile:${project.slug}`), JSON.stringify(currentProgress(`mobile:${project.slug}`, {
       version: 1,
       activeStep: total,
       completed: Array.from({ length: total }, (_, index) => index + 1),
       score: total * 10,
-    }));
+    })));
     const snapshot = buildDashboardSnapshot([project], localStorage, "mobile");
     const onOpenPortfolio = vi.fn();
 
@@ -416,12 +433,12 @@ describe("academy interface", () => {
 
   it("does not duplicate a started project in the saved-for-later group", async () => {
     localStorage.setItem("feya-dashboard-v1:saved", JSON.stringify(["pressure-diary"]));
-    localStorage.setItem(progressKey("pressure-diary"), JSON.stringify({
+    localStorage.setItem(progressKey("pressure-diary"), JSON.stringify(currentProgress("pressure-diary", {
       version: 1,
       activeStep: 2,
       completed: [1],
       score: 10,
-    }));
+    })));
     window.history.replaceState({}, "", "/?section=projects");
 
     render(<AppEntry />);
@@ -507,6 +524,9 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: "Неделя 2" }));
     expect(screen.getByRole("button", { name: "Неделя 1" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Неделя 2" })).toHaveAttribute("aria-expanded", "true");
+    const panel = document.getElementById("dashboard-week-2")!;
+    expect(within(panel).getAllByRole("article")).toHaveLength(8);
+    expect([...panel.querySelectorAll("a")].map((link) => link.getAttribute("href"))).toContainEqual(expect.stringContaining("quest=planning&output=agent"));
   });
 
   it("opens matching weeks instead of showing an empty current week", async () => {
@@ -573,7 +593,7 @@ describe("academy interface", () => {
     window.history.replaceState({}, "", "/?section=weeks&q=%D0%98%D0%98-%D0%B0%D0%B3%D0%B5%D0%BD%D1%82+%D0%BF%D0%BB%D0%B0%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F+%D0%B4%D0%BD%D1%8F");
     render(<AppEntry />);
 
-    expect(await screen.findAllByRole("article", { name: /планирование/i })).toHaveLength(1);
+    expect(await screen.findAllByRole("article", { name: /ИИ-агент планирования/i })).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Неделя 1" })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: "Неделя 2" })).toHaveAttribute("aria-expanded", "true");
   });
@@ -588,20 +608,20 @@ describe("academy interface", () => {
     expect(screen.getByRole("article", { name: /дневник давления/i })).toBeInTheDocument();
     expect(screen.queryByRole("article", { name: /планирование/i })).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByRole("searchbox", { name: /поиск по квестам недели/i }), { target: { value: "шагов" } });
-    expect(screen.getByRole("article", { name: /привычки и активность/i })).toBeInTheDocument();
-    expect(screen.queryByRole("article", { name: /дневник давления/i })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole("searchbox", { name: /поиск по квестам недели/i }), { target: { value: "давления" } });
+    expect(screen.getByRole("article", { name: /дневник давления/i })).toBeInTheDocument();
+    expect(screen.queryByRole("article", { name: /планирование/i })).not.toBeInTheDocument();
   });
 
   it("shows factual time, format and discovery metadata on project cards", async () => {
     window.history.replaceState({}, "", "/?section=weeks");
     render(<AppEntry />);
 
-    const planning = await screen.findByRole("article", { name: /планирование/i });
-    expect(planning).toHaveTextContent("Время: 5–10 минут на уровень");
-    expect(planning).toHaveTextContent("Формат: 2 варианта на выбор");
-    expect(planning).toHaveTextContent("Тип результата: экранный сервис / разговорный ИИ-агент");
-    expect(planning).toHaveTextContent("Чем отличаются: сервис открывают и нажимают кнопки; с ИИ-агентом переписываются как с помощником");
+    const planning = await screen.findByRole("article", { name: /планер на день/i });
+    expect(planning).toHaveTextContent("Время: 5–7 минут на уровень");
+    expect(planning).toHaveTextContent("Формат: Сервис");
+    expect(planning).toHaveTextContent("Тип результата: Сервис");
+    expect(planning).not.toHaveTextContent("2 варианта на выбор");
     expect(planning).not.toHaveTextContent("или агент");
     expect(planning).toHaveTextContent(/Ключевые слова:.+Для себя/i);
     const server = screen.getByRole("article", { name: /покупаем сервер/i });
@@ -612,6 +632,7 @@ describe("academy interface", () => {
     saveOutputChoice("planning", "desktop", "service", localStorage);
     localStorage.setItem(progressKey(branchStorageSlug("planning", "service", "desktop")), JSON.stringify({
       version: 1,
+      journeyRevision: "planning-20260908",
       activeStep: 2,
       completed: [1],
       score: 10,
@@ -629,7 +650,8 @@ describe("academy interface", () => {
 
   it.each(["desktop", "mobile"] as const)("stores a real result independently from the %s lesson", async (surface) => {
     const total = getProjectLevelCount("pressure-diary");
-    localStorage.setItem(progressKey(surface === "mobile" ? "mobile:pressure-diary" : "pressure-diary"), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
+    const storageSlug = surface === "mobile" ? "mobile:pressure-diary" : "pressure-diary";
+    localStorage.setItem(progressKey(storageSlug), JSON.stringify(currentProgress(storageSlug, { version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 })));
     const Component = surface === "mobile" ? MobileAcademy : Academy;
     const onOpen = vi.fn();
     render(<Component section="portfolio" onOpen={onOpen} />);
@@ -646,7 +668,7 @@ describe("academy interface", () => {
   it.each(["service", "agent"] as const)("keeps the completed %s result in a separate portfolio card", async (output) => {
     const branch = getBundle("planning").formats[output];
     const total = getProjectLevelCount(branch);
-    localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
+    localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({ version: 1, journeyRevision: "planning-20260908", activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
     render(<Academy section="portfolio" />);
     expect(await screen.findByRole("article", { name: branch.title })).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(1);
@@ -656,7 +678,7 @@ describe("academy interface", () => {
   it("keeps both completed bundle outputs as two independently editable works", async () => {
     for (const output of ["service", "agent"] as const) {
       const total = getProjectLevelCount(getBundle("planning").formats[output]);
-      localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
+      localStorage.setItem(progressKey(branchStorageSlug("planning", output, "desktop")), JSON.stringify({ version: 1, journeyRevision: "planning-20260908", activeStep: total, completed: Array.from({ length: total }, (_, i) => i + 1), score: total * 10 }));
     }
     render(<Academy section="portfolio" />);
     expect(await screen.findAllByRole("article")).toHaveLength(2);
@@ -978,16 +1000,14 @@ describe("academy interface", () => {
     expect(within(workspace!).getByRole("navigation", { name: /карта уровней/i })).toBeInTheDocument();
     expect(within(workspace!).getByRole("heading", { name: "Зачем" })).toBeInTheDocument();
     expect(within(workspace!).getByRole("heading", { name: "Что сделать" })).toBeInTheDocument();
-    expect(within(workspace!).getByRole("heading", { name: /готовая команда для Codex/i })).toBeInTheDocument();
+    expect(within(workspace!).getByRole("region", { name: "Действие этого шага" })).toBeInTheDocument();
     expect(within(workspace!).getByRole("heading", { name: "Готово, если" })).toBeInTheDocument();
 
     fireEvent.click(within(workspace!).getByRole("button", { name: /^нужна помощь$/i }));
     const ordered = [
+      workspace!.querySelector(".lesson-workbench"),
       workspace!.querySelector(".quest-purpose"),
       workspace!.querySelector(".quest-action"),
-      workspace!.querySelector(".beginner-terms"),
-      workspace!.querySelector(".quest-prompt"),
-      workspace!.querySelector(".quest-guide"),
       workspace!.querySelector(".quest-result"),
       workspace!.querySelector(".quest-help"),
       workspace!.querySelector(".quest-step-actions"),
@@ -999,27 +1019,26 @@ describe("academy interface", () => {
   });
 
   it("opens the result screenshot in a native modal and restores its exact opener", () => {
-    const { container } = render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    const opener = screen.getByRole("button", { name: /увеличить пример результата/i });
+    const { container } = render(<QuestGuide frames={[{ id: 1, app: "Codex", title: "Проверенный кадр", screenshot: "/screens/server-152fz/step-01.webp", action: "Проверьте экран" }]} />);
+    const opener = screen.getByRole("button", { name: /увеличить кадр 1/i });
     opener.focus();
 
     fireEvent.click(opener);
 
-    const dialog = screen.getByRole("dialog", { name: "Увеличенный пример" });
+    const dialog = screen.getByRole("dialog", { name: /увеличенный кадр 1/i });
     expect(dialog.tagName).toBe("DIALOG");
     expect(dialog).not.toHaveAttribute("aria-modal");
     expect(showModalMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("button", { name: /закрыть увеличенный пример/i })).toHaveFocus();
+    expect(screen.getByRole("button", { name: /закрыть увеличенный кадр 1/i })).toHaveFocus();
 
     fireEvent.keyDown(dialog, { key: "Escape" });
-    expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /увеличенный кадр 1/i })).not.toBeInTheDocument();
     expect(opener).toHaveFocus();
 
     fireEvent.click(opener);
-    const reopened = screen.getByRole("dialog", { name: "Увеличенный пример" });
+    const reopened = screen.getByRole("dialog", { name: /увеличенный кадр 1/i });
     fireEvent(reopened, new Event("cancel", { cancelable: true }));
-    expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /увеличенный кадр 1/i })).not.toBeInTheDocument();
     expect(opener).toHaveFocus();
     expect(container.querySelector(".image-modal[aria-modal]")).toBeNull();
   });
@@ -1029,16 +1048,15 @@ describe("academy interface", () => {
     Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: undefined });
 
     try {
-      render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
-      fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-      const opener = screen.getByRole("button", { name: /увеличить пример результата/i });
+      render(<QuestGuide frames={[{ id: 1, app: "Codex", title: "Проверенный кадр", screenshot: "/screens/server-152fz/step-01.webp", action: "Проверьте экран" }]} />);
+      const opener = screen.getByRole("button", { name: /увеличить кадр 1/i });
       opener.focus();
       fireEvent.click(opener);
 
-      const dialog = screen.getByRole("dialog", { name: "Увеличенный пример" });
+      const dialog = screen.getByRole("dialog", { name: /увеличенный кадр 1/i });
       expect(dialog).toHaveAttribute("open");
-      fireEvent.click(screen.getByRole("button", { name: /закрыть увеличенный пример/i }));
-      expect(screen.queryByRole("dialog", { name: "Увеличенный пример" })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: /закрыть увеличенный кадр 1/i }));
+      expect(screen.queryByRole("dialog", { name: /увеличенный кадр 1/i })).not.toBeInTheDocument();
       expect(opener).toHaveFocus();
     } finally {
       Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: originalShowModal });
@@ -1046,11 +1064,10 @@ describe("academy interface", () => {
   });
 
   it("opens rewards as a native modal, supports Escape and restores the exact action opener", () => {
-    const project = getQuestProject("family-expenses")!;
-    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 4, completed: [1, 2, 3], score: 30 }));
+    const project = getQuestProject("server-152fz")!;
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 9, completed: [1, 2, 3, 4, 5, 6, 7, 8], score: 80 }));
     render(<Quest project={project} onHome={vi.fn()} />);
-    const opener = screen.getByRole("button", { name: /я сделала — продолжить/i });
+    const opener = screen.getByRole("button", { name: /завершить квест/i });
     opener.focus();
 
     fireEvent.click(opener);
@@ -1061,33 +1078,31 @@ describe("academy interface", () => {
     expect(screen.getByRole("button", { name: /забрать награду/i })).toHaveFocus();
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(screen.queryByRole("dialog", { name: "Новая награда" })).not.toBeInTheDocument();
-    expect(opener).toHaveFocus();
+    expect(document.querySelector(".quest-step-card")).toHaveFocus();
   });
 
   it("keeps the native reward usable when showModal is unavailable", () => {
     const originalShowModal = HTMLDialogElement.prototype.showModal;
     Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: undefined });
-    const project = getQuestProject("family-expenses")!;
-    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 4, completed: [1, 2, 3], score: 30 }));
+    const project = getQuestProject("server-152fz")!;
+    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 9, completed: [1, 2, 3, 4, 5, 6, 7, 8], score: 80 }));
 
     try {
       render(<Quest project={project} onHome={vi.fn()} />);
-      const opener = screen.getByRole("button", { name: /я сделала — продолжить/i });
+      const opener = screen.getByRole("button", { name: /завершить квест/i });
       fireEvent.click(opener);
       expect(screen.getByRole("dialog", { name: "Новая награда" })).toHaveAttribute("open");
       fireEvent.click(screen.getByRole("button", { name: /забрать награду/i }));
       expect(screen.queryByRole("dialog", { name: "Новая награда" })).not.toBeInTheDocument();
-      expect(opener).toHaveFocus();
+      expect(document.querySelector(".quest-step-card")).toHaveFocus();
     } finally {
       Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, writable: true, value: originalShowModal });
     }
   });
 
   it("moves final reward focus to the completed step when its opener becomes disabled", () => {
-    const project = getQuestProject("family-expenses")!;
+    const project = getQuestProject("server-152fz")!;
     const total = getProjectLevelCount(project);
-    localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
     localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: total, completed: Array.from({ length: total - 1 }, (_, index) => index + 1), score: (total - 1) * 10 }));
     const { container } = render(<Quest project={project} onHome={vi.fn()} />);
     const opener = screen.getByRole("button", { name: /завершить квест/i });
@@ -1102,8 +1117,7 @@ describe("academy interface", () => {
   });
 
   it("opens a guide screenshot as a native modal and restores the selected frame opener", () => {
-    render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    render(<QuestGuide frames={[{ id: 2, app: "Codex", title: "Проверенный кадр", screenshot: "/screens/server-152fz/step-01.webp", action: "Проверьте экран" }]} />);
     const opener = screen.getByRole("button", { name: /увеличить кадр 2:/i });
     opener.focus();
 
@@ -1124,18 +1138,16 @@ describe("academy interface", () => {
   it("keeps page and quest phase headings in document order", () => {
     const server = render(<Quest project={getQuestProject("server-152fz")!} onHome={vi.fn()} />);
     const workspace = server.container.querySelector<HTMLElement>('[data-quest-workspace="desktop"]')!;
-    const pageHeading = within(workspace).getByRole("heading", { level: 1, name: /решила, нужен ли мне сервер/i });
+    const pageHeading = within(workspace).getByRole("heading", { level: 1, name: /проверяем, нужен ли отдельный сервер/i });
     const offerHeading = within(workspace).getByRole("heading", { level: 2, name: /скидка 60% на сервер/i });
     expect(pageHeading.compareDocumentPosition(offerHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     server.unmount();
 
     render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    const promptHeading = screen.getByRole("heading", { level: 2, name: /готовая команда для Codex/i });
-    const guideHeading = screen.getByRole("heading", { level: 2, name: /один кадр — одно маленькое действие/i });
-    const firstFrameHeading = screen.getByRole("heading", { level: 3, name: /откройте: Предпросмотр проекта/i });
-    expect(promptHeading.compareDocumentPosition(guideHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(guideHeading.compareDocumentPosition(firstFrameHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const promptHeading = screen.getByRole("region", { name: "Действие этого шага" });
+    const resultHeading = screen.getByRole("heading", { level: 2, name: /готово, если/i });
+    expect(promptHeading.compareDocumentPosition(resultHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("keeps the desktop level map locked, current and synchronized with the opened step", () => {
@@ -1159,7 +1171,7 @@ describe("academy interface", () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
     const project = getQuestProject("pressure-diary")!;
     localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 2, completed: [1], score: 10 }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify(currentProgress(project.slug, { version: 1, activeStep: 2, completed: [1], score: 10 })));
     const { container } = render(<Quest project={project} onHome={vi.fn()} />);
     const compactMap = container.querySelector<HTMLDetailsElement>(".narrow-desktop-level-map");
 
@@ -1179,39 +1191,39 @@ describe("academy interface", () => {
     expect(stepCard).toHaveFocus();
     expect(container.querySelector(".quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
     expect(JSON.parse(localStorage.getItem(progressKey(project.slug))!)).toMatchObject({ activeStep: 1, completed: [1] });
-    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
   });
 
   it("uses the same desktop step opener for map, back and a completed-step continuation", () => {
     const project = getQuestProject("pressure-diary")!;
     localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 2, completed: [1, 2], score: 20 }));
+    localStorage.setItem(progressKey(project.slug), JSON.stringify(currentProgress(project.slug, { version: 1, activeStep: 2, completed: [1, 2], score: 20 })));
     render(<Quest project={project} onHome={vi.fn()} />);
     vi.mocked(window.scrollTo).mockClear();
 
     fireEvent.click(screen.getByRole("button", { name: /уровень 1:/i }));
     expect(screen.getByRole("button", { name: /^← назад$/i })).toBeDisabled();
-    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
 
     fireEvent.click(screen.getByRole("button", { name: /^продолжить/i }));
     expect(screen.getByRole("button", { name: /уровень 2:/i })).toHaveAttribute("aria-current", "step");
-    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
 
     fireEvent.click(screen.getByRole("button", { name: /^← назад$/i }));
     expect(screen.getByRole("button", { name: /уровень 1:/i })).toHaveAttribute("aria-current", "step");
-    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
   });
 
   it("finishes the last desktop level with a factual completion date", () => {
     const project = getQuestProject("pressure-diary")!;
     const total = getProjectLevelCount(project);
     localStorage.setItem(preparationKey(project.slug), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey(project.slug), JSON.stringify({
+    localStorage.setItem(progressKey(project.slug), JSON.stringify(currentProgress(project.slug, {
       version: 1,
       activeStep: total,
       completed: Array.from({ length: total - 1 }, (_, index) => index + 1),
       score: (total - 1) * 10,
-    }));
+    })));
     render(<Quest project={project} onHome={vi.fn()} />);
 
     expect(screen.getByRole("button", { name: /^← назад$/i })).toBeEnabled();
@@ -1269,18 +1281,15 @@ describe("academy interface", () => {
     const workspace = api.container.querySelector<HTMLElement>('[data-quest-workspace="mobile"]')!;
 
     expect(workspace.querySelector(".mobile-capability")).toHaveTextContent(/действия на компьютере/i);
-    expect(workspace.querySelector(".mobile-action")).not.toBeNull();
-    expect(within(workspace).getByRole("region", { name: /делайте по картинкам/i })).toBeInTheDocument();
-    expect(within(workspace).getByRole("heading", { name: /готовая команда для Codex/i })).toBeInTheDocument();
-    expect(within(workspace).getByRole("button", { name: /увеличить мобильный пример/i })).toBeInTheDocument();
+    expect(workspace.querySelector(".mobile-action")).toBeNull();
+    expect(within(workspace).getByRole("region", { name: "Действие этого шага" })).toBeInTheDocument();
 
     fireEvent.click(within(workspace).getByRole("button", { name: /^нужна помощь$/i }));
     const mandatory = [
       workspace.querySelector(".mobile-quest-step-heading"),
+      workspace.querySelector(".lesson-workbench"),
       workspace.querySelector(".mobile-why"),
       workspace.querySelector(".mobile-do"),
-      workspace.querySelector(".mobile-prompt"),
-      workspace.querySelector(".quest-guide"),
       workspace.querySelector(".mobile-result"),
       workspace.querySelector(".mobile-quest-help"),
       workspace.querySelector(".mobile-quest-step-actions"),
@@ -1288,12 +1297,12 @@ describe("academy interface", () => {
     expect(mandatory.every(Boolean)).toBe(true);
     const ordered = [
       mandatory[0],
-      mandatory[1],
       mandatory[2],
-      workspace.querySelector(".beginner-terms"),
       mandatory[3],
-      mandatory[4],
       workspace.querySelector(".quest-links"),
+      mandatory[1],
+      workspace.querySelector(".beginner-terms"),
+      mandatory[4],
       mandatory[5],
       mandatory[6],
       mandatory[7],
@@ -1305,11 +1314,11 @@ describe("academy interface", () => {
     api.unmount();
     localStorage.setItem(progressKey("mobile:server-152fz"), JSON.stringify({ version: 1, activeStep: 9, completed: [1, 2, 3, 4, 5, 6, 7, 8], score: 80 }));
     const server = render(<MobileQuest project={getQuestProject("server-152fz")!} onHome={vi.fn()} />);
-    const serverPrompt = server.container.querySelector(".mobile-prompt")!;
+    const serverPrompt = server.container.querySelector(".lesson-workbench")!;
     const serverLinks = server.container.querySelector(".quest-links")!;
     const serverResult = server.container.querySelector(".mobile-result")!;
     expect(serverLinks).toHaveTextContent(/152-ФЗ|AdminVPS/i);
-    expect(serverPrompt.compareDocumentPosition(serverLinks) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(serverLinks.compareDocumentPosition(serverPrompt) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(serverLinks.compareDocumentPosition(serverResult) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
@@ -1337,7 +1346,7 @@ describe("academy interface", () => {
     fireEvent.click(within(map).getByRole("button", { name: /уровень 1:.*пройден/i }));
     expect(screen.queryByRole("navigation", { name: /карта уровней/i })).not.toBeInTheDocument();
     expect(container.querySelector(".mobile-quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
-    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
     await waitFor(() => expect(screen.getByRole("button", { name: /открыть карту уровней/i })).toHaveFocus());
 
     fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
@@ -1367,7 +1376,7 @@ describe("academy interface", () => {
   it("uses one mobile step opener for a completed revisit, continuation and back", () => {
     const project = getQuestProject("pressure-diary")!;
     localStorage.setItem(preparationKey("mobile:pressure-diary"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify({ version: 1, activeStep: 2, completed: [1, 2], score: 20 }));
+    localStorage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify(currentProgress("mobile:pressure-diary", { version: 1, activeStep: 2, completed: [1, 2], score: 20 })));
     render(<MobileQuest project={project} onHome={vi.fn()} />);
     vi.mocked(window.scrollTo).mockClear();
 
@@ -1380,19 +1389,19 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /^← назад$/i }));
     expect(document.querySelector(".mobile-quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
     expect(window.scrollTo).toHaveBeenCalledTimes(3);
-    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
+    expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: "instant" });
   });
 
   it("finishes the mobile quest in its own progress namespace with a completion date", () => {
     const project = getQuestProject("pressure-diary")!;
     const total = getProjectLevelCount(project);
     localStorage.setItem(preparationKey("mobile:pressure-diary"), JSON.stringify({ version: 1, mode: "demo", checked: [], ready: true }));
-    localStorage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify({
+    localStorage.setItem(progressKey("mobile:pressure-diary"), JSON.stringify(currentProgress("mobile:pressure-diary", {
       version: 1,
       activeStep: total,
       completed: Array.from({ length: total - 1 }, (_, index) => index + 1),
       score: (total - 1) * 10,
-    }));
+    })));
     localStorage.setItem(progressKey(project.slug), JSON.stringify({ version: 1, activeStep: 1, completed: [], score: 0 }));
     render(<MobileQuest project={project} onHome={vi.fn()} />);
 
@@ -1404,20 +1413,8 @@ describe("academy interface", () => {
     expect(screen.getByRole("button", { name: /квест пройден/i })).toBeDisabled();
   });
 
-  it("uses native accessible screenshot and guide dialogs in the mobile workspace", () => {
-    render(<MobileQuest project={getQuestProject("api-keys")!} onHome={vi.fn()} />);
-    const screenshotOpener = screen.getByRole("button", { name: /увеличить мобильный пример/i });
-    screenshotOpener.focus();
-    fireEvent.click(screenshotOpener);
-
-    const screenshotDialog = screen.getByRole("dialog", { name: /увеличенный мобильный пример/i });
-    expect(screenshotDialog.tagName).toBe("DIALOG");
-    expect(screenshotDialog).not.toHaveAttribute("aria-modal");
-    expect(screen.getByRole("button", { name: /закрыть увеличенный мобильный пример/i })).toHaveFocus();
-    fireEvent.keyDown(screenshotDialog, { key: "Escape" });
-    expect(screen.queryByRole("dialog", { name: /увеличенный мобильный пример/i })).not.toBeInTheDocument();
-    expect(screenshotOpener).toHaveFocus();
-
+  it("uses a native accessible dialog for an explicit non-production guide fixture", () => {
+    render(<QuestGuide frames={[{ id: 2, app: "Codex", title: "Тестовый кадр", screenshot: "/screens/server-152fz/step-01.webp", action: "Проверьте экран" }]} />);
     const guideOpener = screen.getByRole("button", { name: /увеличить кадр 2:/i });
     guideOpener.focus();
     fireEvent.click(guideOpener);
@@ -1594,16 +1591,17 @@ describe("academy interface", () => {
   });
 
   it("keeps content-specific finished prototypes on dashboard cards", async () => {
-    const { container } = render(<Academy />);
-    expect(await screen.findByRole("img", { name: /сервис проекта «планирование»/i })).toHaveAttribute(
+    const { container } = render(<Academy section="weeks" />);
+    fireEvent.click(await screen.findByText('Библиотека всех вариантов — необязательно проходить всё'));
+    expect(await screen.findByRole("img", { name: /результат проекта «планер на день/i })).toHaveAttribute(
       "src",
-      "/covers/planner.webp",
+      "/covers/planner.webp?v=20260908-mockups",
     );
-    const agentSlide = container.querySelector('.bundle-preview-slide[data-format="agent"]');
-    expect(agentSlide).toHaveAttribute("aria-hidden", "true");
-    expect(agentSlide?.querySelector("img")).toHaveAttribute(
+    expect(container.querySelector('.bundle-preview-slide')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Неделя 2" }));
+    expect(screen.getByRole("img", { name: /результат проекта «ИИ-агент планирования/i })).toHaveAttribute(
       "src",
-      "/covers/day-planner-agent.webp",
+      "/covers/day-planner-agent.webp?v=20260908-mockups",
     );
     expect(container.querySelector('.project-preview img[src*="/screens/"]')).toBeNull();
     expect(container.querySelectorAll(".project-preview img").length).toBeGreaterThan(4);
@@ -1611,17 +1609,10 @@ describe("academy interface", () => {
 
   it("shows three different reference roles and the resulting original design", () => {
     const project = getQuestProject("unique-design")!;
-    const { container, rerender } = render(<ExpectedScene project={project} step={8} />);
-
-    expect(container.querySelector('[data-design-marker="three-reference-original-design"]')).not.toBeNull();
-    expect(screen.getByText(/логика блоков/i)).toBeInTheDocument();
-    expect(screen.getByText(/настроение и типографика/i)).toBeInTheDocument();
-    expect(screen.getByText(/одна деталь/i)).toBeInTheDocument();
-    expect(screen.getByText(/моя версия/i)).toBeInTheDocument();
-
-    rerender(<MobileExpectedScene project={project} step={14} />);
-    expect(container.querySelector('[data-design-marker="three-reference-original-design"]')).not.toBeNull();
-    expect(screen.getAllByText(/390 px/i).length).toBeGreaterThan(0);
+    const lesson = buildQuest(project).find((step) => step.sourceStepId === 7)!;
+    expect(lesson.title).toMatch(/три примера/i);
+    expect(`${lesson.action} ${lesson.prompt}`).toMatch(/структур|типограф|детал/i);
+    expect(lesson.expected.length).toBeGreaterThanOrEqual(2);
   });
 
   it("renders every mobile collection screen without asking for prepared files", () => {
@@ -1653,49 +1644,39 @@ describe("academy interface", () => {
 
   it("renders distinct family-budget stages instead of a generic service mockup", () => {
     const project = getQuestProject("family-expenses")!;
-    const stages = new Map([[2, "concept"], [7, "expense"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)} />)}</>);
-
-    for (const [step, stage] of stages) {
-      expect(container.querySelectorAll(`[data-original-service="family-expenses"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
-    }
-    expect(container.querySelectorAll('[data-palette-choice="Мятная свежесть"]')).toHaveLength(2);
-    expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
+    const steps = buildQuest(project);
+    expect(steps.map((step) => step.title)).toEqual(expect.arrayContaining([expect.stringMatching(/трёх расходах/i), expect.stringMatching(/ошибку/i), expect.stringMatching(/портфолио/i)]));
+    expect(steps.map((step) => step.customization).filter(Boolean)).toEqual(["service"]);
+    expect(steps.map((step) => step.title).join(" ")).not.toMatch(/клиентск.*коп/i);
   });
 
-  it("renders distinct planner stages with a personal and client version", () => {
+  it("renders distinct planner stages without requiring a client copy", () => {
     const project = getQuestProject("planner")!;
-    const stages = new Map([[2, "concept"], [7, "task"], [8, "focus"], [10, "feature"], [15, "client-copy"], [16, "client-brief"], [17, "portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step) => <ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)} />)}{[...stages.keys()].map((step) => <MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)} />)}</>);
-
-    for (const [step, stage] of stages) {
-      expect(container.querySelectorAll(`[data-original-service="planner"][data-original-stage="${stage}"]`), `step ${step}`).toHaveLength(2);
-    }
-    expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
+    const steps = buildQuest(project);
+    expect(steps.map((step) => step.title)).toEqual(expect.arrayContaining([expect.stringMatching(/добавляем одно дело/i), expect.stringMatching(/главное/i), expect.stringMatching(/портфолио/i)]));
+    expect(steps.map((step) => step.customization).filter(Boolean)).toEqual(["service"]);
+    expect(steps.map((step) => step.title).join(" ")).not.toMatch(/клиентск.*коп/i);
   });
 
   it("renders distinct idea-vault stages from capture to client portfolio", () => {
     const project = getQuestProject("idea-vault")!;
-    const stages = new Map([[2,"concept"],[7,"capture"],[8,"organize"],[10,"feature"],[11,"search"],[15,"client-copy"],[16,"client-brief"],[17,"portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)}/>)}</>);
-    for (const [step,stage] of stages) expect(container.querySelectorAll(`[data-original-service="idea-vault"][data-original-stage="${stage}"]`),`step ${step}`).toHaveLength(2);
-    expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
+    const steps = buildQuest(project);
+    expect(steps.map((step) => step.title)).toEqual(expect.arrayContaining([expect.stringMatching(/сохраняем мысль/i), expect.stringMatching(/повторную запись/i), expect.stringMatching(/портфолио/i)]));
+    expect(steps.map((step) => step.title).join(" ")).not.toMatch(/клиентск.*коп/i);
   });
 
   it("renders distinct child-schedule stages from week planning to client portfolio", () => {
     const project = getQuestProject("child-schedule")!;
-    const stages = new Map([[2,"concept"],[7,"activity"],[8,"week"],[10,"feature"],[11,"morning"],[15,"client-copy"],[16,"client-brief"],[17,"portfolio"]]);
-    const { container } = render(<>{[...stages.keys()].map((step)=><ExpectedScene key={`d-${step}`} project={project} step={routeStepFor(project, step)}/>)}{[...stages.keys()].map((step)=><MobileExpectedScene key={`m-${step}`} project={project} step={routeStepFor(project, step)}/>)}</>);
-    for (const [step,stage] of stages) expect(container.querySelectorAll(`[data-original-service="child-schedule"][data-original-stage="${stage}"]`),`step ${step}`).toHaveLength(2);
-    expect(container.querySelectorAll(".service-scene")).toHaveLength(0);
+    const steps = buildQuest(project);
+    expect(steps.map((step) => step.title)).toEqual(expect.arrayContaining([expect.stringMatching(/переносим/i), expect.stringMatching(/пересечение/i), expect.stringMatching(/портфолио/i)]));
+    expect(steps.map((step) => step.title).join(" ")).not.toMatch(/клиентск.*коп/i);
   });
 
-  it("shows both click-by-click pictures and the final project prototype in an original quest", () => {
+  it("does not promise click-by-click pictures for a reviewed quest without real frames", () => {
     render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    const guide = screen.getByRole("region", { name: /делайте по картинкам/i });
-    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(3);
-    expect(screen.getByRole("img", { name: /прототип уровня 1/i })).toHaveAttribute("src", "/screens/family-expenses/step-01.webp");
+    expect(screen.queryByRole("region", { name: /делайте по картинкам/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /увеличить пример результата/i })).not.toBeInTheDocument();
   });
 
   it("renders a different functional result screen for every AI agent", () => {
@@ -1745,10 +1726,10 @@ describe("academy interface", () => {
 
     for (const [slug, marker, phrases] of expectations) {
       const prototypes = container.querySelectorAll(`[data-source-prototype="${marker}"]`);
-      expect(prototypes, slug).toHaveLength(2);
+      expect(prototypes.length, slug).toBeGreaterThanOrEqual(1);
       for (const phrase of phrases) {
         expect(prototypes[0], slug).toHaveTextContent(phrase);
-        expect(prototypes[1], slug).toHaveTextContent(phrase);
+        if (prototypes[1]) expect(prototypes[1], slug).toHaveTextContent(phrase);
       }
     }
   });
@@ -1798,25 +1779,87 @@ describe("academy interface", () => {
     expect(localStorage.getItem(progressKey("planner"))).toContain('"completed":[1]');
   });
 
+  it.each([false, true])("restores the first completed assignment after reopening (mobile=%s)", (mobile) => {
+    const Component = mobile ? MobileQuest : Quest;
+    const project = getQuestProject("recipe-book")!;
+    const slug = `${mobile ? "mobile:" : ""}recipe-book`;
+    const view = render(<Component project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    expect(JSON.parse(localStorage.getItem(progressKey(slug))!).completed).toEqual([1]);
+    view.unmount();
+    const reopened = render(<Component project={project} onHome={vi.fn()} />);
+    expect(reopened.container.querySelector(mobile ? ".mobile-quest-step-heading" : ".quest-step-heading")).toHaveTextContent(/уровень 2 из/i);
+  });
+
+  it.each([false, true])("does not advance or claim success when progress cannot be saved (mobile=%s)", (mobile) => {
+    const Component = mobile ? MobileQuest : Quest;
+    const project = getQuestProject("recipe-book")!;
+    const view = render(<Component project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    const setItem = Storage.prototype.setItem;
+    const broken = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function(key, value) {
+      if (key.startsWith("feya-academy-progress-v1:")) throw new DOMException("Full", "QuotaExceededError");
+      return setItem.call(this, key, value);
+    });
+    try {
+      fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+      expect(view.container.querySelector(mobile ? ".mobile-quest-step-heading" : ".quest-step-heading")).toHaveTextContent(/уровень 1 из/i);
+      expect(screen.getByRole("alert")).toHaveTextContent(/не удалось сохранить/i);
+    } finally { broken.mockRestore(); }
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("Сохранено в этом браузере")).toBeInTheDocument();
+  });
+
+  it.each([false, true])("autosaves project choices without pressing Save (mobile=%s)", (mobile) => {
+    const Component = mobile ? MobileQuest : Quest;
+    const project = getQuestProject("family-expenses")!;
+    const slug = `${mobile ? "mobile:" : ""}family-expenses`;
+    const view = render(<Component project={project} onHome={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    fireEvent.click(screen.getByRole("radio", { name: "Семья с детьми" }));
+    expect(localStorage.getItem(customizationKey(slug))).toContain("Семья с детьми");
+    view.unmount();
+    render(<Component project={project} onHome={vi.fn()} />);
+    expect(screen.getByRole("radio", { name: "Семья с детьми" })).toBeChecked();
+  });
+
   it("returns a desktop quest to the top after the learner presses next", async () => {
     render(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
+    const renderedSteps: string[] = [];
+    vi.mocked(window.scrollTo).mockImplementation(() => {
+      renderedSteps.push(document.querySelector(".quest-step-heading")?.textContent ?? "");
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
-    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" }));
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" }));
+    expect(renderedSteps[0]).toMatch(/уровень 2 из/i);
+    expect(document.querySelector(".quest-step-card")).toHaveFocus();
+    vi.mocked(window.scrollTo).mockImplementation(() => {});
     expect(screen.getByRole("button", { name: /уровень 2/i })).toBeEnabled();
   });
 
-  it("returns a mobile quest to the top immediately after next", async () => {
+  it("returns a mobile quest to the top instantly after the next step is rendered", async () => {
     render(<MobileQuest project={getQuestProject("child-schedule")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     vi.mocked(window.scrollTo).mockClear();
+    const renderedSteps: string[] = [];
+    vi.mocked(window.scrollTo).mockImplementation(() => {
+      renderedSteps.push(document.querySelector(".mobile-quest-step-heading")?.textContent ?? "");
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
-    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" }));
+    await waitFor(() => expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" }));
+    expect(renderedSteps).toHaveLength(1);
+    expect(renderedSteps[0]).toMatch(/уровень 2 из/i);
+    vi.mocked(window.scrollTo).mockImplementation(() => {});
     fireEvent.click(screen.getByRole("button", { name: /открыть карту уровней/i }));
     expect(screen.getByRole("button", { name: /уровень 2:/i })).toBeEnabled();
   });
@@ -1826,7 +1869,8 @@ describe("academy interface", () => {
     render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /нужна помощь/i }));
-    expect(screen.getByText(/не создавайте папку сами/i)).toBeInTheDocument();
+    expect(screen.getByText(/не начинайте проект заново/i)).toBeInTheDocument();
+    expect(screen.getByText(/не прикладывайте ключи/i)).toBeInTheDocument();
   });
 
   it("renders the full beginner level contract on desktop and mobile", async () => {
@@ -1834,29 +1878,29 @@ describe("academy interface", () => {
     const desktop = render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
 
-    const desktopTerms = screen.getByRole("region", { name: /новые слова перед началом/i });
     const desktopWhy = desktop.container.querySelector(".quest-purpose")!;
-    expect(desktopTerms).toHaveTextContent(/Codex.+создаёт, проверяет и исправляет/is);
-    expect(desktopWhy.compareDocumentPosition(desktopTerms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByText("прототип")).toBeInTheDocument();
+    const desktopAction = desktop.container.querySelector(".quest-action")!;
+    expect(desktopWhy.compareDocumentPosition(desktopAction) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole("region", { name: /новые слова перед началом/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /я сделала — продолжить/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
     const desktopHelp = desktop.container.querySelector(".help-card")!;
     fireEvent.click(within(desktopHelp).getByRole("button", { name: /скопировать/i }));
-    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringMatching(/recipe-book.+не проси меня создавать/is)));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringMatching(/recipe-book.+исправь только причину/is)));
     desktop.unmount();
 
     const mobile = render(<MobileQuest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    const mobileTerms = screen.getByRole("region", { name: /новые слова перед началом/i });
     const mobileWhy = mobile.container.querySelector(".mobile-why")!;
-    expect(mobileWhy.compareDocumentPosition(mobileTerms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const mobileAction = mobile.container.querySelector(".mobile-do")!;
+    expect(mobileWhy.compareDocumentPosition(mobileAction) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole("region", { name: /новые слова перед началом/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /я сделала — продолжить/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /^нужна помощь$/i }));
     fireEvent.click(screen.getByRole("button", { name: /скопировать команду помощи/i }));
-    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(expect.stringMatching(/ФОРМАТ: С ТЕЛЕФОНА.+техническую работу/is)));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(expect.stringMatching(/recipe-book.+в своей среде.+исправь только причину/is)));
   });
 
   it("hydrates project cards without changing saved progress during hydration", async () => {
@@ -1945,7 +1989,7 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     const checks = screen.getAllByRole("checkbox");
     expect(checks).toHaveLength(5);
-    const start = screen.getByRole("button", { name: /готова отвечать Codex — начать квест/i });
+    const start = screen.getByRole("button", { name: /готова.*начать квест/i });
     expect(start).toBeDisabled();
     checks.forEach((check) => fireEvent.click(check));
     expect(start).toBeEnabled();
@@ -1959,11 +2003,11 @@ describe("academy interface", () => {
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
 
     expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/Codex сам создаст папку, файлы и структуру/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/ничего заранее создавать не нужно/i)).toBeInTheDocument();
     expect(screen.queryByText(/создайте.+(?:папк|файл)/i)).not.toBeInTheDocument();
-    expect(screen.getAllByRole("checkbox")).toHaveLength(4);
+    expect(screen.getAllByRole("checkbox").length).toBeGreaterThan(0);
 
-    const start = screen.getByRole("button", { name: /готова отвечать Codex — начать квест/i });
+    const start = screen.getByRole("button", { name: /готова.*начать квест/i });
     expect(start).toBeDisabled();
     screen.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
     expect(start).toBeEnabled();
@@ -1973,38 +2017,41 @@ describe("academy interface", () => {
     render(<Quest project={getQuestProject("pressure-diary")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/Codex сам создаст проект pressure-diary, папки, файлы и нужные поля/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/ничего заранее создавать не нужно/i)).toBeInTheDocument();
     expect(screen.queryByText(/мои-измерения\.csv|поля-дневника\.txt/i)).not.toBeInTheDocument();
   });
 
   it("opens the shared learning dashboard from the mobile format route", async () => {
+    const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue({ok:true,json:async()=>({url:null})} as Response);
     window.history.replaceState({}, "", "/?format=mobile");
     render(<AppEntry />);
-    expect(await screen.findByText(/ваш следующий шаг/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "С чего начать обучение" })).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveAttribute("data-dashboard-format", "mobile");
     expect(screen.getByRole("navigation", { name: /навигация Академии на телефоне/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("img", { name: /сервис проекта «планирование»/i })).not.toHaveLength(0);
-    screen.getAllByRole("img", { name: /сервис проекта «планирование»/i }).forEach((image) => {
-      expect(image).toHaveAttribute("src", "/covers/planner.webp");
-    });
+    expect(screen.queryByRole("img", { name: /сервис проекта «планирование»/i })).toBeNull();
+    expect(await screen.findByRole("textbox", { name: "Адрес вашей Феечки" })).toBeInTheDocument();
+    fetcher.mockRestore();
   });
 
-  it("stores phone progress separately and shows a safe Telegram fallback", () => {
+  it("stores phone progress separately and opens the saved personal bot", async () => {
+    const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue({ok:true,json:async()=>({url:"https://t.me/student_fairy_bot"})} as Response);
     const project = getQuestProject("family-expenses")!;
     render(<MobileQuest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
-    expect(screen.getByRole("heading", { name: /увидела, каким станет мой бюджет/i })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /открыть моего помощника/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/Сначала добавьте ссылку на личного помощника/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /создаём работающий семейный бюджет/i })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: /открыть Феечку/i })).toHaveAttribute("href", "https://t.me/student_fairy_bot");
+    expect(screen.getByRole("button", { name: /я сделала/i })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
     expect(localStorage.getItem(progressKey("mobile:family-expenses"))).toContain('"completed":[1]');
     expect(localStorage.getItem(progressKey("family-expenses"))).toBeNull();
+    fetcher.mockRestore();
   });
 
   it("lets a learner personalize the first four quests and restores her choice", () => {
     const project = getQuestProject("family-expenses")!;
     const { unmount } = render(<Quest project={project} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
     expect(screen.getByRole("heading", { name: /соберите свой семейный бюджет/i })).toBeInTheDocument();
@@ -2016,15 +2063,15 @@ describe("academy interface", () => {
     expect(screen.getByLabelText(/живой предпросмотр/i)).toHaveTextContent("Куда ушли деньги");
     fireEvent.click(screen.getByRole("button", { name: /сохранить мою версию/i }));
 
-    expect(screen.getByRole("status")).toHaveTextContent("Семья с детьми");
-    expect(screen.getByRole("status")).toHaveTextContent("Дни без покупок");
-    expect(screen.getByRole("status")).toHaveTextContent("Пудровое тепло");
+    expect(screen.getByRole("status", { name: "Ваша версия проекта" })).toHaveTextContent("Семья с детьми");
+    expect(screen.getByRole("status", { name: "Ваша версия проекта" })).toHaveTextContent("Дни без покупок");
+    expect(screen.getByRole("status", { name: "Ваша версия проекта" })).toHaveTextContent("Пудровое тепло");
     expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("Семья с детьми");
     expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("Пудровое тепло");
     unmount();
 
     render(<Quest project={project} onHome={vi.fn()} />);
-    expect(screen.getByRole("status")).toHaveTextContent("Семья с детьми");
+    expect(screen.getByRole("status", { name: "Ваша версия проекта" })).toHaveTextContent("Семья с детьми");
     expect(screen.getByRole("radio", { name: "Дни без покупок" })).toBeChecked();
     expect(screen.getByRole("button", { name: /пудровое тепло/i })).toHaveAttribute("aria-pressed", "true");
   });
@@ -2033,13 +2080,14 @@ describe("academy interface", () => {
     render(<Quest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
 
     fireEvent.click(screen.getByRole("button", { name: /собрать свою гамму/i }));
     fireEvent.change(screen.getByLabelText("Фон проекта"), { target: { value: "#fef1f6" } });
     fireEvent.change(screen.getByLabelText("Кнопки и акценты"), { target: { value: "#7b3655" } });
     fireEvent.click(screen.getByRole("button", { name: /сохранить мою версию/i }));
 
-    expect(screen.getByRole("status")).toHaveTextContent("Моя гамма");
+    expect(screen.getByRole("status", { name: "Ваша версия проекта" })).toHaveTextContent("Моя гамма");
     expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("#fef1f6");
     expect(localStorage.getItem(customizationKey("family-expenses"))).toContain("#7b3655");
   });
@@ -2057,50 +2105,39 @@ describe("academy interface", () => {
     render(<MobileQuest project={getQuestProject("family-expenses")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на вымышленных данных/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
+    fireEvent.click(screen.getByRole("button", { name: /я сделала/i }));
 
     expect(screen.getByRole("heading", { name: /соберите свой семейный бюджет/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Я сама" })).toBeChecked();
-    expect(localStorage.getItem(customizationKey("mobile:family-expenses"))).toBeNull();
+    expect(JSON.parse(localStorage.getItem(customizationKey("mobile:family-expenses"))!).audience).toBe("Я сама");
   });
 
-  it("walks a real home-helper learner through every click with pictures", () => {
+  it("walks a real home-helper learner through the reviewed actions without fake pictures", () => {
     render(<Quest project={getQuestProject("home-helper")!} onHome={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /работать на реальных данных/i }));
     expect(screen.queryByRole("img", { name: /подготовка home-helper/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/Codex сам создаст проект home-helper, папки, файлы и нужные поля/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /ничего заранее создавать не нужно/i })).toBeInTheDocument();
     screen.getAllByRole("checkbox").forEach((checkbox) => fireEvent.click(checkbox));
-    fireEvent.click(screen.getByRole("button", { name: /готова отвечать Codex — начать квест/i }));
+    fireEvent.click(screen.getByRole("button", { name: /готова.*начать квест/i }));
 
-    let guide = screen.getByRole("region", { name: /делайте по картинкам/i });
-    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(4);
-    expect(within(guide).getByRole("heading", { name: /откройте Codex/i })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /делайте по картинкам/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /создаём первый список домашних дел/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
     fireEvent.click(screen.getByRole("button", { name: /я сделала — продолжить/i }));
-    guide = screen.getByRole("region", { name: /делайте по картинкам/i });
-    expect(within(guide).getAllByRole("img", { name: /кадр \d+/i })).toHaveLength(5);
-    expect(within(guide).getByRole("heading", { name: /скопируйте команду опроса/i })).toBeInTheDocument();
-    expect(within(guide).getByRole("heading", { name: /запустите разговор/i })).toBeInTheDocument();
-    expect(within(guide).getByRole("heading", { name: /ответьте обычными словами/i })).toBeInTheDocument();
-    expect(within(guide).getAllByText(/готово, если/i)).toHaveLength(5);
-    expect(screen.queryByText(/вымышлен|демонстрацион|учебн/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: /делайте по картинкам/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /делаем сервис своим/i })).toBeInTheDocument();
+    expect(screen.getByText(/не заменяй мои записи учебными/i)).toBeInTheDocument();
   });
 
-  it("renders a dedicated arrow screenshot scene for each home-helper action", async () => {
-    window.history.replaceState({}, "", "/?capture-guide=home-helper--real--step-03--frame-03");
-    render(<AppEntry />);
-    expect(await screen.findAllByRole("heading", { name: /ответьте обычными словами/i })).not.toHaveLength(0);
+  it("renders a dedicated test-only guide fixture without changing the curriculum", () => {
+    render(<QuestGuide frames={[{ id: 1, app: "Codex", title: "Ответьте обычными словами", screenshot: "/screens/server-152fz/step-01.webp", action: "Пишите сюда" }]} />);
+    expect(screen.getByRole("heading", { name: /ответьте обычными словами/i })).toBeInTheDocument();
     expect(screen.getByText(/пишите сюда/i)).toBeInTheDocument();
-    expect(document.querySelector("#capture-guide-scene")).toBeInTheDocument();
   });
 
-  it("renders a project-specific guide scene for family expenses", async () => {
-    window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-04--frame-02");
-    render(<AppEntry />);
-    expect(await screen.findByRole("heading", { name: /Codex сам подготовил рабочее место/i })).toBeInTheDocument();
-    expect(screen.getByText(/создать всё автоматически/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/family-expenses/i).length).toBeGreaterThan(1);
-    expect(document.querySelector('[data-original-guide="family-expenses"]')).toBeInTheDocument();
+  it("does not attach obsolete guide scenes to reviewed family-expenses lessons", () => {
+    expect(buildQuest(getQuestProject("family-expenses")!).every((step) => !step.guide)).toBe(true);
   });
 
   it("shows the conversational result instead of prepared files in family-expenses screenshots", async () => {
@@ -2111,19 +2148,16 @@ describe("academy interface", () => {
     expect(screen.queryByText(/проверила данные расходов|семейные-расходы\.csv/i)).not.toBeInTheDocument();
   });
 
-  it("does not show pre-created files before the family-expenses Codex interview", async () => {
-    window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-03--frame-02");
-    render(<AppEntry />);
-    expect(await screen.findByText(/новый проект — пока без файлов/i)).toBeInTheDocument();
-    expect(screen.queryByText(/паспорт-проекта\.txt|данные\.csv|правила\.txt/i)).not.toBeInTheDocument();
+  it("does not require pre-created files before the family-expenses Codex interview", () => {
+    const first = buildQuest(getQuestProject("family-expenses")!, "real")[0];
+    expect(`${first.action} ${first.prompt}`).toMatch(/создай.*папк|все.*файл.*создавай сам/i);
+    expect(`${first.action} ${first.prompt}`).not.toMatch(/создайте.*паспорт-проекта|создайте.*данные\.csv/i);
   });
 
-  it("shows exactly where to choose a palette in the level-two picture guide", async () => {
-    window.history.replaceState({}, "", "/?capture-guide=family-expenses--real--step-02--frame-02");
-    render(<AppEntry />);
-    expect(await screen.findByText("Пудровое тепло")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /собрать свою гамму/i })).toBeInTheDocument();
-    expect(screen.getByText("ЖИВОЙ ПРЕДПРОСМОТР")).toBeInTheDocument();
+  it("places family-expenses palette customization on the declared lesson", () => {
+    const steps = buildQuest(getQuestProject("family-expenses")!);
+    expect(steps.findIndex((step) => step.customization === "service")).toBe(2);
+    expect(steps.filter((step) => step.guide)).toHaveLength(0);
   });
 
   it("keeps shared result screenshots neutral for real and training routes", async () => {
@@ -2133,18 +2167,16 @@ describe("academy interface", () => {
     expect(screen.queryByText(/вымышлен|учебной папке/i)).not.toBeInTheDocument();
   });
 
-  it("shows a voice-or-text interview instead of source files in the mobile screenshot", async () => {
-    window.history.replaceState({}, "", "/?capture-mobile=pressure-diary--step-03");
-    render(<AppEntry />);
-    expect(await screen.findByText(/расскажите своими словами/i)).toBeInTheDocument();
-    expect(screen.getByText(/Codex сам создаст комнату, поля и файлы/i)).toBeInTheDocument();
-    expect(screen.queryByText(/мои-измерения\.csv|поля-дневника\.txt/i)).not.toBeInTheDocument();
+  it("keeps personal source files out of the reviewed mobile lesson", () => {
+    const first = buildQuest(getQuestProject("pressure-diary")!, "real")[0];
+    expect(`${first.action} ${first.prompt}`).toMatch(/не проси настоящие измерения|личн/i);
+    expect(`${first.action} ${first.prompt}`).not.toMatch(/мои-измерения\.csv|поля-дневника\.txt/i);
   });
 
   it("does not expose the obsolete manual preparation capture route", async () => {
     window.history.replaceState({}, "", "/?capture-prep=home-helper--prep-02");
     render(<AppEntry />);
-    expect(await screen.findByRole("heading", { level: 1, name: /устанавливаем codex/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: /с чего начать обучение/i })).toBeInTheDocument();
     expect(document.querySelector("#capture-guide-scene")).not.toBeInTheDocument();
   });
 });

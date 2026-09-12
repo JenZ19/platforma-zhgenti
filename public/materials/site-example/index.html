@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ирина Ковалёва — учебный пример сайта</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#2d2430;background:#fdfbf7;--accent:#7a5a3c;--soft:#f3ece2;--line:#e6dccf}
+*{box-sizing:border-box}body{margin:0}
+.wrap{max-width:960px;margin:auto;padding:0 20px}
+header.top{padding:22px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:-.3px}
+.cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:650;border-radius:12px;padding:12px 20px}
+.cta:focus-visible,a:focus-visible{outline:3px solid #b08a63;outline-offset:3px}
+.hero{padding:40px 0 52px;display:grid;gap:26px;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center}
+.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.1;letter-spacing:-1.4px;margin:10px 0 16px}
+.kicker{letter-spacing:.09em;text-transform:uppercase;font-size:12px;font-weight:700;color:var(--accent);margin:0}
+.hero p{font-size:19px;color:#5c5048;margin:0 0 24px;max-width:46ch}
+.portrait{aspect-ratio:4/5;border-radius:24px;background:linear-gradient(160deg,#efe4d6,#dccbb6);display:grid;place-items:center;color:#8a745c;font-size:14px;text-align:center;padding:20px}
+section{padding:38px 0;border-top:1px solid var(--line)}
+h2{font-size:26px;letter-spacing:-.6px;margin:0 0 18px}
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}
+.card h3{margin:0 0 8px;font-size:19px}
+.card p{margin:0;color:#5c5048}
+.card b{display:block;margin-top:14px;color:var(--accent)}
+.steps{counter-reset:s;display:grid;gap:14px;padding:0;margin:0;list-style:none}
+.steps li{counter-increment:s;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--soft);font-weight:700}
+.faq details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px 18px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{margin:10px 0 0;color:#5c5048}
+.contact{background:var(--soft);border-radius:24px;padding:30px;text-align:center;margin-bottom:40px}
+.contact p{max-width:46ch;margin:0 auto 20px;color:#5c5048}
+footer{padding:0 0 40px;color:#8a7f74;font-size:14px}
+@media (max-width:720px){.hero{grid-template-columns:1fr}.portrait{max-width:280px}}
+</style></head><body>
+<div class="wrap">
+<header class="top"><span class="brand">Ирина Ковалёва</span><a class="cta" href="#contact">Записаться на разбор</a></header>
+
+<div class="hero">
+  <div>
+    <p class="kicker">Учебный пример · неделя 4</p>
+    <h1>Помогаю навести порядок в семейном бюджете</h1>
+    <p>За три встречи разберём, куда уходят деньги, и соберём план, который выдержит обычный месяц с ремонтом, днями рождения и отпуском.</p>
+    <a class="cta" href="#contact">Записаться на разбор →</a>
+  </div>
+  <div class="portrait">Здесь ваша фотография<br>или изображение работы</div>
+</div>
+
+<section>
+  <h2>С чем ко мне приходят</h2>
+  <div class="cards">
+    <div class="card"><h3>Деньги есть, порядка нет</h3><p>Доход нормальный, а к концу месяца непонятно, где он.</p><b>Разбор за 2 недели</b></div>
+    <div class="card"><h3>Копить не получается</h3><p>Откладываете — и снимаете обратно на первую же неожиданность.</p><b>План подушки</b></div>
+    <div class="card"><h3>Спорите о тратах</h3><p>Нужен общий язык с партнёром, а не ещё одна таблица.</p><b>Встреча для двоих</b></div>
+  </div>
+</section>
+
+<section>
+  <h2>Как проходит работа</h2>
+  <ol class="steps">
+    <li><div><strong>Заявка</strong><p>Вы пишете пару слов о ситуации. Отвечаю в течение дня.</p></div></li>
+    <li><div><strong>Разбор, 60 минут</strong><p>Смотрим реальные траты за три месяца. Без осуждения и советов «просто меньше тратьте».</p></div></li>
+    <li><div><strong>План на месяц</strong><p>Присылаю короткий документ: что меняем, в каком порядке и к чему это приведёт.</p></div></li>
+    <li><div><strong>Проверка через месяц</strong><p>Смотрим, что сработало, и правим то, что нет.</p></div></li>
+  </ol>
+</section>
+
+<section class="faq">
+  <h2>Частые вопросы</h2>
+  <details><summary>Нужно показывать выписки из банка?</summary><p>Достаточно сумм по категориям. Выписки можно не присылать, а если пришлёте — удаляю после встречи.</p></details>
+  <details><summary>А если доход нестабильный?</summary><p>Тогда считаем по минимальному месяцу, а излишки распределяем отдельно. Так план не разваливается в плохой месяц.</p></details>
+  <details><summary>Вы советуете, куда вкладывать?</summary><p>Нет. Я не инвестиционный консультант и не даю таких рекомендаций — мы работаем только с расходами и подушкой.</p></details>
+</section>
+
+<section class="contact" id="contact">
+  <h2>Записаться на разбор</h2>
+  <p>Напишите, что сейчас беспокоит. Отвечу в течение дня и скажу, смогу ли помочь.</p>
+  <a class="cta" href="#contact">Написать в Telegram</a>
+</section>
+
+<footer>Учебный пример школы НЕЙРОПРОФИ. Человек и услуга вымышленные. На вашем сайте будут ваши тексты, фотографии и настоящий способ связаться.</footer>
+</div></body></html>

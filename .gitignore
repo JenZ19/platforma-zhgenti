@@ -40,3 +40,7 @@ yarn-error.log*
 /work/
 /artifacts/
 /.worktrees/
+
+# локальные артефакты сборки и инструментов
+/tsconfig.tsbuildinfo
+/.superpowers/

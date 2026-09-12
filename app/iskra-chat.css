@@ -1,0 +1,17 @@
+.iskra-chat { min-width: 0; }
+.fairy-assistant .iskra-chat-intro { font-size: 1.1rem; line-height: 1.6; margin: 0 0 1rem; }
+.iskra-messages { display: flex; flex-direction: column; gap: 1rem; max-height: 48vh; overflow-y: auto; overscroll-behavior: contain; padding: .25rem .5rem .75rem 0; }
+.iskra-message { max-width: 94%; padding: 1rem 1.2rem; border-radius: 1.2rem; background: #fff; border: 1px solid #eadbe0; font-size: 1rem; line-height: 1.6; overflow-wrap: anywhere; }
+.iskra-message-user { align-self: flex-end; background: #fbe7f0; }
+.iskra-message > strong { display: block; font-size: .875rem; color: #813051; margin-bottom: .35rem; }
+.iskra-answer { white-space: pre-wrap; }
+.iskra-sources { display: grid; gap: .35rem; margin-top: .75rem; font-size: .875rem; }
+.iskra-sources a { color: #813051; text-decoration: underline; }
+.fairy-assistant .iskra-privacy { font-size: .875rem; line-height: 1.5; color: #655860; margin: .75rem 0; }
+.fairy-assistant .iskra-chat-error { font-size: 1rem; line-height: 1.5; color: #8c2444; background: #fff0f3; border-radius: .75rem; padding: .8rem; }
+.iskra-thinking { font-size: 1rem; color: #813051; }
+.iskra-chat .fairy-actions { flex-wrap: wrap; }
+@media(max-width:640px) {
+  .iskra-message { max-width: 100%; padding: .85rem; }
+  .iskra-chat .fairy-actions > button { flex: 1 1 auto; min-height: 44px; }
+}

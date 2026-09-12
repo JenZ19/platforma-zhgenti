@@ -1,4 +1,5 @@
 import type { CatalogProject, ProjectFormat } from "../content/types";
+import { isProjectBundle } from "../content/projects";
 import type { QuestSurface } from "./output-format";
 import { getCatalogProjectProgressState, type StorageLike } from "./progress";
 import { buildCourseMilestones, type CourseMilestone } from "./course-route";
@@ -11,6 +12,9 @@ const dashboardSections: readonly DashboardSection[] = ["home", "projects", "wee
 
 export type DashboardProjectState = {
   project: CatalogProject;
+  /** Concrete library cards retain their bundle's navigation and saved-project identity. */
+  catalogSlug?: string;
+  variants?: DashboardProjectState[];
   completedLevels: number;
   totalLevels: number;
   percent: number;
@@ -181,6 +185,19 @@ export function buildDashboardSnapshot(
       updatedAt: progress.updatedAt,
       completedAt: progress.completedAt,
       output: format,
+      variants: isProjectBundle(project) ? branches.map((branch) => ({
+        project: project.formats[branch.format],
+        catalogSlug: project.slug,
+        output: branch.format,
+        completedLevels: branch.progress.completed.length,
+        totalLevels: branch.totalLevels,
+        percent: Math.round(branch.progress.completed.length / branch.totalLevels * 100),
+        status: branch.progress.completed.length === branch.totalLevels ? "completed" : branch.progress.completed.length ? "started" : "new",
+        saved: saved.includes(project.slug),
+        updatedAt: branch.progress.updatedAt,
+        completedAt: branch.progress.completedAt,
+        completedOutputs: [],
+      })) : undefined,
       completedOutputs: branches
         .filter((branch) => branch.progress.completed.length === branch.totalLevels)
         .map((branch) => ({ format: branch.format, completedAt: branch.progress.completedAt })),

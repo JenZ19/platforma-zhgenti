@@ -1,0 +1,19 @@
+room: &chat
+  chat_container: ""
+  message_item: "div.comment[data-uniq-id]"
+  author_attr: "data-user-name"
+  message_author: ".title span:last-of-type"
+  message_text: ".text"
+  message_id_attr: "data-uniq-id"
+  chat_input: "input.new-comment-input"
+  chat_send_button: "button.js-webinar-rating-btn"
+  presence_anchor: "input.new-comment-input"
+admin_comments:
+  <<: *chat
+  moderation_link: "a:has-text('Модерация комментариев')"
+login:
+  login_form: "form#login, input[name='login'], input[type='password']"
+  login_url_markers: ["/login", "/cms/system/login", "/user/login"]
+  email_input: "input[name='email']"
+  password_input: "input[name='password'], input[type='password']"
+  submit_button: "button:has-text('Войти')"

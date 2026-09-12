@@ -34,4 +34,5 @@ it("rejects unrelated backups and unsafe bot URLs", () => {
   expect(normalizePersonalBot("https://evil.test/bot")).toBeUndefined();
   expect(normalizePersonalBot("https://t.me/good_bot?token=secret")).toBeUndefined();
   expect(normalizePersonalBot("@student_fairy_bot")).toBe("https://t.me/student_fairy_bot");
+  expect(normalizePersonalBot("T.me/feyakrestnayasbm_bot")).toBeUndefined();
 });

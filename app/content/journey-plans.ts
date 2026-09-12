@@ -39,12 +39,12 @@ export type JourneyCheckKey =
   | "scheduling"
   | "restore";
 
-export const questLevelCounts = {
+export const legacyQuestLevelCounts = {
   "install-codex": 6,
   "server-152fz": 9,
   "api-keys": 14,
   "family-expenses": 18,
-  planner: 17,
+  planner: 9,
   "idea-vault": 18,
   "child-schedule": 19,
   "pressure-diary": 19,
@@ -53,7 +53,7 @@ export const questLevelCounts = {
   "personal-organizer": 18,
   "home-helper": 17,
   "family-health-hub": 20,
-  "day-planner-agent": 17,
+  "day-planner-agent": 10,
   "home-organizer-agent": 18,
   "meal-planning-agent": 19,
   "study-agent": 18,
@@ -91,7 +91,9 @@ export const questLevelCounts = {
   "graduate-portfolio": 19,
 } as const;
 
-const checksBySlug: Record<keyof typeof questLevelCounts, JourneyCheckKey[]> = {
+export const questLevelCounts = { ...legacyQuestLevelCounts, ...reviewedLevelCounts };
+
+const checksBySlug: Record<keyof typeof legacyQuestLevelCounts, JourneyCheckKey[]> = {
   "install-codex": [],
   "server-152fz": [],
   "api-keys": [],
@@ -264,7 +266,7 @@ export function getJourneyPlan(project: ProjectDefinition) {
     levelCount: getJourneyLevelCount(project.slug),
     finalProof: project.journey === "setup"
       ? `Настройка «${project.title}» завершена и проверена по видимым признакам.`
-      : `Личная и клиентская версии дают результат «${project.outcome}» и прошли предметные проверки.`,
+      : `Моя версия даёт результат «${project.outcome}» и прошла предметные проверки.`,
   };
 }
 
@@ -327,6 +329,7 @@ export function applyJourneyPlan(
   project: ProjectDefinition,
   baseSteps: QuestStep[],
   mode: DataMode,
+  historical = false,
 ): QuestStep[] {
   const plan = getJourneyPlan(project);
   if (project.journey === "setup") return renumber(project, baseSteps);
@@ -339,8 +342,10 @@ export function applyJourneyPlan(
     ? [...base, ...checks]
     : [...base.slice(0, portfolioIndex), ...checks, ...base.slice(portfolioIndex)];
   const result = renumber(project, withChecks);
-  if (result.length !== plan.levelCount) {
+  const expectedCount = historical ? legacyQuestLevelCounts[project.slug as keyof typeof legacyQuestLevelCounts] : plan.levelCount;
+  if (result.length !== expectedCount) {
     throw new Error(`Маршрут ${project.slug}: ожидалось ${plan.levelCount} уровней, собрано ${result.length}`);
   }
   return result;
 }
+import { reviewedLevelCounts } from "./reviewed/revision";

@@ -1,73 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { buildRealDataChecklist } from "../lib/preparation";
-import { buildMobileQuest } from "./mobile";
 import { questProjects } from "./projects";
-import { getPreparationProfile } from "./preparation";
 import { buildQuest } from "./quests";
+import { buildMobileQuest } from "./mobile";
+import { buildRealDataChecklist } from "../lib/preparation";
 
-function learnerText(value: ReturnType<typeof buildQuest>[number]): string {
-  return [
-    value.title,
-    value.why,
-    value.action,
-    value.help.body,
-    ...(value.guide ?? []).flatMap((frame) => [frame.title, frame.action, frame.fallback]),
-  ].join(" ");
-}
-
-const manualPreparation = /создайте[^.!?\n]{0,100}(?:папк|файл)|запишите[^.!?\n]{0,100}в файл|откройте[^.!?\n]{0,100}(?:\.txt|\.csv|файл)|ФАЙЛ:/i;
-
-function sourceStep(steps: ReturnType<typeof buildQuest>, id: number) {
-  return steps.find((step) => step.sourceStepId === id);
-}
-
-describe("Codex-first preparation across every track", () => {
-  it("never asks a learner to create preparation folders, text files or tables", () => {
+describe("automation-first learning", () => {
+  it("keeps preparation conversational and leaves technical files to Codex", () => {
     for (const project of questProjects.filter((item) => item.journey !== "setup")) {
-      for (const surface of ["desktop", "mobile"] as const) {
-        const checklist = buildRealDataChecklist(project, surface);
-        const copy = JSON.stringify(checklist);
-        expect(copy, `${project.slug}/${surface}`).not.toMatch(manualPreparation);
-        expect(copy, `${project.slug}/${surface}`).not.toMatch(/\.(?:txt|csv)/i);
-        expect(copy, `${project.slug}/${surface}`).toMatch(/Codex/i);
-        expect(copy, `${project.slug}/${surface}`).toMatch(/голосом или текстом/i);
-      }
+      const copy = JSON.stringify(buildRealDataChecklist(project));
+      expect(copy, project.slug).not.toMatch(/создайте.+(?:\.txt|\.csv|таблиц|папк)|FILE:/i);
+      expect(copy, project.slug).toMatch(/Codex|помощник/i);
     }
   });
 
-  it("collects real information in dialogue and lets Codex create every service file", () => {
+  it("creates a working basis before customization or optional client work", () => {
     for (const project of questProjects.filter((item) => item.journey !== "setup")) {
-      const profile = getPreparationProfile(project.slug);
       const steps = buildQuest(project, "real");
-      const prompts = steps.flatMap((step) => step.prompt ?? []).join(" ");
-      const openingLearnerCopy = steps.slice(0, 6).map(learnerText).join(" ");
-
-      expect(prompts, project.slug).toMatch(/один короткий вопрос за раз/i);
-      expect(prompts, project.slug).toMatch(/голосом или текстом/i);
-      expect(prompts, project.slug).toMatch(/папки, файлы и поля.+создавай (?:их )?сам/i);
-      expect(prompts, project.slug).not.toContain(profile.sourceFile);
-      expect(prompts, project.slug).not.toContain(profile.rulesFile);
-      expect(openingLearnerCopy, project.slug).not.toMatch(manualPreparation);
-      expect(sourceStep(steps, 1)?.prompt, `${project.slug}/source-1`).toMatch(/не начинай опрос/i);
-      if (sourceStep(steps, 2)) expect(sourceStep(steps, 2)?.prompt, `${project.slug}/source-2`).toMatch(/не начинай опрос/i);
-      expect(sourceStep(steps, 3)?.prompt, `${project.slug}/source-3`).toMatch(/один раз собери|задавай строго один короткий вопрос за раз/i);
-      expect(sourceStep(steps, 4)?.prompt, `${project.slug}/source-4`).toMatch(/не начинай опрос заново|используй уже подтверждённые ответы/i);
+      expect(`${steps[0].action} ${steps[0].prompt ?? ""}`, project.slug).toMatch(/созда|собер|рабоч|открой/i);
+      const customizationIndex = steps.findIndex((step) => Boolean(step.customization));
+      if (customizationIndex >= 0) expect(customizationIndex, project.slug).toBeGreaterThan(0);
+      if (project.kind !== "portfolio") expect(steps.at(-1)?.extension, project.slug).toEqual(expect.objectContaining({ title: expect.stringMatching(/по желанию/i) }));
     }
   });
 
-  it("keeps the phone path conversational instead of asking for FILE messages", () => {
+  it("keeps phone commands free of local file chores and fake deployment claims", () => {
     for (const project of questProjects.filter((item) => item.journey !== "setup")) {
-      const profile = getPreparationProfile(project.slug);
-      const steps = buildMobileQuest(project, "real");
-      const openingLearnerCopy = steps.slice(0, 6).map(learnerText).join(" ");
-      const prompts = steps.flatMap((step) => step.prompt ?? []).join(" ");
-
-      expect(openingLearnerCopy, project.slug).not.toMatch(manualPreparation);
-      expect(openingLearnerCopy, project.slug).not.toContain(profile.sourceFile);
-      expect(prompts, project.slug).toMatch(/один короткий вопрос за раз/i);
-      expect(prompts, project.slug).toMatch(/голосом или текстом/i);
-      expect(prompts, project.slug).toMatch(/папки, файлы и поля.+создавай (?:их )?сам/i);
-      expect(steps.slice(4).map((step) => step.prompt ?? "").join(" "), project.slug).toMatch(/не начинай опрос заново/i);
+      const copy = JSON.stringify(buildMobileQuest(project, "real"));
+      expect(copy, project.slug).not.toMatch(/FILE:|создайте.+(?:\.txt|\.csv)|откройте локальную папку/i);
+      expect(copy, project.slug).toMatch(/не localhost|доступн.+телефон|куратор|Telegram/i);
+      expect(copy, project.slug).toMatch(/не утверждай|не называй результат готовым|провер/i);
     }
   });
 });

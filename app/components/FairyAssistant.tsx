@@ -9,6 +9,8 @@ import {
 import type { StorageLike } from "../lib/progress";
 import { DashboardIcon } from "./DashboardIcon";
 import { IskraMascot } from "./IskraMascot";
+import { CuratorRequests } from "./CuratorRequests";
+import { IskraChat } from "./IskraChat";
 
 type SpeechResultEvent = {
   results: ArrayLike<ArrayLike<{ transcript?: string }>>;
@@ -269,21 +271,7 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
           <button type="button" className="fairy-close" onClick={closeDialog} aria-label="Закрыть мои вопросы"><DashboardIcon name="close" /></button>
         )}
       </header>
-      <p className="iskra-connection-status">ИИ-ответы ещё не подключены. Вопросы сохраняются только у вас — их можно передать куратору. Автоматической отправки нет.</p>
-      <div className="fairy-compose">
-        <label htmlFor={`${headingId}-question`}>Ваш вопрос</label>
-        <textarea
-          ref={textareaRef}
-          id={`${headingId}-question`}
-          value={draft}
-          onChange={(event) => {
-            setDraft(event.target.value);
-            if (status === savedStatus) setStatus("");
-          }}
-          rows={5}
-          placeholder="Например: я открыла второй уровень, но не вижу нужную кнопку…"
-        />
-        <div className="fairy-actions">
+      <IskraChat scope={scope} format={format} draft={draft} onDraftChange={setDraft} textareaRef={textareaRef}>
           {speechSupported && (
             <button
               type="button"
@@ -295,11 +283,10 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
               {listening ? "Остановить запись" : "Продиктовать"}
             </button>
           )}
-          <button type="button" className="fairy-save" onClick={saveQuestion} disabled={!draft.trim()}>
+          <button type="button" className="fairy-microphone" onClick={saveQuestion} disabled={!draft.trim()}>
             Сохранить вопрос
           </button>
-        </div>
-      </div>
+      </IskraChat>
       {status && <p className="fairy-status" role="status" aria-live="polite">{status}</p>}
       {notes.length > 0 && (
         <section className="fairy-notes" aria-labelledby={`${headingId}-notes`}>
@@ -346,6 +333,7 @@ function FairyAssistantSession({ scope, mode, format, onClose }: FairyAssistantP
       data-visual-theme="elina-burgundy"
     >
       {content}
+      <CuratorRequests />
     </main>
   );
 }

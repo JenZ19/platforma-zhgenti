@@ -1,0 +1,39 @@
+{
+  "mode": "observe",
+  "network_calls": 0,
+  "live_integrations_started": false,
+  "messages": [
+    {
+      "author": "Марина",
+      "text": "+++ ",
+      "category": "reaction",
+      "confidence": 0.98,
+      "classified_by": "heuristic"
+    },
+    {
+      "author": "Олег",
+      "text": "https://example.test/reklama",
+      "category": "spam",
+      "confidence": 0.9,
+      "classified_by": "heuristic"
+    },
+    {
+      "author": "Ирина",
+      "text": "Будет ли запись?",
+      "category": "other",
+      "confidence": 0.3,
+      "classified_by": "fallback"
+    }
+  ],
+  "faq_matches": [
+    {
+      "question": "Будет ли запись вебинара?",
+      "matched": true
+    },
+    {
+      "question": "Какой цвет фона?",
+      "matched": false
+    }
+  ],
+  "limitation": "Спорные вопросы без AI-ключа честно помечаются other/fallback; GetCourse, Telegram, комнаты, polling и webhook не запускаются."
+}

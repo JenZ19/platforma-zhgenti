@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProjectDefinition, QuestStep } from "../content/types";
-import { buildQuest } from "../content/quests";
+import { buildIllustrationQuest as buildQuest } from "../content/quests";
 import { hasFirstCoverPrototype } from "../content/first-cover-prototypes";
 import { hasThirdCoverPrototype } from "../content/third-cover-prototypes";
 import { hasFinalCoverPrototype } from "../content/final-cover-prototypes";

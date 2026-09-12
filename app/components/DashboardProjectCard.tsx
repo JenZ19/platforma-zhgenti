@@ -44,6 +44,7 @@ const formatLabels: Record<ProjectKind, string> = {
 
 export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscoveryDetails = false }: DashboardProjectCardProps) {
   const { project } = item;
+  const routeSlug = item.catalogSlug ?? project.slug;
   const bundled = isProjectBundle(project);
   const discovery = getCatalogDiscoveryProfile(project);
   const week = bundled ? "Недели 1–2" : `Неделя ${project.week}`;
@@ -53,10 +54,10 @@ export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscove
   const action = item.status === "completed" ? "Открыть проект" : item.status === "new" ? "Начать" : "Продолжить";
   const resultFormat = bundled
     ? item.output ? item.output === "service" ? "Сервис" : "ИИ-агент" : "2 варианта на выбор"
-    : formatLabels[project.kind];
+    : project.journey === "setup" ? "Подготовка" : formatLabels[project.kind];
   const resultType = bundled
     ? item.output ? item.output === "service" ? "Сервис" : "ИИ-агент" : "экранный сервис / разговорный ИИ-агент"
-    : formatLabels[project.kind];
+    : project.journey === "setup" ? "Подготовка" : formatLabels[project.kind];
 
   return (
     <article className="dashboard-project-card" aria-label={project.title}>
@@ -86,19 +87,19 @@ export function DashboardProjectCard({ item, onOpen, onSave, format, showDiscove
             className={item.saved ? "saved" : undefined}
             aria-label={saveLabel}
             aria-pressed={item.saved}
-            onClick={() => onSave(project.slug)}
+            onClick={() => onSave(routeSlug)}
           >
             {item.saved ? "Сохранено ✓" : "На потом"}
           </button>
           <a
             className="dashboard-card-action"
-            href={dashboardQuestHref(project.slug, format, item.output)}
+            href={dashboardQuestHref(routeSlug, format, item.output)}
             aria-label={`${action}: ${project.title}`}
             onClick={(event) => {
               if (!shouldHandleSpaNavigation(event)) return;
               event.preventDefault();
-              if (item.output) onOpen(project.slug, item.output);
-              else onOpen(project.slug);
+              if (item.output) onOpen(routeSlug, item.output);
+              else onOpen(routeSlug);
             }}
           >
             {action} →

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getProjectCardIdentityBySlug } from "../content/project-card-identities";
 import type { ProjectBundleDefinition, ProjectFormat } from "../content/types";
+import { projectArtworkUrl } from "../lib/project-artwork";
 
 const AUTOPLAY_MS = 4200;
 const formats: ProjectFormat[] = ["service", "agent"];
@@ -58,7 +59,7 @@ export function BundlePreviewCarousel({ project }: { project: ProjectBundleDefin
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/covers/${branch.slug}.webp`}
+              src={projectArtworkUrl(branch.slug)}
               alt={`${format === "service" ? "Сервис" : "ИИ-агент"} проекта «${project.title}»`}
               loading="lazy"
               decoding="async"

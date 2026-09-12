@@ -10,10 +10,11 @@ import {
 } from "../content/discovery";
 import { isProjectBundle } from "../content/projects";
 import type { ProjectFormat } from "../content/types";
-import type { DashboardProjectState, DashboardSnapshot } from "../lib/academy-dashboard";
+import type { DashboardSnapshot } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
 import { DashboardIcon } from "./DashboardIcon";
 import { DashboardProjectCard } from "./DashboardProjectCard";
+import { RewardShelf } from "./RewardShelf";
 
 const weeks = [1, 2, 3, 4, 5, 6] as const;
 
@@ -36,12 +37,6 @@ function EmptySearch({ onReset }: { onReset: () => void }) {
       <button type="button" onClick={onReset}>Сбросить фильтры</button>
     </section>
   );
-}
-
-function projectBelongsToWeek(item: DashboardProjectState, week: number): boolean {
-  return isProjectBundle(item.project)
-    ? item.project.weeks[0] === week
-    : item.project.week === week;
 }
 
 function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibraryProps, "initialQuery" | "mode" | "onQueryChange">) {
@@ -105,6 +100,7 @@ function ProjectGroups({ snapshot, format, onOpen, onSave }: Omit<DashboardLibra
           </section>
         ))}
       </div>
+      <RewardShelf snapshot={snapshot} />
     </main>
   );
 }
@@ -122,19 +118,16 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
   } as const), [difficulty, goal, initialQuery]);
 
   const filtered = useMemo(() => {
-    const stateBySlug = new Map(snapshot.items.map((item) => [item.project.slug, item]));
-    return filterAndSortProjects(snapshot.items.map((item) => item.project), filters)
+    const variants = snapshot.items.flatMap((item) => item.variants ?? [item]);
+    const stateBySlug = new Map(variants.map((item) => [item.project.slug, item]));
+    return filterAndSortProjects(variants.map((item) => item.project), filters)
       .map((project) => stateBySlug.get(project.slug)!);
   }, [filters, snapshot.items]);
 
   const hasFilters = Boolean(initialQuery.trim()) || difficulty !== 0 || goal !== "Все цели";
-  const filteredWeekBySlug = useMemo(() => new Map(filtered.map((item) => {
-    if (!isProjectBundle(item.project)) return [item.project.slug, item.project.week] as const;
-    const matchingBranches = Object.values(item.project.formats)
-      .filter((branch) => filterAndSortProjects([branch], filters).length > 0);
-    const week = matchingBranches.length === 1 ? matchingBranches[0].week : item.project.weeks[0];
-    return [item.project.slug, week] as const;
-  })), [filtered, filters]);
+  const filteredWeekBySlug = useMemo(() => new Map(filtered.map((item) => [
+    item.project.slug, isProjectBundle(item.project) ? item.project.weeks[0] : item.project.week,
+  ])), [filtered]);
   const matchingWeeks = new Set(filteredWeekBySlug.values());
   const autoOpenKey = hasFilters && filtered.length > 0 ? [...matchingWeeks].sort().join(",") : String(snapshot.currentWeek);
 
@@ -152,7 +145,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
 
   return (
     <main className="dashboard-section" data-dashboard-section="weeks" data-dashboard-format={format} data-visual-theme="elina-burgundy">
-      <header><p>Дополнительная практика</p><h2>Библиотека вариантов</h2><span>Все варианты доступны, но проходить их все не нужно. Личный агент и сайт с разными нишами выбираются в основном маршруте выше.</span></header>
+      <header><p>Дополнительная практика</p><h2>Библиотека вариантов</h2><span>На первой неделе — сервисы, на второй — личные ИИ-агенты, дальше — проекты для работы и портфолио. Выбирайте один основной результат на неделю; остальные варианты — по желанию.</span></header>
       <section className="dashboard-library-filters" aria-label="Фильтры квестов">
         <label>
           <span>Поиск</span>
@@ -183,7 +176,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
       <div className="dashboard-week-list">
         {weeks.map((week) => {
           const expanded = openWeeks.has(week);
-          const items = filtered.filter((item) => hasFilters ? filteredWeekBySlug.get(item.project.slug) === week : projectBelongsToWeek(item, week));
+          const items = filtered.filter((item) => filteredWeekBySlug.get(item.project.slug) === week);
           return (
             <section className="dashboard-week" key={week}>
               <h2>
@@ -194,7 +187,7 @@ function WeeklyLibrary({ snapshot, initialQuery, format, onOpen, onSave, onQuery
                   aria-controls={`dashboard-week-${week}`}
                   onClick={() => setOpenWeeks(expanded ? new Set() : new Set([week]))}
                 >
-                  <span>Неделя {week}</span><small>{items.length} проектов</small><b aria-hidden="true"><DashboardIcon name="chevron" /></b>
+                  <span>Неделя {week}</span><small>Вариантов: {items.length}</small><b aria-hidden="true"><DashboardIcon name="chevron" /></b>
                 </button>
               </h2>
               {expanded ? (

@@ -1,0 +1,12 @@
+study_channel:
+  handle: "@your_future_channel"
+  topic: "бережное планирование для занятых людей"
+  enabled: false
+  style: "Дружелюбно, конкретно, без выдуманного личного опыта."
+  trend_query: ""
+  news_count: 0
+  total: 1
+  angles:
+    - "один маленький шаг"
+  scripts_count: 0
+  cta_link: ""

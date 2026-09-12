@@ -15,8 +15,9 @@ export function projectSlugs() {
 
 export function projectStepCount(slug) {
   const source = fs.readFileSync(path.join(root, "app/content/journey-plans.ts"), "utf8");
-  const manifest = source.match(/export const questLevelCounts = \{([\s\S]*?)\} as const;/)?.[1];
-  if (!manifest) throw new Error("Не найден questLevelCounts в app/content/journey-plans.ts");
+  // Capture frames are historical illustrations, not the revised lesson sequence.
+  const manifest = source.match(/export const legacyQuestLevelCounts = \{([\s\S]*?)\} as const;/)?.[1];
+  if (!manifest) throw new Error("Не найден legacyQuestLevelCounts в app/content/journey-plans.ts");
   const counts = Object.fromEntries(
     [...manifest.matchAll(/(?:"([a-z0-9-]+)"|([a-z][a-z0-9-]*)):\s*(\d+)/g)]
       .map((match) => [match[1] || match[2], Number(match[3])]),

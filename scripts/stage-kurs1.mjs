@@ -12,11 +12,12 @@ assert.ok(html.includes("<!DOCTYPE html>") && html.includes("/_next/static/"), "
 assert.ok(!html.includes("/@vite/client"), "Never publish development scripts");
 await mkdir(destination, { recursive: true });
 await cp("dist/client", destination, { recursive: true });
-const dirs = ["_next", "covers", "screens-mobile", "screens", "guides", "materials"];
+const dirs = ["_next", "covers", "screens-mobile", "screens", "guides", "materials", "app-icons", "home-screen-guide"];
 function rewrite(text) {
   for (const dir of dirs) text = text.replaceAll(`/${dir}/`, `/kurs1/${dir}/`);
   text = text.replaceAll("/favicon-neiroprofi.svg", "/kurs1/favicon-neiroprofi.svg");
-  for (const name of ["og-neiroprofi.png", "og.png", "og-42-projects.png", "og-45-projects.png"]) text = text.replaceAll(`/${name}`, `/kurs1/${name}`);
+  text = text.replaceAll("/manifest.webmanifest", "/kurs1/manifest.webmanifest");
+  text = text.replaceAll("/og-neiroprofi.png", "/kurs1/og-neiroprofi.png");
   return text;
 }
 async function visit(directory) {

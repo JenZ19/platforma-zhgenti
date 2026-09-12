@@ -2,8 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element -- local lesson screenshots are generated teaching assets */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { buildMobileQuest, getMobileCapability } from "../content/mobile";
+import { CurriculumNotice } from "./CurriculumNotice";
 import { defaultCustomization, getCustomizationProfile } from "../content/customization";
 import { isProjectBundle, resolveProjectVariant } from "../content/projects";
 import type { CatalogProject, ProjectDefinition, ProjectFormat, QuestCustomization } from "../content/types";
@@ -11,9 +12,13 @@ import { loadCustomization, resetCustomization, saveCustomization } from "../lib
 import { branchStorageSlug, loadOutputChoice, resetBundleState, saveOutputChoice } from "../lib/output-format";
 import { buildRealDataChecklist, createEmptyPreparation, isPreparationReady, loadPreparation, resetPreparation, savePreparation, type QuestPreparation as PreparationState } from "../lib/preparation";
 import { completeStep, createEmptyProgress, isStepUnlocked, loadProgress, resetProgress, saveProgress } from "../lib/progress";
-import { MobileActionButton } from "./MobileActionButton";
+import { SupportRequest } from "./SupportRequest";
 import { QuestPreparation } from "./QuestPreparation";
 import { QuestCustomizer } from "./QuestCustomizer";
+import { QuestSaveStatus } from "./QuestSaveStatus";
+import { LessonExtension } from "./LessonExtension";
+import { LearningKitPreview } from "./LearningKitPreview";
+import { QuestResultShowcase } from "./QuestResultShowcase";
 import { QuestResetButton } from "./QuestResetButton";
 import { QuestFormatChoice } from "./QuestFormatChoice";
 import { QuestGuide } from "./QuestGuide";
@@ -22,9 +27,11 @@ import { ServerDiscountOffer } from "./ServerDiscountOffer";
 import { LessonText } from "./LessonText";
 import { BeginnerTerms } from "./BeginnerTerms";
 import { InstallCodexPlatformChoice } from "./InstallCodexPlatformChoice";
+import { LessonWorkbench } from "./LessonWorkbench";
+import { ReadAheadControls } from "./ReadAheadControls";
 import { loadSetupPlatform, resetSetupPlatform, saveSetupPlatform, type SetupPlatform } from "../lib/setup-platform";
 import { DashboardIcon } from "./DashboardIcon";
-import { ProjectBrief, LessonChapter } from "./ProjectBrief";
+import { ProjectBrief } from "./ProjectBrief";
 
 export function MobileQuest({
   project,
@@ -61,7 +68,7 @@ export function MobileQuest({
   }, [installQuest]);
 
   if ((bundled && !choiceLoaded) || (installQuest && !setupChoiceLoaded)) {
-    return <main className="mobile-quest-shell" data-visual-theme="tactile-album"><section className="preparation-card preparation-loading">Готовим выбор формата…</section></main>;
+    return <main className="mobile-quest-shell" data-track-layout="comfortable" data-visual-theme="tactile-album"><section className="preparation-card preparation-loading">Готовим выбор формата…</section></main>;
   }
 
   function chooseSetupPlatform(platform: SetupPlatform) {
@@ -143,8 +150,10 @@ function MobileQuestBody({
 }) {
   const [preparation, setPreparation] = useState<PreparationState | null>(null);
   const [progress, setProgress] = useState(createEmptyProgress);
-  const [copied, setCopied] = useState<"main" | "help" | null>(null);
+  const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
+  const [copied, setCopied] = useState<"main" | "help" | "extension" | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [previewStep, setPreviewStep] = useState<number | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const mapTriggerRef = useRef<HTMLButtonElement>(null);
@@ -153,6 +162,7 @@ function MobileQuestBody({
   const imageCloseRef = useRef<HTMLButtonElement>(null);
   const imageOpenerRef = useRef<HTMLButtonElement | null>(null);
   const mountedRef = useRef(true);
+  const scrollAfterStepChange = useRef(false);
   const [customization, setCustomization] = useState<QuestCustomization | undefined>(() => defaultCustomization(profileSlug));
   const profile = useMemo(() => getCustomizationProfile(profileSlug), [profileSlug]);
   const checklist = useMemo(() => buildRealDataChecklist(project, "mobile"), [project]);
@@ -160,10 +170,19 @@ function MobileQuestBody({
   const capability = getMobileCapability(project);
   const setupQuest = project.journey === "setup";
 
+  useLayoutEffect(() => {
+    if (!scrollAfterStepChange.current) return;
+    scrollAfterStepChange.current = false;
+    // Wait for the new lesson DOM, then bypass global smooth scrolling before paint.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  });
+
   useEffect(() => {
     // Mobile data is isolated from the computer quest by storageSlug.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProgress(loadProgress(storageSlug, window.localStorage, steps.length));
+    setSaveState("idle");
+    setPreviewStep(null);
     setPreparation(loadPreparation(storageSlug, window.localStorage));
     setCustomization(loadCustomization(storageSlug, profileSlug, window.localStorage));
   }, [profileSlug, steps.length, storageSlug]);
@@ -214,7 +233,7 @@ function MobileQuestBody({
     };
   }, []);
 
-  const step = steps[progress.activeStep - 1] ?? steps[0];
+  const step = steps[(previewStep ?? progress.activeStep) - 1] ?? steps[0];
   const ready = setupQuest || (preparation ? isPreparationReady(preparation, checklist) : false);
   const totalLevels = steps.length;
   const lastLevel = totalLevels;
@@ -230,7 +249,7 @@ function MobileQuestBody({
     ? step.links?.filter((link) => link.href !== step.mobileAction?.href)
     : step.links;
   const resultHint = step.showScreenshot === false
-    ? "Проверьте три коротких пункта"
+    ? "Проверьте результат"
     : step.screenshotKind === "placeholder"
       ? "Здесь появится ваш настоящий экран"
       : step.screenshotKind === "prototype"
@@ -251,7 +270,7 @@ function MobileQuestBody({
 
   function restoreMapTriggerFocus() {
     window.setTimeout(() => {
-      if (mountedRef.current && mapTriggerRef.current?.isConnected) mapTriggerRef.current.focus();
+      if (mountedRef.current && mapTriggerRef.current?.isConnected) mapTriggerRef.current.focus({ preventScroll: true });
     }, 0);
   }
 
@@ -264,16 +283,37 @@ function MobileQuestBody({
     if (!Number.isInteger(id) || id < 1 || id > totalLevels || !isStepUnlocked(source, id)) return;
     const restoreMapFocus = mapOpen;
     const next = { ...source, activeStep: id };
+    try {
+      if (customization) saveCustomization(storageSlug, profileSlug, customization, window.localStorage);
+      saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels);
+    } catch {
+      setSaveState("error");
+      return;
+    }
+    setSaveState("saved");
+    scrollAfterStepChange.current = true;
+    setPreviewStep(null);
     setProgress(next);
-    saveProgress(storageSlug, next, window.localStorage, undefined, totalLevels);
     setMapOpen(false);
     setHelpOpen(false);
     setImageOpen(false);
     if (restoreMapFocus) restoreMapTriggerFocus();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function storeCustomization(next: QuestCustomization) {
+    setCustomization(next);
+    try {
+      saveCustomization(storageSlug, profileSlug, next, window.localStorage);
+      setSaveState("saved");
+      return true;
+    } catch {
+      setSaveState("error");
+      return false;
+    }
   }
 
   function finishStep() {
+    if (previewStep !== null) return;
     if (progress.completed.includes(step.id)) {
       if (step.id < lastLevel) openMobileStep(step.id + 1);
       return;
@@ -282,7 +322,7 @@ function MobileQuestBody({
     openMobileStep(completed.activeStep, completed);
   }
 
-  async function copyPrompt(text: string, kind: "main" | "help") {
+  async function copyPrompt(text: string, kind: "main" | "help" | "extension") {
     await navigator.clipboard.writeText(text);
     setCopied(kind);
     window.setTimeout(() => setCopied(null), 1400);
@@ -326,7 +366,9 @@ function MobileQuestBody({
       resetPreparation(storageSlug, window.localStorage);
       resetCustomization(storageSlug, window.localStorage);
     }
+    setPreviewStep(null);
     setProgress(createEmptyProgress());
+    setSaveState("idle");
     setPreparation(createEmptyPreparation());
     setCustomization(defaultCustomization(profileSlug));
     setCopied(null);
@@ -339,9 +381,10 @@ function MobileQuestBody({
 
   if (preparation === null || !ready) {
     return (
-      <main className="mobile-quest-shell" data-visual-theme="tactile-album">
+      <main className="mobile-quest-shell" data-track-layout="comfortable" data-visual-theme="tactile-album">
         <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>Н</span><b>НЕЙРОПРОФИ<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
         <section className="mobile-quest-hero"><button type="button" onClick={onHome}>← Все мобильные проекты</button><div className={`mobile-capability ${capability.id}`}>{capability.label}</div><p>Неделя {project.week} · {project.track}</p><h1>{bundle?.title ?? project.title}</h1><span>{project.outcome}</span>{format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}{setupPlatform && <div className="data-mode-badge setup-platform"><span>{setupPlatform === "mac" ? "⌘" : "⊞"}</span> Компьютер: {setupPlatform === "mac" ? "Mac" : "Windows"}</div>}<div className="mobile-progress"><div><b>{progress.completed.length} из {totalLevels}</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div><QuestResetButton mobile onReset={reset} /></section>
+        <QuestResultShowcase project={project} />
         {!setupQuest && <ProjectBrief project={project} mobile />}
         {preparation === null ? <section className="preparation-card preparation-loading">Готовим мобильный квест…</section> : <QuestPreparation project={project} preparation={preparation} mobile onChooseDemo={() => storePreparation({ version: 1, mode: "demo", checked: [], ready: true })} onChooseReal={() => storePreparation({ version: 1, mode: "real", checked: [], ready: false })} onToggle={togglePreparation} onStartReal={() => checklist.every((item) => preparation.checked.includes(item.id)) && storePreparation({ ...preparation, ready: true })} onBack={() => { resetPreparation(storageSlug, window.localStorage); setPreparation(createEmptyPreparation()); }} />}
         <footer className="mobile-footer"><span>НЕЙРОПРОФИ</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
@@ -353,45 +396,50 @@ function MobileQuestBody({
 
   return (
     <>
-      <main className="mobile-quest-workspace mobile-quest-shell" data-quest-workspace="mobile" data-visual-theme="tactile-album">
+      <main className="mobile-quest-workspace mobile-quest-shell" data-iskra-scope={project.slug} data-iskra-step={step.id} data-iskra-os={setupPlatform ?? 'mac'} data-track-layout="comfortable" data-quest-workspace="mobile" data-visual-theme="tactile-album">
         <header className="mobile-topbar"><button type="button" className="brand" onClick={onHome}><span>Н</span><b>НЕЙРОПРОФИ<small>Квесты с телефона</small></b></button><span className="phone-mode-pill">● {setupQuest ? "нужен компьютер" : "только телефон"}</span></header>
         <section className="mobile-quest-hero">
           <button type="button" onClick={onHome}>← Все мобильные проекты</button>
-          <div className={`mobile-capability ${capability.id}`}>{capability.label}</div>
-          <p>Неделя {project.week} · {project.track}</p>
           <strong className="mobile-quest-project-title">{bundle?.title ?? project.title}</strong>
-          <span>{project.outcome}</span>
+          <details className="mobile-project-details"><summary>О проекте и настройках</summary>
+          <p>Неделя {project.week} · {project.track}</p><p className={`mobile-capability ${capability.id}`}>{capability.label}</p>
+          <p>{project.outcome}</p>
           {format && <div className="data-mode-badge output"><span>✦</span> Формат: {format === "agent" ? "ИИ-агент" : "Сервис"}</div>}
           {setupPlatform && <div className="data-mode-badge setup-platform"><span>{setupPlatform === "mac" ? "⌘" : "⊞"}</span> Компьютер: {setupPlatform === "mac" ? "Mac" : "Windows"}</div>}
           {!setupQuest && <div className={`data-mode-badge ${preparation.mode}`}><span>●</span> Режим: {preparation.mode === "real" ? "реальные ответы · короткий разговор" : "вымышленные данные"}</div>}
-          <div className="mobile-progress" aria-label={`Прогресс ${percent}%`}><div><b>{progress.completed.length} из {totalLevels}</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div>
           <QuestResetButton mobile onReset={reset} />
+          </details>
+          <div className="mobile-progress" aria-label={`Прогресс ${percent}%`}><div><b>{progress.completed.length} из {totalLevels}</b><span>{percent}%</span></div><i><b style={{ width: `${percent}%` }} /></i></div>
         </section>
 
         <button ref={mapTriggerRef} className="mobile-level-map-trigger" type="button" aria-expanded={mapOpen} aria-controls="mobile-level-sheet" onClick={() => setMapOpen((value) => !value)}>Уровень {step.id} из {totalLevels} · Открыть карту уровней</button>
 
         <article className="mobile-quest-step-card" aria-live="polite">
-          <header className="mobile-quest-step-heading"><p>{step.eyebrow} · уровень {step.id} из {totalLevels}</p><h1>{step.title}</h1>{!setupQuest && <LessonChapter step={step.id} total={totalLevels} />}</header>
+          <CurriculumNotice slug={storageSlug} total={totalLevels} />
+          <header className="mobile-quest-step-heading"><p>Уровень {step.id} из {totalLevels}</p><h1>{step.title}</h1></header>
 
+          {previewStep !== null && <ReadAheadControls reading step={step.id} total={totalLevels} optionalSetup={false} onHome={onHome} onPreview={id=>{scrollAfterStepChange.current=true;setPreviewStep(id);setHelpOpen(false);}} onReturn={()=>{scrollAfterStepChange.current=true;setPreviewStep(null);}} />}
+          {step.id === 1 && ["server-152fz", "api-keys"].includes(project.slug) && <button type="button" onClick={onHome}>Сейчас не требуется — к проектам</button>}
           {project.slug === "server-152fz" && step.id === 1 && <ServerDiscountOffer mobile />}
 
           <section className="mobile-why"><h2>Зачем</h2><LessonText text={step.why} kind="why" /></section>
 
-          <section className="mobile-do">
+          <section className="mobile-do" id="lesson-action">
             <h2>Что сделать</h2>
             <LessonText text={step.action} variant="action" kind="action" />
-            {step.id === 2 && profile && customization && <QuestCustomizer compact profile={profile} selection={customization} onChange={setCustomization} onSave={(next) => { saveCustomization(storageSlug, profileSlug, next, window.localStorage); setCustomization(next); }} />}
-            <MobileActionButton action={step.mobileAction} projectSlug={project.slug} step={step.id} />
+            {(step.customization === undefined ? step.id === 2 : Boolean(step.customization)) && profile && customization && <QuestCustomizer compact agent={step.customization === "agent"} profile={profile} selection={customization} onChange={storeCustomization} onSave={storeCustomization} />}
           </section>
+          <QuestLinks links={supplementalLinks} />
+          <LessonWorkbench key={`${storageSlug}:${step.id}`} project={project} step={step} mobile />
 
           <BeginnerTerms terms={step.beginnerTerms} />
 
-          {step.prompt && <section className="mobile-prompt"><header><h2>Готовая команда для Codex</h2><span>Скопируйте целиком</span></header><p>{step.prompt}</p><button type="button" onClick={() => copyPrompt(step.prompt!, "main")}>{copied === "main" ? "Скопировано ✓" : "Скопировать команду"}</button></section>}
+          {step.extension && <LessonExtension extension={step.extension} onCopy={() => copyPrompt(step.extension!.prompt, "extension")} copied={copied === "extension"} />}
 
           {step.guide && <details className="lesson-extra"><summary>Открыть подробные подсказки</summary><QuestGuide frames={step.guide} /></details>}
-          <QuestLinks links={supplementalLinks} />
+          <LearningKitPreview slug={project.slug} stepId={step.id} />
 
-          <section className="mobile-result">
+          <section className="mobile-result" id="lesson-check">
             <div><div><h2>Готово, если</h2><p>{resultHint}</p></div>{step.showScreenshot !== false && <small className="mobile-screenshot-badge">{screenshotBadge}</small>}</div>
             {step.showScreenshot !== false && <button type="button" className={`screenshot-${step.screenshotKind ?? "prototype"}`} onClick={(event) => { imageOpenerRef.current = event.currentTarget; setImageOpen(true); }} aria-label="Увеличить мобильный пример"><img src={step.screenshot} alt={screenshotAlt} /><span>Увеличить</span></button>}
             <ul>{step.expected.map((item) => <li key={item}><span aria-hidden="true">✓</span>{item}</li>)}</ul>
@@ -400,13 +448,15 @@ function MobileQuestBody({
 
           <section className="mobile-quest-help">
             <header><h2>Помощь</h2><button type="button" aria-expanded={helpOpen} onClick={() => setHelpOpen((value) => !value)}>{helpOpen ? "Скрыть помощь" : "Нужна помощь"}</button></header>
-            {helpOpen && <div className="mobile-help"><span aria-hidden="true">?</span><div><h3>{step.help.title}</h3><LessonText text={step.help.body} kind="help" /><div className="mobile-help-prompt"><p>{step.help.prompt}</p><button type="button" onClick={() => copyPrompt(step.help.prompt, "help")}>{copied === "help" ? "Скопировано ✓" : "Скопировать команду помощи"}</button></div></div></div>}
+            {helpOpen && <div className="mobile-help"><span aria-hidden="true">?</span><div><h3>{step.help.title}</h3><LessonText text={step.help.body} kind="help" /><div className="mobile-help-prompt"><button type="button" onClick={() => copyPrompt(step.help.prompt, "help")}>{copied === "help" ? "Скопировано ✓" : "Скопировать команду помощи"}</button><details><summary>Посмотреть текст команды помощи</summary><pre>{step.help.prompt}</pre></details></div><SupportRequest key={step.id} project={project.title} step={step.id} title={step.title} mobile /></div></div>}
           </section>
 
-          <footer className="mobile-quest-step-actions">
+          <QuestSaveStatus state={saveState} />
+          {previewStep === null && <footer className="mobile-quest-step-actions">
             <button type="button" onClick={() => openMobileStep(step.id - 1)} disabled={step.id === 1}>← Назад</button>
             <button type="button" disabled={finished && step.id === lastLevel} onClick={finishStep}>{stepDone ? (step.id === lastLevel ? "Квест пройден ✦" : "Продолжить →") : step.id === lastLevel ? "Завершить квест ✦" : "Я сделала — продолжить →"}</button>
-          </footer>
+          </footer>}
+          {previewStep === null && step.id < lastLevel && <details className="lesson-extra"><summary>Посмотреть уроки без выполнения</summary><ReadAheadControls reading={false} step={step.id} total={totalLevels} optionalSetup={false} onHome={onHome} onPreview={id=>{scrollAfterStepChange.current=true;setPreviewStep(id);setHelpOpen(false);}} onReturn={()=>{scrollAfterStepChange.current=true;setPreviewStep(null);}} /></details>}
         </article>
 
         {mapOpen && (
@@ -429,7 +479,6 @@ function MobileQuestBody({
           </aside>
         )}
 
-        <footer className="mobile-footer"><span>НЕЙРОПРОФИ</span><h2>Всё сложное<br /><em>Фея берёт на себя.</em></h2></footer>
       </main>
 
       {step.showScreenshot !== false && (

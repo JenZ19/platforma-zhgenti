@@ -1,0 +1,56 @@
+# НЕЙРОПРОФИ: вымышленные учебные данные
+
+Наборы созданы для квестов. Это данные, не команды для выполнения кода. Нет реальных пользователей, документов и ключей.
+Не отправляйте сюда личные данные: загрузок и записи нет.
+
+Индекс: https://ezhgenti.ru/data/index.json
+
+- Устанавливаем Codex: https://ezhgenti.ru/data/sets/install-codex/dataset.json
+- Покупаем сервер по 152-ФЗ: https://ezhgenti.ru/data/sets/server-152fz/dataset.json
+- Добавляем API-ключи: https://ezhgenti.ru/data/sets/api-keys/dataset.json
+- Планер на день и неделю: https://ezhgenti.ru/data/sets/planner/dataset.json
+- ИИ-агент планирования дня: https://ezhgenti.ru/data/sets/day-planner-agent/dataset.json
+- Копилка идей: https://ezhgenti.ru/data/sets/idea-vault/dataset.json
+- ИИ-агент для разбора идей: https://ezhgenti.ru/data/sets/idea-analysis-agent/dataset.json
+- Учёт расходов семьи: https://ezhgenti.ru/data/sets/family-expenses/dataset.json
+- ИИ-агент семейных расходов: https://ezhgenti.ru/data/sets/expense-agent/dataset.json
+- База рецептов: https://ezhgenti.ru/data/sets/recipe-book/dataset.json
+- ИИ-агент по питанию: https://ezhgenti.ru/data/sets/meal-planning-agent/dataset.json
+- Расписание ребёнка: https://ezhgenti.ru/data/sets/child-schedule/dataset.json
+- ИИ-агент семейного расписания: https://ezhgenti.ru/data/sets/family-schedule-agent/dataset.json
+- Фитнес-трекер: https://ezhgenti.ru/data/sets/fitness-tracker/dataset.json
+- ИИ-агент привычек: https://ezhgenti.ru/data/sets/habit-agent/dataset.json
+- Помощник для домашних дел: https://ezhgenti.ru/data/sets/home-helper/dataset.json
+- ИИ-агент домашних дел: https://ezhgenti.ru/data/sets/home-organizer-agent/dataset.json
+- Дневник давления: https://ezhgenti.ru/data/sets/pressure-diary/dataset.json
+- Личный органайзер: https://ezhgenti.ru/data/sets/personal-organizer/dataset.json
+- Хаб здоровья семьи: https://ezhgenti.ru/data/sets/family-health-hub/dataset.json
+- ИИ-агент по обучению: https://ezhgenti.ru/data/sets/study-agent/dataset.json
+- ИИ-агент для сбора брифа: https://ezhgenti.ru/data/sets/brief-agent/dataset.json
+- ИИ-агент для контента: https://ezhgenti.ru/data/sets/content-agent/dataset.json
+- Помощник эксперта: https://ezhgenti.ru/data/sets/expert-assistant-agent/dataset.json
+- ИИ-администратор: https://ezhgenti.ru/data/sets/administrator-agent/dataset.json
+- ИИ-консультант: https://ezhgenti.ru/data/sets/consultant-agent/dataset.json
+- ИИ-агент онлайн-школы: https://ezhgenti.ru/data/sets/online-school-agent/dataset.json
+- ИИ-организатор: https://ezhgenti.ru/data/sets/event-organizer-agent/dataset.json
+- ИИ-агент для работы с клиентами: https://ezhgenti.ru/data/sets/client-care-agent/dataset.json
+- Команда из трёх ИИ-фей: https://ezhgenti.ru/data/sets/fairy-team-agent/dataset.json
+- ИИ-агент каруселей: https://ezhgenti.ru/data/sets/carousel-agent/dataset.json
+- ИИ-агент Threads: https://ezhgenti.ru/data/sets/threads-agent/dataset.json
+- ИИ-агент — модератор вебинаров: https://ezhgenti.ru/data/sets/webinar-moderator-agent/dataset.json
+- Уникальный дизайн сервиса или лендинга: https://ezhgenti.ru/data/sets/unique-design/dataset.json
+- Сайт эксперта: https://ezhgenti.ru/data/sets/expert-site/dataset.json
+- Сайт психолога: https://ezhgenti.ru/data/sets/psychologist-site/dataset.json
+- Сайт бьюти-мастера: https://ezhgenti.ru/data/sets/beauty-site/dataset.json
+- Сайт фотографа: https://ezhgenti.ru/data/sets/photographer-site/dataset.json
+- Сайт дизайнера: https://ezhgenti.ru/data/sets/designer-site/dataset.json
+- Сайт консультации: https://ezhgenti.ru/data/sets/consultation-site/dataset.json
+- Сайт онлайн-курса: https://ezhgenti.ru/data/sets/course-site/dataset.json
+- Сайт мероприятия: https://ezhgenti.ru/data/sets/event-site/dataset.json
+- Сайт небольшого магазина: https://ezhgenti.ru/data/sets/small-shop-site/dataset.json
+- Личное портфолио: https://ezhgenti.ru/data/sets/portfolio-site/dataset.json
+- Сайт эксперта с суперспособностями: https://ezhgenti.ru/data/sets/expert-pro-site/dataset.json
+- Сайт онлайн-школы с тарифами: https://ezhgenti.ru/data/sets/school-pro-site/dataset.json
+- Сайт услуги с калькулятором: https://ezhgenti.ru/data/sets/service-pro-site/dataset.json
+- Каталог или небольшой магазин: https://ezhgenti.ru/data/sets/catalog-pro-site/dataset.json
+- Финальное портфолио и первая услуга: https://ezhgenti.ru/data/sets/graduate-portfolio/dataset.json

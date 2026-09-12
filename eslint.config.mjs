@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Independently tested original Python kits, not application JS modules.
+    "learning-kits/**",
   ]),
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

@@ -10,7 +10,7 @@ export function QuestResetButton({ onReset, mobile = false }: { onReset: () => v
     >
       <span aria-hidden="true"><DashboardIcon name="reset" /></span>
       <span>
-        <b>Сбросить проект и начать с нуля</b>
+        <b>Начать квест заново</b>
         <small>Удалятся только прогресс и настройки этого проекта</small>
       </span>
     </button>

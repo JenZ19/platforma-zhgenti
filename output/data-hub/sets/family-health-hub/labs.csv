@@ -1,0 +1,5 @@
+﻿"id","document","profile","date","marker","value","unit","source_line"
+"demo-1","study-lab-a.pdf","demo-parent-a","2026-01-10","Glucose","5","mmol/L","Glucose | 5.0 | mmol/L | 3.9 - 6.1"
+"demo-2","study-lab-a.pdf","demo-parent-a","2026-01-10","Hemoglobin","140","g/L","Hemoglobin | 140 | g/L | 120 - 160"
+"demo-3","study-lab-b.pdf","demo-parent-b","2026-01-17","Glucose","4.8","mmol/L","Glucose | 4.8 | mmol/L | 3.9 - 6.1"
+"demo-4","study-lab-b.pdf","demo-parent-b","2026-01-17","Hemoglobin","135","g/L","Hemoglobin | 135 | g/L | 120 - 160"

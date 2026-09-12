@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Нейропрофи",
+  "short_name": "Нейропрофи",
+  "lang": "ru",
+  "start_url": "./?format=mobile",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#b52f71",
+  "background_color": "#fcf8fa",
+  "icons": [
+    { "src": "./app-icons/iskra-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./app-icons/iskra-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

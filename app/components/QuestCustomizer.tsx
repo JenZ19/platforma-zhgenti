@@ -32,12 +32,14 @@ export function QuestCustomizer({
   onChange,
   onSave,
   compact = false,
+  agent = false,
 }: {
   profile: QuestCustomizationProfile;
   selection: QuestCustomization;
   onChange: (next: QuestCustomization) => void;
-  onSave: (next: QuestCustomization) => void;
+  onSave: (next: QuestCustomization) => boolean | void;
   compact?: boolean;
+  agent?: boolean;
 }) {
   const [customAxis, setCustomAxis] = useState<QuestCustomizationAxis | null>(
     null,
@@ -88,7 +90,10 @@ export function QuestCustomizer({
         complete[axis] = profile.axes[axis].options[0];
     }
     onChange(complete);
-    onSave(complete);
+    if (onSave(complete) === false) {
+      setSaved(false);
+      return;
+    }
     setCustomAxis(null);
     setSaved(true);
   }
@@ -106,12 +111,12 @@ export function QuestCustomizer({
         <div>
           <p>Мой проект — не копия</p>
           <h3>{profile.title}</h3>
-          <small>{profile.promise}</small>
+          <small>{agent ? "Ответьте на четыре вопроса: для кого агент, чем помогает, как называется и как общается." : profile.promise}</small>
         </div>
       </header>
 
       <div className="customizer-axes">
-        {axes.map((axis, index) => {
+        {axes.filter((axis) => !agent || (axis !== "style" && axis !== "feature")).map((axis, index) => {
           const config = profile.axes[axis];
           const usesCustom =
             customAxis === axis ||
@@ -167,7 +172,7 @@ export function QuestCustomizer({
         })}
       </div>
 
-      <section className="customizer-palette" aria-label="Выбор цветовой гаммы">
+      {!agent && <section className="customizer-palette" aria-label="Выбор цветовой гаммы">
         <header>
           <i>07</i>
           <div>
@@ -245,11 +250,11 @@ export function QuestCustomizer({
           </article>
           <small>Меняйте гамму — этот макет сразу покажет сочетание цветов.</small>
         </div>
-      </section>
+      </section>}
 
-      <div className="customizer-summary" role="status" aria-live="polite">
+      <div className="customizer-summary" role="status" aria-label="Ваша версия проекта" aria-live="polite">
         <small>ВАША ВЕРСИЯ</small>
-        <p>{customizationSummary(profile.slug, selection)}</p>
+        <p>{agent ? `${selection.name}. Для кого: ${selection.audience}. Задача: ${selection.goal}. Тон общения: ${selection.tone}.` : customizationSummary(profile.slug, selection)}</p>
         {saved && <b>Сохранено на этом устройстве ✓</b>}
       </div>
       <button type="button" className="customizer-save" onClick={save}>

@@ -1,0 +1,27 @@
+[Unit]
+Description=NEIROPROFI private course access
+After=network.target
+
+[Service]
+Type=simple
+User=neiroprofi-access
+Group=neiroprofi-access
+WorkingDirectory=/opt/neiroprofi-access/current
+EnvironmentFile=/etc/neiroprofi-access/env
+ExecStart=/usr/bin/python3 /opt/neiroprofi-access/current/access.py serve
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/neiroprofi-access
+RestrictAddressFamilies=AF_INET AF_UNIX
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryMax=256M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

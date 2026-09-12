@@ -68,6 +68,7 @@ export function LearningShell({
 
   return (
     <div className={`learning-shell learning-shell-${format}`} data-learning-shell data-client-ready={clientReady ? "true" : "false"} data-visual-theme="elina-burgundy">
+      <a className="skip-to-content" href="#learning-content">Перейти к содержанию</a>
       <aside className="learning-sidebar" aria-label="Навигация Академии">
         <button className="learning-brand" type="button" onClick={() => onNavigate("home")} aria-label="На главную Академии">
           <DashboardIcon name="fairy" />
@@ -102,6 +103,7 @@ export function LearningShell({
         </button>
       )}
       <div className="learning-main">
+        <div className="learning-account-mobile"><a className="learning-account-link" href="/kurs1/account">Мой доступ</a></div>
         <header className="learning-topbar">
           <form role="search" onSubmit={(event) => { event.preventDefault(); onSearch(search); }}>
             <label>
@@ -111,8 +113,9 @@ export function LearningShell({
             <button type="submit">Найти</button>
           </form>
           <strong>{questTitle ?? "Мой учебный кабинет"}</strong>
+          <a className="learning-account-link" href="/kurs1/account">Мой доступ</a>
         </header>
-        {children}
+        <div id="learning-content" tabIndex={-1}>{children}</div>
       </div>
       {activeSection !== "fairy" && (
         <>
@@ -127,7 +130,7 @@ export function LearningShell({
             <IskraMascot />
             <span><b>Искра</b><small>Записать вопрос</small></span>
           </button>
-          {fairyOpen && <FairyAssistant key={assistantScope} scope={assistantScope} mode="floating" onClose={closeFairy} />}
+          {fairyOpen && <FairyAssistant key={assistantScope} scope={assistantScope} format={format} mode="floating" onClose={closeFairy} />}
         </>
       )}
       <nav className="learning-bottom-nav" aria-label="Навигация Академии на телефоне">

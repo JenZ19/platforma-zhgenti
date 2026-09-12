@@ -1,0 +1,13 @@
+[Unit]
+Description=Monday morning reminder about the current route week
+
+[Timer]
+# Понедельник, 10:00 по Москве. Пропущенный запуск (сервер был выключен) догоняется.
+# Часовой пояс в строке требует systemd 252+. Перед включением проверить:
+# systemd-analyze calendar "Mon *-*-* 10:00:00 Europe/Moscow"
+OnCalendar=Mon *-*-* 10:00:00 Europe/Moscow
+Persistent=true
+AccuracySec=1m
+
+[Install]
+WantedBy=timers.target

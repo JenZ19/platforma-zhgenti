@@ -3,6 +3,7 @@ import { getProjectCardIdentity } from "../content/project-card-identities";
 import { isProjectBundle } from "../content/projects";
 import type { CatalogProject } from "../content/types";
 import { BundlePreviewCarousel } from "./BundlePreviewCarousel";
+import { projectArtworkUrl } from "../lib/project-artwork";
 
 type ProjectStickerStyle = CSSProperties & {
   "--project-sticker-accent": string;
@@ -40,10 +41,10 @@ export function ProjectPreview({ project }: { project: CatalogProject }) {
   }
   return (
     <figure className={`project-preview project-preview-${project.kind} ${project.journey === "setup" ? "project-preview-setup" : ""}`}>
-      {/* Static course screenshots are already compressed and must preserve their exact crop. */}
+      {/* Generated concept covers are precompressed and shown without cropping. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`/covers/${project.slug}.webp`}
+        src={projectArtworkUrl(project.slug)}
         alt={`Готовый результат проекта «${project.title}»`}
         loading="lazy"
         decoding="async"

@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./pink-learning-dashboard.css";
+import "./comfortable-tracks.css";
+import "./novice-flow.css";
+import "./iskra-chat.css";
+import "./personal-fairy.css";
 
 export const metadata: Metadata = {
+  applicationName: "Нейропрофи",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Нейропрофи", statusBarStyle: "default" },
   title: "Академия квестов НЕЙРОПРОФИ",
   description: "Шесть недель практики: полезный сервис, ИИ-агенты, сайт и собственное портфолио. Один выбранный результат за раз.",
   openGraph: {
@@ -16,7 +23,7 @@ export const metadata: Metadata = {
     description: "Сервисы, ИИ-агенты и сайты — один результат за раз.",
     images: ["/og-neiroprofi.png"],
   },
-  icons: { icon: "/favicon-neiroprofi.svg", shortcut: "/favicon-neiroprofi.svg" },
+  icons: { icon: "/favicon-neiroprofi.svg", shortcut: "/favicon-neiroprofi.svg", apple: "/app-icons/iskra-180.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

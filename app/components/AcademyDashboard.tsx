@@ -1,4 +1,5 @@
 "use client";
+import { LearningReset } from "./LearningReset";
 
 import { useEffect, useState } from "react";
 import { projects } from "../content/projects";
@@ -11,6 +12,7 @@ import {
   type DashboardSnapshot,
 } from "../lib/academy-dashboard";
 import type { QuestSurface } from "../lib/output-format";
+import { CourseWeekBanner } from "./CourseWeekBanner";
 import { DashboardHome } from "./DashboardHome";
 import { DashboardLibrary } from "./DashboardLibrary";
 import { DashboardPortfolio } from "./DashboardPortfolio";
@@ -61,6 +63,7 @@ function renderDashboardSection(
       return (
         <main className="dashboard-section" data-dashboard-section="weeks" data-visual-theme="elina-burgundy">
         <h1>Маршрут и библиотека</h1>
+        <CourseWeekBanner snapshot={snapshot} format={props.format} />
         <CourseRoute snapshot={snapshot} format={props.format} onOpen={props.onOpen} onChange={onRefresh} />
         <details className="course-library"><summary>Библиотека всех вариантов — необязательно проходить всё</summary>
         <DashboardLibrary
@@ -72,7 +75,9 @@ function renderDashboardSection(
           onSave={onSave}
           onQueryChange={props.onSearchQueryChange}
         />
-        </details></main>
+        </details>
+        <LearningReset mobile={props.format === "mobile"} onRefresh={onRefresh} />
+        </main>
       );
     case "portfolio":
       return <DashboardPortfolio snapshot={snapshot} format={props.format} onOpen={props.onOpen} />;
@@ -97,6 +102,12 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
     setDashboardState({ format, snapshot: buildDashboardSnapshot(availableProjects, window.localStorage, format) });
   }, [format]);
 
+  useEffect(() => {
+    const reread = () => refresh();
+    window.addEventListener("learning-synced", reread);
+    return () => window.removeEventListener("learning-synced", reread);
+  });
+
   function refresh() {
     const availableProjects = format === "mobile" ? projects.filter(isAvailableInMobileTrack) : projects;
     setDashboardState({ format, snapshot: buildDashboardSnapshot(availableProjects, window.localStorage, format) });
@@ -115,6 +126,12 @@ export function AcademyDashboard({ section, searchQuery, onOpen, onOpenPortfolio
         aria-label="Учебный кабинет"
       >
         <p role="status" aria-live="polite">Загружаем учебный кабинет…</p>
+        {/* Скелет вместо пустого экрана: видно, что грузится страница, а не что всё сломалось. */}
+        <div className="dashboard-skeleton" aria-hidden="true">
+          <span className="dashboard-skeleton-banner" />
+          <span className="dashboard-skeleton-row" />
+          <span className="dashboard-skeleton-row" />
+        </div>
       </main>
     );
   }

@@ -5,7 +5,9 @@ import type { CourseChoice } from "../content/course-route";
 import type { DashboardSnapshot } from "../lib/academy-dashboard";
 import { selectCourseChoice } from "../lib/course-route";
 import type { ProjectFormat } from "../content/types";
-import { dashboardQuestHref } from "./DashboardProjectCard";
+import { dashboardQuestHref, shouldHandleSpaNavigation } from "./DashboardProjectCard";
+import { LearningSetup } from "./LearningSetup";
+import { PersonalFairy } from "./PersonalFairy";
 
 function ProjectChoice({ week, selected, choices, onSelect }: {
   week: number; selected: CourseChoice; choices: CourseChoice[]; onSelect: (choice: CourseChoice) => void;
@@ -38,6 +40,11 @@ export function CourseRoute({ snapshot, format, onOpen, onChange, compact = fals
   const milestones = compact ? snapshot.course?.filter((week) => week.week === snapshot.currentWeek) : snapshot.course;
   return <section className="course-route" aria-label="Основной маршрут курса">
     <header><p className="academy-kicker">Основной маршрут · 6 недель</p><h2>{compact ? "Ваш результат этой недели" : "Один результат за раз"}</h2><p>Выберите по одному варианту на неделе. Остальная библиотека — по желанию. Смена варианта не удаляет прежние работы.</p></header>
+    {!compact && <article className="course-milestone">
+      <h3>Перед первым проектом</h3>
+      {format === "desktop" ? <><p>Нужен установленный Codex, в котором уже прошла тестовая задача. Если он готов, сразу выбирайте проект недели.</p><a href="?quest=install-codex">Установить и проверить Codex →</a></> : <><p>Отправляйте команды из урока своей Феечке в Telegram, а результат открывайте на телефоне. Сохраните адрес личного бота один раз.</p><PersonalFairy /><LearningSetup mobile initiallyExpanded={false} onRefresh={onChange} /></>}
+      <p>Сервер и API-ключи нужны не для каждого проекта. Возвращайтесь к этим урокам, когда в выбранном квесте потребуется подключение. Заранее ничего покупать не нужно.</p>
+    </article>}
     {milestones?.map((week) => <article className="course-milestone" key={week.week}>
       <p className="academy-kicker">Неделя {week.week} · {week.complete ? "Пройдена ✓" : "Один проект на выбор"}</p>
       <h3>{week.title}</h3><p>{week.why}</p>
@@ -47,7 +54,7 @@ export function CourseRoute({ snapshot, format, onOpen, onChange, compact = fals
       <p><strong>В результате:</strong> {week.result}</p>
       {week.item ? <p>В выбранном квесте пройдено {week.item.completedLevels} из {week.item.totalLevels} шагов.</p> : null}
       <a className="dashboard-primary-action" href={dashboardQuestHref(week.selected.slug, format, week.selected.output)} onClick={(event) => {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (!shouldHandleSpaNavigation(event)) return;
         event.preventDefault(); onOpen(week.selected.slug, week.selected.output);
       }}>{week.complete ? "Вернуться к проекту" : "Открыть выбранный проект"} →</a>
     </article>)}

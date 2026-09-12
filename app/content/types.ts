@@ -93,6 +93,8 @@ export type AgentContract = {
 
 export type QuestStep = {
   id: number;
+  customization?: "service" | "agent" | false;
+  extension?: { title: string; description: string; prompt: string };
   sourceStepId?: number;
   journeyCheck?: string;
   title: string;
