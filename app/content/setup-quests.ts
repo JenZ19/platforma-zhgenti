@@ -20,7 +20,7 @@ export type SetupStepInput = {
   prompt?: string;
   links?: QuestLink[];
   screenshot?: string;
-  screenshotKind?: "real" | "placeholder";
+  screenshotKind?: "real" | "generated" | "placeholder";
   showGuide?: boolean;
   showScreenshot?: boolean;
 };
@@ -146,6 +146,13 @@ const installCodexSteps: SetupStepInput[] = [
 function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] {
   const mac = platform === "mac";
   const platformName = mac ? "Mac" : "Windows";
+  // Из десяти кадров установки сняты живьём только два: установщик на Mac и открытая страница результата.
+  // Остальные — макеты интерфейса, поэтому помечаются как generated и не выдаются за настоящий экран.
+  const shot = mac ? "mac" : "win";
+  const capture = (step: number, real = false) => ({
+    screenshot: `/screens/install-codex/real-${shot}-step-${String(step).padStart(2, "0")}.jpg`,
+    screenshotKind: (real ? "real" : "generated") as "real" | "generated",
+  });
   const downloadLink = external("Скачать ChatGPT с Codex", "https://chatgpt.com/download/", `Официальная загрузка приложения для ${platformName}.`);
   const helpLink = external("Официальная инструкция OpenAI", "https://help.openai.com/en/articles/20001276-moving-to-the-new-chatgpt-desktop-app", "В новом приложении ChatGPT находятся Chat, Work и Codex.");
 
@@ -178,8 +185,7 @@ function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] 
       target: mac ? "ChatGPT → Программы" : "ChatGPT → Пуск",
       help: mac ? "Если macOS ниже версии 14, сначала обновите систему." : "Если Windows блокирует файл, проверьте, что он скачан с chatgpt.com/download.",
       links: [downloadLink, helpLink],
-      screenshot: `/screens/install-codex/placeholder-${platform}-step-02.svg`,
-      screenshotKind: "placeholder",
+      ...capture(2, mac),
       showGuide: false,
     },
     {
@@ -193,8 +199,7 @@ function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] 
       target: "Верхнее левое меню → Codex",
       help: "Если пункта Codex нет, обновите приложение. Если он не появился, покажите куратору один скриншот всего окна без личных данных.",
       links: [helpLink],
-      screenshot: "/screens/install-codex/placeholder-step-03.svg",
-      screenshotKind: "placeholder",
+      ...capture(3),
       showGuide: false,
     },
     {
@@ -207,8 +212,7 @@ function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] 
       app: "Codex",
       target: "Открыть папку → codex-test",
       help: "Если открылась другая папка, закройте её и снова выберите только codex-test.",
-      screenshot: "/screens/install-codex/placeholder-step-04.svg",
-      screenshotKind: "placeholder",
+      ...capture(4),
       showGuide: false,
     },
     {
@@ -222,8 +226,8 @@ function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] 
       app: "Codex",
       target: "Поле команды",
       help: "Если Codex просит создать файл вручную, отправьте следом: «Создай все нужные файлы сам внутри открытой папки».",
+      ...capture(5),
       showGuide: false,
-      showScreenshot: false,
     },
     {
       id: 6,
@@ -235,8 +239,8 @@ function buildShortInstallCodexSteps(platform: SetupPlatform): SetupStepInput[] 
       app: "предпросмотр",
       target: "Codex работает",
       help: "Если страница не открывается, напишите в Codex: «Проверь index.html и снова открой предпросмотр».",
+      ...capture(6, mac),
       showGuide: false,
-      showScreenshot: false,
     },
   ];
 }

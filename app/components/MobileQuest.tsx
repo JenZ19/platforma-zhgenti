@@ -239,22 +239,28 @@ function MobileQuestBody({
   const lastLevel = totalLevels;
   const percent = Math.round((progress.completed.length / totalLevels) * 100);
   const finished = progress.completed.length === totalLevels;
-  const screenshotBadge = step.screenshotKind === "real" ? "реальный экран" : step.screenshotKind === "placeholder" ? "заглушка для замены" : "прототип";
+  const screenshotBadge = step.screenshotKind === "real" ? "реальный экран"
+    : step.screenshotKind === "generated" ? "пример экрана"
+    : step.screenshotKind === "placeholder" ? "заглушка для замены" : "прототип";
   const screenshotAlt = step.screenshotKind === "real"
     ? `Реальный экран ${project.slug === "install-codex" ? "OpenAI" : "AdminVPS"} — ${step.title}`
-    : step.screenshotKind === "placeholder"
-      ? `Заглушка для будущего скриншота — ${step.title}`
-      : `Мобильный прототип уровня ${step.id}: ${step.title}`;
+    : step.screenshotKind === "generated"
+      ? `Пример экрана — ${step.title}. Макет интерфейса, у вас он может отличаться`
+      : step.screenshotKind === "placeholder"
+        ? `Заглушка для будущего скриншота — ${step.title}`
+        : `Мобильный прототип уровня ${step.id}: ${step.title}`;
   const supplementalLinks = setupQuest && step.mobileAction?.href
     ? step.links?.filter((link) => link.href !== step.mobileAction?.href)
     : step.links;
   const resultHint = step.showScreenshot === false
     ? "Проверьте результат"
-    : step.screenshotKind === "placeholder"
-      ? "Здесь появится ваш настоящий экран"
-      : step.screenshotKind === "prototype"
-        ? "Сверьте свой экран с прототипом"
-        : "Сверьте свой экран с примером";
+    : step.screenshotKind === "generated"
+      ? "Пример экрана: у вас интерфейс может отличаться"
+      : step.screenshotKind === "placeholder"
+        ? "Здесь появится ваш настоящий экран"
+        : step.screenshotKind === "prototype"
+          ? "Сверьте свой экран с прототипом"
+          : "Сверьте свой экран с примером";
 
   function storePreparation(next: PreparationState) {
     if (next.ready) window.scrollTo({ top: 0, behavior: "auto" });

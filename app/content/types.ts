@@ -105,7 +105,9 @@ export type QuestStep = {
   prompt?: string;
   expected: string[];
   screenshot: string;
-  screenshotKind?: "real" | "prototype" | "placeholder";
+  /** real — снятый экран; generated — макет интерфейса, похож, но не подтверждает живую версию;
+   *  prototype — иллюстрация результата курса; placeholder — рисунок до появления настоящего кадра. */
+  screenshotKind?: "real" | "generated" | "prototype" | "placeholder";
   showScreenshot?: boolean;
   beginnerTerms?: BeginnerTerm[];
   reward?: string;

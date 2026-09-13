@@ -319,12 +319,16 @@ function QuestBody({
   const percent = Math.round((progress.completed.length / totalLevels) * 100);
   const finished = progress.completed.length === totalLevels;
   const preparationReady = setupQuest || (preparation ? isPreparationReady(preparation, checklist) : false);
-  const screenshotBadge = step.screenshotKind === "real" ? "реальный экран" : step.screenshotKind === "placeholder" ? "заглушка для замены" : "прототип";
+  const screenshotBadge = step.screenshotKind === "real" ? "реальный экран"
+    : step.screenshotKind === "generated" ? "пример экрана"
+    : step.screenshotKind === "placeholder" ? "заглушка для замены" : "прототип";
   const screenshotAlt = step.screenshotKind === "real"
     ? `Реальный экран ${project.slug === "install-codex" ? "OpenAI" : "AdminVPS"} — ${step.title}`
-    : step.screenshotKind === "placeholder"
-      ? `Заглушка для будущего скриншота — ${step.title}`
-      : `Прототип уровня ${step.id}: ${step.title}`;
+    : step.screenshotKind === "generated"
+      ? `Пример экрана — ${step.title}. Макет интерфейса, у вас он может отличаться`
+      : step.screenshotKind === "placeholder"
+        ? `Заглушка для будущего скриншота — ${step.title}`
+        : `Прототип уровня ${step.id}: ${step.title}`;
 
   function storePreparation(next: PreparationState) {
     if (next.ready) scrollAfterStepChange.current = true;
@@ -526,11 +530,13 @@ function QuestBody({
   const troubles = troublesFor(step, project);
   const resultHint = step.showScreenshot === false
     ? "Проверь результат"
-    : step.screenshotKind === "placeholder"
-      ? "Здесь появится ваш настоящий экран"
-      : step.screenshotKind === "prototype"
-        ? "Сверь свой экран с прототипом"
-        : "Сверь свой экран с примером";
+    : step.screenshotKind === "generated"
+      ? "Пример экрана: у вас интерфейс может отличаться"
+      : step.screenshotKind === "placeholder"
+        ? "Здесь появится ваш настоящий экран"
+        : step.screenshotKind === "prototype"
+          ? "Сверь свой экран с прототипом"
+          : "Сверь свой экран с примером";
 
   return (
     <>

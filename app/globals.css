@@ -1166,14 +1166,18 @@ button {
   object-fit: cover;
 }
 .reference-shot.screenshot-real,
+.reference-shot.screenshot-generated,
 .reference-shot.screenshot-placeholder,
 .mobile-result > button.screenshot-real,
+.mobile-result > button.screenshot-generated,
 .mobile-result > button.screenshot-placeholder {
   background: #eef0ed;
 }
 .reference-shot.screenshot-real img,
+.reference-shot.screenshot-generated img,
 .reference-shot.screenshot-placeholder img,
 .mobile-result > button.screenshot-real img,
+.mobile-result > button.screenshot-generated img,
 .mobile-result > button.screenshot-placeholder img {
   object-fit: contain;
 }
